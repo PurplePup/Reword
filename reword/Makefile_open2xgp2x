@@ -1,0 +1,64 @@
+PROG_NAME = reword
+SOURCES = reword.cpp \
+		app.cpp \
+		audio.cpp \
+		button.cpp \
+		error.cpp \
+		fontttf.cpp \
+		framerate.cpp \
+		game.cpp \
+		gamedata.cpp \
+		image.cpp \
+		imageanim.cpp \
+		input.cpp \
+		play.cpp \
+		playdiff.cpp \
+		playgame.cpp \
+		playgamepopup.cpp \
+		playhigh.cpp \
+		playinst.cpp \
+		playmainmenu.cpp \
+		playmodemenu.cpp \
+		playmenu.cpp \
+		random.cpp \
+		roundels.cpp \
+		score.cpp \
+		screen.cpp \
+		singleton.cpp \
+		sprite.cpp \
+		spritemgr.cpp \
+		surface.cpp \
+		utils.cpp \
+		waiting.cpp \
+		words.cpp
+
+OBJECTS = $(SOURCES:.cpp=.o)
+
+CROSS_PATH = /opt/open2x/gcc-4.1.1-glibc-2.3.6
+
+CXX = $(CROSS_PATH)/bin/arm-open2x-linux-g++
+CXXFLAGS = -c -O2 -Wall -I$(CROSS_PATH)/include/ -I$(CROSS_PATH)/include/SDL -D_REENTRANT -DPLATFORM_GP2X -DGP2X -msoft-float -D_USE_MIKMOD
+LDFLAGS = -L/opt/open2x/gcc-4.1.1-glibc-2.3.6/lib -Wl,-rpath,/opt/open2x/gcc-4.1.1-glibc-2.3.6/lib -static \
+		-lSDL_image -ljpeg -lpng12 -lz -lmikmod -lSDL_ttf -lfreetype \
+		-lSDL_mixer -lmikmod -lvorbisidec -lmad -lsmpeg -lSDL -lpthread -lgcc -lm -lc -ldl -msoft-float
+BIN = $(PROG_NAME).gpe
+STRIP = $(CROSS_PATH)/bin/arm-open2x-linux-strip
+
+all: $(SOURCES) $(BIN)
+
+$(BIN): $(OBJECTS) 
+	$(CXX) $(OBJECTS) $(LDFLAGS) -o $@
+	$(STRIP) $(BIN)
+
+.cpp.o:
+	$(CXX) $(CXXFLAGS) $< -o $@
+
+cleanobjs:
+	rm -f $(OBJECTS)
+
+clean:
+	-rm -f $(BIN) *~ *.o *.bak
+	
+
+
+

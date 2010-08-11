@@ -1,0 +1,32 @@
+REWORD
+Instructions
+
+Time allowed depends on difficulty level.
+Get at least one 6 letter word to get another 6 letters.
+Get all words for the 6 letters to get bonus.
+
+B to move a letter down (or up)
+A to jumble remaining letters
+X to test selected letter against dictionary
+Y to move all selected letters back up 
+START to pause
+
+
+
+
+
+
+
+Well Done!
+Youy got the 6!
+Press B for next word
+
+
+BONUS!
+you got ALL words
+Press B for next word
+
+
+Bad Luck!
+You ran out of time
+Press B to Exit

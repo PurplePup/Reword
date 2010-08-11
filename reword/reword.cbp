@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="reword" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/reword" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/reword" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+		</Compiler>
+		<Unit filename="app.cpp" />
+		<Unit filename="app.h" />
+		<Unit filename="audio.cpp" />
+		<Unit filename="audio.h" />
+		<Unit filename="button.cpp" />
+		<Unit filename="button.h" />
+		<Unit filename="constants.h" />
+		<Unit filename="error.cpp" />
+		<Unit filename="error.h" />
+		<Unit filename="fontttf.cpp" />
+		<Unit filename="fontttf.h" />
+		<Unit filename="framerate.cpp" />
+		<Unit filename="framerate.h" />
+		<Unit filename="game.cpp" />
+		<Unit filename="game.h" />
+		<Unit filename="gamedata.cpp" />
+		<Unit filename="gamedata.h" />
+		<Unit filename="global.h" />
+		<Unit filename="image.cpp" />
+		<Unit filename="image.h" />
+		<Unit filename="imageanim.cpp" />
+		<Unit filename="imageanim.h" />
+		<Unit filename="input.cpp" />
+		<Unit filename="input.h" />
+		<Unit filename="platform.h" />
+		<Unit filename="play.cpp" />
+		<Unit filename="play.h" />
+		<Unit filename="playdiff.cpp" />
+		<Unit filename="playdiff.h" />
+		<Unit filename="playgame.cpp" />
+		<Unit filename="playgame.h" />
+		<Unit filename="playgamepopup.cpp" />
+		<Unit filename="playgamepopup.h" />
+		<Unit filename="playhigh.cpp" />
+		<Unit filename="playhigh.h" />
+		<Unit filename="playinst.cpp" />
+		<Unit filename="playinst.h" />
+		<Unit filename="playmainmenu.cpp" />
+		<Unit filename="playmainmenu.h" />
+		<Unit filename="playmenu.cpp" />
+		<Unit filename="playmenu.h" />
+		<Unit filename="playmodemenu.cpp" />
+		<Unit filename="playmodemenu.h" />
+		<Unit filename="random.cpp" />
+		<Unit filename="random.h" />
+		<Unit filename="reword.cpp" />
+		<Unit filename="roundels.cpp" />
+		<Unit filename="roundels.h" />
+		<Unit filename="score.cpp" />
+		<Unit filename="score.h" />
+		<Unit filename="screen.cpp" />
+		<Unit filename="screen.h" />
+		<Unit filename="singleton.cpp" />
+		<Unit filename="singleton.h" />
+		<Unit filename="sprite.cpp" />
+		<Unit filename="sprite.h" />
+		<Unit filename="spritemgr.cpp" />
+		<Unit filename="spritemgr.h" />
+		<Unit filename="states.h" />
+		<Unit filename="surface.cpp" />
+		<Unit filename="surface.h" />
+		<Unit filename="utils.cpp" />
+		<Unit filename="utils.h" />
+		<Unit filename="waiting.cpp" />
+		<Unit filename="waiting.h" />
+		<Unit filename="words.cpp" />
+		<Unit filename="words.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

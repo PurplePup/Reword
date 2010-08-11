@@ -1,0 +1,28 @@
+This is a clone of a great Flash game called TextTwist I found on the Net a while ago.
+
+Updates:
+Now includes GP2X F200 Touchscreen support - many thanks to Micah Stetson (v0.5)
+Also includes two new game modes: Speed6 and TimeTrial (v0.4)
+
+The basic idea is, you have a 6 letter word that has been jumbled up and you must find as many of the 3, 4 5 and 6 letter words that can be made from it in the time allowed. You must get at least one 6 letter word to progress to the next level.
+
+The dictionary I am using is a British word list I found (sorry can't remember where, but if I do I'll include a credit) that seems to hold a reasonable selection, which once filtered for just 3-6 letter words contains about 7500 words. The word list can be replaced or amended, and uses an additional utility I wrote that formats the list ready for the game.
+
+Any feedback or suggestions welcome.
+
+
+
+
+
+
+Well, I've just submitted my latest update to Reword (v0.5) so hopefully it should show up on the archive in the next 24 hours. [url=http://archive.gp2x.de/cgi-bin/cfiles.cgi?0,0,0,0,25,1867]Reword link[/url]
+
+This update mainly addresses touchscreen support for the F200, and the sound (MOD music) volume problem previously reported.
+
+Menus and in-game play now fully support touchscreen, with single and double tap operation. Double tap menu items to select, single tap letters and the new icon controls in-game to move/select letters or word definitions. 
+See the readme.txt for more information.
+
+I don't have a F200 so Micah Stetson pointed me in the right direction with some code changes I could build on, and testing was done through mouse support on the PC and passing the binary to Micah for approval. Hopefully I haven't broken it in this final build.
+
+Anyway, hope it works on the F200, and you like it.
+Cheers.

@@ -1,0 +1,82 @@
+PROG_NAME = reword
+SOURCES = reword.cpp \
+		app.cpp \
+		audio.cpp \
+		button.cpp \
+		error.cpp \
+		fontttf.cpp \
+		framerate.cpp \
+		game.cpp \
+		gamedata.cpp \
+		image.cpp \
+		imageanim.cpp \
+		input.cpp \
+		play.cpp \
+		playdiff.cpp \
+		playgame.cpp \
+		playgamepopup.cpp \
+		playhigh.cpp \
+		playinst.cpp \
+		playmainmenu.cpp \
+		playmodemenu.cpp \
+		playmenu.cpp \
+		random.cpp \
+		roundels.cpp \
+		score.cpp \
+		screen.cpp \
+		singleton.cpp \
+		sprite.cpp \
+		spritemgr.cpp \
+		surface.cpp \
+		utils.cpp \
+		waiting.cpp \
+		words.cpp
+
+OBJECTS = $(SOURCES:.cpp=.o)
+BIN = $(PROG_NAME).gpe
+
+CROSS_PATH = /opt/open2x/gcc-4.1.1-glibc-2.3.6
+
+CXXFLAGS = -c -Wall 
+
+CXX = $(CROSS_PATH)/bin/arm-open2x-linux-g++
+CXXFLAGS = -c -O2 -Wall -I$(CROSS_PATH)/include/ -I$(CROSS_PATH)/include/SDL -D_REENTRANT -msoft-float -DPLATFORM_GP2X -DGP2X
+
+#DKS: had to add libraries:
+#LDFLAGS = -L/opt/open2x/gcc-4.1.1-glibc-2.3.6/lib -Wl,-rpath,/opt/open2x/gcc-4.1.1-glibc-2.3.6/lib -static \
+#		-lSDL_image -ljpeg -lpng12 -lz -lmikmod -lSDL_ttf -lSDL_mixer -lSDL -lpthread -lgcc -lm -lc -ldl -msoft-float
+
+#DKS: was working with ttd mixer:
+#LDFLAGS = -L/opt/open2x/gcc-4.1.1-glibc-2.3.6/lib -Wl,-rpath,/opt/open2x/gcc-4.1.1-glibc-2.3.6/lib -static \
+#		-lSDL_image -ljpeg -lpng12 -lz -lmikmod -lSDL_ttf -lfreetype \
+#		-lmikmod -lvorbisidec -lmad -lSDL_mixer -lSDL -lpthread -lgcc -lm -lc -ldl -msoft-float
+
+LDFLAGS = -L/opt/open2x/gcc-4.1.1-glibc-2.3.6/lib -Wl,-rpath,/opt/open2x/gcc-4.1.1-glibc-2.3.6/lib -static \
+		-lSDL_image -ljpeg -lpng12 -lz -lmikmod -lSDL_ttf -lfreetype \
+		-lSDL_mixer -lmikmod -lvorbisidec -lmad -lsmpeg -lSDL -lpthread -lgcc -lm -lc -ldl -msoft-float
+
+all: $(SOURCES) $(BIN)
+
+# DKS - had to change the second of the following lines:
+#$(BIN): $(OBJECTS) 
+#	$(CXX) $(LDFLAGS) $(OBJECTS) -o $@
+#	$(CROSS_PATH)/bin/arm-open2x-linux-strip $(PROG_NAME).gpe
+#	mv $(PROG_NAME).gpe $(PROG_NAME)
+# DKS - to this:
+$(BIN): $(OBJECTS) 
+	$(CXX) $(OBJECTS) $(LDFLAGS) -o $@
+	$(CROSS_PATH)/bin/arm-open2x-linux-strip $(PROG_NAME).gpe
+	mv $(PROG_NAME).gpe $(PROG_NAME)
+
+.cpp.o:
+	$(CXX) $(CXXFLAGS) $< -o $@
+
+cleanobjs:
+	rm -f $(OBJECTS)
+
+clean:
+	-rm -f $(BIN) $(BIN).gpe *~ *.o *.bak
+	
+
+
+

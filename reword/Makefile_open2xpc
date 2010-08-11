@@ -1,0 +1,71 @@
+PROG_NAME = reword
+SOURCES = reword.cpp \
+		app.cpp \
+		audio.cpp \
+		button.cpp \
+		error.cpp \
+		fontttf.cpp \
+		framerate.cpp \
+		game.cpp \
+		gamedata.cpp \
+		image.cpp \
+		imageanim.cpp \
+		input.cpp \
+		play.cpp \
+		playdiff.cpp \
+		playgame.cpp \
+		playgamepopup.cpp \
+		playhigh.cpp \
+		playinst.cpp \
+		playmainmenu.cpp \
+		playmodemenu.cpp \
+		playmenu.cpp \
+		random.cpp \
+		roundels.cpp \
+		score.cpp \
+		screen.cpp \
+		singleton.cpp \
+		sprite.cpp \
+		spritemgr.cpp \
+		surface.cpp \
+		utils.cpp \
+		waiting.cpp \
+		words.cpp
+
+OBJECTS = $(SOURCES:.cpp=.o)
+
+CXX = g++ 
+CXXFLAGS = -c -O2 -g -Wall -I/usr/include/ -I/usr/include/SDL -D_REENTRANT
+# -D_USE_MIKMOD 
+#`libmikmod-config --cflags` 
+
+#LDFLAGS =  -Wl,--verbose  -L/usr/lib -Wl,-rpath,/usr/lib \
+#		 `libmikmod-config --libs` \
+LDFLAGS = -L/usr/lib -Wl,-rpath,/usr/lib \
+		-lSDL_image -ljpeg -lpng12 -lz \
+		--start-group -lSDL_ttf -lfreetype -lSDL --end-group \
+		--start-group -lSDL_mixer -lvorbisidec -lmad -lsmpeg -lSDL --end-group \
+		-lpthread -lgcc -lm -lc -ldl 
+#		--start-group -lSDL_mixer -lmikmod -lvorbisidec -lmad -lsmpeg -lSDL --end-group \
+
+BIN = $(PROG_NAME)
+STRIP = strip
+
+all: $(SOURCES) $(BIN)
+
+$(BIN): $(OBJECTS) 
+	$(CXX) $(OBJECTS) $(LDFLAGS) -o $@
+	$(STRIP) $(PROG_NAME)
+
+.cpp.o:
+	$(CXX) $(CXXFLAGS) $< -o $@
+
+cleanobjs:
+	rm -f $(OBJECTS)
+
+clean:
+	-rm -f $(BIN) *~ *.o *.bak
+	
+
+
+

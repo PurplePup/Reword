@@ -1,0 +1,74 @@
+////////////////////////////////////////////////////////////////////
+/*
+
+File:			PlayModeMenu.cpp
+
+Class impl:  	PlayModeMenu
+
+Description:	A class derived from the PlayMenu interface to handle game mode
+				selection
+
+Author:			Al McLuckie (al-at-purplepup-dot-org)
+
+Date:			25 Feb 2008
+
+History:		Version	Date		Change
+				-------	----------	--------------------------------
+				0.4.0	25.02.2008	implemented
+				0.5		16.05.2008	Implement PlayMenu base class and touch screen 
+
+Licence:		This program is free software; you can redistribute it and/or modify
+				it under the terms of the GNU General Public License as published by
+				the Free Software Foundation; either version 2 of the License, or
+				(at your option) any later version.
+
+				This software is distributed in the hope that it will be useful,
+				but WITHOUT ANY WARRANTY; without even the implied warranty of
+				MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+				GNU General Public License for more details.
+
+				You should have received a copy of the GNU General Public License
+				along with this program; if not, write to the Free Software
+				Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+*/
+////////////////////////////////////////////////////////////////////
+
+
+#include "global.h"
+#include "playmodemenu.h"
+
+void PlayModeMenu::init(Input *input)
+{
+	setTitle("MODE");
+	setHelp("Press B to select option", GREY_COLOUR);
+	addItem(MenuItem(0, PURPLE_COLOUR,
+		"Reword", "Get 3, 4, 5 and 6 letter words"));
+	addItem(MenuItem(1, GOLD_COLOUR,
+		"Speed 6", "Just get a 6 letter word to continue"));
+	addItem(MenuItem(2, BLUE_COLOUR,
+		"Time Trial", "Get the most 6 letter words in the time limit"));
+	addItem(MenuItem(3, RED_COLOUR,
+		"Back", "Back to main menu"));
+	setItem((int)_gd._mode);
+	PlayMenu::init(input);
+}
+
+
+void PlayModeMenu::render(Screen *s)
+{
+	PlayMenu::render(s);
+	MenuItem i = getSelected();
+	_gd._fntClean.put_text(s, getNextYPos(), i._comment.c_str(), BLACK_COLOUR, false);
+}
+
+void PlayModeMenu::choose(MenuItem i)
+{
+	if (i._id < 3) {			// 0..2, so play
+		_gd._mode = (eGameMode)i._id;
+		_gd._state = ST_GAME;
+	} else 					// 3, so exit & leave mode as-is
+		_gd._state = ST_MENU;
+	_running = false;	//exit this class running state
+}
+

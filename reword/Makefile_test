@@ -1,0 +1,86 @@
+
+
+#--original
+#CXX = $(CROSS_COMPILE)g++
+#CXXFLAGS = -I"/usr/include/SDL" -ggdb -Wall -D_DEBUG
+#LDFLAGS = -lGL -lGLU `sdl-config --cflags --static-libs` -lSDL --start-group -lSDL_mixer -lSDL --end-group -lSDL_image -lSDL_gfx -lSDL_ttf
+
+# Custom Directory Links
+OPEN2X = /opt/open2x/gcc-4.1.1-glibc-2.3.6
+OPEN2XARM = /opt/open2x/gcc-4.1.1-glibc-2.3.6/arm-open2x-linux
+
+CPP  = arm-open2x-linux-g++
+CC   = arm-open2x-linux-gcc
+OBJ  = main.o
+
+# All Libraries on next line
+# LIBS =  -L$(OPEN2X411)/lib -L$(OPEN2X344)/arm-open2x-linux/lib -static -lSDL_image -lSDL_mixer -lSDL_ttf -lSDL_inifile -lSDL -lpng -ljpeg -lvorbisidec -lmad -lfreetype -lz -lunicodefont  
+
+LIBS =  -L$(OPEN2X)/lib -L$(OPEN2XARM)/lib -static -lSDL_image -lSDL -lpthread
+INCS =  -I$(OPEN2X)/include -I$(OPEN2X)/include/SDL
+CXXINCS =  -I$(OPEN2X)/include/c++/4.1.1/backward -I$(OOPEN2X)/include/c++/4.1.1 $(INCS)
+CXXFLAGS = $(CXXINCS) -DGP2X
+CFLAGS = $(INCS) -D_REENTRANT -DGP2X
+#--open2x
+#TOOLS=/opt/open2x/gcc-4.1.1-glibc-2.3.6/bin
+#CXXFLAGS=-O2 -Wall `$(TOOLS)/sdl-config --cflags`
+#LDFLAGS=-static -GL -GLU -lSDL -lSDL_image -ljpeg -lpng -lz -lm -lSDL_mixer -lvorbisidec -lmikmod -lSDL_ttf -lfreetype -lpthread `$(TOOLS)/sdl-config --static-libs` 
+#CXX=$(TOOLS)/arm-open2x-linux-g++
+#STRIP=$(TOOLS)/arm-open2x-linux-strip
+
+
+#--PC/Linux
+TOOLS=/usr/bin
+CXXFLAGS=-O2 -Wall `$(TOOLS)/sdl-config --cflags`
+#LDFLAGS=-static -lSDL -lSDL_image -ljpeg -lpng -lz -lm -lSDL_mixer -lmikmod -lSDL_ttf -lfreetype -lpthread `$(TOOLS)/sdl-config --static-libs` 
+LDFLAGS=-static -lSDL_image -ljpeg -lpng12 -lz -lSDL_mixer -lvorbisidec -lmikmod -lmad -lsmpeg -lSDL_ttf -lfreetype -lSDL -lgcc -lm -lc -lexpat -lpthread -msoft-float
+CXX=$(TOOLS)/g++
+STRIP=$(TOOLS)/strip
+
+
+TARGET = reword
+OBJS =  reword.o \
+		app.o \
+		audio.o \
+		button.o \
+		error.o \
+		fontttf.o \
+		framerate.o \
+		game.o \
+		gamedata.o \
+		image.o \
+		imageanim.o \
+		input.o \
+		play.o \
+		playdiff.o \
+		playgame.o \
+		playgamepopup.o \
+		playhigh.o \
+		playinst.o \
+		playmainmenu.o \
+		playmodemenu.o \
+		playmenu.o \
+		random.o \
+		roundels.o \
+		score.o \
+		screen.o \
+		singleton.o \
+		sprite.o \
+		spritemgr.o \
+		surface.o \
+		utils.o \
+		waiting.o \
+		words.o
+
+
+ALL_TARGETS = $(TARGET)
+
+all: $(ALL_TARGETS)
+
+$(TARGET): $(OBJS)
+		$(CXX) -o $(TARGET) $(OBJS) $(LDFLAGS)
+
+clean:
+		rm *.o
+		rm $(TARGET)
+# DO NOT DELETE

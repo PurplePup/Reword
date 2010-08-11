@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# REWORD launch script
+./reword
+# sync the SD card so that everything is written.
+sync
+# return to the menu screen
+cd /usr/gp2x
+exec /usr/gp2x/gp2xmenu

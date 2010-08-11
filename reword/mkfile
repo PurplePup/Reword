@@ -1,0 +1,68 @@
+CXX=g++ -Wall -g
+LD=g++
+CFLAGS=`{sdl-config --cflags} -D_DEBUG
+LIBS=-lSDL_mixer -lSDL_image -lSDL_ttf `{sdl-config --libs}
+
+GP2XDEV=/gp2xsdk
+GP2X_CXX=$GP2XDEV/Tools/bin/arm-gp2x-linux-g++ -Wall
+GP2X_LD=$GP2XDEV/Tools/bin/arm-gp2x-linux-g++
+GP2X_STRIP=$GP2XDEV/Tools/bin/arm-gp2x-linux-strip
+GP2X_SDLCONFIG=$GP2XDEV/Tools/arm-gp2x-linux/bin/arm-linux-sdl-config
+GP2X_CFLAGS=-O2 `{$GP2X_SDLCONFIG --cflags} -DTARGET_GP2X -DGP2X
+GP2X_LIBS=-lSDL_mixer -lSDL_image -lSDL_ttf `{$GP2X_SDLCONFIG --libs}
+
+OBJS=\
+	reword.o\
+	app.o\
+	audio.o\
+	button.o\
+	error.o\
+	fontttf.o\
+	framerate.o\
+	game.o\
+	gamedata.o\
+	image.o\
+	imageanim.o\
+	input.o\
+	play.o\
+	playdiff.o\
+	playgame.o\
+	playgamepopup.o\
+	playhigh.o\
+	playinst.o\
+	playmainmenu.o\
+	playmodemenu.o\
+	playmenu.o\
+	random.o\
+	roundels.o\
+	score.o\
+	screen.o\
+	singleton.o\
+	sprite.o\
+	spritemgr.o\
+	surface.o\
+	utils.o\
+	waiting.o\
+	words.o\
+
+all:V: reword reword.gpe
+
+reword: $OBJS 
+	$LD -o $target $prereq $LIBS
+reword.gpe: ${OBJS:%.o=%.gpo}
+	$GP2X_LD -o $target  $prereq $GP2X_LIBS
+	$GP2X_STRIP $target
+
+%.o: %.cpp
+	$CXX $CFLAGS -o $stem.o -c $stem.cpp
+%.gpo: %.cpp
+	$GP2X_CXX $GP2X_CFLAGS -o $stem.gpo -c $stem.cpp
+
+clean:V:
+	rm -f *.o reword *.gpo reword.gpe
+	
+SRCS=${OBJS:%.o=%.cpp}
+depend:V:
+	$CXX -MM $CFLAGS $SRCS | sed 's/^\([^:.]*\).o:/\1.o \1.gpo:/' >depend
+
+<depend
