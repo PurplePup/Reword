@@ -311,7 +311,7 @@ void PlayHigh::moveLeft()
 		if (_currPos > 0) _currPos--;
 	}
 	else
-		setDifficulty((eDifficulty)(_diff-1));
+		setDifficulty((eGameDiff)(_diff-1));
 }
 
 void PlayHigh::moveRight()
@@ -321,7 +321,7 @@ void PlayHigh::moveRight()
 		if (_currPos < 2) _currPos++;
 	}
 	else
-		setDifficulty((eDifficulty)(_diff+1));
+		setDifficulty((eGameDiff)(_diff+1));
 }
 
 void PlayHigh::touch(Point pt)
@@ -363,7 +363,7 @@ void PlayHigh::touch(Point pt)
 }
 
 //set difficulty locally
-void PlayHigh::setDifficulty(eDifficulty diff)
+void PlayHigh::setDifficulty(eGameDiff diff)
 {
 	if (diff < DIF_EASY) diff = DIF_EASY;
 	if (diff > DIF_HARD) diff = DIF_HARD;

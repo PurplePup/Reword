@@ -28,10 +28,13 @@ public:
 	GameData();
 	~GameData();
 	bool isLoaded() {return _init;}
-	void setDiffLevel(eDifficulty newDiff);
+	void setDiffLevel(eGameDiff newDiff);
 
-	void LoadOptions();
-	void SaveOptions();
+	//void loadOptions();
+	//void saveOptions();
+
+	void saveQuickState();
+	bool loadQuickState();
 	
 	//Resources
 	//////////////////////////////
@@ -88,15 +91,15 @@ public:
 
 	int			_mainmenuoption;	// (0=play, 1=level, 2=hiscore etc)
 
-	eDifficulty	_diffLevel;
-	std::string _diffName;
+	eGameDiff	_diffLevel;
+	std::string	_diffName;
 	SDL_Color	_diffColour;
 
 	eGameState	_state;		//state of play...
 	eGameMode	_mode;		//type of game
 
 	Score		_score;
-	CWords		_words;		//The one instance of the main word manipulation class
+	Words		_words;		//The one instance of the main word manipulation class
 
 	float		_fact;		//frame rate speed factor
 
@@ -106,8 +109,9 @@ public:
 	int			_current_w;			//used to store screen width
 
 	bool 		_bTouch;			//true if touchscreen/mouse detected
+	
 private:
-	bool _init;
+	bool		_init;
 
 };
 

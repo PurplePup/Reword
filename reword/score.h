@@ -62,6 +62,7 @@ public:
 	void init();
 	Uint32 load(std::string scorefile = "");
 	void save(std::string scorefile = "");
+	
 	int isHiScore(int mode, int diffLevel);
 	void insert(int mode, int diff, int pos, tHiScoreEntry &curr);
 
@@ -86,6 +87,8 @@ public:
 	unsigned int words(int mode, int diff, int level);
 	unsigned int score(int mode, int diff, int level);
 	unsigned int fastest(int mode, int diff, int level);
+	unsigned int seed() { return _seed; }
+	void setSeed(unsigned int seed) { _seed = seed; }
 
 protected:
 	tHiScoreLevels * getLevel(int mode, int diff);
@@ -94,9 +97,38 @@ protected:
 	std::string		_scorefile;
 
 	tHiScoreEntry	_curr;			//current score, words and inits to save to scoretable
-	tHiScoreLevels	_hiScore[3];	//3 difficulties (easy, med, hard) of 10x hi scores 
-	tHiScoreLevels	_hiScoreS6[3];	//3 difficulties (easy, med, hard) of 10x hi scores 
-	tHiScoreLevels	_hiScoreTT[3];	//3 difficulties (easy, med, hard) of 10x hi scores 
+	tHiScoreLevels	_hiScore[3];	//Reword - 3 difficulties (easy, med, hard) of 10x hi scores 
+	tHiScoreLevels	_hiScoreS6[3];	//Speed - 3 difficulties (easy, med, hard) of 10x hi scores 
+	tHiScoreLevels	_hiScoreTT[3];	//TimeTrial - 3 difficulties (easy, med, hard) of 10x hi scores
+
+    unsigned int 	_seed;
+};
+
+//structure to hold quick save state between levels (for restore)
+typedef struct
+{
+	Uint32	words;	//words found so far
+	Uint32	score;	//
+	Uint32	diff;	//easy,med,hard
+	Uint32	mode;	//game type rew,speed,TT
+	Uint32	seed;	//random seed to restore the word list in same order
+} tQuickStateSave;
+
+class QuickState
+{
+public:
+	QuickState();
+    bool quickStateLoad();
+    bool quickStateSave();
+	bool quickStateExists();
+	void quickStateDelete();
+	void setQuickState(const tQuickStateSave &qss);
+	void getQuickState(tQuickStateSave &qss);
+
+protected:
+	std::string		_quickstatefile;
+ 	tQuickStateSave	_qStateSave;
+
 };
 
 #endif //_SCORE_H

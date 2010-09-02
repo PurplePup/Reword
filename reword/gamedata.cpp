@@ -37,6 +37,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "global.h"
 #include "gamedata.h"
 #include "platform.h"
+#include "score.h"
+
 #include <iostream>
 
 GameData::GameData() : _bTouch(false),  _init(false)
@@ -138,10 +140,48 @@ GameData::~GameData()
 }
 
 //set the relevant vars (value, name, colour) for the difficulty level
-void GameData::setDiffLevel(eDifficulty newDiff)
+void GameData::setDiffLevel(eGameDiff newDiff)
 {
 	_diffLevel = newDiff;
 	_diffName = (_diffLevel==DIF_EASY)?"   Easy":(_diffLevel==DIF_MED)?"Medium":"   Hard";
 	_diffColour = (_diffLevel==DIF_EASY)?GREEN_COLOUR:(_diffLevel==DIF_MED)?ORANGE_COLOUR:RED_COLOUR;
+}
+
+void GameData::saveQuickState()
+{
+	tQuickStateSave	qss;
+	qss.words = _score.currWords();
+	qss.score =  _score.currScore();
+	qss.diff = (int)_diffLevel;
+	qss.mode = (int)_mode;
+	qss.seed = _score.seed();
+	QuickState qs;
+	qs.setQuickState(qss);
+	qs.quickStateSave();
+}
+
+//restore the last quick save state and allow resume playing at the next word
+//in the word list (using the same random gen seed, so the list will be the
+//same 'random' order).
+bool GameData::loadQuickState()
+{
+	QuickState qs;
+	if (qs.quickStateLoad())
+	{
+		tQuickStateSave	qss;
+		qs.getQuickState(qss);
+
+		_score.setCurrWords(qss.words);
+		_score.setCurrScore(qss.score);
+		_diffLevel = (eGameDiff)qss.diff;
+		_mode = (eGameMode)qss.mode;
+		_score.setSeed(qss.seed);
+
+		//load same word file as last load, same seed, next word on
+		_words.load("", qss.seed, qss.words+1);
+		qs.quickStateDelete();	//remove last quick save file
+		return true;
+	}
+	return false;
 }
 

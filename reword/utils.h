@@ -82,18 +82,21 @@ public:
 	//string functions
 	static void makeUpper(std::string &s);
 	static void makeLower(std::string &s);
-	static void trimRight(std::string &s, const std::string &t);
-	static void trimLeft(std::string &s, const std::string &t); 
-	static void trim(std::string &source, const std::string &t); 
+	static void trimRight(std::string &s, const std::string &tokens);
+	static void trimLeft(std::string &s, const std::string &tokens); 
+	static void trim(std::string &source, const std::string &tokens); 
 	static void makeAlpha(std::string &s);
 	static bool endsWith(const std::string &str, const std::string &match, bool caseSensitive = false);
 	static void buildTextPage(std::string &inStr, unsigned int nCharsPerLine, std::vector<std::string> &outVect);
+	static bool splitKeyValuePair(const std::string &line, std::string &key, std::string &value);
 
 	//math functions
 	//static int round(float fl);
 	
 	//rand functions
 //	static int RandomInt(unsigned int limit);
+
+	static void pushSDL_Event(int code, void *data1 = 0, void *data2 = 0);
 
 };
 

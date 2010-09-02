@@ -42,33 +42,37 @@ void PlayModeMenu::init(Input *input)
 {
 	setTitle("MODE");
 	setHelp("Press B to select option", GREY_COLOUR);
-	addItem(MenuItem(0, PURPLE_COLOUR,
-		"Reword", "Get 3, 4, 5 and 6 letter words"));
-	addItem(MenuItem(1, GOLD_COLOUR,
-		"Speed 6", "Just get a 6 letter word to continue"));
-	addItem(MenuItem(2, BLUE_COLOUR,
-		"Time Trial", "Get the most 6 letter words in the time limit"));
-	addItem(MenuItem(3, RED_COLOUR,
-		"Back", "Back to main menu"));
+
+	//it doesnt really matter what the id (first param) number is, but if we keep
+	//0,1,2 as actual games and 99 for the optional resume, 255 for exit
+	QuickState qs;
+	if (qs.quickStateExists())
+	  	addItem(MenuItem(99, GREEN_COLOUR, "Resume game...", "Continue playing a quick save game"));
+	
+	addItem(MenuItem(0, PURPLE_COLOUR, "Reword", "Get 3, 4, 5 and 6 letter words"));
+	addItem(MenuItem(1, GOLD_COLOUR, "Speed 6", "Just get a 6 letter word to continue"));
+	addItem(MenuItem(2, BLUE_COLOUR, "Time Trial", "Get the most 6 letter words in the time limit"));
+	
+	addItem(MenuItem(255, RED_COLOUR, "Back", "Back to main menu"));
+	
 	setItem((int)_gd._mode);
 	PlayMenu::init(input);
 }
 
-
-void PlayModeMenu::render(Screen *s)
-{
-	PlayMenu::render(s);
-	MenuItem i = getSelected();
-	_gd._fntClean.put_text(s, getNextYPos(), i._comment.c_str(), BLACK_COLOUR, false);
-}
 
 void PlayModeMenu::choose(MenuItem i)
 {
 	if (i._id < 3) {			// 0..2, so play
 		_gd._mode = (eGameMode)i._id;
 		_gd._state = ST_GAME;
-	} else 					// 3, so exit & leave mode as-is
+	}
+	else if (i._id == 99)		// optional (ie. found file) resume available
+		_gd._state = ST_RESUME;
+	else if (i._id == 255)		// exit & leave mode as-is
 		_gd._state = ST_MENU;
+
+	
+	std::cout << "state selectd = " << _gd._state << std::endl;		//##DEBUG
 	_running = false;	//exit this class running state
 }
 

@@ -17,7 +17,6 @@ public:
 	PlayModeMenu(GameData& gd) : PlayMenu(gd) {}
     virtual void init(Input *input);
     virtual void choose(MenuItem i);
-    virtual void render(Screen *s);
 
 };
 

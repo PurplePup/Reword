@@ -34,11 +34,15 @@ Licence:		This program is free software; you can redistribute it and/or modify
 ////////////////////////////////////////////////////////////////////
 
 #include "utils.h"
+#include "platform.h"
+#include "global.h"
+
 #include <algorithm>	//for std::min and std::max (if used) amongst other things
 #include <cctype>
 #include <sstream>
 #include <cstring> 	//for strcasecmp/stricmp etc
-#include "platform.h"
+#include <iostream>
+#include <cerrno>
 
 void Utils::makeUpper(std::string &s)
 {
@@ -50,20 +54,20 @@ void Utils::makeLower(std::string &s)
 	std::transform(s.begin(),s.end(),s.begin(),tolower);
 }
 
-void Utils::trimRight(std::string &s, const std::string &t) 
+void Utils::trimRight(std::string &s, const std::string &tokens) 
 {
-	s.erase(s.find_last_not_of(t)+1);
+	s.erase(s.find_last_not_of(tokens)+1);
 }
 
-void Utils::trimLeft(std::string &s, const std::string &t) 
+void Utils::trimLeft(std::string &s, const std::string &tokens) 
 {
-	s.erase(0, s.find_first_not_of(t));
+	s.erase(0, s.find_first_not_of(tokens));
 }
 
-void Utils::trim(std::string &s, const std::string &t)
+void Utils::trim(std::string &s, const std::string &tokens)
 {
-	trimLeft(s, t);
-	trimRight(s, t);
+	trimLeft(s, tokens);
+	trimRight(s, tokens);
 }
 
 //strip any non alpha (A-Z) letters from the string passed in
@@ -114,6 +118,25 @@ void Utils::buildTextPage(std::string &inStr,unsigned int nCharsPerLine, std::ve
 	}
 }
 
+bool Utils::splitKeyValuePair(const std::string &line, std::string &key, std::string &value)
+{
+	//split a config file type entry "key=value" into its "key"/"value" parts
+	std::string::size_type pos = line.find("=");
+	if (pos != std::string::npos)
+	{
+		key = line.substr(0,pos);
+		if (pos < line.length())
+			value = line.substr(pos+1);
+		std::string whitespace("\"= \r\n\t\'");
+		Utils::trim(key, whitespace);
+		Utils::trim(value, whitespace);
+		std::cout << "split '" << line << "' into : '" << key << "' and '" << value << "'" << std::endl;		//##DEBUG
+		return true;
+	}
+	std::cout << "split '" << line << "' failed" << std::endl;		//##DEBUG
+	return false;
+}
+
 
 /*
 float Utils::round( float x, int places )
@@ -140,3 +163,23 @@ int Utils::RandomInt(unsigned int limit)
 	return (int)m_randInt.Random(limit);
 }
 */  
+
+//push an event into the SDL event queue
+void Utils::pushSDL_Event(int code, void *data1, void *data2)
+{
+	//push event (e.g. "end of level" or other user defined event)
+    SDL_Event event;
+    SDL_UserEvent userevent;
+
+    userevent.type = SDL_USEREVENT;
+    userevent.code = code;
+
+	userevent.data1 = data1;
+    userevent.data2 = data2;
+
+    event.type = SDL_USEREVENT;
+    event.user = userevent;
+
+    SDL_PushEvent(&event);
+}
+

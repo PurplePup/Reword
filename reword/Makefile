@@ -36,17 +36,19 @@ OBJECTS = $(SOURCES:.cpp=.o)
 BIN = $(PROG_NAME)
 
 ifdef pc
+CXX = g++ 
 # LDFLAGS = -lm -lg -lpthread -lSDL -lSDL_image -lSDL_mixer -lSDL_ttf
 # CXX = g++ 
 # CXXFLAGS = -c -Wall `sdl-config --cflags` -ggdb -D_DEBUG -I/usr/include/SDL
-
 LDFLAGS = -lm -lg -lpthread -lSDL -lSDL_mixer -lSDL_image -lSDL_ttf `sdl-config --static-libs` 
 #LDFLAGS = -L/lib -DGP2X -lSDL_image  -lSDL_gfx  -lSDL_ttf  -ljpeg -lpng12 -lz -lSDL_mixer -lvorbisidec -lmikmod -lmad -lSDL -lgcc -lm -lc -lexpat -lpthread -msoft-float
 #-lfreetype 
-CXX = g++ 
-#CXXFLAGS = -c -Wall `sdl-config --cflags` -ggdb -D_DEBUG -I/usr/include/SDL
-CXXFLAGS = -c -Wall `sdl-config --cflags` -I/usr/include/SDL
-STRIP = strip
+#=====BUILD DEBUG
+CXXFLAGS = -c -Wall `sdl-config --cflags` -ggdb -D_DEBUG -I/usr/include/SDL
+STRIP = ls -l
+#=====BUILD RELEASE
+#CXXFLAGS = -c -Wall `sdl-config --cflags` -I/usr/include/SDL
+#STRIP = strip
 endif
 
 ifdef gp2x

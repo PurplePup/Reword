@@ -101,32 +101,33 @@ public:
 };
 */
 
-class CWords
+class Words
 {
 public:
-	CWords();
-	CWords(const std::string &wordFile);
-	void setList(bool bOn = true) { m_bList = bOn; }
-	void setDebug(bool bOn = true) { m_bDebug = bOn; }
+	Words();
+	Words(const std::string &wordFile);
+	void setList(bool bOn = true) { _bList = bOn; }
+	void setDebug(bool bOn = true) { _bDebug = bOn; }
 
 	bool load(std::string wordFile = std::string(""), 	//load a wordlist and exclude 
-				unsigned int rndSeed = 0);				//duplicates, too many etc
+				unsigned int rndSeed = 0,				//duplicates, too many etc
+				unsigned int startAtWord = 0);
 
-	unsigned int wordsLoaded() { return m_total; };		//before exclusions, duff words etc
-	unsigned int size() { return (unsigned int)m_mapAll.size(); }	//current size
+	unsigned int wordsLoaded() { return _total; };		//before exclusions, duff words etc
+	unsigned int size() { return (unsigned int)_mapAll.size(); }	//current size
 	
-	bool nextWord(std::string &retln, eDifficulty level, eGameMode mode, bool reloadAtEnd=true);
-	const tWordsInTarget getWordsInTarget() { return m_wordsInTarget; }; 
-	int wordsOfLength(unsigned int i) { if (i > 3) return 0; else return m_nWords[i]; };
+	bool nextWord(std::string &retln, eGameDiff level, eGameMode mode, bool reloadAtEnd=true);
+	const tWordsInTarget getWordsInTarget() { return _wordsInTarget; };
+	int wordsOfLength(unsigned int i) { if (i > 3) return 0; else return _nWords[i]; };
 	int checkWordsInTarget(std::string &testWord);
 	DictWord getDictForWord(std::string &wrd);
-	unsigned int wordsInLevel(unsigned int i) { if (i >= DIF_MAX) return 0; else return m_nInLevel[i]; };
+	unsigned int wordsInLevel(unsigned int i) { if (i >= DIF_MAX) return 0; else return _nInLevel[i]; };
 
-	std::string getWord6() { return m_word._word; };			//curr word
-	int			getWordLevel() { return m_word._level; };		//curr word level
-	std::string getWordDesc() { return m_word._description; };	//curr word description
+	std::string getWord6() { return _word._word; };			//curr word
+	int			getWordLevel() { return _word._level; };		//curr word level
+	std::string getWordDesc() { return _word._description; };	//curr word description
 
-	CWords & operator+=(const CWords &w)
+	Words & operator+=(const Words &w)
 	{
 	    // Check for self-assignment
 	    if (this != &w)      // not same object, so add all of 'w' to 'this'
@@ -135,44 +136,44 @@ public:
 	    	//We can't just use map.insert(begin,end) as we need to check for existence and
 	    	//insert into vect if not there too.
 			tWordMap::const_iterator pos;
-			for (pos = w.m_mapAll.begin(); pos != w.m_mapAll.end(); ++pos)
+			for (pos = w._mapAll.begin(); pos != w._mapAll.end(); ++pos)
 			{
 				//only add if not already exists - this save us from searching the m_vect6 vector each time
-				if (this->m_mapAll.find(pos->first) == this->m_mapAll.end())
+				if (this->_mapAll.find(pos->first) == this->_mapAll.end())
 				{
-					this->m_mapAll[pos->first] = pos->second;
+					this->_mapAll[pos->first] = pos->second;
 					if (6 == pos->first.length())		//is a 6 letter word
-						this->m_vect6.push_back(pos->first);	//so also add to valid 6 letter word vector 
+						this->_vect6.push_back(pos->first);	//so also add to valid 6 letter word vector
 				}
 			}
 		}
 		return *this;
 	}
-	const CWords operator+(const CWords &other) const 
+	const Words operator+(const Words &other) const
 	{
-		return CWords(*this) += other;	//call += operator overload (as it's already there)
+		return Words(*this) += other;	//call += operator overload (as it's already there)
 	}
 
-	CWords & operator-=(const CWords &w)
+	Words & operator-=(const Words &w)
 	{
 	    // Check for self-assignment
 	    if (this != &w)      // not same object, so remove all of 'w' from 'this'
 		{
 			//iterate through and remove from vect too, time consuming but necessary
 			tWordMap::const_iterator pos;
-			for (pos = w.m_mapAll.begin(); pos != w.m_mapAll.end(); ++pos)
+			for (pos = w._mapAll.begin(); pos != w._mapAll.end(); ++pos)
 			{
-				this->m_mapAll.erase(pos->first);	//erase by value
+				this->_mapAll.erase(pos->first);	//erase by value
 
 				//find the same word in the vect6 and erase it
 				//int n(0);
 				tWordVect::iterator vpos;
-				for (vpos = this->m_vect6.begin(); vpos != this->m_vect6.end(); ++vpos)
+				for (vpos = this->_vect6.begin(); vpos != this->_vect6.end(); ++vpos)
 				{
 					if (*vpos == pos->first)
 					{
 						//std::cout << pos->first << " erased after " << n+1 << " reads" << std::endl;
-						this->m_vect6.erase(vpos);
+						this->_vect6.erase(vpos);
 						break;
 					}
 					//n++;
@@ -181,9 +182,9 @@ public:
 		}
 		return *this;
 	}
-	const CWords operator-(const CWords &other) const 
+	const Words operator-(const Words &other) const
 	{
-		return CWords(*this) -= other;	//call -= operator overload (as it's already there)
+		return Words(*this) -= other;	//call -= operator overload (as it's already there)
 	}
 
 protected:
@@ -195,20 +196,20 @@ protected:
 	int findWordsInWord6(tWordMap &shortwords, const char *word6);
 	bool splitDictLine(std::string line, DictWord &dict);
 	
-	tWordMap 		m_mapAll;				//all words - for 
-	tWordVect		m_vect6;				//vector to hold all 6 letter words in a rnd order
-	tWordVect::const_iterator m_vect6_it;	//m_vect6 iterator
-	DictWord		m_word;					//current 6 letter word to find etc
-	tWordsInTarget 	m_wordsInTarget;		//map of sub words (ie 3,4,5,6 letter for word6) with a "found" flag to say player got it
-	int 			m_nWords[4];			//count of number of words of each length to be found in 3, 4, 5 & 6 letter word lists
-	unsigned int	m_nInLevel[DIF_MAX];	//number of words in each level (to disable a level if == 0)
+	tWordMap 		_mapAll;				//all words - for
+	tWordVect		_vect6;				//vector to hold all 6 letter words in a rnd order
+	tWordVect::const_iterator _vect6_it;	//m_vect6 iterator
+	DictWord		_word;					//current 6 letter word to find etc
+	tWordsInTarget 	_wordsInTarget;		//map of sub words (ie 3,4,5,6 letter for word6) with a "found" flag to say player got it
+	int 			_nWords[4];			//count of number of words of each length to be found in 3, 4, 5 & 6 letter word lists
+	unsigned int	_nInLevel[DIF_MAX];	//number of words in each level (to disable a level if == 0)
 
-	int				m_total;				//total words loaded
-	int				m_ignored;				//number of words ignored
-	bool 			m_bList;				//output processing msgs to console
-	bool			m_bDebug;				//output detail 'debug' to console?
+	int				_total;				//total words loaded
+	int				_ignored;				//number of words ignored
+	bool 			_bList;				//output processing msgs to console
+	bool			_bDebug;				//output detail 'debug' to console?
 
-	std::string 	m_wordFile;				//saved when load() called to allow nextWord() to reload
+	std::string 	_wordFile;				//saved when load() called to allow nextWord() to reload
 };
 
 

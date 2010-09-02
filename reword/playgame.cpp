@@ -52,9 +52,6 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "platform.h"
 #include <cassert>
 
-//max number of words to display in a 3, 4, 5 or 6 word column
-#define MAX_WORD_COL	8
-
 static	int _countdown;				//seconds remaining
 
 //function called when timer reaches interval set
@@ -62,11 +59,11 @@ Uint32 countdown_callback(Uint32 interval, void *param)
 {
 	if (_countdown <= 0)
 	{
-		PlayGame::pushEvent(USER_EV_END_COUNTDOWN); //pushEndOfLevel();
+		Utils::pushSDL_Event(USER_EV_END_COUNTDOWN); //pushEndOfLevel();
 		return 0;
 	}
 
-	PlayGame::pushEvent(USER_EV_PING_COUNTDOWN);
+	Utils::pushSDL_Event(USER_EV_PING_COUNTDOWN);
 
 	return(interval);
 }
@@ -84,7 +81,7 @@ PlayGame::PlayGame(GameData& gd) : _gd(gd), _pPopup(0)
 void PlayGame::init(Input *input)
 {
 	//fade out any menu music (but only if no game music still playing)
-	//Game music handled seperately froim in-game music (mp3 dir etc)
+	//Game music handled seperately froim in-game music (mp3 dir etc ?)
 	Audio * pAudio = Audio::instance();
 	if (pAudio && pAudio->isPlayingMusic()==false)
 		Mix_FadeOutMusic(3000);
@@ -191,7 +188,7 @@ void PlayGame::render_play(Screen* s)
 	//(>10) normal countdown in "plenty of time" colour
 	//(<=10) countdown in "oh crap" colour (red to denote time running out)
 	//		A warning "ping" is also sounded in the countdown callback fn each second...
-	_gd._fntMed.put_number(s, _countdown0_x, _countdown0_y, _countdown, "%03d",
+	_gd._fntBig.put_number(s, _countdown0_x, _countdown0_y, _countdown, "%03d",
 		(_countdown > 10)?YELLOW_COLOUR:RED_COLOUR, true);	//TIME:
 
 	if (PG_PLAY == _state)
@@ -213,7 +210,6 @@ void PlayGame::render_play(Screen* s)
 
 		_gd._cursor.blitTo(s, _xScratch+(_round.currentX()*(CURSORW+2)),
 						(_round.cursorIsTop()?_yScratchTop:_yScratchBot), (int)_gd._diffLevel-1);
-
 	}
 
 #if defined(_DEBUG)
@@ -221,7 +217,7 @@ void PlayGame::render_play(Screen* s)
 #endif
 
 	//draw word boxes 1 length at a time downwards (easier)
-	int yo = _yScratchBot+CURSORH+_boxOffsetY;	//start y offset
+	int yo = _yScratchBot + CURSORH + _boxOffsetY;	//start y offset
 	tWordsFoundList::const_iterator it;
 
 	//[3..], [4...], [5....] and [6.....] letter boxes
@@ -569,11 +565,11 @@ void PlayGame::button(Input* input, Input::ButtonType b)
 			if (_inputL && _inputR)
 			{
 				_bAbort = true;
-				pushEvent(USER_EV_END_COUNTDOWN); //try to exit more gracefully, pushes end of level
+				Utils::pushSDL_Event(USER_EV_END_COUNTDOWN); //try to exit more gracefully, pushes end of level
 			}
 			else
 			{
-				pushEvent(USER_EV_NEXT_TRACK);	//try to start next music track
+				Utils::pushSDL_Event(USER_EV_NEXT_TRACK);	//try to start next music track
 			}
 		}
 		break;
@@ -616,16 +612,17 @@ void PlayGame::button_play(Input* input, Input::ButtonType b)
 		}
 		break;
 	case Input::L:
-		if (input->isPressed(b)) _round.setWordToLast();
+		if (input->isPressed(b)) commandWordToLast();	// _round.setWordToLast();
 		break;
 	case Input::R:
-		if (input->isPressed(b)) _round.setWordToLast();
+		if (input->isPressed(b)) commandWordToLast();	// _round.setWordToLast();
 		break;
 	case Input::A:
 		if (input->isPressed(b))
 		{
-			if (_round.jumbleWord())
-				Mix_PlayChannel(-1,_gd._fxWoosh,0);	//sound only if not already moving etc
+			commandJumbleWord();
+/*			if (_round.jumbleWord())
+				Mix_PlayChannel(-1,_gd._fxWoosh,0);	//sound only if not already moving etc*/
 		}
 		break;
 	case Input::B:
@@ -647,10 +644,10 @@ void PlayGame::button_play(Input* input, Input::ButtonType b)
 		if (input->isPressed(b)) doPauseGame();
 		break;
 	case Input::Y:
-		if (input->isPressed(b)) _round.clearAllToTop();
+		if (input->isPressed(b)) commandClearAllToTop();	// _round.clearAllToTop();
 		break;
 	case Input::X:
-		if (input->isPressed(b)) tryWord();
+		if (input->isPressed(b)) commandTryWord();	// tryWord();
 		break;
 
 	default:break;
@@ -773,12 +770,15 @@ void PlayGame::handlePopup()
 		break;
 	case PlayGamePopup::POP_SKIP:
 		if (_state != PG_END)	//not already at end
-			pushEvent(USER_EV_END_COUNTDOWN);	//next level - if not got a 6, will end game
+			Utils::pushSDL_Event(USER_EV_END_COUNTDOWN);	//next level - if not got a 6, will end game
 		break;
+	case PlayGamePopup::POP_SAVE:
+		//user selected to save state (now at least a 6 letter word found)
+		//and allow resume game later, so follow on to POP_QUIT
 	case PlayGamePopup::POP_QUIT:
 		//back to main menu - like L+R+Click (or ESC on PC)
 		_bAbort = true;
-		pushEvent(USER_EV_END_COUNTDOWN); //try to exit more gracefully, pushes end of level
+		Utils::pushSDL_Event(USER_EV_END_COUNTDOWN); //try to exit more gracefully, pushes end of level
 		break;
 
 	default:break;	//do nothing
@@ -815,29 +815,23 @@ void PlayGame::touch_play(Point pt)
 	}
 	else if (_gd._word_last_pulse.contains(pt))
 	{
-		//start pulse anim and launch command
-		_gd._word_last_pulse.startAnim(0, -1, ImageAnim::ANI_ONCE, 20);
-		_round.setWordToLast();
+		commandWordToLast();
 	}
 	else if (_gd._word_totop_pulse.contains(pt))
 	{
-		_gd._word_totop_pulse.startAnim(0, -1, ImageAnim::ANI_ONCE, 20);
-		_round.clearAllToTop();
+		commandClearAllToTop();
 	}
 	else if (_gd._word_shuffle_pulse.contains(pt))
 	{
-		_gd._word_shuffle_pulse.startAnim(0, -1, ImageAnim::ANI_ONCE, 20);
-		if (_round.jumbleWord())
-			Mix_PlayChannel(-1,_gd._fxWoosh,0);	//sound only if not already moving etc
+		commandJumbleWord();
 	}
 	else if (_gd._word_try_pulse.contains(pt))
 	{
-		_gd._word_try_pulse.startAnim(0, -1, ImageAnim::ANI_ONCE, 20);
-		tryWord();
+		commandTryWord();
 	}
 	else
 		if (!_doubleClick.done())
-			tryWord();
+		    commandTryWord();	//	  tryWord();
 		else
 			_doubleClick.start(300);
 }
@@ -902,6 +896,33 @@ void PlayGame::touch_dict(Point pt)
 			doDictionary();
 		else
 			_doubleClick.start(300);
+}
+
+//command issued by player - to place last word in scratch pannel
+void PlayGame::commandWordToLast()
+{
+	//start pulse anim and launch command
+	_gd._word_last_pulse.startAnim(0, -1, ImageAnim::ANI_ONCE, 20);
+	_round.setWordToLast();
+}
+//command issued by player - to place all chars in the top row
+void PlayGame::commandClearAllToTop()
+{
+	_gd._word_totop_pulse.startAnim(0, -1, ImageAnim::ANI_ONCE, 20);
+	_round.clearAllToTop();
+}
+//command issued by player - to jumble all remaining letters in the top row
+void PlayGame::commandJumbleWord()
+{
+	_gd._word_shuffle_pulse.startAnim(0, -1, ImageAnim::ANI_ONCE, 20);
+	if (_round.jumbleWord())
+		Mix_PlayChannel(-1,_gd._fxWoosh,0);	//sound only if not already moving etc
+}
+//command issued by player - to check word selected against dictionary
+void PlayGame::commandTryWord()
+{
+	_gd._word_try_pulse.startAnim(0, -1, ImageAnim::ANI_ONCE, 20);
+	tryWord();
 }
 
 //process any events not handled by the main input function
@@ -1010,7 +1031,7 @@ void PlayGame::doMoveOn()
 		if (_countdown==0)
 		{
 			_bAbort = true;
-			pushEvent(USER_EV_END_COUNTDOWN); //try to exit more gracefully, pushes end of level
+			Utils::pushSDL_Event(USER_EV_END_COUNTDOWN); //try to exit more gracefully, pushes end of level
 		}
 		else
 		{
@@ -1134,6 +1155,11 @@ void PlayGame::newGame()
 	_yScratchBot = _yScratchTop + CURSORH + GAME_GAP1;
 
 	_gd._score.resetCurr();
+	if (_gd._state == ST_RESUME)
+	{
+		_gd.loadQuickState();
+		_gd._state = ST_GAME;	//as if it was always...
+	}
 	_gd._unmatchedWords.clear();
 
 	if (_gd._mode == GM_TIMETRIAL)
@@ -1164,25 +1190,6 @@ void PlayGame::newGame()
 	Mix_FadeOutChannel(-1, 1000);	//fade out menu music & sound effects etc
 ////	Mix_FadeOutMusic(1000);	//and any music	##TODO##
 
-}
-
-//push an event into the SDL event queue
-void PlayGame::pushEvent(int code, void *data1, void *data2)
-{
-	//push event "end of level" or other user defined event
-    SDL_Event event;
-    SDL_UserEvent userevent;
-
-    userevent.type = SDL_USEREVENT;
-    userevent.code = code;
-
-	userevent.data1 = data1;
-    userevent.data2 = data2;
-
-    event.type = SDL_USEREVENT;
-    event.user = userevent;
-
-    SDL_PushEvent(&event);
 }
 
 //timer specific to the countdown timer
@@ -1370,7 +1377,7 @@ void PlayGame::tryWord()
 	{
 		if (_longestWordLen == wordlen)
 		{
-			pushEvent(USER_EV_END_COUNTDOWN);	//pushes end of level
+			Utils::pushSDL_Event(USER_EV_END_COUNTDOWN);	//pushes end of level
 			return;
 		}
 		else wordlen = -1;	//speed6 or timetrial badWord sound as < 6 letters
@@ -1384,7 +1391,7 @@ void PlayGame::tryWord()
 
 		if (allWordsFound())
 		{
-			pushEvent(USER_EV_END_COUNTDOWN); //pushes end of level
+			Utils::pushSDL_Event(USER_EV_END_COUNTDOWN); //pushes end of level
 			return;	//exit before sound, as success() plays fanfare sound
 		}
 		//it's a simple word find
@@ -1496,7 +1503,7 @@ void PlayGame::prepareBackground()
 	//find out sizes and calc reasonable positions
 	FontTTF &fontText = _gd._fntSmall;
 	FontTTF &fontNumbers = _gd._fntSmall;
-	FontTTF &fontCounter = _gd._fntMed;
+	FontTTF &fontCounter = _gd._fntBig;
 	Rect r(0, 0, 0, 0);
 	int score_len(0), score0_len(0), words_len(0), words0_len(0), count0_len(0);
 	r = fontText.calc_text_metrics("SCORE: ");		//note gap to look better
@@ -1523,7 +1530,7 @@ void PlayGame::prepareBackground()
 	fontText.put_text(_gamebg.get(), _score0_x+score0_len+equal_gap, titles_y, "WORDS:", WHITE_COLOUR);
 	_words0_x = _score0_x+score0_len+equal_gap+words_len;
 	_words0_y = numbers_y;
-	_countdown0_x = _words0_x+words0_len+equal_gap;
+	_countdown0_x = SCREEN_WIDTH - (count0_len + (count0_len / 8));  	//	_words0_x+words0_len+equal_gap;
 	_countdown0_y = (sb_h - fontCounter.height()) / 2;
 
 	//draw mode in bot right corner (before/under word boxes so if 8 6-letter words, it doesnt cover anything up)

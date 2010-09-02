@@ -34,6 +34,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include "global.h"
 #include "score.h"
+#include "utils.h"
 
 #include <iostream>
 #include <cerrno>
@@ -42,11 +43,12 @@ Score::Score()
 {
 #ifdef PANDORA
 	//pandora .pnd directory structure requires a unnamed directory for data written back to the SD card,
-	//so create a score directory in the startup/run .sh script and read/write scores in there.
+	//so create a score directory in the startup/run .sh script and read/write scores files in there.
 	_scorefile = "./hiscore.dat";
 #else
 	_scorefile = RES_BASE + "hiscore.dat";
 #endif
+	_seed = 0;
 }
 
 void Score::init()
@@ -71,9 +73,8 @@ void Score::init()
 
 
 //return a hash total to help seed random number gen
-//NOTE:
-//from v0.4, save files lead with a zero byte and a version byte to allow
-//future score file mods without the player having to trash the score file and restart from scratch
+//NOTE: from v0.4, save files lead with a zero byte and a version byte to allow future score
+// 		file mods without the player having to trash the score file and restart from scratch
 Uint32 Score::load(std::string scorefile)
 {
 	if (!scorefile.length()) 
@@ -94,17 +95,17 @@ Uint32 Score::load(std::string scorefile)
 
 	if (in.is_open())
 	{
-		char zero, version = 0;
-		zero = in.get();
+		char version = 0, format = 0;
+		version = in.get();
 		if (in.bad()) return 0; 	//can't read first char - poss empty file
-		if (0 == zero)
+		if (0 == version)
 		{
 			//First byte is a zero (so is a v0.4 type score file) not an initial.
 			//Score file versioning started in v0.4. Before that it was just a
 			//straight dump of all 3 _hiScore entries (see old code in else block)
-			version = in.get();
+			format = in.get();
 			if (in.bad()) return 0; 	//can't read version char - poss corrupt file
-			if (0x01 == version)		//first generation format
+			if (0x01 == format)		//first generation format
 			{
 				//load a version 0.4 save file
 				for (diff=0; diff<3; ++diff)	//3 levels easy, med, hard
@@ -144,6 +145,7 @@ Uint32 Score::load(std::string scorefile)
 		for (tpos=0, p=(unsigned char*)&_hiScoreS6[0]; tpos < (int)sizeof(_hiScoreS6[0])*3; ++tpos) { total += (unsigned int)*p; ++p; }
 		for (tpos=0, p=(unsigned char*)&_hiScoreTT[0]; tpos < (int)sizeof(_hiScoreTT[0])*3; ++tpos) { total += (unsigned int)*p; ++p; }
 	}
+	_seed = total;
 	return total;
 }
 
@@ -154,8 +156,8 @@ void Score::save(std::string scorefile)
 	std::ofstream out(scorefile.c_str(), std::ios::out|std::ifstream::binary);
 	if (out)
 	{
-	  out.put( 0x00 );	//0x00 byte first denotes >= v0.4 score file
-	  out.put( 0x01 );	//0x01 denotes first generation format
+	  out.put( 0x00 );	//format: 0x00 byte first denotes >= v0.4 score file
+	  out.put( 0x01 );	//version: 0x01 denotes first generation format
 
 	  int diff;
 	  for (diff=0; diff<3; ++diff)	//3 levels easy, med, hard
@@ -173,10 +175,6 @@ void Score::save(std::string scorefile)
 	}
 }
 
-void Score::setCurr(tHiScoreEntry &curr)
-{
-	_curr = curr;
-}
 void Score::setCurrInits(std::string inits)
 {
 	//only use first 3 chars and make sure 4th is NULL
@@ -278,6 +276,11 @@ unsigned int Score::fastest(int mode, int diff, int level)
 	return getLevel(mode, diff)->level[level].fastest;
 }
 
+void Score::setCurr(tHiScoreEntry &curr)
+{
+	_curr = curr;
+}
+
 //return a pointer to the correct array depending on mode and difficulty level
 tHiScoreLevels *Score::getLevel(int mode, int diff)
 {
@@ -291,5 +294,89 @@ tHiScoreLevels *Score::getLevel(int mode, int diff)
 	 	return &_hiScore[diff];
 	}
 }
+
+
+//////////////////////////////////////////////////////////////////////////////////
+//	QuickState save class member functions
+//	Used for save/resore mid game...
+//////////////////////////////////////////////////////////////////////////////////
+
+QuickState::QuickState()
+{
+#ifdef PANDORA
+	//pandora .pnd directory structure requires a unnamed directory for data written back to the SD card,
+	//so create a score directory in the startup/run .sh script and read/write score files in there.
+	_quickstatefile = "./.quickstate.save";
+#else
+	_quickstatefile = RES_BASE + ".quickstate.save";
+#endif
+}
+
+bool QuickState::quickStateSave()
+{
+	//quick save state for restore:
+	//score, words, dictionary shuffle seed, game type, game diff, dict file,
+ 	std::ofstream outfile(_quickstatefile.c_str(), std::ios::out|std::ifstream::trunc);
+	if (outfile.is_open())
+	{
+		outfile << "words=" << _qStateSave.words << std::endl;
+		outfile << "score=" << _qStateSave.score << std::endl;
+		outfile << "diff=" << _qStateSave.diff << std::endl;
+		outfile << "mode=" << _qStateSave.mode << std::endl;
+		outfile << "seed=" << _qStateSave.seed << std::endl;
+	}
+	return true;
+}
+
+bool QuickState::quickStateLoad()
+{
+	std::string line, key, value;
+	std::ifstream infile (_quickstatefile.c_str(), std::ios_base::in);
+	if (infile.is_open())
+	{
+		while (std::getline(infile, line, '\n'))
+		{
+			Utils::splitKeyValuePair(line, key, value);
+			if (key == "words")
+				_qStateSave.words = atoi(value.c_str());
+			else if (key == "score")
+				_qStateSave.score = atoi(value.c_str());
+			else if (key == "diff")
+				_qStateSave.diff = atoi(value.c_str());
+			else if (key == "mode")
+				_qStateSave.mode = atoi(value.c_str());
+			else if (key == "seed")
+				_qStateSave.seed = atoi(value.c_str());
+		}
+		return true;
+	}
+	return false;
+}
+
+//return true if .quickState.save file exists
+bool QuickState::quickStateExists()
+{
+	return std::ifstream(_quickstatefile.c_str());
+}
+
+//delete the quick state save file -once reload has been selected, so user
+//must save state again to be able to resume later. I.e user shouldn't be
+//able to keep resuming the same game and get better scores each time.
+void QuickState::quickStateDelete()
+{
+//	std::remove(_quickstatefile.c_str());	//TODO: replace delete once working
+	std::cout << "DEBUG: not performing QuickState::quickStateDelete" << std::endl;
+}
+
+void QuickState::setQuickState(const tQuickStateSave &qss)
+{
+	_qStateSave = qss;
+}
+void QuickState::getQuickState(tQuickStateSave &qss)
+{
+	qss = _qStateSave;
+}
+
+
 
 

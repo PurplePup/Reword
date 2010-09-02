@@ -21,6 +21,7 @@
 #define RES_SYS_BASE	(std::string("./data/"))
 #endif
 
+
 //screen and hardware dependant settings
 #if defined (GP2X)
 //GPH GP2X
@@ -58,6 +59,7 @@
 #define BG_LINE_BOT		(SCREEN_HEIGHT-30)
 #define GAME_GAP1		3
 #define SCORE_OFFSET	((SCREEN_WIDTH-300)/2)
+#define MAX_WORD_COL	8	//max number of words to display in a 3, 4, 5 or 6 word column
 
 
 #elif defined (PANDORA)
@@ -97,6 +99,7 @@
 #define BG_LINE_BOT		415
 #define GAME_GAP1		8
 #define SCORE_OFFSET	((SCREEN_WIDTH-300)/2)
+#define MAX_WORD_COL	8	//max number of words to display in a 3, 4, 5 or 6 word column
 
 //#elif defined (WIZ)
 
@@ -133,12 +136,12 @@
 #define FONT_TINY		18
 #define FONT_CLEAN		22
 #define FONT_CLEAN_MAX	80
-
 #define ROUNDEL_VEL		20
 #define BG_LINE_TOP		85
 #define BG_LINE_BOT		415
 #define GAME_GAP1		8
 #define SCORE_OFFSET	((SCREEN_WIDTH-300)/2)
+#define MAX_WORD_COL	8	//max number of words to display in a 3, 4, 5 or 6 word column
 
 #endif
 

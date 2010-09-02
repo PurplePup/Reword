@@ -25,7 +25,7 @@ public:
 	virtual void touch(Point pt);
 	
 protected:
-	void setDifficulty(eDifficulty diff);
+	void setDifficulty(eGameDiff diff);
 	void setMode(eGameMode mode);
 	void setDescription();
 	void prepareBackground();

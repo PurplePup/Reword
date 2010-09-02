@@ -42,6 +42,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "playgamepopup.h"
 #include "audio.h"
 #include "platform.h"
+#include "score.h"
 
 #include <string>
 #include <cassert>
@@ -64,8 +65,8 @@ void PlayGamePopup::init(Input *input)
 	//Do not init repeat keys so we dont have to reset game repeat on return
 	_menuoption = 0;	//always start on 0
 	_selectedId = 0;
-	_bSelected = false;			//bool for caller to determine if selection made
-	_bConfirm = false;			//true goes into yes/no mode if exit pressed
+	_bSelected = false;		//bool for caller to determine if selection made
+	_bDoYesNoMenu = false;		//true goes into yes/no mode if exit pressed
 	
 	prepareBackground();
 	
@@ -88,7 +89,10 @@ void PlayGamePopup::init(Input *input)
 	_itemList[++i] = MenuItem(POP_TOGGLEMUSIC, BLUE_COLOUR, bIsPlaying?"Music Stop":"Music Start", bIsPlaying?"Stop current track":"Start a song", bHasMusic);
 	_itemList[++i] = MenuItem(POP_NEXTTRACK, BLUE_COLOUR, "Next Track", "Play next song", bHasMusic);
 	_itemList[++i] = MenuItem(POP_PREVTRACK, BLUE_COLOUR, "Prev Track", "Play previous song", bHasMusic);
-*/	_itemList[++i] = MenuItem(POP_QUIT, RED_COLOUR, "Quit Game !", "Exit (saves if highscore)");
+*/
+	if (_hasMaxWord)
+		_itemList[++i] = MenuItem(POP_SAVE, BLUE_COLOUR, "Save & Exit", "Allows exit and restart at same place");
+	_itemList[++i] = MenuItem(POP_QUIT, RED_COLOUR, "Quit Game !", "Exit (save highscore)");
 	
 	_itemYNList.clear();
 	_itemYNList[i=0] = MenuItem(POP_NO, GREEN_COLOUR, "No", "Back to menu");
@@ -213,14 +217,14 @@ void PlayGamePopup::choose()
 	MenuItem *pItem = &(it->second);
 	assert(pItem);
 
-	if (_bConfirm)
+	if (_bDoYesNoMenu)
 	{
 		//already showing YES/NO confirm options, so process...
 		if (pItem->_id == POP_NO)
 		{
 			_pItems = &_itemList;		//point back to first menu, then
 			_menuoption = ItemFromId(POP_QUIT); 	//NO selected, back to POP_QUIT
-			_bConfirm = false;			//back to POP_CANCEL/SKIP/QUIT menu
+			_bDoYesNoMenu = false;			//back to POP_CANCEL/SKIP/QUIT menu
 			return;
 		}
 		else
@@ -231,12 +235,18 @@ void PlayGamePopup::choose()
 		//first check if (and ignore) disabled menu items
 		if ( !pItem->_enabled )
 			return;
+		if (pItem->_id == POP_SAVE)	//for later RESUME
+		{
+			_gd.saveQuickState();
+			_menuoption = ItemFromId(POP_QUIT);	//auto (force) exit
+		}
 		//if on exit option, go to yes/no options and wait for yes or no
 		if (pItem->_id == POP_QUIT)
 		{
+			//setup Yes/No sub menu - to check user actually want to exit
 			_pItems = &_itemYNList;		//point to new menu, then
 			_menuoption = ItemFromId(POP_NO);	//get pos of no option
-			_bConfirm = true;
+			_bDoYesNoMenu = true;
 			return;
 		}
 		if (pItem->_id == POP_TOGGLEMUSIC)

@@ -19,7 +19,7 @@ public:
 	PlayGamePopup(GameData& gd, bool bMaxWordFound);
 	virtual ~PlayGamePopup() {}
 
-	enum eOptions { POP_CANCEL, POP_SKIP, POP_TOGGLEMUSIC, POP_NEXTTRACK, POP_PREVTRACK, POP_QUIT, POP_MAXVAL };
+	enum eOptions { POP_CANCEL, POP_SKIP, POP_TOGGLEMUSIC, POP_NEXTTRACK, POP_PREVTRACK, POP_SAVE, POP_QUIT, POP_MAXVAL };
 	enum eYNOptions { POP_NO, POP_YES, POP_YN_MAXVAL };	//same as POP_CANCEL etc as same positions in menu
 //	void select(Uint32 i) { if (i >= POP_MAXVAL) _menuoption = 0; else _menuoption = i; }
 	int selectedId() { return _selectedId; }
@@ -55,7 +55,7 @@ private:
 	tMenuMap	*_pItems;
 	std::auto_ptr<Image> _menubg;
 
-	bool 		_bConfirm;		//user must select yes tpo exit game
+	bool 		_bDoYesNoMenu;		//user must select yes tpo exit game
 	Waiting		_doubleClick;	//touch support
 };
 

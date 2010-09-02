@@ -97,6 +97,8 @@ void PlayMenu::render(Screen *s)
 			r = _gd._fntMed.put_text(s, y-2, p->_title.c_str(), p->_hoverOn, true);
 			r._min._x -= 30;
 			_gd._star.setPos(r._min._x, y-2);
+			//show comment for selected item - might be blank
+			_gd._fntClean.put_text(s, BG_LINE_BOT - (_gd._fntClean.height()+2) , p->_comment.c_str(), BLACK_COLOUR, false);
 		}
 		else
 		{
@@ -109,7 +111,7 @@ void PlayMenu::render(Screen *s)
 	_nextYpos = y;	//useful for placing help text after items
 	
 	_gd._star.draw(s);
-	
+
 	int helpYpos = BG_LINE_BOT+((SCREEN_HEIGHT-BG_LINE_BOT-_gd._fntClean.height())/2);
 	_gd._fntClean.put_text(s, helpYpos, _help.c_str(), _helpColor, true);
 

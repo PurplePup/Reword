@@ -25,7 +25,7 @@ const int COUNTDOWN_REWORD		= 60;
 const int COUNTDOWN_SPEED6		= 40;
 const int COUNTDOWN_TIMETRIAL	= 120;
 
-//User defined SDL_Event codes 
+//User defined SDL_Event codes - caught in game.cpp loop
 //user event timer code
 #define USER_EV_END_COUNTDOWN		1
 //to sound the countdown ping
@@ -35,7 +35,7 @@ const int COUNTDOWN_TIMETRIAL	= 120;
 #define USER_EV_PREV_TRACK			4
 #define USER_EV_PAUSE_TRACK			5
 #define USER_EV_STOP_TRACK			6
-
+#define USER_EV_SAVE_STATE			7
 
 #endif //_GAME_GLOBAL_H_
 

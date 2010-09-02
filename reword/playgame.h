@@ -89,6 +89,11 @@ public:
     virtual void button(Input* input, Input::ButtonType b);
     virtual void touch(Point pt);
 
+	static 	void pushSDL_Event
+(int code, void *data1 = NULL, void *data2 = NULL);
+
+protected:
+	
 	//state funcion pointer handling
 	void stateFn(eState state);
 	void statePush(eState state);
@@ -144,7 +149,10 @@ public:
 	void touch_default(Point pt);
 	void touch_dict(Point pt);
 	
-	static 	void pushEvent(int code, void *data1 = NULL, void *data2 = NULL);
+	void commandWordToLast();
+	void commandClearAllToTop();
+	void commandJumbleWord();
+	void commandTryWord();
 
 private:
 	GameData &	_gd;			//shared data between screens (play classes)
@@ -207,6 +215,7 @@ private:
     void (PlayGame::*pWorkFn)(Input*, float);
 	void (PlayGame::*pButtonFn)(Input*, Input::ButtonType);
 	void (PlayGame::*pTouchFn)(Point pt);
+
 	//...
 	PlayGamePopup	*_pPopup;
 

@@ -58,7 +58,7 @@ void PlayDiff::init(Input *input)
 
 void PlayDiff::choose(MenuItem i)
 {
-	_gd.setDiffLevel((eDifficulty)i._id);
+	_gd.setDiffLevel((eGameDiff)i._id);
 	_gd._state = ST_MENU;
 	_running = false;	//exit this class running state
 }

@@ -201,6 +201,7 @@ bool Game::run(void)
 		
 		case ST_MODE:		p = new PlayModeMenu(*_gd);break;
 
+		case ST_RESUME:
 		case ST_GAME:		p = new PlayGame(*_gd);break;
 
 		case ST_DIFF:		p = new PlayDiff(*_gd);break;
@@ -366,17 +367,19 @@ bool Game::play(IPlay *p)
 						p->button(_input, b);
 					}
 					break;
-//#ifndef GP2X
+
 					case SDL_MOUSEBUTTONDOWN:
 					{
 						p->touch(Point(event.button.x, event.button.y));
 					}
 					break;
-//#endif
+
 					case SDL_QUIT:	
 						return false;	//valid exit
 
 					default:
+						//ok, here we handle all *our* events, user defined or pass on
+						//any others in case it's handled elsewhere (ie, in game)
 						if (event.type == SDL_USEREVENT)
 						{
 							switch (event.user.code)
@@ -390,6 +393,9 @@ bool Game::play(IPlay *p)
 							case USER_EV_PREV_TRACK:
 								audio->startPrevTrack();
 								break;
+/*							case USER_EV_SAVE_STATE:
+								_gd->saveQuickState();
+								break;*/
 							default:
 								p->handleEvent(event);	//let the play impl handle other user events
 								break;
@@ -446,6 +452,7 @@ bool Game::play(IPlay *p)
 	//Its up to the next screen (play class) to set as required on entry.
 	_input->clearRepeat();
 
+	std::cout << "exit game loop" << std::endl;		//##DEBUG
 	return true;
 }
 
