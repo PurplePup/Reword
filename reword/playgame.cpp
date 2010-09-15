@@ -48,6 +48,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "playgame.h"
 #include "spritemgr.h"
 #include "utils.h"
+#include "helpers.h"
 #include "audio.h"
 #include "platform.h"
 #include <cassert>
@@ -59,11 +60,11 @@ Uint32 countdown_callback(Uint32 interval, void *param)
 {
 	if (_countdown <= 0)
 	{
-		Utils::pushSDL_Event(USER_EV_END_COUNTDOWN); //pushEndOfLevel();
+		pp_g::pushSDL_Event(USER_EV_END_COUNTDOWN); //pushEndOfLevel();
 		return 0;
 	}
 
-	Utils::pushSDL_Event(USER_EV_PING_COUNTDOWN);
+	pp_g::pushSDL_Event(USER_EV_PING_COUNTDOWN);
 
 	return(interval);
 }
@@ -221,7 +222,7 @@ void PlayGame::render_play(Screen* s)
 	tWordsFoundList::const_iterator it;
 
 	//[3..], [4...], [5....] and [6.....] letter boxes
-	for (xx=0; xx<(_longestWordLen-2); ++xx)	//accross the screen
+	for (xx=_shortestWordLen; xx<=_longestWordLen; ++xx)	//accross the screen
 	{
 		it = _wordsFound[xx].begin();
 		int nWords = _gd._words.wordsOfLength(xx);
@@ -256,7 +257,8 @@ void PlayGame::render_play(Screen* s)
 				//draw the box for the word to be displayed in - using a highlighted box if
 				//not in play state and this is the curr word the selection is on.
 				_gd._boxes.blitTo( s, _boxOffset[xx], yo+(yy*(BOXH-1)),						//tile 0=3, 1=4, 2=5, 3=6 letter words
-					((PG_PLAY != _state) && xx == _xxWordHi && yy == _yyWordHi)?xx+4:xx );	//xx+4 as there are 4 boxes in boxes.png
+					//xx+(count/2) for n boxes in boxes.png, and -3 to reset the xx back to 0 as the boxes.png starts at 3 letter tile
+					(((PG_PLAY != _state) && xx == _xxWordHi && yy == _yyWordHi)?xx+(_gd._boxes.tileCount()/2):xx)-3 );
 
 				if (it != _wordsFound[xx].end())
 				{
@@ -317,7 +319,7 @@ void PlayGame::render_end(Screen* s)
 
 	//finished level so show success type and bonus etc
 	int minGap = _gd._fntSmall.height();	//useful distance based on small font
-	int yyTitle = _gd._scorebar.tileH() + (minGap*2);
+	int yyTitle = _gd._scorebar.tileH() + minGap;
 	int yyReward = yyTitle +_gd._fntBig.height() + minGap;
 	int yyBonus = (_yScratchBot+CURSORH+_boxOffsetY) + (2*_gd._fntBig.height());
 	switch (_success)
@@ -565,11 +567,11 @@ void PlayGame::button(Input* input, Input::ButtonType b)
 			if (_inputL && _inputR)
 			{
 				_bAbort = true;
-				Utils::pushSDL_Event(USER_EV_END_COUNTDOWN); //try to exit more gracefully, pushes end of level
+				pp_g::pushSDL_Event(USER_EV_END_COUNTDOWN); //try to exit more gracefully, pushes end of level
 			}
 			else
 			{
-				Utils::pushSDL_Event(USER_EV_NEXT_TRACK);	//try to start next music track
+				pp_g::pushSDL_Event(USER_EV_NEXT_TRACK);	//try to start next music track
 			}
 		}
 		break;
@@ -671,7 +673,7 @@ void PlayGame::button_end(Input* input, Input::ButtonType b)
 		if (input->isPressed(b))
 		{
 			do {	//repeat jump left if finds a gap (missing 3, 4, 5 letter word)
-				if (_xxWordHi-1 < 0) _xxWordHi = 3; else --_xxWordHi;
+				if (_xxWordHi-1 < _shortestWordLen) _xxWordHi = _longestWordLen; else --_xxWordHi;
 			} while (_gd._words.wordsOfLength(_xxWordHi) == 0);
 			if (_yyWordHi > _gd._words.wordsOfLength(_xxWordHi)-1) _yyWordHi = _gd._words.wordsOfLength(_xxWordHi)-1;
 		}
@@ -680,7 +682,7 @@ void PlayGame::button_end(Input* input, Input::ButtonType b)
 		if (input->isPressed(b))
 		{
 			do {	//repeat jump right if finds a gap (missing 3, 4, 5 letter word)
-				if (_xxWordHi+1 > 3) _xxWordHi = 0; else ++_xxWordHi;
+				if (_xxWordHi+1 > _longestWordLen) _xxWordHi = _shortestWordLen; else ++_xxWordHi;
 			} while (_gd._words.wordsOfLength(_xxWordHi) == 0);
 			if (_yyWordHi > _gd._words.wordsOfLength(_xxWordHi)-1) _yyWordHi = _gd._words.wordsOfLength(_xxWordHi)-1;
 		}
@@ -770,7 +772,7 @@ void PlayGame::handlePopup()
 		break;
 	case PlayGamePopup::POP_SKIP:
 		if (_state != PG_END)	//not already at end
-			Utils::pushSDL_Event(USER_EV_END_COUNTDOWN);	//next level - if not got a 6, will end game
+			pp_g::pushSDL_Event(USER_EV_END_COUNTDOWN);	//next level - if not got a 6, will end game
 		break;
 	case PlayGamePopup::POP_SAVE:
 		//user selected to save state (now at least a 6 letter word found)
@@ -778,7 +780,7 @@ void PlayGame::handlePopup()
 	case PlayGamePopup::POP_QUIT:
 		//back to main menu - like L+R+Click (or ESC on PC)
 		_bAbort = true;
-		Utils::pushSDL_Event(USER_EV_END_COUNTDOWN); //try to exit more gracefully, pushes end of level
+		pp_g::pushSDL_Event(USER_EV_END_COUNTDOWN); //try to exit more gracefully, pushes end of level
 		break;
 
 	default:break;	//do nothing
@@ -839,9 +841,9 @@ void PlayGame::touch_end(Point pt)
 {
 	//test if word box selected (doubleclick to see word definition)
 	int yo = _yScratchBot + CURSORH + _boxOffsetY;	//start y offset
-	//[3..], [4...], [5....] and [6.....] letter boxes
+	//[3..], [4...], [5....] to [N.....] letter boxes
 	int xx, yy;
-	for (xx=0; xx<4; ++xx)	//accross the screen
+	for (xx=_shortestWordLen; xx<=_longestWordLen; ++xx)	//accross the screen
 	{
 		//check if click even in this column (speed up)
 		if (pt._x < _boxOffset[xx] || pt._x > _boxOffset[xx]+_boxLength[xx]) continue;
@@ -1031,7 +1033,7 @@ void PlayGame::doMoveOn()
 		if (_countdown==0)
 		{
 			_bAbort = true;
-			Utils::pushSDL_Event(USER_EV_END_COUNTDOWN); //try to exit more gracefully, pushes end of level
+			pp_g::pushSDL_Event(USER_EV_END_COUNTDOWN); //try to exit more gracefully, pushes end of level
 		}
 		else
 		{
@@ -1089,12 +1091,12 @@ void PlayGame::doDictionary()
 
 		//get the dictionary definition into one long string
 		dictDefinition = _gd._words.getDictForWord(dictWord)._description;
-		Utils::trimLeft(dictDefinition, " \t\n\r");	//NOTE need \n\r on GP2X
-		Utils::trimRight(dictDefinition, " \t\n\r");//ditto
+		pp_s::trimLeft(dictDefinition, " \t\n\r");	//NOTE need \n\r on GP2X
+		pp_s::trimRight(dictDefinition, " \t\n\r");//ditto
 		if (!dictDefinition.length()) dictDefinition = "** sorry, not defined **";	//blank word - no dictionary entry
 		//now build definition strings to display (on seperate lines)
 		_dictLine = 0;	//start on first line
-		Utils::buildTextPage(dictDefinition, FONT_CLEAN_MAX, _dictDef);
+		pp_s::buildTextPage(dictDefinition, FONT_CLEAN_MAX, _dictDef);
 
 		//prepare roundel class ready for a dictionary display
 		_roundDict= std::auto_ptr<Roundels>(new Roundels());
@@ -1254,13 +1256,14 @@ void PlayGame::newLevel()
 	//##TODO## ??
 
 	int xx;
-	for (xx=0; xx<4; ++xx)
+	for (xx=0; xx<TARGET_MAX; ++xx)
 		_wordsFound[xx].clear();
 
 	std::string newword;
 	//nextWord() returns false if bad dictionary entry (XXXXXX corrupted or hacked) !
 	bool bWord = _gd._words.nextWord(newword, _gd._diffLevel, _gd._mode);	//return next word found.
 	_longestWordLen = newword.length();
+	_shortestWordLen = _longestWordLen-3;	//so if longest is 6, shortest is 3 (for 3, 4, 5, 6)
 
 	//X pos of scratch area depends on length of word so calc here at each new level/word)
 	_xScratch = (SCREEN_WIDTH - ((_longestWordLen * (CURSORW+2)) -2) ) /2;
@@ -1270,14 +1273,17 @@ void PlayGame::newLevel()
 	//simple algo for now just using box offset and len - until boxes wrap around or whatever...
 	int xLen = 0;	//length of all word boxes added together
 	int n = 0;
-	for (n=0; n<(_longestWordLen-2); ++n)	//ignore 1 and 2 letter words
-		xLen += 40 + (n*10);	//xxx=40, xxxx=50, xxxxx=60, xxxxxx=70, etc
+	//only ever have to find 4 word lengths for any given target word length
+	//i.e. For 6 letter target - find 3,4,5,6. For 7 letter target - find 4,5,6,7 etc
+	for (n=_shortestWordLen; n<=_longestWordLen; ++n)	//4 word lengths inc target len
+		xLen += (n*FOUND_WORD_CHR);	//eg xxx=40, xxxx=50, xxxxx=60, xxxxxx=70, etc
+		
 	//equal gaps, so minus 1&2 letter words, plus left&right edges, so div by word size!
 	int xGap = (SCREEN_WIDTH - xLen) / (_longestWordLen-1);
 	int nextPos = xGap;
-	for (n=0; n<(_longestWordLen-2); ++n)
+	for (n=_longestWordLen-3; n<=_longestWordLen; ++n)
 	{
-		xLen = 40 + (n*10);	//xxx=40, xxxx=50, xxxxx=60, xxxxxx=70, etc
+		xLen = (n*FOUND_WORD_CHR);	//xxx=40, xxxx=50, xxxxx=60, xxxxxx=70, etc
 /*
 		int nWords = _gd._words.wordsOfLength(n);
 		while (yy < SCREEN_HEIGHT)
@@ -1304,7 +1310,7 @@ void PlayGame::newLevel()
 			//current_w is not supported in my gp2x SDL build, so saved from video setup
 //			const SDL_VideoInfo *pVI = SDL_GetVideoInfo();	//for pVI->current_w
 			_boxOffset[n] = _boxLength[n] = 0;
-			if (n == _longestWordLen-3)
+			if (n == _longestWordLen)
 			{
 				//middle of screen as only a single N letter word column
 				_boxOffset[n] = (_gd._current_w / 2) - (_gd._boxes.tileW() / 2);
@@ -1334,7 +1340,7 @@ void PlayGame::newLevel()
 	_success = SU_NONE;
 	_bonusScore = 0;
 	_fastest = 0;
-	_xxWordHi = 3;			//highlight the 6 letter word column (for dict definition on end of level)
+	_xxWordHi = _longestWordLen;	//highlight the target word column (for dict definition on end of level)
 	_yyWordHi = 0;			//highlight first 6 letter word in column
 	_maxwordlen = 0;		//always reset the fact that a 6 letter word not got yet
 
@@ -1377,7 +1383,7 @@ void PlayGame::tryWord()
 	{
 		if (_longestWordLen == wordlen)
 		{
-			Utils::pushSDL_Event(USER_EV_END_COUNTDOWN);	//pushes end of level
+			pp_g::pushSDL_Event(USER_EV_END_COUNTDOWN);	//pushes end of level
 			return;
 		}
 		else wordlen = -1;	//speed6 or timetrial badWord sound as < 6 letters
@@ -1391,7 +1397,7 @@ void PlayGame::tryWord()
 
 		if (allWordsFound())
 		{
-			Utils::pushSDL_Event(USER_EV_END_COUNTDOWN); //pushes end of level
+			pp_g::pushSDL_Event(USER_EV_END_COUNTDOWN); //pushes end of level
 			return;	//exit before sound, as success() plays fanfare sound
 		}
 		//it's a simple word find
@@ -1418,7 +1424,7 @@ int PlayGame::tryWordAgainstDict()
 	if (ret < 1) return ret; //0=already found, -1=not found
 	//else found in target and is set to 'found' in list
 
-	int w = newword.length()-3;
+	const int w = newword.length();
 
 	//add found word to (front of) list of words of that length already found
 	//(and so be displayed in reverse found order in the boxes under the main letters)
@@ -1440,7 +1446,7 @@ bool PlayGame::allWordsFound()
 {
 	bool bAllWords = true;
 	int xx;
-	for (xx=0; xx<4; ++xx)
+	for (xx=_longestWordLen-3; xx<=_longestWordLen; ++xx)
 		//if max words found, or all words on screen (if some are off screen) found
 		if ((_gd._words.wordsOfLength(xx) <= MAX_WORD_COL && _gd._words.wordsOfLength(xx)!=(int)_wordsFound[xx].size())
 			|| (_gd._words.wordsOfLength(xx) > MAX_WORD_COL && _wordsFound[xx].size() < MAX_WORD_COL))
@@ -1462,7 +1468,7 @@ void PlayGame::fillRemainingWords()
 	for (it=wit.begin(); it != wit.end(); ++it)
 	{
 		wrd = (*it).first.c_str();
-		w = wrd.length()-3;	//index 0..n (no 1 or 2 letter words)
+		w = wrd.length();
 		bFound = false;
 		for (foundit = _wordsFound[w].begin(); foundit != _wordsFound[w].end(); ++foundit)
 		{
@@ -1481,7 +1487,7 @@ void PlayGame::fillRemainingWords()
 		}
 	}
 
-	for (w=0; w<4; ++w)	//do each 3, 4, 5 & 6 word group
+	for (w=_longestWordLen-3; w<=_longestWordLen; ++w)	//do each 3, 4, 5 & 6 word group
 		std::sort(_wordsFound[w].begin(), _wordsFound[w].end(), DictWord());
 }
 

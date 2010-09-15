@@ -43,7 +43,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 ////////////////////////////////////////////////////////////////////
 
 #include "words.h"
-#include "utils.h"
+#include "helpers.h"
+#include "platform.h"
 
 #include <fstream>
 #include <ios>
@@ -52,6 +53,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <ctime>
 #include <cstdlib>
 #include <iterator>
+
+#include <string.h>	//for strchr etc
 
 
 
@@ -74,7 +77,7 @@ void Words::clearCurrentWord()
 {
 	_word.clear();
 	_wordsInTarget.clear();
-	for (int i=0; i<4; _nWords[i++]=0);
+	for (int i=0; i<TARGET_MAX; _nWords[i++]=0);
 }
 
 void Words::reset()
@@ -84,7 +87,7 @@ void Words::reset()
 
 	_total = _ignored = 0;
 
-	for (int i=DIF_EASY; i<DIF_MAX; _nInLevel[i++]=0);
+//	for (int i=DIF_EASY; i<DIF_MAX; _nInLevel[i++]=0);
 
 	//and any current word values, counts etc
 	clearCurrentWord();
@@ -107,10 +110,10 @@ bool Words::splitDictLine(std::string text, DictWord &dictword)
         if (end == std::string::npos)
             end = text.length() + 1;
 		newword = text.substr(0,end);
-		Utils::trim(newword, " \r\n\t\'");
+		pp_s::trim(newword, " \r\n\t\'");
 		switch (count)
 		{
-		case 0:	Utils::makeUpper(newword);
+		case 0:	pp_s::makeUpper(newword);
 				dictword._word = newword; 
 				break;
 		case 1:	dictword._level = atoi(newword.c_str());
@@ -125,6 +128,18 @@ bool Words::splitDictLine(std::string text, DictWord &dictword)
 
 	return dictword._description.length() > 0;
 }
+
+
+//randomizer fn
+//ptrdiff_t wrandom (ptrdiff_t i) { return rand()%i;}
+
+//using restartable rnd function to re-generate same
+//random sequence if given same seed again (for resume games)
+  unsigned int g_rndSeed  = 1234;
+
+ptrdiff_t wrandom (ptrdiff_t i) { return rand_r(&g_rndSeed)%i;}
+// pointer object to it:
+ptrdiff_t (*pwrandom)(ptrdiff_t) = wrandom;
 
 
 //call with default param (blank wordFile string) to reload previous file
@@ -162,7 +177,8 @@ bool Words::load(std::string wordFile, unsigned int rndSeed, unsigned int startA
 			lnwrd = dictWord._word;
 
 			len = lnwrd.length();
-			if (len < 3 || len > 6) 	//ignore short or long words
+//#6		if (len < 3 || len > 6) 	//ignore short or long words
+			if (len < 3 || len > TARGET_MAX) 	//ignore too short or too long words
 			{
 				if (_bDebug) std::cout << "Ignore (len) " << lnwrd.c_str() << std::endl;
 				_ignored++;
@@ -188,34 +204,37 @@ bool Words::load(std::string wordFile, unsigned int rndSeed, unsigned int startA
 
 			//check if level given is valid and increment count
 			if (dictWord._level < DIF_EASY || dictWord._level > DIF_MAX) dictWord._level = DIF_EASY;
-			_nInLevel[dictWord._level]++;	//one more in level
+//			_nInLevel[dictWord._level]++;	//one more in level
 
 			//add word to dict
 			if (_mapAll.find(lnwrd) == _mapAll.end())			//not found
 			{
 				_mapAll[lnwrd] = dictWord;		//so insert it in the ALL word map
-				if (6 == len)					//is a 6 letter word 
-					_vect6.push_back(lnwrd);	//so also add to valid 6 letter word vector used for nextWord()
+//#6				if (6 == len)					//is a 6 letter word
+				if (len >= TARGET_MIN && len <= TARGET_MAX)
+					_vecTarget.push_back(lnwrd);	//so also add to valid 6,7,.. letter word vector used for nextWord()
 			}
 		}
 		ifs1.close();
 
-#ifndef _DEBUG	//curr only shuffle in release version so we can test things in debug
+//#ifndef _DEBUG	//curr only shuffle in release version so we can test things in debug
 		//randomize the 6 letter vector to be the order we get each new word in
-//		if (rndSeed) m_randInt.setSeed(rndSeed);
-//		std::random_shuffle(m_vect6.begin(), m_vect6.end(), m_randInt);
-		if (rndSeed) g_randInt.setSeed(rndSeed);
-		std::random_shuffle(_vect6.begin(), _vect6.end(), g_randInt);
+//		if (rndSeed) g_randInt.setSeed(rndSeed);
+//		std::random_shuffle(_vect6.begin(), _vect6.end(), g_randInt);
 
+		// random generator function:
+		if (rndSeed) g_rndSeed = rndSeed; //srand(rndSeed); 
+		std::random_shuffle(_vecTarget.begin(), _vecTarget.end(), pwrandom);
+	
 		//output the start of the sorted list to check order
 		std::cout << "DEBUG: rnd seed = " << rndSeed << std::endl;
 		std::cout << "List first 20..." << std::endl;
-		std::copy(_vect6.begin(), _vect6.begin()+20, std::ostream_iterator<std::string>(std::cout, "\n"));	//list first 20
-#endif
+		std::copy(_vecTarget.begin(), _vecTarget.begin()+20, std::ostream_iterator<std::string>(std::cout, "\n"));	//list first 20
+//#endif
 		//set the 6word iterator to start (or a specific position)
-		if (startAtWord >=  (unsigned int)_vect6.size())
+		if (startAtWord >=  (unsigned int)_vecTarget.size())
 			startAtWord = 0;	//invalid for size of word llist so just reset to 0
-		_vect6_it = _vect6.begin() + startAtWord;
+		_vecTarget_it = _vecTarget.begin() + startAtWord;
 
 		return true;
 	}
@@ -224,13 +243,13 @@ bool Words::load(std::string wordFile, unsigned int rndSeed, unsigned int startA
 	return false;
 }
 
-//determine if the letters in shortWord are in word6
+//determine if the letters in shortWord are in wordTarget
 //i.e. do all the chars in short word xyz exist in long word xaybzc 
 //ShortWord can be made up from some or all letters in longWord (without using letters twice)
-bool Words::wordInWord(const char * shortWord, const char * word6)
+bool Words::wordInWord(const char * wordShort, const char * wordTarget)
 {
-	int ilongLen = strlen(word6);
-	int ishortLen = strlen(shortWord);
+	int ilongLen = strlen(wordTarget);
+	int ishortLen = strlen(wordShort);
 
 	if (!ilongLen || !ishortLen) return false;	//invalid word
 
@@ -241,7 +260,7 @@ bool Words::wordInWord(const char * shortWord, const char * word6)
 	{
 		for (il = 0; il < ilongLen; il++)
 		{
-			if (word6[il] == shortWord[is])	//char match
+			if (wordTarget[il] == wordShort[is])	//char match
 			{
 				if ((mask & (1<<il)) == 0)	//if not already matched
 				{
@@ -257,22 +276,22 @@ bool Words::wordInWord(const char * shortWord, const char * word6)
 	return found == ishortLen;
 }
 
-//return all the (short word) shortwords that are in (longer word) word6
-//Also updates m_nWords[] with count of words of each length, used in checkCurrentWord6()
-int Words::findWordsInWord6(tWordMap &shortwords, const char *word6)
+//return all the (short word) shortwords that are in (longer word) wordTarget
+//Also updates _nWords[] with count of words of each length, used in checkCurrentwordTarget()
+int Words::findWordsInWordTarget(tWordMap &shortwords, const char *wordTarget)
 {
 	int count = 0;
-	if (_bDebug) std::cout << word6 << ": ";
+	if (_bDebug) std::cout << wordTarget << ": ";
 	for (tWordMap::const_iterator shtwrd = shortwords.begin (); shtwrd != shortwords.end (); ++shtwrd)
 	{
-//		if (strcmp((*shtwrd).second.c_str(), word6) == 0) continue;	//exclude same word?
+//		if (strcmp((*shtwrd).second.c_str(), wordTarget) == 0) continue;	//exclude same word?
 		
-		if (wordInWord( (*shtwrd).second._word.c_str(), word6 ))
+		if (wordInWord( (*shtwrd).second._word.c_str(), wordTarget ))
 		{
 			if (_bDebug) std::cout << (*shtwrd).second._word.c_str() << ", ";
 			
 			_wordsInTarget.insert(tWordsInTarget::value_type( (*shtwrd).second._word.c_str(), false ));	//false = each word not "found" yet
-			_nWords[(*shtwrd).second._word.length() - 3]++;
+			_nWords[(*shtwrd).second._word.length()]++;		//ignore 0,1,2 and start at 3 as min word len is 3
 			count++;
 		}
 	}
@@ -281,31 +300,33 @@ int Words::findWordsInWord6(tWordMap &shortwords, const char *word6)
 }
 
 
-bool Words::checkCurrentWord6(tWordVect::const_iterator &it)
+bool Words::checkCurrentWordTarget(tWordVect::const_iterator &it)
 {
 	bool bOk = true;
 
 	//fill in counters...
-	findWordsInWord6(_mapAll, (*it).c_str()); //side effect - fills m_nWords[]
-	int i3 = _nWords[0];
-	int i4 = _nWords[1];
-	int i5 = _nWords[2];
-	int i6 = _nWords[3];
+	findWordsInWordTarget(_mapAll, (*it).c_str()); //side effect - fills _nWords[]
 
-	if (!i3 && !i4 && !i5)		//only exclude 6 letter word if no 3 and 4 and 5 letter words (reword copes with missing column)
-//	if (!i3 || !i4 || !i5 || !i6)	//if any 3 or 4 or 5 letter words missing, exclude the 6 letter word from the game
-	{
-		if (_bDebug) std::cout << "Missing : " << (*it).c_str() << " 3:" << i3 << " 4:" << i4 << " 5:" << i5 << " 6:" << i6 << std::endl;
-		bOk = false;
-	}
+	int iShortWords = 0, i = 0;
+	for (i = 0; i < TARGET_MIN; ++i) iShortWords += _nWords[i];
 	
-	if (i3 > 8 || i4 > 8 || i5 > 8 || i6 > 8)	//reword only allows 8 rows of 3, 4, 5, 6 letter words found, on screen at the moment
-//	if (i3 + i4 + i5 + i6 > 32)		//this is to be used when diff length word columns wrap on the reword game screen
+	//only need to exclude target word if there are no short words at all for it
+	if (iShortWords == 0)	//exclude target word due to missing (short) 3, 4, 5 letter words 
 	{
-		if (_bDebug) std::cout << "Too many : " << (*it).c_str() << " 3:" << i3 << " 4:" << i4 << " 5:" << i5 << " 6:" << i6 << std::endl;
+		if (_bDebug) std::cout << "All short words missing for word : " << (*it).c_str() << std::endl;
 		bOk = false;
 	}
 
+	//if we ever move to displaying matched words in a wrapping list we could get more on screen
+	//so would need to test for an overall too high number rather than per column.
+	for (i = 0; i < TARGET_MAX; ++i)
+		if (_nWords[i] > MAX_WORD_COL)
+		{
+			if (_bDebug) std::cout << "Too many size " << i << " for word : " << (*it).c_str() << std::endl;
+			bOk = false;
+			break;
+		}
+	
 	return bOk;
 }
 
@@ -313,26 +334,26 @@ bool Words::checkCurrentWord6(tWordVect::const_iterator &it)
 bool Words::nextWord(std::string &retln, eGameDiff level,  eGameMode mode, bool reloadAtEnd /*=true*/)
 {
 	bool bOk = true;
-	int failsafe = _vect6.size(); //size of the whole vector, so allow to loop once to find next
+	int failsafe = _vecTarget.size(); //size of the whole vector, so allow to loop once to find next
 	tWordMap::iterator mapit;
 	do
 	{
 		//clear internal variables holding current word
 		clearCurrentWord();
 
-		if (_vect6_it == _vect6.end())
+		if (_vecTarget_it == _vecTarget.end())
 		{
 			//reload the dictionary
 			retln = "";
 			if (!reloadAtEnd || !load()) return false; //reached list end or failed reload
 		}
 	
-		mapit = _mapAll.find((*_vect6_it).c_str());	//find word from vect in the word6 dict map
+		mapit = _mapAll.find((*_vecTarget_it).c_str());	//find word from vect in the wordTarget dict map
 		if (mapit != _mapAll.end())					//found, so check the level
 		{
 			if ( (bOk = ((*mapit).second._level <= (int)level)) )//make sure word is at or below current difficulty level
 			{
-				if ( (bOk = checkCurrentWord6(_vect6_it)) )
+				if ( (bOk = checkCurrentWordTarget(_vecTarget_it)) )
 				{
 					//set the "current word" to that just found
 					_word = (*mapit).second;
@@ -341,12 +362,12 @@ bool Words::nextWord(std::string &retln, eGameDiff level,  eGameMode mode, bool 
 					{
 						//quick and dirty to strip non 6 letter words from those just found
 						//as speed6 and time trial modes only use the 6 letter words
-						_nWords[0] = _nWords[1] = _nWords[2] = 0;
+						_nWords[3] = _nWords[4] = _nWords[5] = 0;	//[6+] is target size 6, 7 etc
 					}
 				}
 			}
 		}
-		++_vect6_it;	//next word
+		++_vecTarget_it;	//next word
 	} while (--failsafe && !bOk);
 
 	if (!bOk) _word._word = "XXXXXX";	//err in word list - too many or missing

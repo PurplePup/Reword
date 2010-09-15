@@ -36,7 +36,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include "global.h"
 #include "playinst.h"
-#include "utils.h"
+#include "helpers.h"
 #include "platform.h"
 #include <sstream>
 
@@ -308,7 +308,7 @@ void PlayInst::buildPage(int page)
 	default:return;	//not used
 	}
 	str = strstr.str();
-	Utils::buildTextPage(str, FONT_CLEAN_MAX, _inst);	//pass max chars wide displayable
+	pp_s::buildTextPage(str, FONT_CLEAN_MAX, _inst);	//pass max chars wide displayable
 }
 
 

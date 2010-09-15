@@ -5,8 +5,6 @@
 
 #include "SDL.h"
 #include "random.h"
-#include <string>
-#include <vector>
 
 
 class Point
@@ -45,7 +43,8 @@ public:
 class RandInt
 {
 public:
-	RandInt() { 
+	RandInt() {
+//SDL.h may not have been included 	  
 #ifdef _SDL_H
 #ifdef WIN32
 #pragma message("words.h: Using SDL_GetTicks() to seed random\n")
@@ -75,30 +74,12 @@ public:
 
 static RandInt g_randInt;
 
-class Utils
+namespace pp_g 	//pp game functions 
 {
-public:
 
-	//string functions
-	static void makeUpper(std::string &s);
-	static void makeLower(std::string &s);
-	static void trimRight(std::string &s, const std::string &tokens);
-	static void trimLeft(std::string &s, const std::string &tokens); 
-	static void trim(std::string &source, const std::string &tokens); 
-	static void makeAlpha(std::string &s);
-	static bool endsWith(const std::string &str, const std::string &match, bool caseSensitive = false);
-	static void buildTextPage(std::string &inStr, unsigned int nCharsPerLine, std::vector<std::string> &outVect);
-	static bool splitKeyValuePair(const std::string &line, std::string &key, std::string &value);
+	void pushSDL_Event(int code, void *data1 = 0, void *data2 = 0);
 
-	//math functions
-	//static int round(float fl);
-	
-	//rand functions
-//	static int RandomInt(unsigned int limit);
-
-	static void pushSDL_Event(int code, void *data1 = 0, void *data2 = 0);
-
-};
+}
 
 
 #endif //_UTILS_H

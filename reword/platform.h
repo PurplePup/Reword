@@ -35,7 +35,6 @@
 #define SOUND_FORMAT	AUDIO_S16
 #define SOUND_CHANELS	2
 #define SOUND_CHUNK		128
-#define MAX_WORD_LEN	6
 #define CURSORW			40
 #define CURSORH			40
 #define LETTERW			36
@@ -60,7 +59,7 @@
 #define GAME_GAP1		3
 #define SCORE_OFFSET	((SCREEN_WIDTH-300)/2)
 #define MAX_WORD_COL	8	//max number of words to display in a 3, 4, 5 or 6 word column
-
+#define FOUND_WORD_CHR	10	//pixels wide for calculating found word box size
 
 #elif defined (PANDORA)
 //OpenPandora UMPC
@@ -75,12 +74,11 @@
 #define SOUND_FORMAT	AUDIO_S16
 #define SOUND_CHANELS	2
 #define SOUND_CHUNK		128
-#define MAX_WORD_LEN	6
 #define CURSORW			76
 #define CURSORH			76
 #define LETTERW			72
 #define LETTERH			72
-#define BOXW			100
+#define BOXW			136
 #define BOXH			25
 #define BOXTEXTOFFSETX	8
 #define BOXTEXTOFFSETY	2
@@ -100,6 +98,7 @@
 #define GAME_GAP1		8
 #define SCORE_OFFSET	((SCREEN_WIDTH-300)/2)
 #define MAX_WORD_COL	8	//max number of words to display in a 3, 4, 5 or 6 word column
+#define FOUND_WORD_CHR	17	//pixels wide for calculating found word box size
 
 //#elif defined (WIZ)
 
@@ -117,12 +116,11 @@
 #define SOUND_FORMAT	AUDIO_S16
 #define SOUND_CHANELS	2
 #define SOUND_CHUNK		2048
-#define MAX_WORD_LEN	6
 #define CURSORW			76
 #define CURSORH			76
 #define LETTERW			72
 #define LETTERH			72
-#define BOXW			100
+#define BOXW			136
 #define BOXH			25
 #define BOXTEXTOFFSETX	8
 #define BOXTEXTOFFSETY	2
@@ -142,6 +140,7 @@
 #define GAME_GAP1		8
 #define SCORE_OFFSET	((SCREEN_WIDTH-300)/2)
 #define MAX_WORD_COL	8	//max number of words to display in a 3, 4, 5 or 6 word column
+#define FOUND_WORD_CHR	17	//pixels wide for calculating found word box size
 
 #endif
 

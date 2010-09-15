@@ -38,6 +38,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include "global.h"
 #include "audio.h"
+#include "helpers.h"
 #include "utils.h"
 #include "platform.h"
 
@@ -284,7 +285,7 @@ void Audio::loadTracks(const std::string &baseDir)
 			std::string sTrack = dir->d_name;
 			if (sTrack.length()>0 && sTrack[0] != '.')
 			{
-				if (Utils::endsWith(sTrack, "OGG") || Utils::endsWith(sTrack, "MP3"))
+				if (pp_s::endsWith(sTrack, "OGG") || pp_s::endsWith(sTrack, "MP3"))
 				{
 					printf("%s\n", dir->d_name);
 					_trackList.push_back(std::string(dir->d_name));

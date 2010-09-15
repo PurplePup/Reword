@@ -8,6 +8,7 @@ SOURCES = reword.cpp \
 		framerate.cpp \
 		game.cpp \
 		gamedata.cpp \
+		helpers.cpp \
 		image.cpp \
 		imageanim.cpp \
 		input.cpp \

@@ -89,8 +89,7 @@ public:
     virtual void button(Input* input, Input::ButtonType b);
     virtual void touch(Point pt);
 
-	static 	void pushSDL_Event
-(int code, void *data1 = NULL, void *data2 = NULL);
+//	static 	void pushSDL_Event(int code, void *data1 = NULL, void *data2 = NULL);
 
 protected:
 	
@@ -164,6 +163,7 @@ private:
 
 	int _maxwordlen;			//max length word found so far (per level)
 	int _longestWordLen;		//longest word length for this level (6,7 8 etc)
+	int _shortestWordLen;		//shortest word length for this level (3,4 5 etc)
 	
 	bool _inputL, _inputR;		//if L+R(+CLICK) pressed
 	bool _bAbort;				//if user presses L+R+CLICK
@@ -175,8 +175,8 @@ private:
 
 	//x offsets to draw 3, 4, 5 and 6 (etc) word boxes under main display
 	int _boxOffsetY;				//added position below scratch area
-	int _boxOffset[MAX_WORD_LEN-2];	//pos across screen for found word boxes
-	int _boxLength[MAX_WORD_LEN-2];	//and pixel length of each box displayed (for touch support)
+	int _boxOffset[TARGET_MAX];	//pos across screen for found word boxes
+	int _boxLength[TARGET_MAX];	//and pixel length of each box displayed (for touch support)
 
 	int	_xScratch;		//positions for roundels, change depending on platform
 	int _yScratchTop;
@@ -191,9 +191,9 @@ private:
 
 	//a list of found words so far (this level)
 	typedef std::deque<DictWord> tWordsFoundList;
-	tWordsFoundList _wordsFound[4];	//for 3, 4, 5 and 6 letter word
+	tWordsFoundList _wordsFound[TARGET_MAX];	//for 3, 4, 5 and 6 letter word
 	typedef std::deque<DisplayWord> tWordsFoundPos;
-	tWordsFoundPos _wordsFoundPos[4];	//for 3, 4, 5 and 6 letter word
+	tWordsFoundPos _wordsFoundPos[TARGET_MAX];	//for 3, 4, 5 and 6 letter word
 	
 	eState		_state;			//local states for this screen
 	StateInPlay<eState> _states;

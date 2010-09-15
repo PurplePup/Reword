@@ -34,7 +34,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include "global.h"
 #include "score.h"
-#include "utils.h"
+#include "helpers.h"
 
 #include <iostream>
 #include <cerrno>
@@ -336,7 +336,7 @@ bool QuickState::quickStateLoad()
 	{
 		while (std::getline(infile, line, '\n'))
 		{
-			Utils::splitKeyValuePair(line, key, value);
+			pp_s::splitKeyValuePair(line, key, value);
 			if (key == "words")
 				_qStateSave.words = atoi(value.c_str());
 			else if (key == "score")

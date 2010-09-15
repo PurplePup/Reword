@@ -14,11 +14,11 @@
 #include "./tinyxml/tinyxml.h"
 
 
-class CWords2 : public CWords
+class Words2 : public Words
 {
 public:
-	CWords2();
-	~CWords2();
+	Words2();
+	~Words2();
 
 	bool openXmlDict(std::string dictFile);	//open generic xml file
 	TiXmlElement* firstXdxfWord();

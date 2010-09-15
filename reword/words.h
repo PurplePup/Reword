@@ -21,6 +21,14 @@
 //include SDL.h in your own code before including words.h if you want to use SDL_GetTicks()
 //#include "SDL.h"
 
+//define the shortest word we handle
+#define SHORTW_MIN	3
+//define the 'big' target words to be used as the game words. Was just 6 letter words,
+//but now we can expand it to pick words between 6 and ...
+#define TARGET_MIN	6
+#define TARGET_MAX	8
+
+
 struct DictWord
 {
 	std::string _word;
@@ -118,10 +126,10 @@ public:
 	
 	bool nextWord(std::string &retln, eGameDiff level, eGameMode mode, bool reloadAtEnd=true);
 	const tWordsInTarget getWordsInTarget() { return _wordsInTarget; };
-	int wordsOfLength(unsigned int i) { if (i > 3) return 0; else return _nWords[i]; };
+	int wordsOfLength(unsigned int i) { if (i > TARGET_MAX) return 0; else return _nWords[i]; };
 	int checkWordsInTarget(std::string &testWord);
 	DictWord getDictForWord(std::string &wrd);
-	unsigned int wordsInLevel(unsigned int i) { if (i >= DIF_MAX) return 0; else return _nInLevel[i]; };
+//	unsigned int wordsInLevel(unsigned int i) { if (i >= DIF_MAX) return 0; else return _nInLevel[i]; };
 
 	std::string getWord6() { return _word._word; };			//curr word
 	int			getWordLevel() { return _word._level; };		//curr word level
@@ -143,7 +151,9 @@ public:
 				{
 					this->_mapAll[pos->first] = pos->second;
 					if (6 == pos->first.length())		//is a 6 letter word
-						this->_vect6.push_back(pos->first);	//so also add to valid 6 letter word vector
+						this->_vecTarget
+
+.push_back(pos->first);	//so also add to valid 6 letter word vector
 				}
 			}
 		}
@@ -168,12 +178,18 @@ public:
 				//find the same word in the vect6 and erase it
 				//int n(0);
 				tWordVect::iterator vpos;
-				for (vpos = this->_vect6.begin(); vpos != this->_vect6.end(); ++vpos)
+				for (vpos = this->_vecTarget
+
+.begin(); vpos != this->_vecTarget
+
+.end(); ++vpos)
 				{
 					if (*vpos == pos->first)
 					{
 						//std::cout << pos->first << " erased after " << n+1 << " reads" << std::endl;
-						this->_vect6.erase(vpos);
+						this->_vecTarget
+
+.erase(vpos);
 						break;
 					}
 					//n++;
@@ -191,22 +207,25 @@ protected:
 
 	void reset();
 	void clearCurrentWord();
-	bool checkCurrentWord6(tWordVect::const_iterator &it);
-	bool wordInWord(const char * shortWord, const char * word6);
-	int findWordsInWord6(tWordMap &shortwords, const char *word6);
+	bool checkCurrentWordTarget
+(tWordVect::const_iterator &it);
+	bool wordInWord(const char* wordShort, const char* wordTarget
+);
+	int findWordsInWordTarget
+(tWordMap &shortwords, const char *word6);
 	bool splitDictLine(std::string line, DictWord &dict);
 	
 	tWordMap 		_mapAll;				//all words - for
-	tWordVect		_vect6;				//vector to hold all 6 letter words in a rnd order
-	tWordVect::const_iterator _vect6_it;	//m_vect6 iterator
+	tWordVect		_vecTarget;				//vector to hold all 6 letter words in a rnd order
+	tWordVect::const_iterator _vecTarget_it;//m_vect6 iterator
 	DictWord		_word;					//current 6 letter word to find etc
-	tWordsInTarget 	_wordsInTarget;		//map of sub words (ie 3,4,5,6 letter for word6) with a "found" flag to say player got it
-	int 			_nWords[4];			//count of number of words of each length to be found in 3, 4, 5 & 6 letter word lists
-	unsigned int	_nInLevel[DIF_MAX];	//number of words in each level (to disable a level if == 0)
+	tWordsInTarget 	_wordsInTarget;			//map of sub words (ie 3,4,5,6 letter for word6) with a "found" flag to say player got it
+	int 			_nWords[TARGET_MAX+1];	//count of number of words of each length to be found in 3, 4, 5 & 6 letter word lists
+//	unsigned int	_nInLevel[DIF_MAX];		//number of words in each level (to disable a level if == 0)
 
-	int				_total;				//total words loaded
+	int				_total;					//total words loaded
 	int				_ignored;				//number of words ignored
-	bool 			_bList;				//output processing msgs to console
+	bool 			_bList;					//output processing msgs to console
 	bool			_bDebug;				//output detail 'debug' to console?
 
 	std::string 	_wordFile;				//saved when load() called to allow nextWord() to reload

@@ -62,7 +62,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <string>
 
 #include "../reword/platform.h"
-#include "../reword/utils.h"
+#include "../reword/helpers.h"
 #include "../reword/words.h"
 #include "words2.h"
 
@@ -142,7 +142,7 @@ int main(int argc, char* argv[])
 	{
 		std::cout << "Working..." << std::endl;
 
-		CWords2 words2;
+		Words2 words2;
 		words2.setList(bList);
 		words2.setDebug(bDebug);
 	
@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
 		{
 			if (includeList.length() > 0)
 			{
-				CWords includeWords(includeList);
+				Words includeWords(includeList);
 				int iOrig = words2.size();
 				words2 += includeWords;	//add any forced include words
 				int iNew = words2.size();
@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
 			{
 				if (includeList.length() > 0)
 				{
-					CWords includeWords(includeList);
+					Words includeWords(includeList);
 					int iOrig = words2.size();
 					words2 += includeWords;	//add any forced include words
 					int iNew = words2.size();
@@ -189,7 +189,7 @@ int main(int argc, char* argv[])
 		{
 			if (excludeList.length() > 0)
 			{
-				CWords excludeWords(excludeList);
+				Words excludeWords(excludeList);
 				int iOrig = words2.size();
 				words2 -= excludeWords;	//remove any exclusion words
 				int iNew = words2.size();
