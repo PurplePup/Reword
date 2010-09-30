@@ -1256,21 +1256,21 @@ void PlayGame::newLevel()
 	//##TODO## ??
 
 	int xx;
-	for (xx=0; xx<TARGET_MAX; ++xx)
+	for (xx=0; xx<=TARGET_MAX; ++xx)
 		_wordsFound[xx].clear();
 
 	std::string newword;
 	//nextWord() returns false if bad dictionary entry (XXXXXX corrupted or hacked) !
 	bool bWord = _gd._words.nextWord(newword, _gd._diffLevel, _gd._mode);	//return next word found.
 	_longestWordLen = newword.length();
-	_shortestWordLen = _longestWordLen-3;	//so if longest is 6, shortest is 3 (for 3, 4, 5, 6)
+	_shortestWordLen = _longestWordLen-(MAX_WORD_ROW-1); //say if longest is 6, then shortest is 3 (for 3, 4, 5, 6)
 
 	//X pos of scratch area depends on length of word so calc here at each new level/word)
 	_xScratch = (SCREEN_WIDTH - ((_longestWordLen * (CURSORW+2)) -2) ) /2;
 
 	_boxOffsetY = 9;	//default y offset under scratch area - reset by speed6 and timetrial to be slightly lower
 
-	//simple algo for now just using box offset and len - until boxes wrap around or whatever...
+	//simple algo for now just using box offset and len - until found boxes wrap around or whatever...
 	int xLen = 0;	//length of all word boxes added together
 	int n = 0;
 	//only ever have to find 4 word lengths for any given target word length
@@ -1281,7 +1281,7 @@ void PlayGame::newLevel()
 	//equal gaps, so minus 1&2 letter words, plus left&right edges, so div by word size!
 	int xGap = (SCREEN_WIDTH - xLen) / (_longestWordLen-1);
 	int nextPos = xGap;
-	for (n=_longestWordLen-3; n<=_longestWordLen; ++n)
+	for (n=_shortestWordLen; n<=_longestWordLen; ++n)
 	{
 		xLen = (n*FOUND_WORD_CHR);	//xxx=40, xxxx=50, xxxxx=60, xxxxxx=70, etc
 /*
@@ -1390,7 +1390,7 @@ void PlayGame::tryWord()
 	}
 
 	//must be GM_REWORD or bad word
-	if (wordlen > 0)	//is 3,4,5, or 6
+	if (wordlen >= _shortestWordLen && wordlen <= _longestWordLen)	//is 3,4,5, or 6 (or whatever)
 	{
 		_gd._score.addCurrScore( (_longestWordLen == wordlen)?SCORE_WORD6:SCORE_WORD );	//more for a 6 letter word
 		_round.clearAllToTop(true);	//remove hit word
@@ -1446,7 +1446,7 @@ bool PlayGame::allWordsFound()
 {
 	bool bAllWords = true;
 	int xx;
-	for (xx=_longestWordLen-3; xx<=_longestWordLen; ++xx)
+	for (xx=_shortestWordLen; xx<=_longestWordLen; ++xx)
 		//if max words found, or all words on screen (if some are off screen) found
 		if ((_gd._words.wordsOfLength(xx) <= MAX_WORD_COL && _gd._words.wordsOfLength(xx)!=(int)_wordsFound[xx].size())
 			|| (_gd._words.wordsOfLength(xx) > MAX_WORD_COL && _wordsFound[xx].size() < MAX_WORD_COL))
@@ -1487,7 +1487,8 @@ void PlayGame::fillRemainingWords()
 		}
 	}
 
-	for (w=_longestWordLen-3; w<=_longestWordLen; ++w)	//do each 3, 4, 5 & 6 word group
+	//do each 3, 4, 5 & 6 word group and sort column of words into alpha order
+	for (w=_shortestWordLen; w<=_longestWordLen; ++w)
 		std::sort(_wordsFound[w].begin(), _wordsFound[w].end(), DictWord());
 }
 

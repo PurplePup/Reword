@@ -175,8 +175,8 @@ private:
 
 	//x offsets to draw 3, 4, 5 and 6 (etc) word boxes under main display
 	int _boxOffsetY;				//added position below scratch area
-	int _boxOffset[TARGET_MAX];	//pos across screen for found word boxes
-	int _boxLength[TARGET_MAX];	//and pixel length of each box displayed (for touch support)
+	int _boxOffset[TARGET_MAX+1];	//pos across screen for found word boxes
+	int _boxLength[TARGET_MAX+1];	//and pixel length of each box displayed (for touch support)
 
 	int	_xScratch;		//positions for roundels, change depending on platform
 	int _yScratchTop;
@@ -191,9 +191,9 @@ private:
 
 	//a list of found words so far (this level)
 	typedef std::deque<DictWord> tWordsFoundList;
-	tWordsFoundList _wordsFound[TARGET_MAX];	//for 3, 4, 5 and 6 letter word
+	tWordsFoundList _wordsFound[TARGET_MAX+1];	//for 3, 4, 5 and 6 letter word
 	typedef std::deque<DisplayWord> tWordsFoundPos;
-	tWordsFoundPos _wordsFoundPos[TARGET_MAX];	//for 3, 4, 5 and 6 letter word
+	tWordsFoundPos _wordsFoundPos[TARGET_MAX+1];	//for 3, 4, 5 and 6 letter word
 	
 	eState		_state;			//local states for this screen
 	StateInPlay<eState> _states;

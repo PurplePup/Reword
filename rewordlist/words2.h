@@ -28,6 +28,9 @@ public:
 	//build the output dictionary just from an input xdxf file
 	bool buildXdxfDict(std::string outFile, std::string dictFile);
 
+	//loop through all words and add to valid sets (one set per word length)
+	void addWordsToSets();
+	
 	//build the output dictionary from a wordlist and a xdxf dictionary
 	bool filterOut(std::string outFile, const std::string &dictFile = "", bool bUpdateDef = false);
 
@@ -42,7 +45,7 @@ protected:
 	int		_countXdxfMatched;
 	int		_countXdxfMissing;
 
-	tWordSet _ws6, _ws5, _ws4, _ws3;
+	tWordSet _wordSet[TARGET_MAX+1];	//use 1..n for actual word length (as index)
 
 };
 

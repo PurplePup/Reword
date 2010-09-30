@@ -22,11 +22,11 @@
 //#include "SDL.h"
 
 //define the shortest word we handle
-#define SHORTW_MIN	3
+#define SHORTW_MIN	((int)3)
 //define the 'big' target words to be used as the game words. Was just 6 letter words,
 //but now we can expand it to pick words between 6 and ...
-#define TARGET_MIN	6
-#define TARGET_MAX	8
+#define TARGET_MIN	((int)6)
+#define TARGET_MAX	((int)8)
 
 
 struct DictWord
@@ -117,7 +117,8 @@ public:
 	void setList(bool bOn = true) { _bList = bOn; }
 	void setDebug(bool bOn = true) { _bDebug = bOn; }
 
-	bool load(std::string wordFile = std::string(""), 	//load a wordlist and exclude 
+	bool rejectWord(const std::string &strWord);		//true if word loaded not useable
+	bool load(std::string wordFile = std::string(""), 	//load a wordlist and exclude
 				unsigned int rndSeed = 0,				//duplicates, too many etc
 				unsigned int startAtWord = 0);
 
@@ -151,9 +152,7 @@ public:
 				{
 					this->_mapAll[pos->first] = pos->second;
 					if (6 == pos->first.length())		//is a 6 letter word
-						this->_vecTarget
-
-.push_back(pos->first);	//so also add to valid 6 letter word vector
+						this->_vecTarget.push_back(pos->first);	//so also add to valid 6 letter word vector
 				}
 			}
 		}
@@ -178,18 +177,12 @@ public:
 				//find the same word in the vect6 and erase it
 				//int n(0);
 				tWordVect::iterator vpos;
-				for (vpos = this->_vecTarget
-
-.begin(); vpos != this->_vecTarget
-
-.end(); ++vpos)
+				for (vpos = this->_vecTarget.begin(); vpos != this->_vecTarget.end(); ++vpos)
 				{
 					if (*vpos == pos->first)
 					{
 						//std::cout << pos->first << " erased after " << n+1 << " reads" << std::endl;
-						this->_vecTarget
-
-.erase(vpos);
+						this->_vecTarget.erase(vpos);
 						break;
 					}
 					//n++;
@@ -207,12 +200,9 @@ protected:
 
 	void reset();
 	void clearCurrentWord();
-	bool checkCurrentWordTarget
-(tWordVect::const_iterator &it);
-	bool wordInWord(const char* wordShort, const char* wordTarget
-);
-	int findWordsInWordTarget
-(tWordMap &shortwords, const char *word6);
+	bool checkCurrentWordTarget(const std::string &wordTarget);
+	bool wordInWord(const char* wordShort, const char* wordTarget);
+	int findWordsInWordTarget(tWordMap &shortwords, const char *word6);
 	bool splitDictLine(std::string line, DictWord &dict);
 	
 	tWordMap 		_mapAll;				//all words - for

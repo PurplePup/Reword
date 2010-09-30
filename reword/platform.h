@@ -58,7 +58,8 @@
 #define BG_LINE_BOT		(SCREEN_HEIGHT-30)
 #define GAME_GAP1		3
 #define SCORE_OFFSET	((SCREEN_WIDTH-300)/2)
-#define MAX_WORD_COL	8	//max number of words to display in a 3, 4, 5 or 6 word column
+#define MAX_WORD_COL	8	//max number of words to display down a 3, 4, 5 or 6 word column
+#define MAX_WORD_ROW	4	//4 across screen, 3,4,5,6 for 6, or 5,6,7,8 for 8 letter target word
 #define FOUND_WORD_CHR	10	//pixels wide for calculating found word box size
 
 #elif defined (PANDORA)
@@ -97,7 +98,8 @@
 #define BG_LINE_BOT		415
 #define GAME_GAP1		8
 #define SCORE_OFFSET	((SCREEN_WIDTH-300)/2)
-#define MAX_WORD_COL	8	//max number of words to display in a 3, 4, 5 or 6 word column
+#define MAX_WORD_COL	8	//max number of words to display down a 3, 4, 5 or 6 word column
+#define MAX_WORD_ROW	4	//4 across screen, 3,4,5,6 for 6, or 5,6,7,8 for 8 letter target word
 #define FOUND_WORD_CHR	17	//pixels wide for calculating found word box size
 
 //#elif defined (WIZ)
@@ -139,7 +141,8 @@
 #define BG_LINE_BOT		415
 #define GAME_GAP1		8
 #define SCORE_OFFSET	((SCREEN_WIDTH-300)/2)
-#define MAX_WORD_COL	8	//max number of words to display in a 3, 4, 5 or 6 word column
+#define MAX_WORD_COL	8	//max number of words to display down a 3, 4, 5 or 6 word column
+#define MAX_WORD_ROW	4	//4 across screen, 3,4,5,6 for 6, or 5,6,7,8 for 8 letter target word
 #define FOUND_WORD_CHR	17	//pixels wide for calculating found word box size
 
 #endif

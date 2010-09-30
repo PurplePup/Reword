@@ -152,8 +152,10 @@ int main(int argc, char* argv[])
 	
 		if (wordList.length() == 0 && dictFile.length() > 0)
 		{
+			std::cout << "Using dictionary file '" << dictFile <<  "' only" << std::endl;
 			if (includeList.length() > 0)
 			{
+				std::cout << "Adding include list file '" << includeList <<  "'" << std::endl;
 				Words includeWords(includeList);
 				int iOrig = words2.size();
 				words2 += includeWords;	//add any forced include words
@@ -164,13 +166,15 @@ int main(int argc, char* argv[])
 			//just load and populate rewordlist.txt from xdxf
 			bSave = words2.buildXdxfDict(outFile, dictFile);
 		}
-		else if (wordList.length() > 0)	//dictFile could be blank or valid
+		else if (wordList.length() > 0)	//dictFile could be blank or valid (see filterOut())
 		{
 			//load the named wordlist (with or without level and definition values)
 			if (words2.load(wordList))	
 			{
+				std::cout << "Using wordlist file '" << wordList <<  "' only" << std::endl;
 				if (includeList.length() > 0)
 				{
+					std::cout << "Adding include list file '" << includeList <<  "'" << std::endl;
 					Words includeWords(includeList);
 					int iOrig = words2.size();
 					words2 += includeWords;	//add any forced include words
@@ -180,15 +184,17 @@ int main(int argc, char* argv[])
 
 				//remove unwanted words (i.e. too long, too short, bad chars etc),
 				//and try to add dict entries to output final rewordlist.txt 
+				std::cout << "Filtering out additional unwanted words" << std::endl;
 				bSave = words2.filterOut(outFile, dictFile, bForceDef);
 			}
 		}
-		else bHelp = true;
+		else bHelp = true;	//invalid input so show help
 
 		if (!bHelp && bSave)
 		{
 			if (excludeList.length() > 0)
 			{
+				std::cout << "Removing words found in exclude list file '" << excludeList <<  "'" << std::endl;
 				Words excludeWords(excludeList);
 				int iOrig = words2.size();
 				words2 -= excludeWords;	//remove any exclusion words
@@ -206,7 +212,7 @@ int main(int argc, char* argv[])
 					if (dictFile.length()) std::cout << " and ";
 				}
 				if (dictFile.length()) std::cout << dictFile;
-				std::cout << std::endl << "Place this in the data directory of the reword game" << std::endl;
+				std::cout << std::endl << "Place this in the data/words/ directory of the Reword game" << std::endl;
 			}
 			else
 				std::cout << std::endl << "Error: Unable to filter " << wordList << " into " << outFile << std::endl;

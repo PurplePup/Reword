@@ -435,9 +435,12 @@ bool Roundels::cursorFirst()
 	while (i < (int)_word.length())
 	{
 		std::cout << "  i == " << i << std::endl;
-		if (0 != (_bCursorTop?_top[i]:_bot[i])) { _cx = i;
-												  std::cout << "  exit i == " << i << std::endl;
-												  return true; }
+		if (0 != (_bCursorTop?_top[i]:_bot[i]))
+		{
+			_cx = i;
+			std::cout << "  exit i == " << i << std::endl;
+			return true;
+		}
 		++i;
 	}
 	std::cout << "  no letters, cx == " << _cx << std::endl;
@@ -452,9 +455,12 @@ bool Roundels::cursorLast()
 	while (i >= 0)
 	{
 		std::cout << "  i == " << i << std::endl;
-		if (0 != (_bCursorTop?_top[i]:_bot[i])) { _cx = i;
-												  std::cout << "  exit i == " << i << std::endl;
-												  return true; }
+		if (0 != (_bCursorTop?_top[i]:_bot[i]))
+		{
+			_cx = i;
+			std::cout << "  exit i == " << i << std::endl;
+			return true;
+		}
 		--i;
 	}
 	std::cout << "  no letters, cx == " << _cx << std::endl;
@@ -465,16 +471,19 @@ bool Roundels::cursorLast()
 bool Roundels::cursorPrev()
 {
 	if (!_bCursorTop) return false; //not move on bottom row
-	int save = _cx;
+	const int save = _cx;
 	int i = _cx;
 	std::cout << "cursorPrev() :: cx == " << _cx << std::endl;
 	do {
 		std::cout << "i == " << i << std::endl;
 		if (i == 0) i = _word.length()-1; else --i;
 		std::cout << "i == " << i << std::endl;
-		if (0 != (_bCursorTop?_top[i]:_bot[i])) { _cx = i;
-											std::cout << "  exit i == " << i << std::endl;
-											return true; }
+		if (0 != (_bCursorTop?_top[i]:_bot[i]))
+		{
+			_cx = i;
+			std::cout << "  exit i == " << i << std::endl;
+			return true;
+		}
 	} while (i != save);
 	std::cout << "  no letters, cx == " << _cx << std::endl;
 	return false;	//no letters
@@ -484,16 +493,19 @@ bool Roundels::cursorPrev()
 bool Roundels::cursorNext()
 {
 	if (!_bCursorTop) return false; //not move on bottom row
-	int save = _cx;
+	const int save = _cx;
 	int i = _cx;
 	std::cout << "cursorNext() :: cx == " << _cx << std::endl;
 	do {
 		std::cout << "  i == " << i << std::endl;
 		if (i == (int)_word.length()-1) i = 0; else ++i;
 		std::cout << "  i == " << i << std::endl;
-		if (0 != (_bCursorTop?_top[i]:_bot[i])) { _cx = i;
-											  std::cout << "  new cursor pos == " << i << std::endl;
-											  return true; }
+		if (0 != (_bCursorTop?_top[i]:_bot[i]))
+		{
+			_cx = i;
+			std::cout << "  new cursor pos == " << i << std::endl;
+			return true;
+		}
 	} while (i != save);
 	std::cout << "  no letters, cx == " << _cx << std::endl;
 	return false;	//no letters
@@ -503,7 +515,7 @@ bool Roundels::cursorNext()
 void Roundels::cursorUp()
 {
 	std::cout << "cursorUp() :: cx == " << _cx << std::endl;
-   	_bCursorTop=true;
+   	_bCursorTop = true;
 	if (_top[_cx] == 0) //back on top, position is space so find next
 	{	
 		if (!cursorNext())
@@ -521,7 +533,7 @@ void Roundels::cursorDown()
 	std::cout << "cursorDown() :: cx == " << _cx << std::endl;
 	if (_bot[0] == 0) return;
 	std::cout << "  no bottom word, back to top" << std::endl;
-   	_bCursorTop=false;
+   	_bCursorTop = false;
 	_cx=0;
 	cursorLast();
 }
@@ -533,8 +545,8 @@ bool Roundels::cursorAt(Point pt)
 	{
 		if (_top[i] && _top[i]->_spr->contains(pt))
 		{
-			_bCursorTop=true;
-			_cx=i;
+			_bCursorTop = true;
+			_cx = i;
 			return true;
 		}
 	}
@@ -544,8 +556,8 @@ bool Roundels::cursorAt(Point pt)
 		{
 			if (_bot[i]->_spr->contains(pt))
 			{
-				_bCursorTop=false;
-				_cx=i;
+				_bCursorTop = false;
+				_cx = i;
 				return true;
 			}
 			break; // only the last letter on the bottom is clickable
