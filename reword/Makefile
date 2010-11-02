@@ -110,7 +110,7 @@ cleanobjs:
 	rm -f $(OBJECTS)
 
 clean:
-	-rm -f $(BIN) *~ *.o *.bak
+	rm -f $(BIN) *~ *.o *.bak
 	
 
 

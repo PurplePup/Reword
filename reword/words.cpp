@@ -88,8 +88,6 @@ void Words::reset()
 
 	_total = _ignored = 0;
 
-//	for (int i=DIF_EASY; i<DIF_MAX; _nInLevel[i++]=0);
-
 	//and any current word values, counts etc
 	clearCurrentWord();
 }
@@ -130,7 +128,7 @@ bool Words::splitDictLine(std::string text, DictWord &dictword)
 	return dictword._description.length() > 0;
 }
 
-//return true if word passed in is not useablein the game due to size or content
+//return true if word passed in is not useable in the game due to size or content
 bool Words::rejectWord(const std::string &strWord)
 {
 	const size_t found = strWord.find_first_of("\' .-;,");
@@ -163,7 +161,9 @@ ptrdiff_t (*pwrandom)(ptrdiff_t) = wrandom;
 
 
 //call with default param (blank wordFile string) to reload previous file
-bool Words::load(std::string wordFile, unsigned int rndSeed, unsigned int startAtWord)
+//Load all words from wordlist file. The nextWord() function locates next
+//valid word and all its shortedr words.
+bool Words::load(const std::string &wordFile, unsigned int rndSeed, unsigned int startAtWord)
 {
 	if (!wordFile.length() && !_wordFile.length())
 	{
@@ -213,7 +213,8 @@ bool Words::load(std::string wordFile, unsigned int rndSeed, unsigned int startA
 			}
 
 			//check if level given is valid and increment count
-			if (dictWord._level < DIF_EASY || dictWord._level > DIF_MAX) dictWord._level = DIF_EASY;
+			if (dictWord._level < DIF_EASY || dictWord._level > DIF_MAX)
+				dictWord._level = DIF_EASY;
 
 			//add word to dict
 			if (_mapAll.find(lnwrd) == _mapAll.end())			//not found
@@ -262,7 +263,7 @@ bool Words::wordInWord(const char * wordShort, const char * wordTarget)
 	if (!ilongLen || !ishortLen) return false;	//invalid word
 
 	int il, is;		//longword and shortword counters
-	int mask = 0;	//used to check if letters at specific position already tested for (int is ok as words are only ever 3..6 char long)
+	int mask = 0;	//used to check if letters at specific position already tested for (int is ok as words are only ever 3..8 char long)
 	int found = 0;	//number of letters found
 	for (is = 0; is < ishortLen; is++)
 	{
@@ -417,8 +418,7 @@ DictWord Words::getDictForWord(std::string &wrd)
 	tWordMap::iterator it = _mapAll.find(wrd);
 	if (it == _mapAll.end())
 	{
-		DictWord wrdNotFound;
-		return wrdNotFound;
+		return DictWord();	//not found - blank struct
 	}
 	return (*it).second;
 

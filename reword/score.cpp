@@ -364,8 +364,7 @@ bool QuickState::quickStateExists()
 //able to keep resuming the same game and get better scores each time.
 void QuickState::quickStateDelete()
 {
-//	std::remove(_quickstatefile.c_str());	//TODO: replace delete once working
-	std::cout << "DEBUG: not performing QuickState::quickStateDelete" << std::endl;
+	std::remove(_quickstatefile.c_str());
 }
 
 void QuickState::setQuickState(const tQuickStateSave &qss)

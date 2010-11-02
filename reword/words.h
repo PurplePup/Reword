@@ -118,10 +118,9 @@ public:
 	void setDebug(bool bOn = true) { _bDebug = bOn; }
 
 	bool rejectWord(const std::string &strWord);		//true if word loaded not useable
-	bool load(std::string wordFile = std::string(""), 	//load a wordlist and exclude
+	bool load(const std::string &wordFile = "", 				//load a wordlist and exclude
 				unsigned int rndSeed = 0,				//duplicates, too many etc
 				unsigned int startAtWord = 0);
-
 	unsigned int wordsLoaded() { return _total; };		//before exclusions, duff words etc
 	unsigned int size() { return (unsigned int)_mapAll.size(); }	//current size
 	
@@ -147,11 +146,11 @@ public:
 			tWordMap::const_iterator pos;
 			for (pos = w._mapAll.begin(); pos != w._mapAll.end(); ++pos)
 			{
-				//only add if not already exists - this save us from searching the m_vect6 vector each time
+				//only add if not already exists - this saves us from searching the m_vect6 vector each time
 				if (this->_mapAll.find(pos->first) == this->_mapAll.end())
 				{
 					this->_mapAll[pos->first] = pos->second;
-					if (6 == pos->first.length())		//is a 6 letter word
+					if ((pos->first.length() >= TARGET_MIN) && (pos->first.length() <= TARGET_MAX))  //is a 6..n target word
 						this->_vecTarget.push_back(pos->first);	//so also add to valid 6 letter word vector
 				}
 			}
@@ -175,7 +174,6 @@ public:
 				this->_mapAll.erase(pos->first);	//erase by value
 
 				//find the same word in the vect6 and erase it
-				//int n(0);
 				tWordVect::iterator vpos;
 				for (vpos = this->_vecTarget.begin(); vpos != this->_vecTarget.end(); ++vpos)
 				{
@@ -185,7 +183,6 @@ public:
 						this->_vecTarget.erase(vpos);
 						break;
 					}
-					//n++;
 				}
 			}
 		}
@@ -206,8 +203,8 @@ protected:
 	bool splitDictLine(std::string line, DictWord &dict);
 	
 	tWordMap 		_mapAll;				//all words - for
-	tWordVect		_vecTarget;				//vector to hold all 6 letter words in a rnd order
-	tWordVect::const_iterator _vecTarget_it;//m_vect6 iterator
+	tWordVect		_vecTarget;				//vector to hold all 6,7,8 letter words in a rnd order
+	tWordVect::const_iterator _vecTarget_it;//vect target iterator
 	DictWord		_word;					//current 6 letter word to find etc
 	tWordsInTarget 	_wordsInTarget;			//map of sub words (ie 3,4,5,6 letter for word6) with a "found" flag to say player got it
 	int 			_nWords[TARGET_MAX+1];	//count of number of words of each length to be found in 3, 4, 5 & 6 letter word lists

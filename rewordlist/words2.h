@@ -8,6 +8,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <algorithm>
 #include "stdio.h"
 
 #include "../reword/words.h"
@@ -18,26 +19,72 @@ class Words2 : public Words
 {
 public:
 	Words2();
+	Words2(const std::string &wordFile);
 	~Words2();
 
-	bool openXmlDict(std::string dictFile);	//open generic xml file
-	TiXmlElement* firstXdxfWord();
-	TiXmlElement* nextXdxfWord(TiXmlElement* ar, std::string &word, std::string &def);
-	bool matchXdxfDict(bool bUpdateDef);
-
 	//build the output dictionary just from an input xdxf file
-	bool buildXdxfDict(std::string outFile, std::string dictFile);
+	bool xdxfBuildDict(const std::string &dictFile);
 
-	//loop through all words and add to valid sets (one set per word length)
-	void addWordsToSets();
-	
 	//build the output dictionary from a wordlist and a xdxf dictionary
-	bool filterOut(std::string outFile, const std::string &dictFile = "", bool bUpdateDef = false);
+	bool filterOut(const std::string &dictFile = "", bool bUpdateDef = false);
 
-	int saveWordMap(FILE *& fp, tWordMap &wmOrig, tWordSet &wsFilt);
 	bool save(std::string outFile);
+	bool empty();
+	
+	Words2 & operator += (const Words2 &w2)
+	{
+		// Check for self-assignment
+		if (this != &w2)      // not same object, so add all of 'w2' to 'this'
+		{
+			this->Words::operator+=(w2);	//call Words += operator overload first
+			for (int i = TARGET_MAX; i >= SHORTW_MIN; --i)
+			{
+				_wordSet[i].insert(w2._wordSet[i].begin(), w2._wordSet[i].end());
+			}
+		}
+		return *this;
+	}
+	const Words2 operator+(const Words2 &other) const
+	{
+		return Words2(*this) += other;	//call += operator overload (as it's already there)
+	}
+	
+	Words2 & operator -= (const Words2 &w2)
+	{
+		// Check for self-assignment
+		if (this != &w2)      // not same object, so del all of 'w2' from 'this'
+		{
+			this->Words::operator-=(w2);	//call Words overload first
+			for (int i = TARGET_MAX; i >= SHORTW_MIN; --i)
+			{
+//				_wordSet[i].erase(w2._wordSet[i].begin(), w2._wordSet[i].end());
+				tWordSet temp;
+				std::set_difference( _wordSet[i].begin(), _wordSet[i].end(),
+									 w2._wordSet[i].begin(),w2._wordSet[i].end(),
+									 std::inserter(temp, temp.begin()));
+				temp.swap(_wordSet[i]);
+			}
+			
+		}
+		return *this;
+	}
+	const Words2 operator-(const Words2 &other) const
+	{
+		return Words2(*this) -= other;	//call -= operator overload (as it's already there)
+	}
 
+//	int wordSetCount() { int c(0); for(int i=SHORTW_MIN; i<=TARGET_MAX; c+=_wordSet[i++].size()); return c; }
+//	int mapAllCount() { return _mapAll.size(); }
+	
 protected:
+	
+	bool 			xdxfOpenDict(const std::string &dictFile);	//open generic xml file
+	void 			xdxfCloseDict();
+	TiXmlElement* 	xdxfFirstWord();
+	TiXmlElement* 	xdxfNextWord(TiXmlElement* ar, std::string &word, std::string &def);
+
+	void addWordsToSets();	//add to valid sets (one set per word length)
+	int saveWordMap(FILE *& fp, tWordMap &wmOrig, tWordSet &wsFilt);
 
 	TiXmlDocument * _doc;
 	int		_countXdxfWords;
@@ -46,7 +93,6 @@ protected:
 	int		_countXdxfMissing;
 
 	tWordSet _wordSet[TARGET_MAX+1];	//use 1..n for actual word length (as index)
-
 };
 
 #endif //_WORDS2_H
