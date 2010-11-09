@@ -11,7 +11,7 @@ Name=New Native Application Configuration
 Type=Native Application
 
 [Launch][Launch Configuration 0][Data]
-Arguments=wordlist.orig.master.txt dict_webster.xdxf
+Arguments=wordlist.orig.master.txt rewordlist.txt.from.xdxf.only.txt
 Debugger Shell=
 Dependencies=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x00)
 Dependency Action=Nothing

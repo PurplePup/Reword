@@ -79,7 +79,7 @@ using namespace std;
 int main(int argc, char* argv[])
 {
 	bool bList = false, bDebug = false, bForceDef = false, bXdxfDef = false;
-	string::size_type pos;
+	std::string::size_type pos;
 	bool bHelp = true, bHelpForce = false;
 
 	std::string includeList, excludeList;

@@ -13,8 +13,8 @@ OBJECTS = $(SOURCES:.cpp=.o)
 BIN = $(PROG_NAME)
 
 CXX = g++
-CXXFLAGS = -Wall -ansi -g
-LDFLAGS = -c -Wall -ggdb -D_DEBUG
+CXXFLAGS = -Wall -ansi -ggdb -D_DEBUG
+LDFLAGS = -c -Wall
 
 all:
 #	make pcversion pc=1
