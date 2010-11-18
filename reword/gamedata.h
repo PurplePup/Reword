@@ -1,6 +1,6 @@
 //gamedata.h
 //
-//All the types, constants and data used globally for the game; 
+//All the types, constants and data used globally for the game;
 //fonts, images, scores, counters etc
 
 
@@ -35,7 +35,7 @@ public:
 
 	void saveQuickState();
 	bool loadQuickState();
-	
+
 	//Resources
 	//////////////////////////////
 
@@ -57,12 +57,13 @@ public:
 	Image _game_reword;
 	Image _game_speed6;
 	Image _game_timetrial;
-	Image _scratch;
 	Image _cursor;
 	Image _letters;
 	Image _boxes;
 	Image _popupmenu;
-	
+
+	ImageAnim _scratch; //multiple frames (but not animated)
+
 	Sprite _arrowUp;
 	Sprite _arrowDown;
 	Sprite _arrowLeft;
@@ -109,7 +110,7 @@ public:
 	int			_current_w;			//used to store screen width
 
 	bool 		_bTouch;			//true if touchscreen/mouse detected
-	
+
 private:
 	bool		_init;
 

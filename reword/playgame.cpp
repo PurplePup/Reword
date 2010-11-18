@@ -194,10 +194,16 @@ void PlayGame::render_play(Screen* s)
 
 	if (PG_PLAY == _state)
 	{
+		//draw the tile background before any lower letters placed
+	    //expecting a scratch image list of: "[>][3][4][5][6][7][8]"
+	    //resolve to show: [>][>][3][4][5][6]   to   [>][>][>][5][6][7][8]
+	    const int nArrows = _shortestWordLen-1;   //num of [arrows] before [numbers]
 		for (xx=0; xx<_longestWordLen; xx++)
 		{
-			//draw the tile background before any lower letters placed
-			_gd._scratch.blitTo(s, _xScratch+(xx*(CURSORW+2)), _yScratchBot);
+		    //if no words of a certain length, place a [>], else place [N]
+            int nTile(0);   //point to [>] tile
+            if (xx >= nArrows && _gd._words.wordsOfLength(xx+1) > 0) nTile = xx-1;   //point to [N] tile
+			_gd._scratch.blitTo(s, _xScratch+(xx*(CURSORW+2)), _yScratchBot, nTile);
 		}
 
 		//draw touch controls
@@ -602,29 +608,21 @@ void PlayGame::button_play(Input* input, Input::ButtonType b)
 		if (input->isPressed(b)) _round.cursorNext();
 		break;
 	case Input::UP:
-		if (input->isPressed(b))
-		{
-			_round.cursorUp();
-		}
+		if (input->isPressed(b)) _round.cursorUp();
 		break;
 	case Input::DOWN:
-		if (input->isPressed(b))
-		{
-			_round.cursorDown(); //will only go down if letters exist
-		}
+		if (input->isPressed(b)) _round.cursorDown(); //will only go down if letters exist
 		break;
 	case Input::L:
-		if (input->isPressed(b)) commandWordToLast();	// _round.setWordToLast();
+		if (input->isPressed(b)) commandWordToLast();
 		break;
 	case Input::R:
-		if (input->isPressed(b)) commandWordToLast();	// _round.setWordToLast();
+		if (input->isPressed(b)) commandWordToLast();
 		break;
 	case Input::A:
 		if (input->isPressed(b))
 		{
 			commandJumbleWord();
-/*			if (_round.jumbleWord())
-				Mix_PlayChannel(-1,_gd._fxWoosh,0);	//sound only if not already moving etc*/
 		}
 		break;
 	case Input::B:
@@ -646,10 +644,10 @@ void PlayGame::button_play(Input* input, Input::ButtonType b)
 		if (input->isPressed(b)) doPauseGame();
 		break;
 	case Input::Y:
-		if (input->isPressed(b)) commandClearAllToTop();	// _round.clearAllToTop();
+		if (input->isPressed(b)) commandClearAllToTop();
 		break;
 	case Input::X:
-		if (input->isPressed(b)) commandTryWord();	// tryWord();
+		if (input->isPressed(b)) commandTryWord();
 		break;
 
 	default:break;
@@ -833,7 +831,7 @@ void PlayGame::touch_play(Point pt)
 	}
 	else
 		if (!_doubleClick.done())
-		    commandTryWord();	//	  tryWord();
+		    commandTryWord();
 		else
 			_doubleClick.start(300);
 }
@@ -1178,7 +1176,7 @@ void PlayGame::newGame()
 	_gd._word_try_pulse.setPos(posLeft, posBot);
 	_gd._word_totop_pulse.setPos(posRight, posTop);
 	_gd._word_last_pulse.setPos(posRight, posBot);
-	
+
 	//don't want to show or allow touch controls if not on a touchscreen (or mouse/PC) device
 	_gd._word_shuffle_pulse.setVisible(_gd._bTouch);
 	_gd._word_shuffle_pulse.setTouchable(_gd._bTouch);
@@ -1277,7 +1275,7 @@ void PlayGame::newLevel()
 	//i.e. For 6 letter target - find 3,4,5,6. For 7 letter target - find 4,5,6,7 etc
 	for (n=_shortestWordLen; n<=_longestWordLen; ++n)	//4 word lengths inc target len
 		xLen += (n*FOUND_WORD_CHR);	//eg xxx=40, xxxx=50, xxxxx=60, xxxxxx=70, etc
-		
+
 	//equal gaps, so minus 1&2 letter words, plus left&right edges, so div by word size!
 	int xGap = (SCREEN_WIDTH - xLen) / (_longestWordLen-1);
 	int nextPos = xGap;
@@ -1321,7 +1319,6 @@ void PlayGame::newLevel()
 		}
 	}
 
-//	_round.setWord(_gd._words.getWord6(), _gd._letters, _xScratch+2, _yScratchTop+2, 6, true);
 	_round.setWord(newword, _gd._letters, _xScratch+2, _yScratchTop+2, 6, true);
 	_round.setTopAndBottomYPos(_yScratchTop+2, _yScratchBot+2);
 	if (bWord)

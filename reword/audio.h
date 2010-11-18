@@ -4,8 +4,7 @@
 #define _AUDIO_H
 
 #include "error.h"
-#include "SDL_mixer.h"
-//#include "singleton.h"
+#include <SDL_mixer.h>
 #include <string>
 #include <deque>
 #include <memory>
@@ -22,7 +21,7 @@ protected:
 	Audio();
 public:
 	~Audio();
-	
+
 	void init();
 	void setVolume(Sint16 newvol, bool test = true);
 	void volumeUp();
@@ -79,7 +78,7 @@ public:
     static Audio *getPtr();			// Get a pointer to the object
 private:
     static std::auto_ptr<Audio> _instance;	//singleton instance pointer
-	
+
 };
 
 #endif //_AUDIO_H

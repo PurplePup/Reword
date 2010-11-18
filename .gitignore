@@ -27,5 +27,7 @@ config.status
 cscope*
 .scon*
 config.py
-build
 .svn
+build/
+bin/
+obj/

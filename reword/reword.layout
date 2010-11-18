@@ -1,10 +1,40 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="playgame.cpp" open="1" top="0" tabpos="2">
-		<Cursor position="22720" topLine="667" />
+	<File name="app.cpp" open="0" top="0" tabpos="4">
+		<Cursor position="1198" topLine="23" />
 	</File>
-	<File name="screen.cpp" open="1" top="0" tabpos="1">
+	<File name="audio.cpp" open="0" top="0" tabpos="5">
+		<Cursor position="7296" topLine="28" />
+	</File>
+	<File name="audio.h" open="0" top="0" tabpos="6">
+		<Cursor position="430" topLine="0" />
+	</File>
+	<File name="game.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="11227" topLine="405" />
+	</File>
+	<File name="gamedata.cpp" open="1" top="0" tabpos="1">
+		<Cursor position="2933" topLine="48" />
+	</File>
+	<File name="gamedata.h" open="1" top="0" tabpos="3">
+		<Cursor position="1263" topLine="42" />
+	</File>
+	<File name="global.h" open="0" top="0" tabpos="3">
+		<Cursor position="367" topLine="0" />
+	</File>
+	<File name="input.h" open="0" top="0" tabpos="0">
+		<Cursor position="0" topLine="34" />
+	</File>
+	<File name="playgame.cpp" open="1" top="1" tabpos="2">
+		<Cursor position="40472" topLine="1253" />
+	</File>
+	<File name="playgame.h" open="0" top="0" tabpos="7">
+		<Cursor position="4361" topLine="125" />
+	</File>
+	<File name="playinst.cpp" open="0" top="0" tabpos="8">
+		<Cursor position="0" topLine="240" />
+	</File>
+	<File name="screen.cpp" open="0" top="0" tabpos="1">
 		<Cursor position="0" topLine="0" />
 	</File>
 </CodeBlocks_layout_file>

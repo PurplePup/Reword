@@ -5,8 +5,8 @@ File:			game.cpp
 
 Class impl:		Game
 
-Description:	A control class for the whole game. Some initialisation, then 
-				each screen is created and called from here, passing input and 
+Description:	A control class for the whole game. Some initialisation, then
+				each screen is created and called from here, passing input and
 				events as they happen.
 
 Author:			Al McLuckie (al-at-purplepup-dot-org)
@@ -44,7 +44,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <SDL_gp2x.h>
 #endif
 
-#include "screen.h" 
+#include "screen.h"
 #include "game.h"
 #include "gamedata.h"	//for colour in fps etc
 #include "global.h"
@@ -78,7 +78,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 Game::Game() :
 	_init(false), _screen(0), _input(0), _audio(0), _gd(0)
 {
-  
+
 }
 
 Game::~Game()
@@ -111,7 +111,7 @@ void Game::splash()
 bool Game::init()
 {
 	std::cout << "Using hardware/keyboard profile : " << DEBUG_HW_NAME << std::endl;
-	
+
 	//sanity check
 	assert(false==_init);	//shouldn't be called once initialised successfully
 //	if (_init) return false;
@@ -128,7 +128,7 @@ bool Game::init()
 #endif
 	splash();				//show splash png not text
 
-	//Initialize SDL_ttf 
+	//Initialize SDL_ttf
 	if( TTF_Init() == -1 )
 	{
 		setLastError("Unable to init fonts");
@@ -152,7 +152,7 @@ bool Game::init()
 	if (pAudio) pAudio->init();
 //	_audio = new Audio();
 //	_audio->init();
-	
+
 	//load all game data (images, fonts, etc, etc)
 	_gd = new GameData();
 	_gd->_current_w = _screen->width();
@@ -177,16 +177,16 @@ bool Game::init()
 	return (_init = (_gd && _gd->isLoaded()));
 }
 
-//factory fn to run the game, 
+//factory fn to run the game,
 //and manage the state transitions between screens etc
 bool Game::run(void)
 {
 	assert(_init);
-	
-	//call different play classes 
+
+	//call different play classes
 #ifdef _USE_MIKMOD
 	std::cout << "Using MikMod audio directly" << std::endl;
-	Audio *audio = Singleton<Audio>::getPtr();	//not currently using it as some compilers bork (VC6)
+	Audio *audio = Singleton<Audio>::getPtr();	// some compilers (VC6) bork
 	audio->modStart();
 //	_audio->modStart();
 #endif
@@ -198,7 +198,7 @@ bool Game::run(void)
 		switch (_gd->_state)
 		{
 		case ST_MENU:		p = new PlayMainMenu(*_gd);break;
-		
+
 		case ST_MODE:		p = new PlayModeMenu(*_gd);break;
 
 		case ST_RESUME:
@@ -243,8 +243,8 @@ bool Game::play(IPlay *p)
 #endif
 
 //	Audio *audio = Singleton<Audio>::getPtr();	//not currently using it as some compilers bork (VC6)
-	Audio *audio = Audio::getPtr();	
-	
+	Audio *audio = Audio::getPtr();
+
 /*	//tinkering... Fixed interval time-based animation variables
 	double lastFrameTime = SDL_GetTicks();//0.0;
 	double cyclesLeftOver = 0.0;
@@ -256,7 +256,7 @@ bool Game::play(IPlay *p)
 
 	int fbdev = open("/dev/fb0", O_RDONLY);
 	void *buffer = mmap(0, 800*480*2, PROT_WRITE, MAP_SHARED, fbdev, 0);
-	
+
 	// Initialise play/level specific stuff
 	p->init(_input);
 
@@ -269,19 +269,19 @@ bool Game::play(IPlay *p)
 		fr.setSpeedFactor();
 
 /*
-		//tinkering... 
+		//tinkering...
 		currentTime = SDL_GetTicks();
 		updateIterations = ((currentTime - lastFrameTime) + cyclesLeftOver);
 		if (updateIterations > (MAX_CYCLES_PER_FRAME * UPDATE_INTERVAL)) {	//4*0.01666 = 0.0666666666
 			updateIterations = (MAX_CYCLES_PER_FRAME * UPDATE_INTERVAL);
 		}
-		while (updateIterations > UPDATE_INTERVAL) 
+		while (updateIterations > UPDATE_INTERVAL)
 		{
 			updateIterations -= UPDATE_INTERVAL;
-			// Update game state a variable number of times 
+			// Update game state a variable number of times
 */
 			// Do work/think stuff
-			//_gd->_fact = fr.speedFactor(); 
+			//_gd->_fact = fr.speedFactor();
 			p->work(_input, fr.speedFactor());
 
 			// Handle SDL events
@@ -289,7 +289,7 @@ bool Game::play(IPlay *p)
 			{
 				switch (event.type)
 				{
-					// Handle keys 
+					// Handle keys
 					// a - a
 					// b - b
 					// x - x
@@ -324,7 +324,7 @@ bool Game::play(IPlay *p)
 							break;
 						}
 
-#ifdef _DEBUG			//if Q key pressed, toggle capped framerate 
+#ifdef _DEBUG			//if Q key pressed, toggle capped framerate
 						if (event.key.keysym.sym == SDLK_q)	bCap = !bCap;
 #endif
 
@@ -335,15 +335,15 @@ bool Game::play(IPlay *p)
 							p->button(_input, b);
 						}
 
-						if (Input::VOLUP == b) 
+						if (Input::VOLUP == b)
 							audio->volumeUp();
 						else
-							if (Input::VOLDOWN == b) 
+							if (Input::VOLDOWN == b)
 								audio->volumeDown();
 
 					}
 					break;
-					
+
 					// Handle GP2X button events
 
 					case SDL_JOYBUTTONUP:
@@ -352,14 +352,14 @@ bool Game::play(IPlay *p)
 						_input->up(b);
 						p->button(_input, b);
 
-						if (Input::VOLUP == b) 
+						if (Input::VOLUP == b)
 							audio->volumeUp();
 						else
-							if (Input::VOLDOWN == b) 
+							if (Input::VOLDOWN == b)
 								audio->volumeDown();
 					}
 					break;
-					
+
 					case SDL_JOYBUTTONDOWN:
 					{
 						Input::ButtonType b = static_cast<Input::ButtonType>(event.jbutton.button);
@@ -374,7 +374,7 @@ bool Game::play(IPlay *p)
 					}
 					break;
 
-					case SDL_QUIT:	
+					case SDL_QUIT:
 						return false;	//valid exit
 
 					default:
@@ -414,8 +414,8 @@ bool Game::play(IPlay *p)
 //#endif
 
 /*
-		//tinkering... 
-		}	//while (updateIterations > UPDATE_INTERVAL) 
+		//tinkering...
+		}	//while (updateIterations > UPDATE_INTERVAL)
 		cyclesLeftOver = updateIterations;
 		lastFrameTime = currentTime;
 */

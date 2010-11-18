@@ -54,7 +54,7 @@ GameData::GameData() : _bTouch(false),  _init(false)
 	bErr |= !_fntBig.load(RES_BASE + "fonts/BD_Cartoon_Shout.ttf", FONT_BIG);
 
 	//BACKGROUNDS & IMAGES
-	
+
 	bErr |= !_boxes.load(RES_BASE + "images/boxes.png");
 	bErr |= !_boxes.setTileSize(BOXW, BOXH);	//tile 0=3, 1=4, 2=5, 3=6 letter words
 
@@ -67,12 +67,13 @@ GameData::GameData() : _bTouch(false),  _init(false)
 	bErr |= !_game_reword.load(RES_BASE + "images/game_reword.png");
 	bErr |= !_game_speed6.load(RES_BASE + "images/game_speed6.png");
 	bErr |= !_game_timetrial.load(RES_BASE + "images/game_timetrial.png");
-	bErr |= !_scratch.load(RES_BASE + "images/scratch.png");
 	bErr |= !_popupmenu.load(RES_BASE + "images/popup_menu.png", 200);
 	bErr |= !_cursor.load(RES_BASE + "images/cursors.png");
 	bErr |= !_cursor.setTileSize(CURSORW,CURSORH);
 	bErr |= !_letters.load(RES_BASE + "images/roundel_letters.png", 255);
 	bErr |= !_letters.setTileSize(LETTERW,LETTERH);
+
+	bErr |= !_scratch.load(RES_BASE + "images/scratch_2.png", -1, 7);
 
 	bErr |= !_word_last_pulse.load(RES_BASE + "images/btn_word_last.png", -1, 6);
 	bErr |= !_word_totop_pulse.load(RES_BASE + "images/btn_word_totop.png", -1, 6);

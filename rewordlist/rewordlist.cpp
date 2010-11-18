@@ -20,22 +20,22 @@ History:		Version	Date		Change
 										word before cutoff. This increased reword.txt
 										by about 500 to ~1700 6 letter words
 				0.3		30.05.2007	Updated
-									Added ability to parse and include xdxf dictionary definitions 
-									to the words in the originating wordlist, or to create the 
+									Added ability to parse and include xdxf dictionary definitions
+									to the words in the originating wordlist, or to create the
 									rewordlist.txt file directly from the xdxf dictionary.
-									- Using a wordlist as the initial word file allows you to more easily 
-									  control the words to be used in the game, and then apply any big enough 
+									- Using a wordlist as the initial word file allows you to more easily
+									  control the words to be used in the game, and then apply any big enough
 									  xdxf dictionary to fill in the definitions.
-									- Using purely the xdxf as the word source gives a more complete word list 
+									- Using purely the xdxf as the word source gives a more complete word list
 									  but may include words that are proper names etc, and not as good for a game
-									Included a word difficulty rating, where 1=easy, 2=med, 3=hard, so each 
-										difficulty level can be tuned for say, different age groups. This 
-										unfortunately must be manually entered for each word as it's a 
-										personal setting. Only 6 letter words need to be set currently 
+									Included a word difficulty rating, where 1=easy, 2=med, 3=hard, so each
+										difficulty level can be tuned for say, different age groups. This
+										unfortunately must be manually entered for each word as it's a
+										personal setting. Only 6 letter words need to be set currently
 										as smaller words are not filtered using the level.
-				0.4		08.11.2007	Added options to use exclusion and/or inclusion files of words 
-										to always remove/insert, allowing different wordlists to be 
-										tried without having to reedit each time to make sure certain words 
+				0.4		08.11.2007	Added options to use exclusion and/or inclusion files of words
+										to always remove/insert, allowing different wordlists to be
+										tried without having to reedit each time to make sure certain words
 										are always removed or added.
 						19.03.2008	Improved include/exclude code + upped max def to 2000 chars
 
@@ -64,9 +64,6 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <algorithm>
 #include <iterator>
 
-//#include "../reword/platform.h"
-//#include "../reword/helpers.h"
-//#include "../reword/words.h"
 #include "words2.h"
 
 using namespace std;
@@ -85,24 +82,24 @@ int main(int argc, char* argv[])
 	std::string includeList, excludeList;
 	tWordSet xdxfFiles;
 	tWordSet txtFiles;
-	
-	//v. simple loop to load cmd line args - in any order, 
+
+	//v. simple loop to load cmd line args - in any order,
 	//but must be seperately 'dashed' ie. -l -f not -lf
 	for (int i = 1; i< argc; ++i)
 	{
 		std::string arg = argv[i];
-		if ("--help" == arg) 
-		{ 
+		if ("--help" == arg)
+		{
 			bHelp = bHelpForce = true;
 			continue;
 		}
-		if ("-l" == arg) 
-		{ 
+		if ("-l" == arg)
+		{
 			bList = true;
 			continue;
 		}
-		if ("-d" == arg) 
-		{ 
+		if ("-d" == arg)
+		{
 			bDebug = true;
 			continue;
 		}
@@ -159,7 +156,7 @@ int main(int argc, char* argv[])
 		Words2 finalWords;
 		finalWords.setList(bList);
 		finalWords.setDebug(bDebug);
-	
+
 		std::string outFile("rewordlist.txt");
 
 		bool bSave = false;
@@ -240,7 +237,7 @@ int main(int argc, char* argv[])
 		else if (wordList.length() > 0)	//dictFile could be blank or valid (see filterOut())
 		{
 			//load the named wordlist (with or without level and definition values)
-			if (words2.load(wordList))	
+			if (words2.load(wordList))
 			{
 				std::cout << "Using wordlist file '" << wordList <<  "'" << std::endl;
 				if (includeList.length() > 0)
@@ -254,7 +251,7 @@ int main(int argc, char* argv[])
 				}
 
 				//remove unwanted words (i.e. too long, too short, bad chars etc),
-				//and try to add dict entries to output final rewordlist.txt 
+				//and try to add dict entries to output final rewordlist.txt
 				std::cout << "Filtering out additional unwanted words" << std::endl;
 				bSave = words2.filterOut(dictFile, bForceDef);
 			}
@@ -276,7 +273,7 @@ int main(int argc, char* argv[])
 			}
 
 //std::cout << "Before save finalWords count : " << finalWords.wordSetCount() + finalWords.mapAllCount() << std::endl;
-			
+
 			//save it
 			if (finalWords.save(outFile))
 			{
@@ -293,9 +290,9 @@ int main(int argc, char* argv[])
 	if (bHelp)
 	{
 		std::cout << "Utility (version 0.4) to generate rewordlist.txt for the reword game." << std::endl
-				<< "Useage:" << std::endl 
+				<< "Useage:" << std::endl
 				<< "rewordlist [words.txt] [words.include] [words.exclude] [dictionary.xdxf|...] [-f] [-l] [-d] [-x]" << std::endl
-				<< std::endl 
+				<< std::endl
 				<< "  Params:  " << std::endl
 				<< "  words.txt is a simple one word per line wordlist, which may include |diff|def " << std::endl
 				<< "        (omit, if creating rewordlist.txt directly from xdxf)" << std::endl
