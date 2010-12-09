@@ -53,6 +53,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "platform.h"
 #include <cassert>
 
+#include <SDL_gfxPrimitives.h>
+
 static	int _countdown;				//seconds remaining
 
 //function called when timer reaches interval set
@@ -237,7 +239,7 @@ void PlayGame::render_play(Screen* s)
 		{
 			for (yy=0; yy<nWords; ++yy)	//down the screen
 			{
-
+			    const int boxOffsetY = yo+(yy*(BOXH + 3));
 				//As the old limit of 7 on screen word boxes has now been extended to 8, we can't use
 				//this fuction. If it ever goes back to 7 and includes more words than can fit in
 				//a 7 word column, we might use this again. But probably not!
@@ -262,7 +264,7 @@ void PlayGame::render_play(Screen* s)
 
 				//draw the box for the word to be displayed in - using a highlighted box if
 				//not in play state and this is the curr word the selection is on.
-				_gd._boxes.blitTo( s, _boxOffset[xx], yo+(yy*(BOXH-1)),						//tile 0=3, 1=4, 2=5, 3=6 letter words
+				_gd._boxes.blitTo( s, _boxOffset[xx], boxOffsetY,					//tile 0=3, 1=4, 2=5, 3=6 etc. letter words
 					//xx+(count/2) for n boxes in boxes.png, and -3 to reset the xx back to 0 as the boxes.png starts at 3 letter tile
 					(((PG_PLAY != _state) && xx == _xxWordHi && yy == _yyWordHi)?xx+(_gd._boxes.tileCount()/2):xx)-3 );
 
@@ -290,7 +292,7 @@ void PlayGame::render_play(Screen* s)
 					}
 
 					//display the word (in red or blue)
-					_gd._fntClean.put_text(s, _boxOffset[xx]+BOXTEXTOFFSETX, yo+(yy*(BOXH-1)-BOXTEXTOFFSETY),
+					_gd._fntClean.put_text(s, _boxOffset[xx]+BOXTEXTOFFSETX, boxOffsetY+BOXTEXTOFFSETY,
 							(*it)._word.c_str(), ((*it)._found)?BLUE_COLOUR:RED_COLOUR);
 
 					++it;
@@ -298,12 +300,17 @@ void PlayGame::render_play(Screen* s)
 
 			}
 		}
-//		else
-//		{
+		else
+		{
 //			//draw "none" in column with no matching sub words (ie no boxes in column)
 //			_gd._boxes.blitTo ...  ( _boxOffset[xx], yo, boxes, screen, &r);
 //			_gd._fntClean.put_text ... (fntClean, _boxOffset[xx]+6, yo-4, "none", GREY_COLOUR, screen);
-//		}
+
+//            s->drawSolidRect(_boxOffset[xx], yo, _boxLength[xx], BOXH, WHITE_COLOUR);
+            rectangleColor(s->surface(), _boxOffset[xx], yo, _boxOffset[xx]+_boxLength[xx], yo+BOXH, 0x080808FF); //white
+
+            //rectangleColor(s->surface(), _boxOffset[xx], yo+(yy*(BOXH-1)), _boxLength[xx], _gd._boxes.tileH(), 200);
+		}
 	}	//for
 }
 
@@ -1250,9 +1257,6 @@ void PlayGame::newLevel()
 {
 	stopCountdown();
 
-	//maybe show a filler screen here..?
-	//##TODO## ??
-
 	int xx;
 	for (xx=0; xx<=TARGET_MAX; ++xx)
 		_wordsFound[xx].clear();
@@ -1276,26 +1280,12 @@ void PlayGame::newLevel()
 	for (n=_shortestWordLen; n<=_longestWordLen; ++n)	//4 word lengths inc target len
 		xLen += (n*FOUND_WORD_CHR);	//eg xxx=40, xxxx=50, xxxxx=60, xxxxxx=70, etc
 
-	//equal gaps, so minus 1&2 letter words, plus left&right edges, so div by word size!
-	int xGap = (SCREEN_WIDTH - xLen) / (_longestWordLen-1);
+	//equal gaps = screen W - col width / num gaps + 1
+	int xGap = (SCREEN_WIDTH - xLen) / (_longestWordLen-_shortestWordLen+2);
 	int nextPos = xGap;
 	for (n=_shortestWordLen; n<=_longestWordLen; ++n)
 	{
 		xLen = (n*FOUND_WORD_CHR);	//xxx=40, xxxx=50, xxxxx=60, xxxxxx=70, etc
-/*
-		int nWords = _gd._words.wordsOfLength(n);
-		while (yy < SCREEN_HEIGHT)
-		{
-			DisplayWord wordPos;
-			wordPos._x = 0;
-			wordPos._y = 0;
-			wordPos._len = n+2;
-			_wordsFoundPos[n].push_back(wordPos);
-			yy += _gd._boxes.tileH();
-		}
-
-	... ##TODO calc rest of box positions ...
-*/
 
 		if (_gd._mode == GM_REWORD)	//classic mode
 		{

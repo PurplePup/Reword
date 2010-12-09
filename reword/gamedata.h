@@ -18,8 +18,6 @@
 #include "sprite.h"
 
 
-#define VERSION_STRING		"v0.51 "	//only displayed on menu (playmenu)
-
 //to persist global data throughout app
 class GameData
 {

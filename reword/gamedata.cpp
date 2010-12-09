@@ -56,7 +56,7 @@ GameData::GameData() : _bTouch(false),  _init(false)
 	//BACKGROUNDS & IMAGES
 
 	bErr |= !_boxes.load(RES_BASE + "images/boxes.png");
-	bErr |= !_boxes.setTileSize(BOXW, BOXH);	//tile 0=3, 1=4, 2=5, 3=6 letter words
+	bErr |= !_boxes.setTileSize(BOXW, BOXH, Image::TILE_VERT);	//tile 0=3, 1=4, 2=5, 3=6 letter words
 
 	bErr |= !_menubg.load(RES_BASE + "images/menubg.png");		//solid background (no alpha)
 	bErr |= !_menubg_plain.load(RES_BASE + "images/menubg_plain.png");

@@ -6,7 +6,7 @@ File:			audio.cpp
 Class impl:		Audio
 
 Description:	A class to manage the SDL audio interface
-				It was intended to use the Singleton template class to create it, 
+				It was intended to use the Singleton template class to create it,
 				but some compilers (VC6) can't handle it so haven't used it (yet)
 
 Author:			Al McLuckie (al-at-purplepup-dot-org)
@@ -45,7 +45,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <stdio.h> 
+#include <stdio.h>
 
 #ifndef _WIN32
 #include <sys/ioctl.h>
@@ -60,7 +60,7 @@ Audio::Audio() : _init(false), _volume(0), _volTest(0), _musicTrack(0), _lastTra
 
 Audio::~Audio()
 {
-	if (_volTest) 
+	if (_volTest)
 		Mix_FreeChunk(_volTest);
 
 	if (_init) Mix_CloseAudio();
@@ -92,7 +92,7 @@ void Audio::init()
         return;	//failed
     }
 #endif
-	
+
 	loadTracks(_baseTrackDir);
 	_init = true;
 }
@@ -233,7 +233,7 @@ void Audio::startPrevTrack()
 void Audio::startTrack(const std::string &trackName)
 {
 	stopTrack();	//stop any existing music
-	
+
 	if (trackName.length() > 0)
 	{
 		printf("Play: %s\n", trackName.c_str());
@@ -246,10 +246,10 @@ void Audio::startTrack(const std::string &trackName)
 		}
 		else
 			printf("Failed to start %s (%s)\n", newTrack.c_str(), Mix_GetError());
-			
+
 		Mix_HookMusicFinished(AudioTrackDone);	//reiterate callback
 	}
-	if (!_bPlayingTrack) 
+	if (!_bPlayingTrack)
 	{
 		//TODO: play fail sound
 	}
@@ -258,7 +258,7 @@ void Audio::startTrack(const std::string &trackName)
 std::string Audio::getNextTrack()
 {
 	if (_trackList.size() == 0) return "";	//no tracks
-	
+
 	if (++_lastTrack > (int)_trackList.size()) _lastTrack=1;
 	return _trackList[_lastTrack-1];
 }
@@ -266,7 +266,7 @@ std::string Audio::getNextTrack()
 std::string Audio::getPrevTrack()
 {
 	if (_trackList.size() == 0) return "";	//no tracks
-	
+
 	if (--_lastTrack < 1) _lastTrack=_trackList.size();
 	return _trackList[_lastTrack-1];
 }
@@ -276,7 +276,7 @@ void Audio::loadTracks(const std::string &baseDir)
 #ifndef _WIN32
 	DIR           *d;
 	struct dirent *dir;
-	
+
 	d = opendir(baseDir.c_str());
 	if (d)
 	{

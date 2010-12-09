@@ -5,7 +5,7 @@
 //win32 pragmas to help prevent STL truncation warnings
 #pragma warning(disable:4503)
 #pragma warning(disable:4786)
-#pragma warning(disable:4788) 
+#pragma warning(disable:4788)
 //MSVC compiler + runtime
 #define round(x) floor(x+0.5)
 #define strcasecmp(s1,s2) stricmp(s1,s2)
@@ -79,7 +79,7 @@
 #define CURSORH			76
 #define LETTERW			72
 #define LETTERH			72
-#define BOXW			136
+#define BOXW			144
 #define BOXH			25
 #define BOXTEXTOFFSETX	8
 #define BOXTEXTOFFSETY	2
@@ -100,7 +100,7 @@
 #define SCORE_OFFSET	((SCREEN_WIDTH-300)/2)
 #define MAX_WORD_COL	8	//max number of words to display down a 3, 4, 5 or 6 word column
 #define MAX_WORD_ROW	4	//4 across screen, 3,4,5,6 for 6, or 5,6,7,8 for 8 letter target word
-#define FOUND_WORD_CHR	17	//pixels wide for calculating found word box size
+#define FOUND_WORD_CHR	18	//pixels wide for calculating found word box size
 
 //#elif defined (WIZ)
 
@@ -122,10 +122,10 @@
 #define CURSORH			76
 #define LETTERW			72
 #define LETTERH			72
-#define BOXW			136
+#define BOXW			144
 #define BOXH			25
-#define BOXTEXTOFFSETX	8
-#define BOXTEXTOFFSETY	2
+#define BOXTEXTOFFSETX	6
+#define BOXTEXTOFFSETY	-3
 #define MENU_HI_X		58
 #define MENU_HI_Y		(LETTERH + 40)
 #define MENU_HI_GAP		55
@@ -143,7 +143,7 @@
 #define SCORE_OFFSET	((SCREEN_WIDTH-300)/2)
 #define MAX_WORD_COL	8	//max number of words to display down a 3, 4, 5 or 6 word column
 #define MAX_WORD_ROW	4	//4 across screen, 3,4,5,6 for 6, or 5,6,7,8 for 8 letter target word
-#define FOUND_WORD_CHR	17	//pixels wide for calculating found word box size
+#define FOUND_WORD_CHR	18	//pixels wide for calculating found word box size
 
 #endif
 

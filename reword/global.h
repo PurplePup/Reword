@@ -6,6 +6,10 @@
 #include "platform.h"
 #include "SDL.h"
 
+
+#define VERSION_STRING		"v0.51 "	//only displayed on menu (playmenu)
+
+
 const SDL_Color NORMAL_COLOUR	= {0xDD,0xDD,0xDD,0};
 const SDL_Color BLACK_COLOUR	= {0x00,0x00,0x00,0};
 const SDL_Color WHITE_COLOUR	= {0xFF,0xFF,0xFF,0};

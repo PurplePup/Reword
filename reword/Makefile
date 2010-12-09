@@ -1,6 +1,5 @@
 PROG_NAME = reword
 SOURCES = reword.cpp \
-		app.cpp \
 		audio.cpp \
 		button.cpp \
 		error.cpp \

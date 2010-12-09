@@ -4,7 +4,7 @@
 File:			helpers.cpp
 
 Description:	General helper functions
-				not relying on game headers or other code (other than stl)
+				no dependency on game headers or other code (other than stl)
 
 Author:			Al McLuckie (al-at-purplepup-dot-org)
 
@@ -43,7 +43,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 namespace pp_s
 {
-  
+
 void makeUpper(std::string &s)
 {
 	std::transform(s.begin(),s.end(),s.begin(),toupper);

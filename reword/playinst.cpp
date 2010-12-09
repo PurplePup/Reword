@@ -57,11 +57,11 @@ void PlayInst::init(Input *input)
 	_title.setWordCenterHoriz(std::string("INFO"), _gd._letters, (BG_LINE_TOP-_gd._letters.tileH())/2, 2);
 	_title.startMoveFrom( 0, -(_gd._letters.tileH()*2), 15, 100, 0, ROUNDEL_VEL);
 	_titleW.start(3000, 1000);
-	
+
 	//set the repeat of the keys required
 	input->setRepeat(Input::UP, 250, 250);		//button, rate, delay
 	input->setRepeat(Input::DOWN, 250, 250);
-	
+
 	//set arrow (scroll positions)
 	_gd._arrowUp.setPos(SCREEN_WIDTH-_gd._arrowUp.tileW(), BG_LINE_TOP+2);		//positions dont change, just made visible or not if scroll available
 	_gd._arrowUp.setFrame(_gd._arrowUp.getMaxFrame()-1);			//last frame
@@ -73,7 +73,7 @@ void PlayInst::init(Input *input)
 	//calc number of lines available for displaying instruction lines
 	//end of display area minus start of screen lines+title height, div by line height. Minus 1 for a reasonable gap
 	_lines = ((BG_LINE_BOT - BG_LINE_TOP - _gd._fntMed.height()) / _gd._fntClean.height()) - 1;
-	
+
 	//need to set the _init and _running flags
 	_init = true;
 	_running = true;
@@ -95,13 +95,13 @@ void PlayInst::render(Screen *s)
 		_gd._fntMed.put_text(s, yyStart, "About", BLUE_COLOUR, true);
 		_gd._fntClean.put_text(s, helpYpos, "Press B for controls, Y to exit", GREY_COLOUR, true);
 	}
-	
+
 	if (_page == 2)
 	{
 		_gd._fntMed.put_text(s, yyStart, "Controls", BLUE_COLOUR, true);
 		_gd._fntClean.put_text(s, helpYpos, "Press B for rules, Y to exit", GREY_COLOUR, true);
 	}
-	
+
 	if (_page == 3)
 	{
 		_gd._fntMed.put_text(s, yyStart, "How to play", BLUE_COLOUR, true);
@@ -139,7 +139,7 @@ void PlayInst::work(Input *input, float speedFactor)
 {
 	_title.work();
 
-	//animate the roundel title if it's not moving and 
+	//animate the roundel title if it's not moving and
 	//we have waited long enough since it animated last
 	if (!_title.isMoving() && _titleW.done(true))
 	{
@@ -162,26 +162,26 @@ void PlayInst::button(Input *input, Input::ButtonType b)
 {
 	switch (b)
 	{
-	case Input::UP: 
-		if (input->isPressed(b)) 
+	case Input::UP:
+		if (input->isPressed(b))
 			//move the _instLine offset var up a line
 			scrollDown();
 		break;
-	case Input::DOWN: 
+	case Input::DOWN:
 		if (input->isPressed(b))
 			//move the _instLine offset var down a line
 			scrollUp();
 		break;
-	case Input::Y: 
-	case Input::START: 
+	case Input::Y:
+	case Input::START:
 		if (input->isPressed(b))	//exit back to menu
 		{
 			_gd._state = ST_MENU;
 			_running = false;	//exit this class running state
 		}
 		break;
-	case Input::CLICK: 
-	case Input::B: 
+	case Input::CLICK:
+	case Input::B:
 		if (input->isPressed(b))
 			nextPage();
 		break;
@@ -243,7 +243,7 @@ void PlayInst::buildPage(int page)
 			"\n\n"
 			"Written by : Alistair McLuckie (PurplePup)\n\n"
 			"Ideas & testing by : Annette Odom\n\n"
-			"Music by : unknown artist\n\n"
+			"Music by : unknown MOD artist\n\n"
 			;
 			_txtColour = BLACK_COLOUR;
 			_bCentered = true;
@@ -268,17 +268,17 @@ void PlayInst::buildPage(int page)
 			"There are three game modes to play, with three difficulty levels "
 			"each. Time allowed and bonuses depend on the difficulty. \n\n"
 			"1) Reword\n"
-			"Make 3, 4, 5 and 6 letter words from the 6 letters given. "
-			"You must make at least one 6 letter word in each round to be able "
-			"to move on to the next round. If all words are found, "
+			"Make as many words from the letters given, aiming to use all letters. "
+			"You must make at least one word with all letters in each round to "
+			"move on to the next round. If all words are found, "
 			"a bonus is given for each second remaining."
 			"\n\n"
 			"2) Speed6\n"
-			"You must get a single 6 letter word to continue to the next round.\n"
+			"You must get a single all letter word to continue to the next round.\n"
 			"A bonus is given each time a fastest word is achieved."
 			"\n\n"
 			"3) TimeTrial\n"
-			"You must get as many 6 letter words as you can in the time allowed.\n"
+			"You must get as many all letter words as you can in the time allowed.\n"
 			"A bonus is given each time a fastest word is achieved.\n"
 			"Note that the timer will continue to count down even after a word has been "
 			"found. You must move on as quickly as possible for a good score!"
@@ -288,23 +288,23 @@ void PlayInst::buildPage(int page)
 			;
 			_txtColour = BLACK_COLOUR;
 			break;
-			
+
 	case 4: strstr <<	//scoring
 			"In Reword:\n" <<
 			SCORE_BONUS <<" for each level passed\n" <<
 			SCORE_SECONDS << " * seconds left, if ALL words found\n" <<
-			SCORE_WORD6 << " for each 6 letter word found\n" <<
-			SCORE_WORD << " for each 3, 4, 5 letter word\n" <<
+			SCORE_WORD6 << " for each all letter word found\n" <<
+			SCORE_WORD << " for each smaller letter words\n" <<
 			"\nIn Speed6:\n" <<
-			SCORE_WORD6 << " * for each 6 letter word found\n" <<
+			SCORE_WORD6 << " * for each all letter word found\n" <<
 			SCORE_FASTEST << " * remainder seconds for each fastest\n" <<
 			"\nIn TimeTrial:\n" <<
-			SCORE_WORD6 << " for each 6 letter word found\n" <<
+			SCORE_WORD6 << " for each all letter word found\n" <<
 			SCORE_FASTEST << " * remainder seconds for each fastest\n"
 			;
 			_txtColour = BLACK_COLOUR;
 			break;
-			
+
 	default:return;	//not used
 	}
 	str = strstr.str();

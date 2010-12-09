@@ -13,6 +13,7 @@ const SDL_Color ALPHA_COLOUR	= {0xFF,0x00,0xFF,0};
 class Image : public Surface
 {
 public:
+    enum eTileDir { TILE_HORIZ, TILE_VERT };
 
 	Image();
 	Image(unsigned int w, unsigned int h, int iAlpha = -1);
@@ -31,7 +32,7 @@ public:
 		}
 		return *this;
 	};
-	
+
 	bool initDone() { return _init; }	//has Image been initialised properly
 	bool initImage(SDL_Surface *newSurface, int iAlpha = -1);
 
@@ -39,7 +40,7 @@ public:
 	void createThisFromImage(Image &image, int tileNum = -1, int iAlpha = -1);	//create this image using an existing image (tile)
 
 	virtual bool load(std::string fileName, int iAlpha = -1);	//default no alpha
-	bool setTileSize(int w = 0, int h = 0);
+	bool setTileSize(int w = 0, int h = 0, eTileDir tileDir = TILE_HORIZ);
 	SDL_Rect tile(int i);	//uses stored _tileW and _tileH
 
 	//specific blit for Image class types
@@ -57,10 +58,10 @@ public:
 protected:
 	void cleanUp();
 
-	int _tileW;
-	int _tileH;
-	int _tileCount;	//number of tiles in image (if setTileSize() used)
-//	SDL_Rect *_clip;
+	int _tileW, _tileH; //actual individual tile w & h withing image
+	int _tileCount;	    //number of tiles in image (if setTileSize() used)
+
+    int _tileWOffset, _tileHOffset;     //value or 0, depend on eTileDir to multiply by
 
 private:
 	bool _init;

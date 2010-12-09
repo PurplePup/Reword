@@ -75,10 +75,11 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #define MAX_FRAME_RATE 60
 
 
-Game::Game() :
-	_init(false), _screen(0), _input(0), _audio(0), _gd(0)
+Game::Game(const GameOptions &options) :
+	_init(false), _screen(0), _input(0), //_audio(0),
+	_gd(0), _options(options)
 {
-
+	atexit(SDL_Quit);	//auto cleanup, just in case
 }
 
 Game::~Game()
@@ -88,7 +89,7 @@ Game::~Game()
 	//now unload the SDL stuff
 	delete _screen;
 	delete _input;
-	delete _audio;
+//	delete _audio;
 
 	if (_init)
 	{
@@ -116,6 +117,20 @@ bool Game::init()
 	assert(false==_init);	//shouldn't be called once initialised successfully
 //	if (_init) return false;
 
+    Uint32 init_flags = SDL_INIT_EVERYTHING;
+    if (!_options._bSfx)
+    {
+        std::cout << "Audio disabled" << std::endl;
+        init_flags &= ~SDL_INIT_AUDIO;
+    }
+
+	//Init SDL but if anything borks, just exit
+	if ( SDL_Init(init_flags) < 0 )
+	{
+		setLastError("Unable to init SDL");
+		return false;
+	}
+
 	_screen  = new Screen(SCREEN_WIDTH, SCREEN_HEIGHT);
 	if (!_screen->initDone())
 	{
@@ -142,16 +157,12 @@ bool Game::init()
 //	joystick = SDL_JoystickOpen(0);
 #else
     SDL_WM_SetCaption("REWORD", 0);		//windowed caption
-	std::cout << "Using Caption REWORD" << std::endl;
+	std::cout << "Using window, Caption REWORD" << std::endl;
 #endif
 
 
-//	Singleton<Audio>::instance();
-//	Singleton<Audio>::getPtr()->init();
 	Audio *pAudio = Audio::instance();
 	if (pAudio) pAudio->init();
-//	_audio = new Audio();
-//	_audio->init();
 
 	//load all game data (images, fonts, etc, etc)
 	_gd = new GameData();
@@ -185,10 +196,12 @@ bool Game::run(void)
 
 	//call different play classes
 #ifdef _USE_MIKMOD
-	std::cout << "Using MikMod audio directly" << std::endl;
-	Audio *audio = Singleton<Audio>::getPtr();	// some compilers (VC6) bork
-	audio->modStart();
-//	_audio->modStart();
+    if (_options._bMusic)
+    {
+        std::cout << "Using MikMod audio directly" << std::endl;
+        Audio *audio = Audio::instance();
+        audio->modStart();
+    }
 #endif
 
 	IPlay *p = 0;
@@ -219,8 +232,7 @@ bool Game::run(void)
 	}
 
 #ifdef _USE_MIKMOD
-	audio->modStop();
-//	_audio->modStop();
+	if (_options._bMusic) audio->modStop();
 #endif
 
 	return b;
@@ -242,7 +254,6 @@ bool Game::play(IPlay *p)
 	int touchX(0), touchY(0);
 #endif
 
-//	Audio *audio = Singleton<Audio>::getPtr();	//not currently using it as some compilers bork (VC6)
 	Audio *audio = Audio::getPtr();
 
 /*	//tinkering... Fixed interval time-based animation variables
@@ -255,7 +266,7 @@ bool Game::play(IPlay *p)
 	SDL_Event event;
 
 	int fbdev = open("/dev/fb0", O_RDONLY);
-	void *buffer = mmap(0, 800*480*2, PROT_WRITE, MAP_SHARED, fbdev, 0);
+	void *buffer = mmap(0, SCREEN_WIDTH*SCREEN_HEIGHT*2, PROT_WRITE, MAP_SHARED, fbdev, 0);
 
 	// Initialise play/level specific stuff
 	p->init(_input);

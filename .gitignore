@@ -31,3 +31,6 @@ config.py
 build/
 bin/
 obj/
+hiscore.dat
+.quickstate.save
+

@@ -15,7 +15,7 @@ Date:			25 Feb 2008
 History:		Version	Date		Change
 				-------	----------	--------------------------------
 				0.4.0	25.02.2008	implemented
-				0.5		16.05.2008	Implement PlayMenu base class and touch screen 
+				0.5		16.05.2008	Implement PlayMenu base class and touch screen
 
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by
@@ -47,16 +47,18 @@ void PlayModeMenu::init(Input *input)
 	//0,1,2 as actual games and 99 for the optional resume, 255 for exit
 	QuickState qs;
 	if (qs.quickStateExists())
-	  	addItem(MenuItem(99, GREEN_COLOUR, "Resume game...", "Continue playing a quick save game"));
-	
-	addItem(MenuItem(0, PURPLE_COLOUR, "Reword", "Get 3, 4, 5 and 6 letter words"));
-	addItem(MenuItem(1, GOLD_COLOUR, "Speed 6", "Just get a 6 letter word to continue"));
-	addItem(MenuItem(2, BLUE_COLOUR, "Time Trial", "Get the most 6 letter words in the time limit"));
-	
+	  	addItem(MenuItem(99, GREEN_COLOUR, "Resume game...", "Continue playing a quick saved game"));
+
+	addItem(MenuItem(0, PURPLE_COLOUR, "Reword", "Get 3, 4, 5, 6 ... letter words"));
+	addItem(MenuItem(1, GOLD_COLOUR, "Speed 6", "Just get the all letter word to continue"));
+	addItem(MenuItem(2, BLUE_COLOUR, "Time Trial", "Get the most all letter words in the time limit"));
+
 	addItem(MenuItem(255, RED_COLOUR, "Back", "Back to main menu"));
-	
+
 	setItem((int)_gd._mode);
 	PlayMenu::init(input);
+	if (qs.quickStateExists())
+        setItem(99);
 }
 
 
@@ -71,7 +73,7 @@ void PlayModeMenu::choose(MenuItem i)
 	else if (i._id == 255)		// exit & leave mode as-is
 		_gd._state = ST_MENU;
 
-	
+
 	std::cout << "state selectd = " << _gd._state << std::endl;		//##DEBUG
 	_running = false;	//exit this class running state
 }
