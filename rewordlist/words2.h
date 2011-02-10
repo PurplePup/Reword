@@ -22,15 +22,15 @@ public:
 	Words2(const std::string &wordFile);
 	~Words2();
 
-	//build the output dictionary just from an input xdxf file
-	bool xdxfBuildDict(const std::string &dictFile);
+	//Add words from the xdxf dictionary to the internal lists
+	bool xdxfBuildDict(const std::string &dictFile, bool bUpdateDef);
 
-	//build the output dictionary from a wordlist and a xdxf dictionary
-	bool filterOut(const std::string &dictFile = "", bool bUpdateDef = false);
+	//build the output dictionary from all loaded words
+	bool filterGameWords();   //const std::string &dictFile = "", bool bUpdateDef = false);
 
 	bool save(std::string outFile);
 	bool empty();
-	
+
 	Words2 & operator += (const Words2 &w2)
 	{
 		// Check for self-assignment
@@ -48,7 +48,7 @@ public:
 	{
 		return Words2(*this) += other;	//call += operator overload (as it's already there)
 	}
-	
+
 	Words2 & operator -= (const Words2 &w2)
 	{
 		// Check for self-assignment
@@ -64,7 +64,7 @@ public:
 									 std::inserter(temp, temp.begin()));
 				temp.swap(_wordSet[i]);
 			}
-			
+
 		}
 		return *this;
 	}
@@ -75,9 +75,9 @@ public:
 
 //	int wordSetCount() { int c(0); for(int i=SHORTW_MIN; i<=TARGET_MAX; c+=_wordSet[i++].size()); return c; }
 //	int mapAllCount() { return _mapAll.size(); }
-	
+
 protected:
-	
+
 	bool 			xdxfOpenDict(const std::string &dictFile);	//open generic xml file
 	void 			xdxfCloseDict();
 	TiXmlElement* 	xdxfFirstWord();
@@ -92,7 +92,7 @@ protected:
 	int		_countXdxfMatched;
 	int		_countXdxfMissing;
 
-	tWordSet _wordSet[TARGET_MAX+1];	//use 1..n for actual word length (as index)
+	tWordSet _wordSet[TARGET_MAX+1];	//use 1..n for actual word length (as index) during reword.txt build
 };
 
 #endif //_WORDS2_H

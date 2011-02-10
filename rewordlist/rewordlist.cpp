@@ -75,10 +75,9 @@ using namespace std;
 #endif
 int main(int argc, char* argv[])
 {
-	bool bList = false, bDebug = false, bForceDef = false, bXdxfDef = false;
+	bool bList(false), bDebug(false), bForceDef(false), bXdxfDef(false), bSkillUpd(false);
+	bool bHelp(true), bHelpForce(false);
 	std::string::size_type pos;
-	bool bHelp = true, bHelpForce = false;
-
 	std::string includeList, excludeList;
 	tWordSet xdxfFiles;
 	tWordSet txtFiles;
@@ -90,22 +89,22 @@ int main(int argc, char* argv[])
 		std::string arg = argv[i];
 		if ("--help" == arg)
 		{
-			bHelp = bHelpForce = true;
+			bHelp = bHelpForce = true;  //show help page
 			continue;
 		}
 		if ("-l" == arg)
 		{
-			bList = true;
+			bList = true;       //display more debug info
 			continue;
 		}
 		if ("-d" == arg)
 		{
-			bDebug = true;
+			bDebug = true;      //display extra debug info
 			continue;
 		}
 		if ("-f" == arg)
 		{
-			bForceDef = true;
+			bForceDef = true;   //create/overwrite definitions from included inputs
 			continue;
 		}
 		if ("-x" == arg)
@@ -113,15 +112,23 @@ int main(int argc, char* argv[])
 			bXdxfDef = true;	//use xdxf files passed in for definitions only
 			continue;
 		}
+		if ("-s" == arg)
+        {
+            bSkillUpd = true;    //update word skill value on any word list input
+            continue;
+        }
 		pos = arg.find_last_of(".");		//find the last period for file extension
 		if (pos == string::npos) continue;	//unknown (doesnt end in a file extension)
 		std::string ext(arg.substr(pos));
+
+		//allow multiple imput .xdxf files
 		if (".xdxf" == ext)
 		{
 			xdxfFiles.insert(arg);
 			bHelp = false;	//valid input
 			continue;
 		}
+		//allow multiple input .txt files
 		if (".txt" == ext)
 		{
 			if (strcasecmp(arg.c_str(), "rewordlist.txt") == 0)
@@ -133,15 +140,18 @@ int main(int argc, char* argv[])
 			bHelp = false;	//valid input
 			continue;
 		}
+		//only allow a single .include file
 		if (".include" == ext)
 		{
 			includeList = arg;
 			bHelp = false;	//valid input
 			continue;
 		}
+		//only allow a single .exclude file
 		if (".exclude" == ext)
 		{
 			excludeList = arg;
+			bHelp = false;	//valid input
 			continue;
 		}
 
@@ -156,6 +166,7 @@ int main(int argc, char* argv[])
 		Words2 finalWords;
 		finalWords.setList(bList);
 		finalWords.setDebug(bDebug);
+		finalWords.setSkillUpd(bSkillUpd);
 
 		std::string outFile("rewordlist.txt");
 
@@ -169,14 +180,14 @@ int main(int argc, char* argv[])
 			Words2 includeWords(includeList);
 			int iOrig = finalWords.size();
 			finalWords += includeWords;	//add any forced include words
-			int iNew = finalWords.size();
-			std::cout << "Added " << iNew-iOrig <<  " words using " << includeList << std::endl;
+			std::cout << "Added " << finalWords.size() - iOrig <<  " words using " << includeList << std::endl;
 		}
 		if (!txtFiles.empty())
 		{
 			//load the named wordlists (with or without level and definition values)
 			//Must be done before xdxf dictionaries as xdxf contain possible definitions
 			//for the words in the wordlist files.
+			int iOrig = finalWords.size();
 			tWordSet::const_iterator it_txt = txtFiles.begin();
 			for ( ; it_txt != txtFiles.end(); ++it_txt)
 			{
@@ -184,95 +195,51 @@ int main(int argc, char* argv[])
 				Words2 txtWords;
 				if (txtWords.load(*it_txt))
 				{
+                    if (bList) std::cout << "Inserting " << txtWords.size() << " words for processing" << std::endl;
 					finalWords += txtWords;	//insert into main list (no dups)
 				}
-//std::cout << "txtFiles count : " << txtWords.wordSetCount() + txtWords.mapAllCount() << std::endl;
 			}
-
-//std::cout << "After txtFiles finalWords count : " << finalWords.wordSetCount() + finalWords.mapAllCount() << std::endl;
+			std::cout << "Added " << finalWords.size() - iOrig <<  " words using text files" << std::endl;
 		}
 		if (!xdxfFiles.empty())
 		{
 			//load all the named xdxf dictionary/definition files
+			int iOrig = finalWords.size();
 			tWordSet::const_iterator it_xdxf = xdxfFiles.begin();
 			for ( ; it_xdxf != xdxfFiles.end(); ++it_xdxf)
 			{
 				std::cout << "Adding .xdxf dictionary file '" << *it_xdxf <<  "'" << std::endl;
 				Words2 xdxfWords;
 
-				if (xdxfWords.xdxfBuildDict(*it_xdxf))
+                if (xdxfWords.xdxfBuildDict(*it_xdxf, bForceDef))
 				{
+                    if (bList) std::cout << "Inserting " << xdxfWords.size() << " words from xdxf file" << std::endl;
 					finalWords += xdxfWords;	//insert into main list (no dups)
-//std::cout << "xdxfFiles count : " << xdxfWords.wordSetCount() + xdxfWords.mapAllCount() << std::endl;
 				}
 			}
-//std::cout << "After xdxfFiles finalWords count : " << finalWords.wordSetCount() + finalWords.mapAllCount() << std::endl;
+			std::cout << "Added " << finalWords.size() - iOrig <<  " words using xdxf dictionary files" << std::endl;
 		}
+        if (excludeList.length() > 0)
+        {
+            std::cout << "Removing words found in exclude list file '" << excludeList <<  "'" << std::endl;
+            Words2 excludeWords(excludeList);
+            int iOrig = finalWords.size();
+            finalWords -= excludeWords;	//remove any exclusion words
+            std::cout << "Removed " << finalWords.size() - iOrig <<  " words using " << excludeList << std::endl;
+        }
 
-		if (finalWords.empty())
+        if (finalWords.size() == 0)
 		{
 			std::cout << "Nothing to output." << std::endl;
 			bSave = false;
 		}
 		else bSave = true;
 
-/*
-
-		if (wordList.length() == 0 && dictFile.length() > 0)
-		{
-			std::cout << "Using dictionary file '" << dictFile <<  "' only" << std::endl;
-			if (includeList.length() > 0)
-			{
-				std::cout << "Adding include list file '" << includeList <<  "'" << std::endl;
-				Words includeWords(includeList);
-				int iOrig = words2.size();
-				words2 += includeWords;	//add any forced include words
-				int iNew = words2.size();
-				std::cout << "Added " << iNew-iOrig <<  " words using " << includeList << std::endl;
-			}
-
-			//just load and populate rewordlist.txt from xdxf
-			bSave = words2.xdxfBuildDict(dictFile);
-		}
-		else if (wordList.length() > 0)	//dictFile could be blank or valid (see filterOut())
-		{
-			//load the named wordlist (with or without level and definition values)
-			if (words2.load(wordList))
-			{
-				std::cout << "Using wordlist file '" << wordList <<  "'" << std::endl;
-				if (includeList.length() > 0)
-				{
-					std::cout << "Adding include list file '" << includeList <<  "'" << std::endl;
-					Words includeWords(includeList);
-					int iOrig = words2.size();
-					words2 += includeWords;	//add any forced include words
-					int iNew = words2.size();
-					std::cout << "Added " << iNew-iOrig <<  " words using " << includeList << std::endl;
-				}
-
-				//remove unwanted words (i.e. too long, too short, bad chars etc),
-				//and try to add dict entries to output final rewordlist.txt
-				std::cout << "Filtering out additional unwanted words" << std::endl;
-				bSave = words2.filterOut(dictFile, bForceDef);
-			}
-		}
-		else bHelp = true;	//invalid input so show help
-*/
-
-
 		if (!bHelp && bSave)
 		{
-			if (excludeList.length() > 0)
-			{
-				std::cout << "Removing words found in exclude list file '" << excludeList <<  "'" << std::endl;
-				Words2 excludeWords(excludeList);
-				int iOrig = finalWords.size();
-				finalWords -= excludeWords;	//remove any exclusion words
-				int iNew = finalWords.size();
-				std::cout << "Removed " << iOrig-iNew <<  " words using " << excludeList << std::endl;
-			}
-
-//std::cout << "Before save finalWords count : " << finalWords.wordSetCount() + finalWords.mapAllCount() << std::endl;
+            //now all list and xdxf words added internally, filter out words
+            //not needed due to not found in bigger words etc
+            finalWords.filterGameWords();
 
 			//save it
 			if (finalWords.save(outFile))
@@ -280,7 +247,7 @@ int main(int argc, char* argv[])
 				std::cout << std::endl << "Created '" << outFile <<  "'";// from ";
 //				std::copy( txtFiles.begin(), txtFiles.end(), std::ostream_iterator< std::string >( std::cout, "," ) );
 	//			std::copy( xdxfFiles.begin(), xdxfFiles.end(), std::ostream_iterator< std::string >( std::cout, "," ) );
-				std::cout << std::endl << "Place this in the data/words/ directory of the Reword game" << std::endl;
+				std::cout << std::endl << "Place this file in the data/words/ directory of the Reword game" << std::endl;
 			}
 			else
 				std::cout << std::endl << "Error: Unable to filter word lists into " << outFile << std::endl;

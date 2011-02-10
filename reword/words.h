@@ -37,6 +37,8 @@ struct DictWord
 	bool		_personal;		//a personally entered word (not in dict)
 	bool 		_found;
 
+    DictWord() { clear(); }
+
 	void clear()
 	{
 		_word = "";
@@ -84,12 +86,12 @@ typedef std::vector<std::string> tWordVect;
 class RandInt
 {
 public:
-	RandInt() { 
+	RandInt() {
 #ifdef _SDL_H
 #ifdef WIN32
 #pragma message("words.h: Using SDL_GetTicks() to seed random\n")
 #endif
-		setSeed(SDL_GetTicks()); 
+		setSeed(SDL_GetTicks());
 #else
 #ifdef WIN32
 #pragma message("words.h: Using ctime to seed random\n")
@@ -116,6 +118,7 @@ public:
 	Words(const std::string &wordFile);
 	void setList(bool bOn = true) { _bList = bOn; }
 	void setDebug(bool bOn = true) { _bDebug = bOn; }
+	void setSkillUpd(bool bOn = true) { _bSkillUpd = bOn; }
 
 	bool rejectWord(const std::string &strWord);		//true if word loaded not useable
 	bool load(const std::string &wordFile = "", 				//load a wordlist and exclude
@@ -123,7 +126,7 @@ public:
 				unsigned int startAtWord = 0);
 	unsigned int wordsLoaded() { return _total; };		//before exclusions, duff words etc
 	unsigned int size() { return (unsigned int)_mapAll.size(); }	//current size
-	
+
 	bool nextWord(std::string &retln, eGameDiff level, eGameMode mode, bool reloadAtEnd=true);
 	const tWordsInTarget getWordsInTarget() { return _wordsInTarget; };
 	int wordsOfLength(unsigned int i) { if (i > TARGET_MAX) return 0; else return _nWords[i]; };
@@ -141,18 +144,38 @@ public:
 	    if (this != &w)      // not same object, so add all of 'w' to 'this'
 	    {
 	    	//we must iterate through and assign, as there is a map and a vect to modify
-	    	//We can't just use map.insert(begin,end) as we need to check for existence and
+	    	//We can't just use map::insert(begin,end) as we need to check for existence and
 	    	//insert into vect if not there too.
 			tWordMap::const_iterator pos;
+            tWordMap::iterator foundpos;
 			for (pos = w._mapAll.begin(); pos != w._mapAll.end(); ++pos)
 			{
-				//only add if not already exists - this saves us from searching the m_vect6 vector each time
-				if (this->_mapAll.find(pos->first) == this->_mapAll.end())
+                foundpos = this->_mapAll.find(pos->first);
+				//only add if not already exists - this saves us from searching the _vecTarget vector each time
+				if (foundpos == this->_mapAll.end())
 				{
-					this->_mapAll[pos->first] = pos->second;
-					if ((pos->first.length() >= TARGET_MIN) && (pos->first.length() <= TARGET_MAX))  //is a 6..n target word
-						this->_vecTarget.push_back(pos->first);	//so also add to valid 6 letter word vector
+				    //check we don't overwrite a valid value with a blank, but anything valid overwrites
+					this->_mapAll[pos->first]._word = pos->second._word;
+					if (!pos->second._description.empty())
+                        this->_mapAll[pos->first]._description = pos->second._description;
+                    if (pos->second._level > 0)
+                        this->_mapAll[pos->first]._level = pos->second._level;
+
+					if ((pos->first.length() >= TARGET_MIN) && (pos->first.length() <= TARGET_MAX))  //is a 6to8 target word
+						this->_vecTarget.push_back(pos->first);	//so also add to valid 6to8 letter word vector
 				}
+
+
+
+
+//				if (this->_mapAll.find(pos->first) == this->_mapAll.end())
+//				{
+//					this->_mapAll[pos->first] = pos->second;
+//					if ((pos->first.length() >= TARGET_MIN) && (pos->first.length() <= TARGET_MAX))  //is a 6to8 target word
+//						this->_vecTarget.push_back(pos->first);	//so also add to valid 6to8 letter word vector
+//				}
+
+
 			}
 		}
 		return *this;
@@ -201,9 +224,9 @@ protected:
 	bool wordInWord(const char* wordShort, const char* wordTarget);
 	int findWordsInWordTarget(tWordMap &shortwords, const char *word6);
 	bool splitDictLine(std::string line, DictWord &dict);
-	
-	tWordMap 		_mapAll;				//all words - for
-	tWordVect		_vecTarget;				//vector to hold all 6,7,8 letter words in a rnd order
+
+	tWordMap 		_mapAll;				//all words - for full wordlist to test against (during game)
+	tWordVect		_vecTarget;				//vector to hold all 6,7,8 letter words in a rnd order (during game)
 	tWordVect::const_iterator _vecTarget_it;//vect target iterator
 	DictWord		_word;					//current 6 letter word to find etc
 	tWordsInTarget 	_wordsInTarget;			//map of sub words (ie 3,4,5,6 letter for word6) with a "found" flag to say player got it
@@ -214,6 +237,7 @@ protected:
 	int				_ignored;				//number of words ignored
 	bool 			_bList;					//output processing msgs to console
 	bool			_bDebug;				//output detail 'debug' to console?
+    bool            _bSkillUpd;             //update the word skill level with any non 0 value from any list
 
 	std::string 	_wordFile;				//saved when load() called to allow nextWord() to reload
 };

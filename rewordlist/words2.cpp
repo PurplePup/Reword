@@ -7,7 +7,7 @@ Class impl:		Words2
 
 Description:	Class derived from Words to handle creation of wordlist file by rewordlist
 				application. Allows optional xdxf dictionary entries.
-				Uses TinyXml to parse the xdxf xml(ish) dictionary format. Dictionaries 
+				Uses TinyXml to parse the xdxf xml(ish) dictionary format. Dictionaries
 				can be obtained from http://xdxf.sourceforge.net/
 
 Author:			Al McLuckie (al-at-purplepup-dot-org)
@@ -17,9 +17,9 @@ Date:			15 May 2007
 History:		Version	Date		Change
 				-------	----------	--------------------------------
 				0.3		15.05.2007	Created
-				0.4		08.11.2007	Added include/exclude file names to filterOut() fn
+				0.4		08.11.2007	Added include/exclude file names to filterGameWords() fn
 				0.5.2	23.09.2010	Added ability to load longer words
-				
+
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by
 				the Free Software Foundation; either version 2 of the License, or
@@ -77,7 +77,7 @@ bool Words2::xdxfOpenDict(const std::string &dictFile)
 
 	if (_doc && !_doc->LoadFile())
 	{
-		std::cout << "RewordList: Unable load " << dictFile.c_str() << std::endl;
+		std::cout << "RewordList: Unable to load " << dictFile.c_str() << std::endl;
 		return false;
 	}
 	return true;
@@ -103,9 +103,9 @@ TiXmlElement* Words2::xdxfFirstWord()
 }
 
 //takes the current <ar> node pointer and gets the word and definition for it
-//Then moves the pointer on to the next <ar> node (or 'end' if no more found) 
+//Then moves the pointer on to the next <ar> node (or 'end' if no more found)
 //
-//Note, I find the formatting of the definition within the node bizzarre as the 
+//Note, I find the formatting of the definition within the node bizzarre as the
 //definition can be split into several blocks, with nodes embedded with the text.
 //Not the way I'd define a dictionary schema, but hey, its free and comprehensive
 //so I can't really complain.
@@ -141,10 +141,10 @@ TiXmlElement* Words2::xdxfNextWord(TiXmlElement* ar, std::string &word, std::str
 			//check if the def starts with the dictionary word.
 			//Some xdxf dictionary defs I've seen do something like:
 			//"abbacy n : the jurisdiction or office of an abbot"
-			//where the "abbacy " part is not required for the game, 
+			//where the "abbacy " part is not required for the game,
 			//as it's already shown so try and remove it.
 			std::string::size_type pos = def.find_first_of(" ");
-			std::string prefix = def.substr(0,pos);	//may contain other chars, if so those words will stay 
+			std::string prefix = def.substr(0,pos);	//may contain other chars, if so those words will stay
 			pp_s::makeUpper(prefix);
 			if (word == prefix)
 				def = def.substr(pos);
@@ -164,10 +164,10 @@ TiXmlElement* Words2::xdxfNextWord(TiXmlElement* ar, std::string &word, std::str
 }
 
 //build the word list from the xdxf dictionary without using the wordlist
-//Needs 2 passes to build valid 6/8 letter words first, then those 6/8 letter words 
-//with 3, 4, or 5 letter words within them that will be saved as the result file.
-//Don't reset values before staring as .include files may have been loaded
-bool Words2::xdxfBuildDict(const std::string& dictFile)
+//Needs 2 processes to build valid 6to8 letter words first, then those 6to8 letter words
+//with shorter letter words within them that will be saved as the result file.
+//Don't reset values before starting as .include files may have been loaded
+bool Words2::xdxfBuildDict(const std::string& dictFile, bool bUpdateDef)
 {
 	//scan any xdxf format dictionary file and assign the description to the
 	//same word in our list of acceptable words for the game.
@@ -189,51 +189,59 @@ bool Words2::xdxfBuildDict(const std::string& dictFile)
 				_total++;
 				pp_s::makeAlpha(word);			//strip any non a-z chars
 				pp_s::makeUpper(word);			//force to UPPER case
-				
+
 				if (rejectWord(word))
 				{
 					_ignored++;
 					continue;
 				}
-	
+
 				if (_bDebug) std::cout << "DEBUG: Line " << _total << ": " << word.c_str() << std::endl;
 
 				dictPair = dictSet.insert(word);
-				if (!dictPair.second)	//not inserted so is a duplicate word
+				if (!dictPair.second)	//not inserted so is a duplicate word from the input (xdxf) file
 				{
 					if (_bDebug) std::cout << "DEBUG: Line " << _total << " Duplicate: " << word.c_str() << std::endl;
 					_ignored++;
 					continue;
 				}
 
+				//add/update word in dict
+//				tWordMap::iterator it_word = _mapAll.find(word);
+//				const bool bExists = (it_word != _mapAll.end());
+				const bool bExists = (_mapAll.find(word) != _mapAll.end());
+
 				dictWord._word = word;
 				dictWord._description = def;
-				dictWord._level = 0;
-
-				//add word to dict
-				if (_mapAll.find(word) == _mapAll.end())			//not found yet so add
-				{
-					if (_bDebug) std::cout << "DEBUG: Adding " << word.c_str() << " : def = " << def.c_str() << std::endl;
-
-					_mapAll[word] = dictWord;			//so insert it in the ALL word map
-					if (word.length() >= TARGET_MIN && word.length() <= TARGET_MAX)
-						_vecTarget.push_back(word);		//so also add to valid target word vector used for nextWord()
-				}
+				dictWord._level = 0;    //level only defined in .txt files, not .xdxf
+//
+//				if (bExists)
+//                {
+//                    if (it_word->second._level != 0)
+//                    dictWord._level = it_word->second._level;  //may have been loaded in a reword.txt type fileloaded first
+//                }
+//
+				_mapAll[word] = dictWord;			//so insert/amend it in the ALL word map
+				if (!bExists && (word.length() >= TARGET_MIN && word.length() <= TARGET_MAX))
+                {
+                    if (_bDebug) std::cout << "DEBUG: Adding " << word.c_str() << " : def = " << def.c_str() << std::endl;
+                    _vecTarget.push_back(word);		//so also add to valid target word vector used for nextWord()
+                }
 			}
 		}
-		std::cout << "Words loaded : " << _mapAll.size() << std::endl;
+/*		std::cout << "Words loaded : " << _mapAll.size() << std::endl;
 		std::cout << "Target words loaded : " << _vecTarget.size() << std::endl;
-		
+
 		//now again, to match 3, 4, 5 etc, letter words
 		addWordsToSets();
 
 		for (int i=SHORTW_MIN; i<=TARGET_MAX; ++i)
 			std::cout << i << " letter words : found " << _wordSet[i].size() << std::endl;
-		
+
 		std::cout << std::endl << "From Xdxf dict : " << dictFile << std::endl;
 		std::cout << std::endl << "      Loaded   : " << _total << " words" << std::endl;
 		std::cout << std::endl << "      Rejected : " << _ignored << " words" << std::endl;
-
+*/
 		return true;
 	}
 	return false;
@@ -242,9 +250,15 @@ bool Words2::xdxfBuildDict(const std::string& dictFile)
 //build the word sets from the full list using the target list as the source
 void Words2::addWordsToSets()
 {
+    int iCount = _vecTarget.size(),
+        iMod = _vecTarget.size() / 50;
+
 	tWordVect::const_iterator target_it = _vecTarget.begin();
 	while (target_it != _vecTarget.end())
 	{
+	    if (!(iCount-- % iMod))
+            std::cout << std::unitbuf << "." << iCount;
+
 		//make sure its a word length we support (say 3..8)
 		if ((*target_it).length() >= SHORTW_MIN && (*target_it).length() <= TARGET_MAX)
 		{
@@ -266,119 +280,24 @@ void Words2::addWordsToSets()
 		}
 		++target_it;
 	}
+	std::cout << std::nounitbuf << std::endl;
 }
 
 
-//Filter the loaded wordlist that has been processed to remove duplicates or words with too 
-//many or too few letters etc and save it back out to the named file. 
-//This function is primarily used to pre filter the wordlist file so that the game would 
-//have no problem loading it and could process each word without having to worry about said duplicates etc.
-//This makes it easier to build level and description markers into the word list file 
-//without wasting time on words that will eventually be excluded by the game anyway. 
-bool Words2::filterOut(const std::string &dictFile, bool bUpdateDef)
+//Filter the loaded wordlists that has been processed to remove duplicates or words with too
+//many or too few letters etc and get it ready to save back out to the named file.
+bool Words2::filterGameWords()    //const std::string &dictFile, bool bUpdateDef)
 {
-	if (!_total)
-	{
-		std::cout << "Nothing to filter or save" << std::endl;
-		return false;	//nothing loaded
-	}
-
 	//now we know we can open the output file, so proceed - which may take a while...
 	std::cout << "Filtering ... " << _vecTarget.size() << std::endl;
 
 	addWordsToSets();
 
-	//scan any (optional) xdxf format dictionary file and assign the description
-	//to the same word in our list of acceptable words for the game.
-	if (xdxfOpenDict(dictFile))
-	{
-		//search dictionary for definitions and update if needed
-		bool bFound = false;
-		std::string word;
-		std::string def;
-		tWordMap::iterator it;
-		TiXmlElement *ar = xdxfFirstWord();
-		while (ar)
-		{
-			if ((ar = xdxfNextWord(ar, word, def)))
-			{
-				bFound = false;
-				
-				//match the word with one we already validated from our
-				//word list and add the dictionary entry to it
-				pp_s::makeAlpha(word);			//strip any non a-z chars
-				pp_s::makeUpper(word);			//force to UPPER case
-				it = _mapAll.find(word);
-				if (it != _mapAll.end())			//found the word
-				{
-					bFound = true;
-					if (bUpdateDef || (*it).second._description.length()==0)	//overwrite or blank
-					{
-						if (_bDebug) std::cout << "DEBUG: Xdxf " << word.c_str() << " : def = " << def.c_str() << std::endl;
-						
-						++_countXdxfMatched;
-						(*it).second._description = def;
-					}
-					else ++_countXdxfSkipped;
-				}
-				
-				if (word.length() < TARGET_MAX)	//so still able to try add 'S'
-				{
-					//Q&D!
-					//if the shorter word doesnt end in 'S' try it again, with an 'S'
-					//as plurals not always in the dictionary file, just the singular,
-					//but they may well be in the originating wordlist.
-					if (word[word.length()-1] != 'S')
-					{
-						word += 'S';
-						
-						it = _mapAll.find(word);
-						if (it != _mapAll.end())			//found the word
-						{
-							bFound = true;
-							if (bUpdateDef || (*it).second._description.length()==0)	//overwrite or blank
-							{
-								if (_bDebug) std::cout << "DEBUG: Xdxf " << word.c_str() << " : def = " << def.c_str() << std::endl;
-								
-								++_countXdxfMatched;
-								(*it).second._description = def;
-								
-								if (_bList) std::cout << "Found from singular?: " << word << std::endl;
-							}
-							else ++_countXdxfSkipped;
-							continue;	//next ar
-						}
-					}
-				}
-				
-				if (!bFound) ++_countXdxfMissing;
-			}
-		}
-		
-
-
-
-	}
-
-	std::cout << "From wordlist  : " << _wordFile << std::endl;
-	std::cout << "     Loaded    : " << _total << " words" << std::endl;
-	std::cout << "     Rejected  : " << _ignored << " words" << std::endl;
-
-	if (dictFile.length())
-	{
-		std::cout << std::endl;
-		std::cout << "From Xdxf dict : " << dictFile << std::endl;
-		std::cout << "     Loaded    : " << _countXdxfWords << " words with definitions" << std::endl;
-		std::cout << "     Skipped   : " << _countXdxfSkipped << " words due to blank definition or already defined" << std::endl;
-		std::cout << "     Matched   : " << _countXdxfMatched << " definitions to blank wordlist entries" << std::endl;
-		std::cout << "     Missing   : " << _countXdxfMissing << " words in dictionay but not in filtered wordlist" << std::endl;
-	}
-
 	return true;
 }
 
 //output the actual word list to file
-//The wordMap is the original list and the wordSet is the filtered list that 
+//The wordMap is the original list and the wordSet is the filtered list that
 //is to be output. Called from save() for each set of same length words.
 int Words2::saveWordMap(FILE *& fp, tWordMap &wmOrig, tWordSet &wsFilt)
 {
@@ -410,18 +329,15 @@ bool Words2::save(std::string outFile)
 	if ((fp = fopen(outFile.c_str(), "w+")))  //create output file even if exists
 	{
 		//now save filtered dictionary...
-
 		if (_bList) std::cout << "Writing..." << outFile <<std::endl;
 
-//int  x = (int)_mapAll.size();
-
-		//loop through _mapAll to output as 6 then 5 then 4 then 3.
-		//which is easier to read and maintain in the output file.
+		//loop through each word set and use _mapAll to output N.. 6.. 5.. 4.. 3.
+		//with full description and level value.
 		for (int i = TARGET_MAX; i >= SHORTW_MIN; --i)
 		{
 			iout = saveWordMap(fp, _mapAll, _wordSet[i]);
 			itotal += iout;
-			std::cout << "Saved: " << iout << " " << i << " letter filtered words " << std::endl;
+			if (_bList) std::cout << "Saved: " << iout << " " << i << " letter filtered words " << std::endl;
 		}
 		fclose(fp);
 

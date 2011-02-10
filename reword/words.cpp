@@ -14,12 +14,12 @@ Date:			06 April 2007
 History:		Version	Date		Change
 				-------	----------	--------------------------------
 				0.3		25.02.2007	Rework word matching algorithms to work on-the-fly so we don't
-										need to pre-create a formatted wordlist with all words matching 
-										each 6 letter word.  This also helps prevent people looking up 
+										need to pre-create a formatted wordlist with all words matching
+										each 6 letter word.  This also helps prevent people looking up
 										the matching words during play.
-										Rewordlist utility app is still used to initially filter wordlists, 
-										but now mainly used to add dictionary definitions. 
-									Header file excludes SDL_GetTicks call when seeding random numbers if 
+										Rewordlist utility app is still used to initially filter wordlists,
+										but now mainly used to add dictionary definitions.
+									Header file excludes SDL_GetTicks call when seeding random numbers if
 										called from app (rewordlist) that doesn't use SDL
 				0.4		09.11.2007	Modify load() to pass in dict container so we can load diff files into
 										diff containers. Mainly used for exclusion/inclusion file lists
@@ -113,7 +113,7 @@ bool Words::splitDictLine(std::string text, DictWord &dictword)
 		switch (count)
 		{
 		case 0:	pp_s::makeUpper(newword);
-				dictword._word = newword; 
+				dictword._word = newword;
 				break;
 		case 1:	dictword._level = atoi(newword.c_str());
 				break;
@@ -170,25 +170,25 @@ bool Words::load(const std::string &wordFile, unsigned int rndSeed, unsigned int
 		std::cerr << "Wordfile not specified, cannot load" << std::endl;
 		return false;	//no previously opened/saved file
 	}
-	
+
 	//reset all containers and working vars and totals to 0 etc
 	reset();
 
 	tWordSet dictSet;	//to remove duplicates... discarded after load()
 	std::pair<tWordSet::const_iterator, bool> dictPair;
-	
+
 	if (wordFile.length()) _wordFile = wordFile;	//save it for any reload
-	
+
 	std::string lnwrd;
 	DictWord dictWord;
-	
+
 	std::ifstream ifs1 (_wordFile.c_str(), std::ifstream::in);	//open the file
 	if (ifs1.is_open() && !ifs1.eof())
 	{
 		if (_bDebug) std::cout << _wordFile << std::endl;
-		
+
 		int wordLen = 0;
-		while (std::getline(ifs1, lnwrd))	
+		while (std::getline(ifs1, lnwrd))
 		{
 			_total++;
 
@@ -201,7 +201,7 @@ bool Words::load(const std::string &wordFile, unsigned int rndSeed, unsigned int
 				_ignored++;
 				continue;
 			}
-				
+
 			if (_bDebug) std::cout << "Line " << _total << ": " << lnwrd.c_str() << std::endl;
 
 			dictPair = dictSet.insert(lnwrd);
@@ -213,8 +213,8 @@ bool Words::load(const std::string &wordFile, unsigned int rndSeed, unsigned int
 			}
 
 			//check if level given is valid and increment count
-			if (dictWord._level < DIF_EASY || dictWord._level > DIF_MAX)
-				dictWord._level = DIF_EASY;
+			if (dictWord._level < (int)DIF_EASY || dictWord._level > (int)DIF_MAX)
+				dictWord._level = 0;
 
 			//add word to dict
 			if (_mapAll.find(lnwrd) == _mapAll.end())			//not found
@@ -232,9 +232,9 @@ bool Words::load(const std::string &wordFile, unsigned int rndSeed, unsigned int
 //		std::random_shuffle(_vect6.begin(), _vect6.end(), g_randInt);
 
 		// random generator function:
-		if (rndSeed) g_rndSeed = rndSeed; //srand(rndSeed); 
+		if (rndSeed) g_rndSeed = rndSeed; //srand(rndSeed);
 		std::random_shuffle(_vecTarget.begin(), _vecTarget.end(), pwrandom);
-	
+
 		//output the start of the sorted list to check order
 /*		std::cout << "DEBUG: rnd seed = " << rndSeed << std::endl;
 		std::cout << "List first 20..." << std::endl;
@@ -253,7 +253,7 @@ bool Words::load(const std::string &wordFile, unsigned int rndSeed, unsigned int
 }
 
 //determine if the letters in wordShort are in wordTarget
-//i.e. do all the chars in short word xyz exist in long word xaybzc 
+//i.e. do all the chars in short word xyz exist in long word xaybzc
 //ShortWord can be made up from some or all letters in longWord (without using letters twice)
 bool Words::wordInWord(const char * wordShort, const char * wordTarget)
 {
@@ -273,11 +273,11 @@ bool Words::wordInWord(const char * wordShort, const char * wordTarget)
 			{
 				if ((mask & (1<<il)) == 0)	//if not already matched
 				{
-					mask |= 1<<il;	//set mask and go for next 
+					mask |= 1<<il;	//set mask and go for next
 					++found;
 					break;
 				}
-				//else try next available letter 
+				//else try next available letter
 			}
 		}
 		if (found != is+1) break; //last loop failed to find letter
@@ -294,11 +294,11 @@ int Words::findWordsInWordTarget(tWordMap &shortwords, const char *wordTarget)
 	for (tWordMap::const_iterator shtwrd = shortwords.begin (); shtwrd != shortwords.end (); ++shtwrd)
 	{
 //		if (strcmp((*shtwrd).second.c_str(), wordTarget) == 0) continue;	//exclude same word?
-		
+
 		if (wordInWord( (*shtwrd).first.c_str(), wordTarget ))
 		{
 			if (_bDebug) std::cout << (*shtwrd).first.c_str() << ", ";
-			
+
 			_wordsInTarget.insert(tWordsInTarget::value_type( (*shtwrd).first.c_str(), false ));	//false = each word not "found" yet
 			_nWords[(*shtwrd).first.length()]++;		//ignore 0,1,2 and start at 3 as min word len is 3
 			count++;
@@ -335,9 +335,9 @@ bool Words::checkCurrentWordTarget(const std::string &wordTarget)
 			break;
 		}
 	}
-	
+
 	//only need to exclude target word if there are no short words at all for it
-	if (iShortWords == 0)	//exclude target word due to missing (short) 3, 4, 5 letter words 
+	if (iShortWords == 0)	//exclude target word due to missing (short) 3, 4, 5 letter words
 	{
 		if (_bDebug) std::cout << "All short words missing for word : " << wordTarget << std::endl;
 		bOk = false;
@@ -346,7 +346,7 @@ bool Words::checkCurrentWordTarget(const std::string &wordTarget)
 	return bOk;
 }
 
-//get the next 6 letter word to use in the game
+//get the next 6to8 letter word to use in the game
 bool Words::nextWord(std::string &retln, eGameDiff level,  eGameMode mode, bool reloadAtEnd /*=true*/)
 {
 	bool bOk = true;
@@ -388,7 +388,7 @@ bool Words::nextWord(std::string &retln, eGameDiff level,  eGameMode mode, bool 
 	} while (--failsafe && !bOk);
 
 	if (!bOk) _word._word = "XXXXXX";	//err in word list - too many or missing
-	
+
 	retln = _word._word;
 
 	return bOk;
@@ -407,7 +407,7 @@ int Words::checkWordsInTarget(std::string &testWord)
 		(*it).second = true;	//indicate its now been found
 	}
 	else return -1;	//not found
-	
+
 	return 1;	//found and set to 'found' in list
 
 }
