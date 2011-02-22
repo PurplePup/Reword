@@ -6,7 +6,7 @@ File:			PlayMenu.cpp
 Class impl:		PlayMenu
 
 Description:	A class derived from the IPlay interface to handle all screen
-				events and drawing of the Menu screen
+				events and drawing of any generic Menu screens
 
 Author:			Al McLuckie (al-at-purplepup-dot-org)
 
@@ -15,7 +15,7 @@ Date:			06 April 2007
 History:		Version	Date		Change
 				-------	----------	--------------------------------
 				0.3.1	07.06.2007	Speed up menu movement a little
-				0.5.0	18.06.2008	Added code to create menu items dynamically 
+				0.5.0	18.06.2008	Added code to create menu items dynamically
 										and support touchscreen
 
 Licence:		This program is free software; you can redistribute it and/or modify
@@ -39,6 +39,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "global.h"
 #include "playmenu.h"
 #include "platform.h"
+#include "audio.h"
 #include <string>
 
 PlayMenu::PlayMenu(GameData &gd)  : _gd(gd)
@@ -53,9 +54,7 @@ void PlayMenu::init(Input *input)
 {
 	//once the class is initialised, init and running are set true
 
-	//play menu music - if not already playing
-	if (!Mix_PlayingMusic())
-		Mix_PlayMusic(_gd._musicMenu, -1);	//play 'forever'
+    startMenuMusic();
 
 	//set the repeat of the keys required
 	input->setRepeat(Input::UP, 150, 300);		//button, rate, delay
@@ -67,9 +66,31 @@ void PlayMenu::init(Input *input)
 	_gd._star.setPos(MENU_HI_X,0);//MENU_HI_Y+(_item*MENU_HI_GAP));	//modified once menu text X pos returned from put_text()
 	_gd._star.startAnim( 0, 6, ImageAnim::ANI_LOOP, 35, 0);
 
+    //music on/off icon
+	_gd._gamemusic_icon.setPos(5, 5);
+	_gd._gamemusic_icon.setTouchable(_gd._bTouch);
+	_gd._gamemusic_icon.setFrame(_gd._options._bMusic?0:1);    //first frame (on) or second frame (off)
+
 	//need to set the _init and _running flags
 	_init = true;
 	_running = true;
+}
+
+void PlayMenu::startMenuMusic()
+{
+	//play menu music - if not already playing
+	if (_gd._options._bMusic && !Mix_PlayingMusic())
+		Mix_PlayMusic(_gd._musicMenu, -1);	//play 'forever'
+
+}
+void PlayMenu::stopMenuMusic()
+{
+    //stop any menu music or personal music playing in the menu
+    Audio *pAudio = Audio::instance();
+    if (pAudio)
+    {
+        pAudio->stopTrack();
+    }
 }
 
 void PlayMenu::choose(MenuItem i)
@@ -85,7 +106,8 @@ void PlayMenu::render(Screen *s)
 
 	_title.draw(s);
 
-	_gd._fntTiny.put_text_right(s, 5, VERSION_STRING, BLACK_COLOUR); //display vN.N at top right
+    _gd._gamemusic_icon.draw(s);
+	_gd._fntTiny.put_text_right(s, 5, 0, VERSION_STRING, BLACK_COLOUR); //display vN.N at top right
 
 	int selected = getSelected()._id;
 	int y = MENU_HI_Y+MENU_HI_OFF;
@@ -109,7 +131,7 @@ void PlayMenu::render(Screen *s)
 		y += MENU_HI_GAP;
 	}
 	_nextYpos = y;	//useful for placing help text after items
-	
+
 	_gd._star.draw(s);
 
 	int helpYpos = BG_LINE_BOT+((SCREEN_HEIGHT-BG_LINE_BOT-_gd._fntClean.height())/2);
@@ -122,18 +144,18 @@ void PlayMenu::work(Input *input, float speedFactor)
 	_title.work();
 	_gd._star.work();
 
-	//animate the roundel title if it's not moving and 
+	//animate the roundel title if it's not moving and
 	//we have waited long enough since it animated last
 	if (!_title.isMoving() && _titleW.done(true))
 	{
 		if (_title.isInOrder())
-			_title.jumbleWord(true); 
+			_title.jumbleWord(true);
 		else
 			_title.unJumbleWord(true);
 	}
 
 	//Do repeat keys...
-	//if a key is pressed and the interval has expired process 
+	//if a key is pressed and the interval has expired process
 	//that button as if pressesd again
 
     if (input->repeat(Input::UP)) button(input, Input::UP);
@@ -144,7 +166,7 @@ void PlayMenu::button(Input *input, Input::ButtonType b)
 {
 	switch (b)
 	{
-	case Input::UP: 
+	case Input::UP:
 		if (input->isPressed(b) && _itemList.size())
 		{
 			if (0==_item)
@@ -153,7 +175,7 @@ void PlayMenu::button(Input *input, Input::ButtonType b)
 				_item--;
 		}
 		break;
-	case Input::DOWN: 
+	case Input::DOWN:
 		if (input->isPressed(b) && _itemList.size())
 		{
 			if (_itemList.size()-1==_item)
@@ -163,7 +185,7 @@ void PlayMenu::button(Input *input, Input::ButtonType b)
 		}
 		break;
 	case Input::SELECT:
-	case Input::CLICK: 
+	case Input::CLICK:
 	case Input::START:
 	case Input::B:
 		if (input->isPressed(b) && _itemList[_item]._enabled)
@@ -191,6 +213,16 @@ void PlayMenu::touch(Point pt)
 			return;
 		}
 	}
+
+    if (_gd._gamemusic_icon.contains(pt))
+    {
+        _gd._options._bMusic = !_gd._options._bMusic;
+        _gd._gamemusic_icon.setFrame(_gd._options._bMusic?0:1);    //first frame (on) or second frame (off)
+        if (_gd._options._bMusic)
+            startMenuMusic();
+        else
+            stopMenuMusic();
+    }
 }
 
 void PlayMenu::setTitle(std::string title)

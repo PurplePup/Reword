@@ -22,7 +22,11 @@ protected:
 public:
 	~Audio();
 
-	void init();
+    static Audio *instance();		// Create an instance of the object
+    static Audio &getRef();			// Get a reference to the object
+    static Audio *getPtr();			// Get a pointer to the object
+
+	void init(bool bMusic, bool bSfx);
 	void setVolume(Sint16 newvol, bool test = true);
 	void volumeUp();
 	void volumeDown();
@@ -32,6 +36,7 @@ public:
 	void startPrevTrack();
 	void startTrack(const std::string &trackName);
 	void stopTrack();
+	void pauseTrack();
 	bool hasMusicTracks() { return _trackList.size() > 0; }
 	bool isPlayingMusic() { return _bPlayingTrack; }
 	bool isActuallyPlayingMusic() { return Mix_PlayingMusic()?true:false; }
@@ -71,11 +76,8 @@ protected:
 	std::string _baseTrackDir;
 	std::deque<std::string> _trackList;
 	bool		_bPlayingTrack;		//set true if start playing
+	bool        _bMusic, _bSfx;
 
-public:
-    static Audio *instance();		// Create an instance of the object
-    static Audio &getRef();			// Get a reference to the object
-    static Audio *getPtr();			// Get a pointer to the object
 private:
     static std::auto_ptr<Audio> _instance;	//singleton instance pointer
 

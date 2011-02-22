@@ -41,6 +41,7 @@
 #define LETTERH			36
 #define BOXW			90
 #define BOXH			15
+#define BOXHGAP         3
 #define BOXTEXTOFFSETX	4
 #define BOXTEXTOFFSETY	4
 #define MENU_HI_X		58
@@ -57,7 +58,6 @@
 #define BG_LINE_TOP		(LETTERH+10)
 #define BG_LINE_BOT		(SCREEN_HEIGHT-30)
 #define GAME_GAP1		3
-#define SCORE_OFFSET	((SCREEN_WIDTH-300)/2)
 #define MAX_WORD_COL	8	//max number of words to display down a 3, 4, 5 or 6 word column
 #define MAX_WORD_ROW	4	//4 across screen, 3,4,5,6 for 6, or 5,6,7,8 for 8 letter target word
 #define FOUND_WORD_CHR	10	//pixels wide for calculating found word box size
@@ -81,8 +81,9 @@
 #define LETTERH			72
 #define BOXW			144
 #define BOXH			25
+#define BOXHGAP         3
 #define BOXTEXTOFFSETX	8
-#define BOXTEXTOFFSETY	2
+#define BOXTEXTOFFSETY	-2
 #define MENU_HI_X		58
 #define MENU_HI_Y		(LETTERH + 40)
 #define MENU_HI_GAP		55
@@ -97,7 +98,6 @@
 #define BG_LINE_TOP		85
 #define BG_LINE_BOT		415
 #define GAME_GAP1		8
-#define SCORE_OFFSET	((SCREEN_WIDTH-300)/2)
 #define MAX_WORD_COL	8	//max number of words to display down a 3, 4, 5 or 6 word column
 #define MAX_WORD_ROW	4	//4 across screen, 3,4,5,6 for 6, or 5,6,7,8 for 8 letter target word
 #define FOUND_WORD_CHR	18	//pixels wide for calculating found word box size
@@ -124,6 +124,7 @@
 #define LETTERH			72
 #define BOXW			144
 #define BOXH			25
+#define BOXHGAP         3
 #define BOXTEXTOFFSETX	6
 #define BOXTEXTOFFSETY	-3
 #define MENU_HI_X		58
@@ -140,7 +141,6 @@
 #define BG_LINE_TOP		85
 #define BG_LINE_BOT		415
 #define GAME_GAP1		8
-#define SCORE_OFFSET	((SCREEN_WIDTH-300)/2)
 #define MAX_WORD_COL	8	//max number of words to display down a 3, 4, 5 or 6 word column
 #define MAX_WORD_ROW	4	//4 across screen, 3,4,5,6 for 6, or 5,6,7,8 for 8 letter target word
 #define FOUND_WORD_CHR	18	//pixels wide for calculating found word box size

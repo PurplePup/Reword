@@ -20,7 +20,7 @@
 
 //a class to wrap the play state (not the game state) so that within game state ST_GAME we
 //have the play states (PG_PLAY, PG_WAIT etc) that direct the processing to different render
-//and work functions. This allows us to separate things like the popup menu render into its 
+//and work functions. This allows us to separate things like the popup menu render into its
 //own function rather than embedding it in the main play render function with lots of if/thens.
 template <class T>
 class StateInPlay
@@ -51,12 +51,12 @@ public:
 			}
 	T pop() {	//return prev value or default if stack is empty
 			if (_state.empty()) return _defaultState;
-			_state.pop(); 
-			return _state.top(); 
+			_state.pop();
+			return _state.top();
 			}
 	T top() {
 			if (_state.empty()) return _defaultState;
-			return _state.top(); 
+			return _state.top();
 			}
 	bool operator==(const T &t) { return (top() == t); }	//test against state value not state object
 
@@ -66,6 +66,7 @@ protected:
 	std::stack<T> _state;
 };
 
+
 struct DisplayWord //: public DictWord
 {
 public:
@@ -73,6 +74,7 @@ public:
 	short	_y;
 	short	_len;
 };
+
 
 class PlayGame : public IPlay
 {
@@ -92,7 +94,7 @@ public:
 //	static 	void pushSDL_Event(int code, void *data1 = NULL, void *data2 = NULL);
 
 protected:
-	
+
 	//state funcion pointer handling
 	void stateFn(eState state);
 	void statePush(eState state);
@@ -124,10 +126,10 @@ protected:
 
 	void render_play(Screen*);	//main play render fn
 	void render_wait(Screen*);	//waiting for PG_END, do "game over" anim etc
-	void render_end(Screen*);	//main play at end 
+	void render_end(Screen*);	//main play at end
 	void render_dict(Screen*);	//dictionary display
 	void render_pause(Screen*);	//pause screen
-	void render_popup(Screen*);	//popup menu 
+	void render_popup(Screen*);	//popup menu
 
     void work_play(Input*, float);
     void work_wait(Input*, float);
@@ -147,7 +149,7 @@ protected:
 	void touch_end(Point pt);
 	void touch_default(Point pt);
 	void touch_dict(Point pt);
-	
+
 	void commandWordToLast();
 	void commandClearAllToTop();
 	void commandJumbleWord();
@@ -160,11 +162,12 @@ private:
 	std::string _tmpStr;		//used in render()
 	std::string _tmpStr2;		//used in render()
 	std::string _tmpDefStr;		//used in render()
+	bool        _tmpDefMore;    //..
 
 	int _maxwordlen;			//max length word found so far (per level)
 	int _longestWordLen;		//longest word length for this level (6,7 8 etc)
 	int _shortestWordLen;		//shortest word length for this level (3,4 5 etc)
-	
+
 	bool _inputL, _inputR;		//if L+R(+CLICK) pressed
 	bool _bAbort;				//if user presses L+R+CLICK
 
@@ -182,8 +185,8 @@ private:
 	int _yScratchTop;
 	int _yScratchBot;
 
-	int _score0_x, _words0_x, _countdown0_x;
-	int _score0_y, _words0_y, _countdown0_y;
+	int _gamemenu_icon_x, _gamemusic_icon_x, _score0_x, _words0_x, _countdown0_x;
+	int _gamemenu_icon_y, _gamemusic_icon_y, _score0_y, _words0_y, _countdown0_y;
 
 	//timers
 	SDL_TimerID _countdownID;	//timer used to show timer countdown in game
@@ -194,9 +197,11 @@ private:
 	tWordsFoundList _wordsFound[TARGET_MAX+1];	//for 3, 4, 5 and 6 letter word
 	typedef std::deque<DisplayWord> tWordsFoundPos;
 	tWordsFoundPos _wordsFoundPos[TARGET_MAX+1];	//for 3, 4, 5 and 6 letter word
-	
+
 	eState		_state;			//local states for this screen
 	StateInPlay<eState> _states;
+
+ // SpriteMgr   _sprites;
 
 	eSuccess	_success;		//used in drawGame()
 	int			_bonusScore;
@@ -205,11 +210,11 @@ private:
 	Waiting		_waiting;		//for PG_WAIT state, wait before continuing (after level finished)
 	Waiting		_doubleClick;
 	int			_randomTitle;
-	
+
 	Roundels	_round;			//for roundel game letter sprites
 	std::auto_ptr<Roundels>	_roundPaused;	//"PAUSED" in middle of screen
 	std::auto_ptr<Roundels>	_roundDict;		//"xxxxx" word highlighted for dictionary display
-	
+
 	//function pointers for render(), work(), button() etc
 	void (PlayGame::*pRenderFn)(Screen*);
     void (PlayGame::*pWorkFn)(Input*, float);

@@ -63,12 +63,38 @@ Audio::~Audio()
 	if (_volTest)
 		Mix_FreeChunk(_volTest);
 
-	if (_init) Mix_CloseAudio();
+	if (_init)
+    {
+        stopTrack();
+        Mix_CloseAudio();
+	}
 }
 
-void Audio::init()
+std::auto_ptr<Audio> Audio::_instance(0);
+
+Audio * Audio::instance()			// Create an instance of the object
+{
+	if (_instance.get() == 0)
+//		_instance.reset(new Audio());
+		_instance = std::auto_ptr<Audio>(new Audio());
+	return _instance.get();
+}
+
+Audio & Audio::getRef()			// Get a reference to the object
+{
+	return *_instance;
+}
+
+Audio * Audio::getPtr()			// Get a pointer to the object
+{
+	return _instance.get();
+}
+
+void Audio::init(bool bMusic, bool bSfx)
 {
 	if (_init) return;
+	_bMusic = bMusic;
+	_bSfx = bSfx;
 
 	//open audio with chunksize of 128 for gp2x, as smaller this is,
 	//the more often the sound hooks will be called, reducing lag
@@ -91,9 +117,11 @@ void Audio::init()
     	//setLastError("Warning: Couldn't init MikMod audio\nReason: %s\n");
         return;	//failed
     }
-#endif
+#endif //_USE_MIKMOD
 
-	loadTracks(_baseTrackDir);
+    if (_bMusic)
+        loadTracks(_baseTrackDir);
+
 	_init = true;
 }
 
@@ -152,7 +180,7 @@ void Audio::setVolume(Sint16 newvol, bool bTest)
 	_volume = newvol;
 
 	//play a test beep/sound at the new volume so player can tell
-	if (bTest) Mix_PlayChannel(-1,_volTest,0);
+	if (bTest && _bSfx) Mix_PlayChannel(-1,_volTest,0);
 
 }
 
@@ -234,7 +262,7 @@ void Audio::startTrack(const std::string &trackName)
 {
 	stopTrack();	//stop any existing music
 
-	if (trackName.length() > 0)
+	if (_bMusic && trackName.length() > 0)
 	{
 		printf("Play: %s\n", trackName.c_str());
 		std::string newTrack = _baseTrackDir + "/" + trackName;
@@ -253,6 +281,14 @@ void Audio::startTrack(const std::string &trackName)
 	{
 		//TODO: play fail sound
 	}
+}
+
+void Audio::pauseTrack()
+{
+    if (Mix_Paused(-1))
+        Mix_ResumeMusic();
+    else
+        Mix_PauseMusic();
 }
 
 std::string Audio::getNextTrack()
@@ -295,7 +331,7 @@ void Audio::loadTracks(const std::string &baseDir)
 		closedir(d);
 	}
 #else
-	//load tracks on MS box
+	//TODO - load tracks on MS box
 #endif
 }
 
@@ -330,25 +366,5 @@ void Audio::modUpdate()	//regular update call
 {
 	if (Player_Active()) MikMod_Update();
 }
-#endif
-
-std::auto_ptr<Audio> Audio::_instance(0);
-
-Audio * Audio::instance()			// Create an instance of the object
-{
-	if (_instance.get() == 0)
-//		_instance.reset(new Audio());
-		_instance = std::auto_ptr<Audio>(new Audio());
-	return _instance.get();
-}
-
-Audio & Audio::getRef()			// Get a reference to the object
-{
-	return *_instance;
-}
-
-Audio * Audio::getPtr()			// Get a pointer to the object
-{
-	return _instance.get();
-}
+#endif  //_USE_MIKMOD
 

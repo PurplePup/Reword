@@ -67,7 +67,9 @@ GameData::GameData() : _bTouch(false),  _init(false)
 	bErr |= !_game_reword.load(RES_BASE + "images/game_reword.png");
 	bErr |= !_game_speed6.load(RES_BASE + "images/game_speed6.png");
 	bErr |= !_game_timetrial.load(RES_BASE + "images/game_timetrial.png");
-	bErr |= !_popupmenu.load(RES_BASE + "images/popup_menu.png", 200);
+	bErr |= !_gamemenu.load(RES_BASE + "images/popup_menu.png", 200);
+    bErr |= !_gamemenu_icon.load(RES_BASE + "images/btn_menu.png",255, 2);     //2 state press on/off
+    bErr |= !_gamemusic_icon.load(RES_BASE + "images/btn_music.png", 255, 2);        //2 states on/off
 	bErr |= !_cursor.load(RES_BASE + "images/cursors.png");
 	bErr |= !_cursor.setTileSize(CURSORW,CURSORH);
 	bErr |= !_letters.load(RES_BASE + "images/roundel_letters.png", 255);

@@ -5,7 +5,7 @@ File:			playgamepopup.cpp
 
 Class impl:		PlayGamePopup
 
-Description:	A class derived from the IPlay interface to handle the in-game popup 
+Description:	A class derived from the IPlay interface to handle the in-game popup
 				menu to allow "end of level", "next word" or "quit game" options
 
 Author:			Al McLuckie (al-at-purplepup-dot-org)
@@ -67,33 +67,37 @@ void PlayGamePopup::init(Input *input)
 	_selectedId = 0;
 	_bSelected = false;		//bool for caller to determine if selection made
 	_bDoYesNoMenu = false;		//true goes into yes/no mode if exit pressed
-	
+
 	prepareBackground();
-	
+
 	memset(_touchArea, 0, sizeof _touchArea );
 	memset(_touchYNArea, 0, sizeof _touchYNArea );
 	_gd._star.setPos(0,0);	//modified once menu text X pos returned from put_text()
 	_gd._star.startAnim( 0, 6, ImageAnim::ANI_LOOP, 35, 0);
 
 	int i(0);
+	//main (in-game) menu optionis
 	_itemList.clear();
 	_itemList[i=0] = MenuItem(POP_CANCEL, GREEN_COLOUR, "Resume Game", "Continue game");
 	_itemList[++i] = MenuItem(POP_SKIP, ORANGE_COLOUR, "Next word/Level", (_hasMaxWord)?"Move on to next word/level":"You must have a 6 first!", _hasMaxWord);
-/*	bool bIsPlaying = false, bHasMusic = false;
-	Audio * pAudio = Audio::instance();
-	if (pAudio)
-	{
-		bIsPlaying = pAudio->isPlayingMusic();	//may be playing/fading menu music so uses isPlaying... rather than isActuallyPl...
-		bHasMusic = pAudio->hasMusicTracks();
-	}
-	_itemList[++i] = MenuItem(POP_TOGGLEMUSIC, BLUE_COLOUR, bIsPlaying?"Music Stop":"Music Start", bIsPlaying?"Stop current track":"Start a song", bHasMusic);
-	_itemList[++i] = MenuItem(POP_NEXTTRACK, BLUE_COLOUR, "Next Track", "Play next song", bHasMusic);
-	_itemList[++i] = MenuItem(POP_PREVTRACK, BLUE_COLOUR, "Prev Track", "Play previous song", bHasMusic);
-*/
+    if (_gd._options._bMusic)
+    {
+        bool bIsPlaying = false, bHasMusic = false;
+        Audio * pAudio = Audio::instance();
+        if (pAudio)
+        {
+            bIsPlaying = pAudio->isPlayingMusic();	//may be playing/fading menu music so uses isPlaying... rather than isActuallyPl...
+            bHasMusic = pAudio->hasMusicTracks();
+        }
+        _itemList[++i] = MenuItem(POP_TOGGLEMUSIC, BLUE_COLOUR, bIsPlaying?"Music Stop":"Music Start", bIsPlaying?"Stop current track":"Start a song", bHasMusic);
+        _itemList[++i] = MenuItem(POP_NEXTTRACK, BLUE_COLOUR, "Next Track", "Play next song", bHasMusic);
+        _itemList[++i] = MenuItem(POP_PREVTRACK, BLUE_COLOUR, "Prev Track", "Play previous song", bHasMusic);
+    }
 	if (_hasMaxWord)
 		_itemList[++i] = MenuItem(POP_SAVE, BLUE_COLOUR, "Save & Exit", "Allows exit and restart at same place");
 	_itemList[++i] = MenuItem(POP_QUIT, RED_COLOUR, "Quit Game !", "Exit (save highscore)");
-	
+
+    //confirmation options
 	_itemYNList.clear();
 	_itemYNList[i=0] = MenuItem(POP_NO, GREEN_COLOUR, "No", "Back to menu");
 	_itemYNList[++i] = MenuItem(POP_YES, RED_COLOUR, "Yes", "Quit the game");
@@ -107,15 +111,15 @@ void PlayGamePopup::init(Input *input)
 void PlayGamePopup::render(Screen *s)
 {
 	//draw menu overlay
-	int x = (s->_width - _gd._popupmenu.tileW()) / 2;
-	int y = (s->_height - _gd._popupmenu.tileH()) / 2;
-	_gd._popupmenu.blitTo(s, x, y, 0);
+	int x = (s->_width - _gd._gamemenu.tileW()) / 2;
+	int y = (s->_height - _gd._gamemenu.tileH()) / 2;
+	_gd._gamemenu.blitTo(s, x, y, 0);
 //	_menubg->blitTo(s, 0, 0, 0);
 
 	//calculate best text gap
 	int maxGap = _gd._fntSmall.height()*2; //max gap
 	int topGap = _gd._fntSmall.height();
-	int h = _gd._popupmenu.tileH() - (_gd._fntSmall.height()*3) - 10; //10=5pix*2 border
+	int h = _gd._gamemenu.tileH() - (_gd._fntSmall.height()*3) - 10; //10=5pix*2 border
 	int texth = _pItems->size() * _gd._fntSmall.height();
 	int gap = (h - texth) / (_pItems->size()-1);
 	if (gap > maxGap)
@@ -123,7 +127,7 @@ void PlayGamePopup::render(Screen *s)
 		gap = maxGap;
 		topGap += (h - texth - (gap*((*_pItems).size()-1))) /2;
 	}
- 
+
 	int yy = y + topGap;
 	Rect r;
 	for (tMenuMap::iterator it = _pItems->begin(); it != _pItems->end(); ++it)
@@ -134,7 +138,7 @@ void PlayGamePopup::render(Screen *s)
 			r._min._x -= _gd._star.tileW()+5;
 			_gd._star.setPos(r._min._x, yy);
 			//help/comment str
-			_gd._fntClean.put_text(s, (y+_gd._popupmenu.tileH())-(_gd._fntSmall.height()*2), it->second._comment.c_str(), GREY_COLOUR, true);
+			_gd._fntClean.put_text(s, (y+_gd._gamemenu.tileH())-(_gd._fntSmall.height()*2), it->second._comment.c_str(), GREY_COLOUR, true);
 		}
 		else
 		{
@@ -162,25 +166,25 @@ void PlayGamePopup::button(Input *input, Input::ButtonType b)
 {
 	switch (b)
 	{
-	case Input::UP: 
+	case Input::UP:
 		if (input->isPressed(b))
 		{
 			if (0==_menuoption)
 				_menuoption=(int)_pItems->size()-1;//(_bConfirm)?(int)_itemYNList.size()-1:(int)_itemList.size()-1;	//down to bottom
-			else 
+			else
 				_menuoption--;
 		}
 		break;
-	case Input::DOWN: 
+	case Input::DOWN:
 		if (input->isPressed(b))
 		{
 			if (_menuoption == (int)_pItems->size()-1)
 				_menuoption=0;	//back to top
-			else 
+			else
 				_menuoption++;
 		}
 		break;
-	case Input::CLICK: 
+	case Input::CLICK:
 	case Input::B:
 		if (input->isPressed(b))
 			choose();
@@ -188,7 +192,7 @@ void PlayGamePopup::button(Input *input, Input::ButtonType b)
 
 	default:break;
 	}
-	
+
 }
 
 void PlayGamePopup::touch(Point pt)
@@ -270,7 +274,7 @@ void PlayGamePopup::choose()
 			Audio *p = Audio::getPtr();
 			if (p) p->pushPrevTrack();
 		}
-		
+
 	}
 	_bSelected = true;
 	_selectedId = pItem->_id;

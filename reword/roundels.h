@@ -46,7 +46,9 @@ public:
 	void cursorUp();
 	void cursorDown();
 	bool cursorAt(Point p);	// return false if p isn't in a valid roundel
+
 	std::string getBottomWord();
+	int getBottomWordLength() { return _botLength; }
 
 	void clearAllToTop(bool bResetCursor = true);
 	void setWordToLast();
@@ -81,8 +83,9 @@ protected:
 	std::string	_word;			//original word used to set roundels
 
 	int _cx;					//cursor (highlight) x and y pos
+	int _botLength;             //current count of actual letters in bottom row
 	bool _bCursorTop;			//cursor curr on top row or bottom row?
-	
+
 	int _yScratchTop,
 		_yScratchBot;		//previously #defined SCRATCHY1 and SCRATCHY2
 };

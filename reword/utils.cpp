@@ -5,8 +5,8 @@ File:			utils.cpp
 
 Class impl:		Error
 
-Description:	Some useful utility functions. 
-				Mainly string functions at the moment 
+Description:	Some useful utility functions.
+				Mainly string functions at the moment
 
 Author:			Al McLuckie (al-at-purplepup-dot-org)
 
@@ -48,7 +48,7 @@ float Utils::round( float x, int places )
     x /= shift;
 
     return x;
-} 
+}
 */
 /*
 inline int Utils::round(float fl)
@@ -62,29 +62,38 @@ int Utils::RandomInt(unsigned int limit)
 {
 	return (int)m_randInt.Random(limit);
 }
-*/  
+*/
 
 namespace pp_g	//pp game functions
 {
-  
-//push an event into the SDL event queue
+
+//push an user event into the SDL event queue
 void pushSDL_Event(int code, void *data1, void *data2)
 {
 	//push event (e.g. "end of level" or other user defined event)
     SDL_Event event;
-    SDL_UserEvent userevent;
-
-    userevent.type = SDL_USEREVENT;
-    userevent.code = code;
-
-	userevent.data1 = data1;
-    userevent.data2 = data2;
-
     event.type = SDL_USEREVENT;
-    event.user = userevent;
+    event.user.code = code;
+    event.user.data1 = data1;
+    event.user.data2 = data2;
 
     SDL_PushEvent(&event);
 }
+
+// push a key to the event queue -
+// note this requires a untranslated key, not one of the Input::XXXX keys
+void pushSDL_EventKey(int key)
+{
+	//push keyboard event instead of user pressing the key
+	//allows us to automate some things
+    SDL_Event event;
+    event.key.type = SDL_KEYDOWN;
+    event.key.state = SDL_PRESSED;
+    event.key.keysym.sym = (SDLKey)key;
+
+    SDL_PushEvent(&event);
+}
+
 
 }	//namespace pp_g
 

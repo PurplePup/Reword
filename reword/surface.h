@@ -36,9 +36,9 @@ public:
 	SDL_PixelFormat* format(void) const;
 
 	//public draw functions
-    void drawRect(const Rect& r, const SDL_Color& c);
-    void drawRect(const SDL_Rect& r, const SDL_Color& c);
-    void drawRect(int x, int y, int w, int h, const SDL_Color& c);
+ //   void drawRect(const Rect& r, const SDL_Color& c);
+ //   void drawRect(const SDL_Rect& r, const SDL_Color& c);
+ //   void drawRect(int x, int y, int w, int h, const SDL_Color& c);
     void drawSolidRect(int x, int y, int w, int h, const SDL_Color& c);
     void drawSolidRectA(int x, int y, int w, int h, const SDL_Color& c, int iAlpha);
 	void PutPixel(int x, int y, Uint32 colour);

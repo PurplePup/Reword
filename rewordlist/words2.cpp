@@ -286,6 +286,7 @@ void Words2::addWordsToSets()
 
 //Filter the loaded wordlists that has been processed to remove duplicates or words with too
 //many or too few letters etc and get it ready to save back out to the named file.
+//Must be called before save is used.
 bool Words2::filterGameWords()    //const std::string &dictFile, bool bUpdateDef)
 {
 	//now we know we can open the output file, so proceed - which may take a while...

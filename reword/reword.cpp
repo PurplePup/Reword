@@ -133,13 +133,13 @@ int main(int argc, char* argv[]) // <- this must match exactly, since SDL rewrit
 
     if (bHelp)
     {
-		std::cout << "Reword game ( " << VERSION_STRING << ")." << std::endl
+		std::cout << "Reword game : " << VERSION_STRING << std::endl
 				<< "Useage:" << std::endl
 				<< "reword [params]" << std::endl
 				<< std::endl
 				<< "  Params:  " << std::endl
-				<< "  -nosound  -  disable all sound(sfx and music)" << std::endl
-				<< "  -nosfx    -  disable sound effects (beeps)" << std::endl
+				<< "  -nosound  -  disable all sound (sfx and music)" << std::endl
+				<< "  -nosfx    -  disable sound effects" << std::endl
 				<< "  -nomusic  -  disable music" << std::endl
 				<< std::endl;
 
@@ -147,8 +147,8 @@ int main(int argc, char* argv[]) // <- this must match exactly, since SDL rewrit
     }
 
 
-	Game game(options);
-	if (game.init())
+	Game game;
+	if (game.init(options))
 	{
 		if (game.run()) return 0;
 		//else fall through to return error

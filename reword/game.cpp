@@ -75,9 +75,9 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #define MAX_FRAME_RATE 60
 
 
-Game::Game(const GameOptions &options) :
+Game::Game() :
 	_init(false), _screen(0), _input(0), //_audio(0),
-	_gd(0), _options(options)
+	_gd(0)
 {
 	atexit(SDL_Quit);	//auto cleanup, just in case
 }
@@ -109,7 +109,7 @@ void Game::splash()
 //	sleep(2);	//so we can see it (POSIX)
 }
 
-bool Game::init()
+bool Game::init(const GameOptions &options)
 {
 	std::cout << "Using hardware/keyboard profile : " << DEBUG_HW_NAME << std::endl;
 
@@ -118,7 +118,7 @@ bool Game::init()
 //	if (_init) return false;
 
     Uint32 init_flags = SDL_INIT_EVERYTHING;
-    if (!_options._bSfx)
+    if (!options._bSfx && !options._bMusic)
     {
         std::cout << "Audio disabled" << std::endl;
         init_flags &= ~SDL_INIT_AUDIO;
@@ -162,12 +162,13 @@ bool Game::init()
 
 
 	Audio *pAudio = Audio::instance();
-	if (pAudio) pAudio->init();
+	if (pAudio) pAudio->init(options._bMusic, options._bSfx);
 
 	//load all game data (images, fonts, etc, etc)
 	_gd = new GameData();
 	_gd->_current_w = _screen->width();
 	_gd->_current_h = _screen->height();
+    _gd->_options = options;
 
 #if defined(_USE_OGG)
 	//load mp3/ogg menu music
@@ -192,11 +193,11 @@ bool Game::init()
 //and manage the state transitions between screens etc
 bool Game::run(void)
 {
-	assert(_init);
+	assert(_init);  //should have called Init() by now
 
 	//call different play classes
 #ifdef _USE_MIKMOD
-    if (_options._bMusic)
+    if (_gd->_options._bMusic)
     {
         std::cout << "Using MikMod audio directly" << std::endl;
         Audio *audio = Audio::instance();
@@ -232,7 +233,7 @@ bool Game::run(void)
 	}
 
 #ifdef _USE_MIKMOD
-	if (_options._bMusic) audio->modStop();
+	if (_gd->_options._bMusic) audio->modStop();
 #endif
 
 	return b;
@@ -247,7 +248,7 @@ bool Game::run(void)
 
 bool Game::play(IPlay *p)
 {
-    if (NULL == p) return false;
+    if (NULL == p) return false;    //invalid IPlay object
 
 	bool bCap = true;
 #ifdef GP2X
@@ -329,7 +330,11 @@ bool Game::play(IPlay *p)
 						// If escape is pressed...
 						if (event.key.keysym.sym == SDLK_ESCAPE)
 						{
-							if (_gd->_state == ST_MENU) return false; //exit menu & game
+							if (_gd->_state == ST_MENU)
+                            {
+                                _gd->_state = ST_EXIT;
+                                return true; //exit main menu & game
+                            }
 							_gd->_state = ST_MENU;	//back to menu screen
 							p->quit();				//sets _running false
 							break;
@@ -386,7 +391,7 @@ bool Game::play(IPlay *p)
 					break;
 
 					case SDL_QUIT:
-						return false;	//valid exit
+						return true;	//valid exit
 
 					default:
 						//ok, here we handle all *our* events, user defined or pass on
@@ -404,6 +409,9 @@ bool Game::play(IPlay *p)
 							case USER_EV_PREV_TRACK:
 								audio->startPrevTrack();
 								break;
+                            case USER_EV_PAUSE_TRACK:
+                                audio->pauseTrack();
+                                break;
 /*							case USER_EV_SAVE_STATE:
 								_gd->saveQuickState();
 								break;*/
@@ -433,7 +441,7 @@ bool Game::play(IPlay *p)
 		_screen->lock();
 		p->render(_screen);	//screen render
 #ifdef _DEBUG	//overlay the framerate and any other debug info required
-		_gd->_fntSmall.put_number(_screen,0,30,fr.fps(),"%d", BLACK_COLOUR);
+		_gd->_fntSmall.put_number(_screen,0,60,fr.fps(),"%d", BLACK_COLOUR);
 #endif
 
 
@@ -463,7 +471,7 @@ bool Game::play(IPlay *p)
 	//Its up to the next screen (play class) to set as required on entry.
 	_input->clearRepeat();
 
-	std::cout << "exit game loop" << std::endl;		//##DEBUG
+//	std::cout << "exit game loop ok" << std::endl;		//##DEBUG
 	return true;
 }
 

@@ -64,7 +64,9 @@ public:
 
 	bool initDone() const { return _init; };
 	void cleanUp();
-    ButtonType translate(int key);		// Translate key to button
+    ButtonType translate(int key);	        // Translate key to button
+    static int un_translate(ButtonType b);  // Reverse translation (from anywhere)
+
     void down(ButtonType b);	// Button pressed
     void up(ButtonType b);		// Button released
     bool isPressed(ButtonType b) const;	// Return true if button is pressed

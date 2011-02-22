@@ -84,7 +84,7 @@ namespace pp_g 	//pp game functions
 {
 
 	void pushSDL_Event(int code, void *data1 = 0, void *data2 = 0);
-
+    void pushSDL_EventKey(int key);
 }
 
 

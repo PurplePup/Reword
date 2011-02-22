@@ -8,9 +8,9 @@ Class impl:		Roundels
 Description:	A class to manage a list of roundels (letter sprites) to animate and
 				move them around. This is used for the screen titles where the letters
 				drop from above the screen, and for the main 6 letter word used in the game
-				which can be selected using the cursor and moved to the lower tiles for 
-				matching against the word(s) being searched for. The class manages top and 
-				bottom rows of letters but only the top row is used for simple letter 
+				which can be selected using the cursor and moved to the lower tiles for
+				matching against the word(s) being searched for. The class manages top and
+				bottom rows of letters but only the top row is used for simple letter
 				animation. The bottom is only used in-game for the selected letters.
 
 Author:			Al McLuckie (al-at-purplepup-dot-org)
@@ -49,7 +49,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <algorithm>
 #include <iostream>
 
-Roundels::Roundels() : _x(0), _y(0), 
+Roundels::Roundels() : _x(0), _y(0),
 					_yScratchTop(28), _yScratchBot(73) //legacy GP2X positions
 {
 }
@@ -67,6 +67,7 @@ void Roundels::cleanUp()
 
 	for (it = _bot.begin(); it != _bot.end(); ++it) if (*it) delete *it;
 	_bot.clear();
+	_botLength = 0;
 
 	_last.clear();	//only uses a copy of _top or _bot pointers so doesnt delete
 
@@ -77,17 +78,17 @@ void Roundels::cleanUp()
 //pass in the string to be turned into a roundel list nd set the final positions of the letters
 //based on the x, y and gap values
 //wrd - the string to be converted to roundels,
-//letters - the letters image to use as the source, 
+//letters - the letters image to use as the source,
 //x, y - the start x and y pos (if not 0,0)
-//gap - and the distance between each letter... 
+//gap - and the distance between each letter...
 //	horizontally or vartically (not both)
-//	other more advanced positioning must be done manually using the 
+//	other more advanced positioning must be done manually using the
 //	accessor functions after the setWord function returns.
 //bHoriz - default true for horizontal letters, false for vertical
-void Roundels::setWord(std::string &wrd, 
-					   Image &letters, 
-					   int x, int y, 
-					   int gap, 
+void Roundels::setWord(std::string &wrd,
+					   Image &letters,
+					   int x, int y,
+					   int gap,
 					   bool bHoriz)
 {
 	cleanUp();
@@ -117,7 +118,7 @@ void Roundels::setWord(std::string &wrd,
 		prnd->_pos = i;			//letter position in string
 		prnd->_spr = pspr;		//pointer to sprite
 
-		//set up basic positions of each letter in the string 
+		//set up basic positions of each letter in the string
 		recalcXYPosition(prnd);
 
 		_top.push_back(prnd);
@@ -136,8 +137,8 @@ void Roundels::setTopAndBottomYPos(int yPosTop, int yPosBot)
 }
 
 //center the roundels horizontally on screen (no need to specify x position)
-void Roundels::setWordCenterHoriz(std::string wrd, 
-					   Image &letters, 
+void Roundels::setWordCenterHoriz(std::string wrd,
+					   Image &letters,
 					   int y,				//no x if centered horiz
 					   int gap)
 {
@@ -152,8 +153,8 @@ void Roundels::setWordCenterHoriz(std::string wrd,
 }
 
 //center the roundels vertically on screen (no need to specify y position)
-void Roundels::setWordCenterVert(std::string wrd, 
-					   Image &letters, 
+void Roundels::setWordCenterVert(std::string wrd,
+					   Image &letters,
 					   int x,				//no y if centered vert
 					   int gap)
 {
@@ -170,12 +171,12 @@ void Roundels::setWordCenterVert(std::string wrd,
 //move the roundels to a starting position (usually off screen) from their current start position
 //stated in setWord() and move them back to their original position using speed and direction
 //ie this fn should be called after setWord()
-void Roundels::startMoveFrom(int deltaX, int deltaY, 
-							 Uint32 rate, Uint32 delay, 
-							 int xVel, int yVel, 
+void Roundels::startMoveFrom(int deltaX, int deltaY,
+							 Uint32 rate, Uint32 delay,
+							 int xVel, int yVel,
 							 Sprite::eSprite type /*= Sprite::SPR_NONE*/)
 {
-	int oldX, oldY;	
+	int oldX, oldY;
 	int i = 0;
 	tRoundVect::iterator it;
 	for (it = _top.begin(); it != _top.end(); ++it)
@@ -196,7 +197,7 @@ void Roundels::work()
 {
 	tRoundVect::iterator it;
 	bool bMoving = false;
-	for (it = _top.begin(); it != _top.end(); ++it) 
+	for (it = _top.begin(); it != _top.end(); ++it)
 	{
 		if (*it) 	//letter exists in this top position
 		{
@@ -266,12 +267,12 @@ bool Roundels::jumbleWord(bool bAnimate /*=true*/)
 			if (!(_top[xx]) || _top[xx]->_spr->isMoving()) continue;
 
 			do
-			{	//rand another letter position                  
+			{	//rand another letter position
 				xx2 = (rand()%_top.size());	//0..5
 				//xx2 = ((int)_gd._myrand.Random(6));	//0..5
 			} while (xx2 == xx || !(_top[xx2]));
 
-			//swap the actual pointers to the roundels 
+			//swap the actual pointers to the roundels
 			//(makes it easier all round rather than trying to sort/determine positions)
 			rtmp = _top[xx2];
 			_top[xx2] = _top[xx];
@@ -288,7 +289,7 @@ bool Roundels::jumbleWord(bool bAnimate /*=true*/)
 	{
 		if (*it && !(*it)->_spr->isMoving())
 		{
-			if (bAnimate) 
+			if (bAnimate)
 				(*it)->_spr->startMoveTo(calcXPos((*it)), calcYPos((*it)), 25, 0, 9, 0);	//start slide anim
 			else
 				recalcXYPosition((*it));
@@ -300,7 +301,7 @@ bool Roundels::jumbleWord(bool bAnimate /*=true*/)
 //unjumble/unrandomize letters in top array
 //If too few letters, exit
 //Only used in main menu screen on REWORD letters above the menu.
-//NOTE: if it is used elsewhere, we may need to protect it aainst rogue letter stray 
+//NOTE: if it is used elsewhere, we may need to protect it aainst rogue letter stray
 //		like the jumbleWord fn where ismoving() needed to be checked
 bool Roundels::unJumbleWord(bool bAnimate /*=true*/)
 {
@@ -319,7 +320,7 @@ bool Roundels::unJumbleWord(bool bAnimate /*=true*/)
 	for (xx=0; xx<(int)_word.length(); ++xx)
 	{
 		if (_top[xx]->_letter == _word[xx]) continue;		//already matches
-		
+
 		//find a match for curr letter in remaining letters
 		for (xx2=xx+1; xx2<(int)_word.length(); ++xx2)
 		{
@@ -341,7 +342,7 @@ bool Roundels::unJumbleWord(bool bAnimate /*=true*/)
 	{
 		if (*it)
 		{
-			if (bAnimate) 
+			if (bAnimate)
 				(*it)->_spr->startMoveTo(calcXPos((*it)), calcYPos((*it)), 25, 0, 9, 0);	//start slide anim
 			else
 				recalcXYPosition((*it));
@@ -350,7 +351,7 @@ bool Roundels::unJumbleWord(bool bAnimate /*=true*/)
 	return true;
 }
 
-//recalculate the sprites position on screen based on its internal 
+//recalculate the sprites position on screen based on its internal
 //_pos value within the list of letters making up the word
 void Roundels::recalcXYPosition(Roundel *r)
 {
@@ -365,7 +366,7 @@ int Roundels::calcYPos(Roundel *r)
 	return _y+(r->_pos*((!_bHoriz)?(r->_spr->tileH()+_gap):0));
 }
 
-//move the selected letter (_cx) to the first 
+//move the selected letter (_cx) to the first
 //free space in the top row
 void Roundels::moveLetterUp()
 {
@@ -379,7 +380,7 @@ void Roundels::moveLetterUp()
 		{
 			int oldX = (int)(_bot[_cx]->_spr->getXPos());
 			int oldY = (int)(_bot[_cx]->_spr->getYPos());
-			
+
 			_top[xx] = _bot[_cx];
 			_top[xx]->_pos = xx;
 			_bot[_cx] = 0;
@@ -391,6 +392,7 @@ void Roundels::moveLetterUp()
 			Uint32 rate = _top[xx]->_spr->calcXYRate(200, oldX, oldY, endX, endY, velX, velY);
 			_top[xx]->_spr->startMoveTo(endX, endY, rate, 0, velX, velY);
 
+            _botLength--;
 			return;
 		}
 	}
@@ -410,7 +412,7 @@ void Roundels::moveLetterDown()
 		{
 			int oldX = (int)(_top[_cx]->_spr->getXPos());
 			int oldY = (int)(_top[_cx]->_spr->getYPos());
-			
+
 			_bot[xx] = _top[_cx];
 			_bot[xx]->_pos = xx;
 			_top[_cx] = 0;
@@ -422,6 +424,7 @@ void Roundels::moveLetterDown()
 			Uint32 rate = _bot[xx]->_spr->calcXYRate(400, oldX, oldY, endX, endY, velX, velY);
 			_bot[xx]->_spr->startMoveTo(endX, endY, rate, 0, velX, velY);
 
+            _botLength++;
 			return;
 		}
 	}
@@ -517,7 +520,7 @@ void Roundels::cursorUp()
 //	std::cout << "cursorUp() :: cx == " << _cx << std::endl;
    	_bCursorTop = true;
 	if (_top[_cx] == 0) //back on top, position is space so find next
-	{	
+	{
 		if (!cursorNext())
 		{
 //		  	std::cout << "  !cursorNext() so cursorTop = false" << std::endl;
@@ -574,10 +577,10 @@ void Roundels::clearAllToTop(bool bResetCursor /*=true*/)
 
 	//make sure players cursor is on top line
 	_bCursorTop = true;
-	if (bResetCursor) cursorFirst();	
+	if (bResetCursor) cursorFirst();
 
 	int xx = 0;
-	//move letters in bottom row to gaps in top 
+	//move letters in bottom row to gaps in top
 	for (xx=0; xx < (int)_word.length(); ++xx)
 	{
 		if (_bot[xx] == 0) return; 	//no more in bottom row
@@ -627,7 +630,7 @@ std::string Roundels::getBottomWord()
 
 		//save curr bottom word to 'last' array so we can put
 		//it back if player asks. Only save if letters on bottom exist
-		if (bSaveLast) _last[xx] = _bot[xx];	
+		if (bSaveLast) _last[xx] = _bot[xx];
 	}
 	return newword;
 }

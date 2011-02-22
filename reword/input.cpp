@@ -65,7 +65,7 @@ void Input::initJoy(void)
         setLastError("Unable to initialise joystick");
 		return;
     }
-    
+
     if ( SDL_NumJoysticks() > 0)
     {
 		joy = SDL_JoystickOpen(0);
@@ -74,7 +74,7 @@ void Input::initJoy(void)
 
     if (joy)
     {
-		SDL_JoystickEventState (SDL_ENABLE);	
+		SDL_JoystickEventState (SDL_ENABLE);
     }
 
 	_init = (joy!=NULL);
@@ -96,7 +96,7 @@ void Input::up(ButtonType b)
 bool Input::isPressed(ButtonType b) const
 {
     return buttons[b].isPressed();
-} 
+}
 
 // Translate key to buttons
 Input::ButtonType Input::translate(int key)
@@ -146,6 +146,52 @@ Input::ButtonType Input::translate(int key)
     return res;
 }
 
+// Translate button to key (reverse of normal translate fn)
+int Input::un_translate(ButtonType b)
+{
+    int key = 0;
+    switch (b)
+    {
+#if defined(PANDORA)
+	case LEFT:	    	key = SDLK_LEFT;    break;
+    case RIGHT:	        key = SDLK_RIGHT;   break;
+    case UP:		    key = SDLK_UP;      break;
+    case DOWN:		    key = SDLK_DOWN;    break;
+    case A:	    	    key = SDLK_HOME;    break;
+    case B:		        key = SDLK_END;     break;
+    case X:	            key = SDLK_PAGEDOWN;break;
+    case Y:	            key = SDLK_PAGEUP;  break;
+    case START:	        key = SDLK_SPACE;   break;
+    case SELECT:        key = SDLK_RETURN;  break;
+	case L:	            key = SDLK_RSHIFT;  break;
+	case R:         	key = SDLK_RCTRL;   break;
+    case VOLUP:	        key = SDLK_EQUALS;  break;
+    case VOLDOWN:	    key = SDLK_MINUS;   break;
+    case CLICK:	    	key = SDLK_c;       break;
+#else
+	case LEFT:  		key = SDLK_LEFT;    break;
+    case RIGHT:	        key = SDLK_RIGHT;   break;
+    case UP:		    key = SDLK_UP;      break;
+    case DOWN:		    key = SDLK_DOWN;    break;
+    case A:		        key = SDLK_a;       break;
+    case B:		        key = SDLK_b;       break;
+    case X:		        key = SDLK_x;       break;
+    case Y:		        key = SDLK_y;       break;
+    case START:	        key = SDLK_SPACE;   break;
+    case SELECT:	    key = SDLK_RETURN;  break;
+	case L:		        key = SDLK_l;       break;
+	case R:		        key = SDLK_r;       break;
+    case VOLUP:	        key = SDLK_EQUALS;  break;
+    case VOLDOWN:   	key = SDLK_MINUS;   break;
+    case CLICK:	    	key = SDLK_c;       break;
+#endif
+	default: break;
+    }
+//	std::cout << "UnTranslate key : " << key << " into " << res << std::endl;
+
+    return key;
+}
+
 // Returns true if button repeats
 bool Input::repeat(ButtonType b)
 {
@@ -161,6 +207,6 @@ void Input::clearRepeat()
 {
 	//default delay and rate to 0 - turn off all ...
 	for (int i=0; i<Input::NUMBER_OF_BUTTONS; buttons[i++].setRepeat(0, 0))
-		;	
+		;
 }
 

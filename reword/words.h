@@ -164,18 +164,6 @@ public:
 					if ((pos->first.length() >= TARGET_MIN) && (pos->first.length() <= TARGET_MAX))  //is a 6to8 target word
 						this->_vecTarget.push_back(pos->first);	//so also add to valid 6to8 letter word vector
 				}
-
-
-
-
-//				if (this->_mapAll.find(pos->first) == this->_mapAll.end())
-//				{
-//					this->_mapAll[pos->first] = pos->second;
-//					if ((pos->first.length() >= TARGET_MIN) && (pos->first.length() <= TARGET_MAX))  //is a 6to8 target word
-//						this->_vecTarget.push_back(pos->first);	//so also add to valid 6to8 letter word vector
-//				}
-
-
 			}
 		}
 		return *this;

@@ -17,6 +17,13 @@
 #include "score.h"
 #include "sprite.h"
 
+struct GameOptions
+{
+    GameOptions() : _bSfx(true), _bMusic(true) {}
+    bool _bSfx;
+    bool _bMusic;
+};
+
 
 //to persist global data throughout app
 class GameData
@@ -58,7 +65,7 @@ public:
 	Image _cursor;
 	Image _letters;
 	Image _boxes;
-	Image _popupmenu;
+	Image _gamemenu;    //in-game popup menu
 
 	ImageAnim _scratch; //multiple frames (but not animated)
 
@@ -67,6 +74,8 @@ public:
 	Sprite _arrowLeft;
 	Sprite _arrowRight;
 	Sprite _star;
+	Sprite _gamemenu_icon;
+	Sprite _gamemusic_icon;        //2 frames, not animated
 
 	Sprite _word_last_pulse;
 	Sprite _word_totop_pulse;
@@ -108,6 +117,8 @@ public:
 	int			_current_w;			//used to store screen width
 
 	bool 		_bTouch;			//true if touchscreen/mouse detected
+
+	GameOptions _options;
 
 private:
 	bool		_init;

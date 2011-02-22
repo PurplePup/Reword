@@ -33,7 +33,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "surface.h"
 #include "utils.h"
 
-#include <SDL_gfxPrimitives.h>
+// #include <SDL_gfxPrimitives.h>
 
 Surface::Surface() : _surface(0)
 {
@@ -151,7 +151,7 @@ int Surface::height(void) const
 }
 
 //public draw functions
-
+/*
 //draw an outline rectangle, useful for debug
 void Surface::drawRect(const Rect& r, const SDL_Color& c)
 {
@@ -172,7 +172,7 @@ void Surface::drawRect(int x, int y, int w, int h, const SDL_Color& c)
 	const Uint32 colour = SDL_MapRGB(_surface->format, c.r, c.g, c.b);
 	rectangleColor(_surface, x, y, x+w, y+h, colour);
 }
-
+*/
 // Draw a filled/solid rectangle
 void Surface::drawSolidRect (int x, int y, int w, int h, const SDL_Color& c)
 {

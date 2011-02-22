@@ -1,5 +1,5 @@
 //PlayMenu.h
- 
+
 #ifndef _PlayMenu_H
 #define _PlayMenu_H
 
@@ -54,6 +54,8 @@ public:
     virtual void button(Input* input, Input::ButtonType b);
     virtual void touch(Point pt);
 
+    void        startMenuMusic();
+    void        stopMenuMusic();
 	void		setTitle(std::string title);
 	void		setHelp(std::string help, SDL_Color c);
 	Uint32		addItem(MenuItem i);	//returns item number
@@ -63,7 +65,7 @@ public:
 	int			getNextYPos() { return _nextYpos; }
 
 	GameData &	_gd;			//shared data between screens (play classes)
-	
+
 private:
 
 	Roundels	_title;

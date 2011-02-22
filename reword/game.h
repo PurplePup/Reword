@@ -11,20 +11,13 @@
 #include "play.h"	//IPlay interface decl
 #include "gamedata.h"
 
-struct GameOptions
-{
-    GameOptions() : _bSfx(true), _bMusic(true) {}
-    bool _bSfx;
-    bool _bMusic;
-};
-
 class Game : public Error
 {
 public:
-	Game(const GameOptions &options);
+	Game();
 	~Game();
 
-	bool 		init();
+	bool 		init(const GameOptions &options);
 	bool 		run(void);	//main game loop
 
 protected:
@@ -39,7 +32,6 @@ private:
 //	Audio		*_audio;
 	GameData	*_gd;
 
-	GameOptions _options;
 };
 
 #endif //GAME_H

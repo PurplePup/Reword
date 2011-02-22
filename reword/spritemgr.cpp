@@ -42,7 +42,7 @@ SpriteMgr::SpriteMgr() :
 {
 }
 
-SpriteMgr::~SpriteMgr() 
+SpriteMgr::~SpriteMgr()
 {
 	clear();
 }
@@ -70,7 +70,7 @@ Sprite * SpriteMgr::get(Uint32 handle)
 //add a sprite and return the (unique) allocated handle
 Uint32 SpriteMgr::add(Sprite * spr)
 {
-	if (NULL == spr) return 0;
+	if (!spr) return 0;
 //	if (_sprmap.find(handle+1) == _sprmap.end()) ??? find next handle...
 	_sprmap[++_handle] = spr;	//##TODO## will eventually wrap and reuse ....
 	return _handle;
@@ -92,17 +92,18 @@ void SpriteMgr::work(Uint32 handle)
 	if (_s)
 	{
 //		if (_s->isLive()) _s->work(); else del(handle);
-_s->work();
+            _s->work();
 	}
 }
 
 void SpriteMgr::work(void)
 {
 	//update all in map
-	for (_it = _sprmap.begin(); _it != _sprmap.end(); ++_it)
+	_itend = _sprmap.end();
+	for (_it = _sprmap.begin(); _it != _itend; ++_it)
 	{
 //		if ((*_it).second->isLive()) (*_it).second->work(); else del((*_it).first);
-(*_it).second->work();
+            (*_it).second->work();
 	}
 }
 
@@ -116,7 +117,8 @@ void SpriteMgr::draw(Uint32 handle, Screen* screen)
 void SpriteMgr::draw(Screen* screen)
 {
 	//draw all in map
-	for (_it = _sprmap.begin(); _it != _sprmap.end(); ++_it, (*_it).second->draw(screen));
+	_itend = _sprmap.end();
+	for (_it = _sprmap.begin(); _it != _itend; ++_it, (*_it).second->draw(screen));
 }
 
 

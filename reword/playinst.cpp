@@ -273,18 +273,18 @@ void PlayInst::buildPage(int page)
 			"move on to the next round. If all words are found, "
 			"a bonus is given for each second remaining."
 			"\n\n"
-			"2) Speed6\n"
-			"You must get a single all letter word to continue to the next round.\n"
+			"2) SpeedWord\n"
+			"You must get a single all-letter word to continue to the next round.\n"
 			"A bonus is given each time a fastest word is achieved."
 			"\n\n"
 			"3) TimeTrial\n"
-			"You must get as many all letter words as you can in the time allowed.\n"
+			"You must get as many all-letter words as you can in the time allowed.\n"
 			"A bonus is given each time a fastest word is achieved.\n"
 			"Note that the timer will continue to count down even after a word has been "
 			"found. You must move on as quickly as possible for a good score!"
 			"\n\n"
 			"General Info:\n"
-			"In Reword or Speed6 you can press SELECT for 'skip' and 'quit' options."
+			"In Reword or SpeedWord you can press SELECT for 'skip' and 'quit' options."
 			;
 			_txtColour = BLACK_COLOUR;
 			break;
@@ -293,13 +293,13 @@ void PlayInst::buildPage(int page)
 			"In Reword:\n" <<
 			SCORE_BONUS <<" for each level passed\n" <<
 			SCORE_SECONDS << " * seconds left, if ALL words found\n" <<
-			SCORE_WORD6 << " for each all letter word found\n" <<
+			SCORE_WORD6 << " for each all-letter word found\n" <<
 			SCORE_WORD << " for each smaller letter words\n" <<
-			"\nIn Speed6:\n" <<
-			SCORE_WORD6 << " * for each all letter word found\n" <<
+			"\nIn SpeedWord:\n" <<
+			SCORE_WORD6 << " * for each all-letter word found\n" <<
 			SCORE_FASTEST << " * remainder seconds for each fastest\n" <<
 			"\nIn TimeTrial:\n" <<
-			SCORE_WORD6 << " for each all letter word found\n" <<
+			SCORE_WORD6 << " for each all-letter word found\n" <<
 			SCORE_FASTEST << " * remainder seconds for each fastest\n"
 			;
 			_txtColour = BLACK_COLOUR;

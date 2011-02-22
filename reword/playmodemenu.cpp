@@ -46,19 +46,22 @@ void PlayModeMenu::init(Input *input)
 	//it doesnt really matter what the id (first param) number is, but if we keep
 	//0,1,2 as actual games and 99 for the optional resume, 255 for exit
 	QuickState qs;
-	if (qs.quickStateExists())
-	  	addItem(MenuItem(99, GREEN_COLOUR, "Resume game...", "Continue playing a quick saved game"));
+	bool bQSExists = qs.quickStateExists();
+    if (bQSExists)
+        addItem(MenuItem(99, GREEN_COLOUR, "Resume game...", "Continue playing a quick saved game"));
 
-	addItem(MenuItem(0, PURPLE_COLOUR, "Reword", "Get 3, 4, 5, 6 ... letter words"));
-	addItem(MenuItem(1, GOLD_COLOUR, "Speed 6", "Just get the all letter word to continue"));
-	addItem(MenuItem(2, BLUE_COLOUR, "Time Trial", "Get the most all letter words in the time limit"));
+	addItem(MenuItem(0, PURPLE_COLOUR, "Reword", "Get shorter and all-letter words"));
+	addItem(MenuItem(1, GOLD_COLOUR, "SpeedWord", "Get the all-letter words quickly to continue"));
+	addItem(MenuItem(2, BLUE_COLOUR, "TimeTrial", "Get the most all-letter words in the time limit"));
 
 	addItem(MenuItem(255, RED_COLOUR, "Back", "Back to main menu"));
 
-	setItem((int)_gd._mode);
+    if (bQSExists)
+        setItem(99);    //start at resume item if there
+    else
+       	setItem((int)_gd._mode);
+
 	PlayMenu::init(input);
-	if (qs.quickStateExists())
-        setItem(99);
 }
 
 
@@ -73,8 +76,6 @@ void PlayModeMenu::choose(MenuItem i)
 	else if (i._id == 255)		// exit & leave mode as-is
 		_gd._state = ST_MENU;
 
-
-	std::cout << "state selectd = " << _gd._state << std::endl;		//##DEBUG
 	_running = false;	//exit this class running state
 }
 
