@@ -14,6 +14,8 @@
 *.ncb
 *.opt
 *.plg
+*.depend
+*.layout
 debug-arm
 depend
 depend.bak
@@ -31,6 +33,8 @@ config.py
 build/
 bin/
 obj/
+work/
 hiscore.dat
 .quickstate.save
+
 
