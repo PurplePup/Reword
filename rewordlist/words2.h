@@ -28,6 +28,10 @@ public:
 	//build the output dictionary from all loaded words
 	bool filterGameWords();   //const std::string &dictFile = "", bool bUpdateDef = false);
 
+	virtual bool load(const std::string &wordFile = "", 		//load a wordlist and exclude
+				unsigned int rndSeed = 0,				//duplicates, too many etc
+				unsigned int startAtWord = 0);
+
 	bool save(std::string outFile);
 	bool empty();
 
@@ -73,6 +77,8 @@ public:
 		return Words2(*this) -= other;	//call -= operator overload (as it's already there)
 	}
 
+	void setAutoSkillUpd(bool bOn = true) { _bAutoSkillUpd = bOn; }
+
 //	int wordSetCount() { int c(0); for(int i=SHORTW_MIN; i<=TARGET_MAX; c+=_wordSet[i++].size()); return c; }
 //	int mapAllCount() { return _mapAll.size(); }
 
@@ -83,6 +89,7 @@ protected:
 	TiXmlElement* 	xdxfFirstWord();
 	TiXmlElement* 	xdxfNextWord(TiXmlElement* ar, std::string &word, std::string &def);
 
+    int calcScrabbleSkillLevel(const std::string &word);
 	void addWordsToSets();	//add to valid sets (one set per word length)
 	int saveWordMap(FILE *& fp, tWordMap &wmOrig, tWordSet &wsFilt);
 
@@ -93,6 +100,8 @@ protected:
 	int		_countXdxfMissing;
 
 	tWordSet _wordSet[TARGET_MAX+1];	//use 1..n for actual word length (as index) during reword.txt build
+
+    bool    _bAutoSkillUpd;             //update the word skill level with any non 0 value from any list
 };
 
 #endif //_WORDS2_H

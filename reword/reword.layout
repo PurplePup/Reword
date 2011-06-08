@@ -1,139 +1,139 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="audio.cpp" open="0" top="0" tabpos="6">
-		<Cursor position="2097" topLine="238" />
+	<File name="audio.cpp" open="0" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="2097" topLine="238" />
 	</File>
-	<File name="audio.h" open="0" top="0" tabpos="8">
-		<Cursor position="840" topLine="3" />
+	<File name="audio.h" open="0" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="840" topLine="3" />
 	</File>
-	<File name="fontttf.cpp" open="0" top="0" tabpos="3">
-		<Cursor position="3180" topLine="86" />
+	<File name="fontttf.cpp" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="3180" topLine="86" />
 	</File>
-	<File name="fontttf.h" open="0" top="0" tabpos="2">
-		<Cursor position="603" topLine="0" />
+	<File name="fontttf.h" open="0" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="603" topLine="0" />
 	</File>
-	<File name="game.cpp" open="0" top="0" tabpos="7">
-		<Cursor position="10552" topLine="378" />
+	<File name="game.cpp" open="0" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="10552" topLine="378" />
 	</File>
-	<File name="game.h" open="0" top="0" tabpos="12">
-		<Cursor position="263" topLine="0" />
+	<File name="game.h" open="0" top="0" tabpos="12" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="263" topLine="0" />
 	</File>
-	<File name="gamedata.cpp" open="0" top="0" tabpos="10">
-		<Cursor position="585" topLine="0" />
+	<File name="gamedata.cpp" open="0" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="585" topLine="0" />
 	</File>
-	<File name="gamedata.h" open="0" top="0" tabpos="3">
-		<Cursor position="1263" topLine="50" />
+	<File name="gamedata.h" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="1263" topLine="50" />
 	</File>
-	<File name="global.h" open="0" top="0" tabpos="3">
-		<Cursor position="1056" topLine="0" />
+	<File name="global.h" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="1056" topLine="0" />
 	</File>
-	<File name="helpers.cpp" open="0" top="0" tabpos="0">
-		<Cursor position="1806" topLine="63" />
+	<File name="helpers.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="1806" topLine="63" />
 	</File>
-	<File name="image.cpp" open="0" top="0" tabpos="11">
-		<Cursor position="7720" topLine="220" />
+	<File name="image.cpp" open="0" top="0" tabpos="11" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="7720" topLine="220" />
 	</File>
-	<File name="image.h" open="0" top="0" tabpos="9">
-		<Cursor position="1102" topLine="17" />
+	<File name="image.h" open="0" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="1102" topLine="17" />
 	</File>
-	<File name="imageanim.cpp" open="0" top="0" tabpos="7">
-		<Cursor position="0" topLine="47" />
+	<File name="imageanim.cpp" open="0" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="0" topLine="47" />
 	</File>
-	<File name="imageanim.h" open="0" top="0" tabpos="6">
-		<Cursor position="0" topLine="12" />
+	<File name="imageanim.h" open="0" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="0" topLine="12" />
 	</File>
-	<File name="input.cpp" open="0" top="0" tabpos="9">
-		<Cursor position="5382" topLine="138" />
+	<File name="input.cpp" open="0" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="5382" topLine="138" />
 	</File>
-	<File name="input.h" open="0" top="0" tabpos="10">
-		<Cursor position="2100" topLine="36" />
+	<File name="input.h" open="0" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="2100" topLine="36" />
 	</File>
-	<File name="platform.h" open="1" top="1" tabpos="2">
-		<Cursor position="2464" topLine="66" />
+	<File name="platform.h" open="0" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="2464" topLine="31" />
 	</File>
-	<File name="play.cpp" open="0" top="0" tabpos="0">
-		<Cursor position="84" topLine="0" />
+	<File name="play.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="84" topLine="0" />
 	</File>
-	<File name="playdiff.cpp" open="0" top="0" tabpos="0">
-		<Cursor position="2716" topLine="39" />
+	<File name="playdiff.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="2716" topLine="39" />
 	</File>
-	<File name="playgame.cpp" open="1" top="0" tabpos="1">
-		<Cursor position="11469" topLine="292" />
+	<File name="playgame.cpp" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="11718" topLine="264" />
 	</File>
-	<File name="playgame.h" open="0" top="0" tabpos="2">
-		<Cursor position="5812" topLine="94" />
+	<File name="playgame.h" open="0" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="5812" topLine="94" />
 	</File>
-	<File name="playgamepopup.cpp" open="0" top="0" tabpos="5">
-		<Cursor position="3276" topLine="10" />
+	<File name="playgamepopup.cpp" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="2923" topLine="68" />
 	</File>
-	<File name="playgamepopup.h" open="0" top="0" tabpos="0">
-		<Cursor position="0" topLine="8" />
+	<File name="playgamepopup.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="0" topLine="8" />
 	</File>
-	<File name="playinst.cpp" open="0" top="0" tabpos="7">
-		<Cursor position="8323" topLine="259" />
+	<File name="playinst.cpp" open="1" top="1" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="9196" topLine="265" />
 	</File>
-	<File name="playmainmenu.cpp" open="0" top="0" tabpos="3">
-		<Cursor position="1467" topLine="18" />
+	<File name="playmainmenu.cpp" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="1467" topLine="18" />
 	</File>
-	<File name="playmainmenu.h" open="0" top="0" tabpos="0">
-		<Cursor position="374" topLine="0" />
+	<File name="playmainmenu.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="374" topLine="0" />
 	</File>
-	<File name="playmenu.cpp" open="0" top="0" tabpos="5">
-		<Cursor position="5820" topLine="195" />
+	<File name="playmenu.cpp" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="5820" topLine="84" />
 	</File>
-	<File name="playmenu.h" open="0" top="0" tabpos="4">
-		<Cursor position="1604" topLine="25" />
+	<File name="playmenu.h" open="0" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="1604" topLine="25" />
 	</File>
-	<File name="playmodemenu.cpp" open="0" top="0" tabpos="14">
-		<Cursor position="2433" topLine="36" />
+	<File name="playmodemenu.cpp" open="0" top="0" tabpos="14" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="2433" topLine="36" />
 	</File>
-	<File name="random.cpp" open="0" top="0" tabpos="0">
-		<Cursor position="2202" topLine="49" />
+	<File name="random.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="2202" topLine="49" />
 	</File>
-	<File name="reword.cpp" open="0" top="0" tabpos="9">
-		<Cursor position="5569" topLine="105" />
+	<File name="reword.cpp" open="0" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="5569" topLine="105" />
 	</File>
-	<File name="roundels.cpp" open="0" top="0" tabpos="0">
-		<Cursor position="12750" topLine="584" />
+	<File name="roundels.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="12750" topLine="584" />
 	</File>
-	<File name="roundels.h" open="0" top="0" tabpos="0">
-		<Cursor position="1464" topLine="38" />
+	<File name="roundels.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="1464" topLine="38" />
 	</File>
-	<File name="score.cpp" open="0" top="0" tabpos="0">
-		<Cursor position="2349" topLine="38" />
+	<File name="score.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="2349" topLine="38" />
 	</File>
-	<File name="screen.cpp" open="0" top="0" tabpos="1">
-		<Cursor position="0" topLine="0" />
+	<File name="screen.cpp" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="0" topLine="0" />
 	</File>
-	<File name="singleton.cpp" open="0" top="0" tabpos="0">
-		<Cursor position="0" topLine="20" />
+	<File name="singleton.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="0" topLine="20" />
 	</File>
-	<File name="sprite.h" open="0" top="0" tabpos="0">
-		<Cursor position="0" topLine="2" />
+	<File name="sprite.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="0" topLine="2" />
 	</File>
-	<File name="spritemgr.cpp" open="0" top="0" tabpos="0">
-		<Cursor position="1852" topLine="64" />
+	<File name="spritemgr.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="1852" topLine="64" />
 	</File>
-	<File name="spritemgr.h" open="0" top="0" tabpos="0">
-		<Cursor position="647" topLine="0" />
+	<File name="spritemgr.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="647" topLine="0" />
 	</File>
-	<File name="surface.cpp" open="0" top="0" tabpos="12">
-		<Cursor position="1185" topLine="9" />
+	<File name="surface.cpp" open="0" top="0" tabpos="12" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="1185" topLine="9" />
 	</File>
-	<File name="surface.h" open="0" top="0" tabpos="1">
-		<Cursor position="827" topLine="18" />
+	<File name="surface.h" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="827" topLine="18" />
 	</File>
-	<File name="utils.cpp" open="0" top="0" tabpos="6">
-		<Cursor position="1728" topLine="45" />
+	<File name="utils.cpp" open="0" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="1728" topLine="45" />
 	</File>
-	<File name="utils.h" open="0" top="0" tabpos="7">
-		<Cursor position="2352" topLine="37" />
+	<File name="utils.h" open="0" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="2352" topLine="37" />
 	</File>
-	<File name="words.cpp" open="0" top="0" tabpos="0">
-		<Cursor position="0" topLine="105" />
+	<File name="words.cpp" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="4625" topLine="126" />
 	</File>
-	<File name="words.h" open="0" top="0" tabpos="0">
-		<Cursor position="6652" topLine="102" />
+	<File name="words.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor1 position="6652" topLine="102" />
 	</File>
 </CodeBlocks_layout_file>

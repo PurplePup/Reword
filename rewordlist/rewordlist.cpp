@@ -75,7 +75,7 @@ using namespace std;
 #endif
 int main(int argc, char* argv[])
 {
-	bool bList(false), bDebug(false), bForceDef(false), bXdxfDef(false), bSkillUpd(false);
+	bool bList(false), bDebug(false), bForceDef(false), bXdxfDef(false), bAutoSkillUpd(false);
 	bool bHelp(true), bHelpForce(false);
 	std::string::size_type pos;
 	std::string includeList, excludeList;
@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
 		}
 		if ("-s" == arg)
         {
-            bSkillUpd = true;    //update word skill value on any word list input
+            bAutoSkillUpd = true;    //update word scrabble skill value on any word list input
             continue;
         }
 		pos = arg.find_last_of(".");		//find the last period for file extension
@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
 		Words2 finalWords;
 		finalWords.setList(bList);
 		finalWords.setDebug(bDebug);
-		finalWords.setSkillUpd(bSkillUpd);
+		finalWords.setAutoSkillUpd(bAutoSkillUpd);
 
 		std::string outFile("rewordlist.txt");
 
@@ -256,7 +256,7 @@ int main(int argc, char* argv[])
 
 	if (bHelp)
 	{
-		std::cout << "Utility (version 0.4) to generate rewordlist.txt for the reword game." << std::endl
+		std::cout << "Utility (version 0.6) to generate rewordlist.txt for the reword game." << std::endl
 				<< "Useage:" << std::endl
 				<< "rewordlist [words.txt] [words.include] [words.exclude] [dictionary.xdxf|...] [-f] [-l] [-d] [-x]" << std::endl
 				<< std::endl
@@ -272,6 +272,7 @@ int main(int argc, char* argv[])
 				<< "  -l to force listing (verbose) mode" << std::endl
 				<< "  -d to force debug listing (messages) mode" << std::endl
 				<< "  -x to use .xdxf files for definitions only, else used to create .txt words" << std::endl
+				<< "  -s to auto generate scrabble scored words and place into easy/med/hard categories" << std::endl
 				<< std::endl
 				<< "e.g." << std::endl
 				<< "If just a xdxf file given, use that to create rewordlist.txt with definitions" << std::endl

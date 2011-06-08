@@ -86,7 +86,8 @@ void Words::reset()
 	//reset all dictionary vars used
 	_mapAll.clear();
 
-	_total = _ignored = 0;
+    //and counter stats
+	_stats.clear();
 
 	//and any current word values, counts etc
 	clearCurrentWord();
@@ -95,7 +96,7 @@ void Words::reset()
 //split up the line read in from the word list file
 //up to 3 params per line:
 //	WORD|level|description
-//only the word is mandatory, the other two default to level 0 and description ""
+//only the word is mandatory, the other two default to level=0 and description=""
 bool Words::splitDictLine(std::string text, DictWord &dictword)
 {
 	std::string::size_type end;
@@ -190,7 +191,7 @@ bool Words::load(const std::string &wordFile, unsigned int rndSeed, unsigned int
 		int wordLen = 0;
 		while (std::getline(ifs1, lnwrd))
 		{
-			_total++;
+			_stats._total++;
 
 			splitDictLine(lnwrd, dictWord);
 			lnwrd = dictWord._word;
@@ -198,17 +199,17 @@ bool Words::load(const std::string &wordFile, unsigned int rndSeed, unsigned int
 
 			if (rejectWord(lnwrd))
 			{
-				_ignored++;
+				_stats._ignored++;
 				continue;
 			}
 
-			if (_bDebug) std::cout << "Line " << _total << ": " << lnwrd.c_str() << std::endl;
+			if (_bDebug) std::cout << "Line " << _stats._total << ": " << lnwrd.c_str() << std::endl;
 
 			dictPair = dictSet.insert(lnwrd);
 			if (!dictPair.second)	//not inserted so is a duplicate word
 			{
-				if (_bDebug) std::cout << "Line " << _total << " Duplicate: " << lnwrd.c_str() << std::endl;
-				_ignored++;
+				if (_bDebug) std::cout << "Line " << _stats._total << " Duplicate: " << lnwrd.c_str() << std::endl;
+				_stats._ignored++;
 				continue;
 			}
 
@@ -225,6 +226,8 @@ bool Words::load(const std::string &wordFile, unsigned int rndSeed, unsigned int
 			}
 		}
 		ifs1.close();
+
+		if (_bDebug) std::cout << "Ignored: " << _stats._ignored << std::endl;
 
 //#ifndef _DEBUG	//curr only shuffle in release version so we can test things in debug
 		//randomize the 6 letter vector to be the order we get each new word in

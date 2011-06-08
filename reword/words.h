@@ -13,6 +13,7 @@
 #include <iostream>
 
 #include "stdio.h"
+#include "memory.h"
 
 #include "states.h"
 #include "random.h"
@@ -111,6 +112,24 @@ public:
 };
 */
 
+struct Stats
+{
+    Stats() { clear(); }
+    void clear() { _total = _ignored = 0;
+                    memset(_countLevels, 0, sizeof(_countLevels));
+                    memset(_countScore, 0, sizeof(_countScore));
+//                  memset(_countWords, 0, sizeof(_countWords));
+                }
+	int		_total;					//total words loaded
+	int		_ignored;				//number of words ignored
+
+	int     _countLevels[3];                //number or easy words, med words and hard words
+	int     _countScore[100];               //number of words for each score (to help define thresholds)
+//	int     _countWords[TARGET_MAX+1];      //number of 6, 7, 8 're-word' words
+
+};
+
+
 class Words
 {
 public:
@@ -118,13 +137,12 @@ public:
 	Words(const std::string &wordFile);
 	void setList(bool bOn = true) { _bList = bOn; }
 	void setDebug(bool bOn = true) { _bDebug = bOn; }
-	void setSkillUpd(bool bOn = true) { _bSkillUpd = bOn; }
 
 	bool rejectWord(const std::string &strWord);		//true if word loaded not useable
-	bool load(const std::string &wordFile = "", 				//load a wordlist and exclude
+	virtual bool load(const std::string &wordFile = "", 		//load a wordlist and exclude
 				unsigned int rndSeed = 0,				//duplicates, too many etc
 				unsigned int startAtWord = 0);
-	unsigned int wordsLoaded() { return _total; };		//before exclusions, duff words etc
+	unsigned int wordsLoaded() { return _stats._total; };		//before exclusions, duff words etc
 	unsigned int size() { return (unsigned int)_mapAll.size(); }	//current size
 
 	bool nextWord(std::string &retln, eGameDiff level, eGameMode mode, bool reloadAtEnd=true);
@@ -215,19 +233,18 @@ protected:
 
 	tWordMap 		_mapAll;				//all words - for full wordlist to test against (during game)
 	tWordVect		_vecTarget;				//vector to hold all 6,7,8 letter words in a rnd order (during game)
-	tWordVect::const_iterator _vecTarget_it;//vect target iterator
+	tWordVect::const_iterator _vecTarget_it;//working vect target iterator
 	DictWord		_word;					//current 6 letter word to find etc
 	tWordsInTarget 	_wordsInTarget;			//map of sub words (ie 3,4,5,6 letter for word6) with a "found" flag to say player got it
 	int 			_nWords[TARGET_MAX+1];	//count of number of words of each length to be found in 3, 4, 5 & 6 letter word lists
 //	unsigned int	_nInLevel[DIF_MAX];		//number of words in each level (to disable a level if == 0)
 
-	int				_total;					//total words loaded
-	int				_ignored;				//number of words ignored
 	bool 			_bList;					//output processing msgs to console
 	bool			_bDebug;				//output detail 'debug' to console?
-    bool            _bSkillUpd;             //update the word skill level with any non 0 value from any list
 
 	std::string 	_wordFile;				//saved when load() called to allow nextWord() to reload
+
+	Stats           _stats;
 };
 
 

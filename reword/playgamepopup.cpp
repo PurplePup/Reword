@@ -76,10 +76,10 @@ void PlayGamePopup::init(Input *input)
 	_gd._star.startAnim( 0, 6, ImageAnim::ANI_LOOP, 35, 0);
 
 	int i(0);
-	//main (in-game) menu optionis
+	//main (in-game) menu options
 	_itemList.clear();
 	_itemList[i=0] = MenuItem(POP_CANCEL, GREEN_COLOUR, "Resume Game", "Continue game");
-	_itemList[++i] = MenuItem(POP_SKIP, ORANGE_COLOUR, "Next word/Level", (_hasMaxWord)?"Move on to next word/level":"You must have a 6 first!", _hasMaxWord);
+	_itemList[++i] = MenuItem(POP_SKIP, ORANGE_COLOUR, "Next word/Level", (_hasMaxWord)?"Move on to next word/level":"You must have a Re-word first!", _hasMaxWord);
     if (_gd._options._bMusic)
     {
         bool bIsPlaying = false, bHasMusic = false;
