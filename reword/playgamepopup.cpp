@@ -18,7 +18,8 @@ History:		Version	Date		Change
 						11.03.2008	Added Yes/No on quit
 				0.5		28.05.2008	Added touchscreen support
 						11.08.2008	Build and render menu like PlayMenu class
-										but use map instaed of seq container.
+										but use map instead of seq container.
+                0.6     20.06.2011  Fix Yes/No menu exit
 
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by
@@ -170,7 +171,7 @@ void PlayGamePopup::button(Input *input, Input::ButtonType b)
 		if (input->isPressed(b))
 		{
 			if (0==_menuoption)
-				_menuoption=(int)_pItems->size()-1;//(_bConfirm)?(int)_itemYNList.size()-1:(int)_itemList.size()-1;	//down to bottom
+				_menuoption=(int)_pItems->size()-1; //down to bottom
 			else
 				_menuoption--;
 		}
@@ -232,7 +233,10 @@ void PlayGamePopup::choose()
 			return;
 		}
 		else
+        {
+			_pItems = &_itemList;		//point back to first menu, then
 			_menuoption = ItemFromId(POP_QUIT);	//YES selected, so exit
+        }
 	}
 	else
 	{
