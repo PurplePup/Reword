@@ -185,8 +185,8 @@ private:
 	int _yScratchTop;
 	int _yScratchBot;
 
-	int _gamemenu_icon_x, _gamemusic_icon_x, _score0_x, _words0_x, _countdown0_x;
-	int _gamemenu_icon_y, _gamemusic_icon_y, _score0_y, _words0_y, _countdown0_y;
+	int _gamemenu_x, _gamemenu_icon_x, _gamemusic_icon_x, _score0_x, _words0_x, _countdown0_x;
+	int _gamemenu_y, _gamemenu_icon_y, _gamemusic_icon_y, _score0_y, _words0_y, _countdown0_y;
 
 	//timers
 	SDL_TimerID _countdownID;	//timer used to show timer countdown in game

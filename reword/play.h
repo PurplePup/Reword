@@ -2,7 +2,7 @@
 
 //based on code by  Dave Parker drparker@freenet.co.uk
 
- 
+
 #ifndef _PLAY_H
 #define _PLAY_H
 
@@ -14,20 +14,20 @@
 #include "sprite.h"
 
 // interface class for all play classes, one for each "screen"
-// This way each new screen has its own class with screen and 
+// This way each new screen has its own class with screen and
 // input handling already in place.
 // e.g	playMenu - to operate the menu
 //		playGame - to play the actual game level
-//		playHiScore - to load, edit and save high scores 
+//		playHiScore - to load, edit and save high scores
 //		etc
 class IPlay
 {
 public:
-    
+
 	//pure virtual functions - must be implemented
 	///////////////////////////////////////////////
 
-    //init the level/screen 
+    //init the level/screen
     virtual void init(Input * /*input*/) = 0;
     // drawing operation
     virtual void render(Screen* /*s*/) = 0;
@@ -39,8 +39,10 @@ public:
 	//virtual functions - dont need to be implemented if not needed
 	////////////////////////////////////////////////////////////////
 
-	// screen touch
+	// screen touch (press)
 	virtual void touch(Point /*pt*/) { /*do nothing*/ }
+	// screen touch (release)
+	virtual void tap(Point /*pt*/) { /*do nothing*/ }
 	//handle events other than buttons and touches
 	virtual void handleEvent(SDL_Event &/*sdlevent*/) { /*do nothing*/ }
 	//determine if the play class should exit (used by Game class)

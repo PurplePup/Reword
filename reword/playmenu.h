@@ -53,6 +53,7 @@ public:
     virtual void work(Input* input, float speedFactor);
     virtual void button(Input* input, Input::ButtonType b);
     virtual void touch(Point pt);
+    virtual void tap(Point pt);
 
     void        startMenuMusic();
     void        stopMenuMusic();
@@ -74,8 +75,9 @@ private:
 	SDL_Color	_helpColor;
 	tMenuItems	_itemList;		//list of menu items
 	Uint32		_item;			//current item highlighted
-	Waiting		_doubleClick;	//touch support
 	int			_nextYpos;
+	Point       _saveTouchPt;   //save pt at which touch/press occurred
+	Waiting     _delayHelp;
 };
 
 #endif //_PlayMenu_H

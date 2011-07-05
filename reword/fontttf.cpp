@@ -129,6 +129,12 @@ Rect FontTTF::put_text_right(Surface *s, int y, int xDelta, const char *textstr,
 	return put_text(s, s->surface()->w - text->w - xDelta, y, textstr, textColour, bShadow);
 }
 
+Rect FontTTF::put_text_mid(Surface *s, int y, int xStart, const char *textstr, const SDL_Color &textColour, bool bShadow /*= false*/)
+{
+	const int len = calc_text_length(textstr);
+	return put_text(s, xStart - (len / 2), y, textstr, textColour, bShadow);
+}
+
 //output a integer number string to the destination surface
 Rect FontTTF::put_number(Surface *s, int x, int y, int number, const char *format, const SDL_Color &textColor, bool bShadow /*= false*/)
 {

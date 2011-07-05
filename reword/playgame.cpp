@@ -219,6 +219,8 @@ void PlayGame::render_play(Screen* s)
         _gd._gamemenu_icon.draw(s);
         _gd._gamemusic_icon.draw(s);
 
+        _gd._fntMed.put_text_mid(s, _gamemenu_y, _gamemenu_x, "MENU", BLACK_COLOUR, true);
+
 		//draw game letters
 		_round.draw(s);
 
@@ -1525,7 +1527,7 @@ void PlayGame::prepareBackground()
 	_gamebg->drawSolidRect(0, 0, Screen::width(), Screen::height(), GAMEBG_COLOUR);
 
 	//place score bar centered - in case screen bigger than graphic
-	int sb_x = (SCREEN_WIDTH-_gd._scorebar.width())/2;  //in case sb w < screen w
+	int sb_x = (SCREEN_WIDTH - _gd._scorebar.width())/2;  //in case sb w < screen w
 	int sb_w = _gd._scorebar.width();
 	int sb_h = _gd._scorebar.height();
 	_gamebg->blitFrom(&_gd._scorebar, -1, sb_x, 0);
@@ -1561,7 +1563,7 @@ void PlayGame::prepareBackground()
     //
 
     int middle_len = score_len+score0_len + words_len+words0_len;
-    int edge_pad = sb_x + (count0_len * 2);  //space taken up by [ MENU ] or [ 999 ]
+    int edge_pad = sb_x + (count0_len * 1.2);  //space taken up by [ MENU ] or [ 999 ]
 	int equal_gap = (sb_w - middle_len - (edge_pad*2)) / 3;    //space on bar len after edges removed, /3 for equal dist
 
 	int titles_y = ((sb_h - fontText.height()) / 2) + 2;	//+2 magic number - too high otherwise...?
@@ -1575,21 +1577,18 @@ void PlayGame::prepareBackground()
 	_words0_x = words_x+words_len;                  //x pos for words "0000"
 	_words0_y = numbers_y;
 
-	_countdown0_x = (sb_x + sb_w) - (edge_pad / 3);//SCREEN_WIDTH - (count0_len + (count0_len / 8));  	//	_words0_x+words0_len+equal_gap;
+	_countdown0_x = (sb_x + sb_w) - (edge_pad / 2);
 	_countdown0_y = (sb_h - fontCounter.height()) / 2;
 
     int gamemenu_w = _gd._gamemenu_icon.tileW();
     int gamemusic_w = _gd._gamemusic_icon.tileW();
     int gameicon_y = (sb_h - _gd._gamemenu_icon.tileH()) / 2;
-//    _gamemenu_icon_x = sb_x + (gamemenu_w / 3);//((edge_pad - gamemenu_w - gamemusic_w) / 3);  //(edge_pad / 8);
-//    _gamemenu_icon_y = gameicon_y;
-//
-//    _gamemusic_icon_x = _gamemenu_icon_x + gamemenu_w + (gamemenu_w / 3);
-//    _gamemusic_icon_y = _gamemenu_icon_y;
 
-    _gamemusic_icon_x = sb_x + (gamemusic_w / 3);
+    _gamemusic_icon_x = edge_pad + (equal_gap / 5);
     _gamemusic_icon_y = gameicon_y;
 
+    _gamemenu_x = edge_pad / 2;
+    _gamemenu_y = sb_h / 4;
     _gamemenu_icon_x = _gamemusic_icon_x + gamemusic_w + (gamemenu_w / 3);
     _gamemenu_icon_y = gameicon_y;
 

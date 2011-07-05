@@ -384,9 +384,19 @@ bool Game::play(IPlay *p)
 					}
 					break;
 
+                    //'touch' denotes a press of the pointing device, and can be acted on immediately or
+                    //the called code can wait for a 'tap' of the pointing device releasing.
 					case SDL_MOUSEBUTTONDOWN:
 					{
 						p->touch(Point(event.button.x, event.button.y));
+					}
+					break;
+
+                    //tap denotes a release of the pointing device after a touch. The called code can act
+                    //on this or check the initial touch position to see if there was a slide waay to cancel.
+					case SDL_MOUSEBUTTONUP:
+					{
+						p->tap(Point(event.button.x, event.button.y));
 					}
 					break;
 
