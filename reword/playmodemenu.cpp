@@ -50,9 +50,10 @@ void PlayModeMenu::init(Input *input)
     if (bQSExists)
         addItem(MenuItem(99, GREEN_COLOUR, "Resume game...", "Continue playing a quick saved game"));
 
-	addItem(MenuItem(0, PURPLE_COLOUR, "Reword", "Get shorter and all-letter words"));
-	addItem(MenuItem(1, GOLD_COLOUR, "SpeedWord", "Get the all-letter words quickly to continue"));
-	addItem(MenuItem(2, BLUE_COLOUR, "TimeTrial", "Get the most all-letter words in the time limit"));
+	addItem(MenuItem(0, GREEN_COLOUR, "Arcade", "Get enough words to continue"));
+	addItem(MenuItem(1, PURPLE_COLOUR, "Classic", "Get at least one all-letter word"));
+	addItem(MenuItem(2, GOLD_COLOUR, "SpeedWord", "Get the all-letter words quickly to continue"));
+	addItem(MenuItem(3, BLUE_COLOUR, "TimeTrial", "Get the most all-letter words in the time limit"));
 
 	addItem(MenuItem(255, RED_COLOUR, "Back", "Back to main menu"));
 
@@ -67,7 +68,7 @@ void PlayModeMenu::init(Input *input)
 
 void PlayModeMenu::choose(MenuItem i)
 {
-	if (i._id < 3) {			// 0..2, so play
+	if (i._id < 4) {			// 0..3, so play
 		_gd._mode = (eGameMode)i._id;
 		_gd._state = ST_GAME;
 	}

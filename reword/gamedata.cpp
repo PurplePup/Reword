@@ -77,10 +77,17 @@ GameData::GameData() : _bTouch(false),  _init(false)
 
 	bErr |= !_scratch.load(RES_BASE + "images/scratch_2.png", -1, 7);
 
+    //in-game actionbuttons
 	bErr |= !_word_last_pulse.load(RES_BASE + "images/btn_word_last.png", -1, 6);
 	bErr |= !_word_totop_pulse.load(RES_BASE + "images/btn_word_totop.png", -1, 6);
 	bErr |= !_word_shuffle_pulse.load(RES_BASE + "images/btn_word_shuffle.png", -1, 6);
 	bErr |= !_word_try_pulse.load(RES_BASE + "images/btn_word_try.png", -1, 6);
+
+	bErr |= !_touch_menu.load(RES_BASE + "images/touch_menu.png", 255, 4);
+	bErr |= !_touch_menu.setTileSize(106, 52, Image::TILE_VERT);
+	bErr |= !_touch_next.load(RES_BASE + "images/touch_next.png", 255, 2);
+	bErr |= !_touch_next.setTileSize(106, 52, Image::TILE_VERT);
+//	bErr |= !_touch_prev.load(RES_BASE + "images/touch_prev.png", 255, 2);
 
 	//SPRITES
 	bErr |= !_arrowUp.load(RES_BASE + "images/btn_scroll_up.png", 255, 3);
@@ -121,7 +128,7 @@ GameData::GameData() : _bTouch(false),  _init(false)
 	//default to medium diff
 	setDiffLevel(DIF_MED);
 	//default to "classic" game mode
-	_mode = GM_REWORD;
+	_mode = GM_ARCADE;
 
 	//finally, are we done? If bErr was set true anywhere above then don't set _init true
 	_init = !bErr;

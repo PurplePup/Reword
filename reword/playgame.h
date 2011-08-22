@@ -82,14 +82,15 @@ public:
 	PlayGame(GameData& gd);
 	virtual ~PlayGame() { stopCountdown(); delete _pPopup; }
 
-	enum eSuccess { SU_NONE=0, SU_GOT6, SU_BONUS, SU_BADLUCK, SU_SPEED6, SU_TIMETRIAL, SU_GAMEOVER };
+	enum eSuccess { SU_NONE=0, SU_ARCADE, SU_GOT6, SU_BONUS, SU_BADLUCK, SU_SPEED6, SU_TIMETRIAL, SU_GAMEOVER };
 	enum eState { PG_PLAY=0, PG_WAIT, PG_END, PG_DICT, PG_PAUSE }; //, PG_POPUP };
 
     virtual void init(Input *input);
     virtual void render(Screen* s);
     virtual void work(Input* input, float speedFactor);
     virtual void button(Input* input, Input::ButtonType b);
-    virtual void touch(Point pt);
+    virtual void touch(Point pt);   //press
+    virtual void tap(Point pt);     //release
 
 //	static 	void pushSDL_Event(int code, void *data1 = NULL, void *data2 = NULL);
 
@@ -115,7 +116,8 @@ protected:
 	void handlePopup();
 	int tryWordAgainstDict();
 	void tryWord();
-	bool allWordsFound();
+    bool foundEnoughWords();
+	bool foundAllWords();
 	void fillRemainingWords();
 	void doMoveOn();
 	void doPauseGame();
@@ -123,6 +125,7 @@ protected:
 	void prepareBackground();
 	void scrollDictUp();
 	void scrollDictDown();
+    void calcArcadeNeededWords();
 
 	void render_play(Screen*);	//main play render fn
 	void render_wait(Screen*);	//waiting for PG_END, do "game over" anim etc
@@ -180,6 +183,11 @@ private:
 	int _boxOffsetY;				//added position below scratch area
 	int _boxOffset[TARGET_MAX+1];	//pos across screen for found word boxes
 	int _boxLength[TARGET_MAX+1];	//and pixel length of each box displayed (for touch support)
+    int _boxWordNeeded[TARGET_MAX+1];   //number of required/needed words in a column (in Arcade mode)
+
+    int _nWordBoxHighlightOffset;   //highlighting a word (for dictionary)
+    int _nWordBoxEmptyOffset;       //column with no words
+    int _nWordBoxNeededOffset;      //box showing a word should be attempted
 
 	int	_xScratch;		//positions for roundels, change depending on platform
 	int _yScratchTop;
@@ -224,6 +232,7 @@ private:
 	//...
 	PlayGamePopup	*_pPopup;
 
+    int _debugTotalLetters, _debugNeededAll, _debugNeededNow;
 };
 
 #endif //_PLAYGAME_H

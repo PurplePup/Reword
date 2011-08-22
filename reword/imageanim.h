@@ -31,24 +31,26 @@ public:
 
 	//animation
 	void setMaxFrame(Uint32 nFrames);
-	void startAnim(int firstFrame_0, int lastFrame_N, eAnim animType, Uint32 rate_ms, Uint32 repeat_N = 0, Uint32 restartIn_ms = 0);
+	void startAnim(int firstFrame_0, int lastFrame_N, eAnim animType,
+                Uint32 rate_ms, Uint32 repeat_N = 0, Uint32 restartIn_ms = 0, Uint32 delayStart_ms = 0);
 	void setFrameRange(Uint32 firstFrame, Uint32 lastFrame);
 	void setFrame(Uint32 frame);
 	Uint32 getFrame() const			{ return _frame; }
 	Uint32 getMaxFrame() const		{ return _nFrames; }
 	void setRepeat(Uint32 r)		{ _repeat = r; }
 
-	void setAnimRate(Uint32 rate)	{ _waitA.start(_rateA = rate, 0); }
+    void setAnimDelay(Uint32 delay, bool bRestart = false) { _delayA.start(delay); _bDelayRestart = bRestart; }   //before anim starts & each repeat?
+	void setAnimRate(Uint32 rate)	            { _waitA.start(_rateA = rate, 0); }
 	void setAnimType(eAnim anim);
-	void setAnimDir(int dir)		{ _frameDir = (dir<0)?-1:1; }	//anim start dir (frame +/-) +1 for forward, -1 for back
-	void setAnimRestart(Uint32 r)	{ _restartA.start(_restart = r, 0); }
-	void setVisible(bool b)			{ _visible = b; }
-	void pauseAnim(bool b = true)	{ _pauseA = b; }			//stop/start animating
-	void toggleAnim()				{ _pauseA = !_pauseA; }		//toggle pause state
-	void resetAnim()				{ _frame = _firstFrame; }	//start anim sequence at start
-	inline bool canAnim() const		{ return (_nFrames>1); }// && !_pauseA); }		//has more than 1 frame & not paused
-	inline bool isVisible() const 	{ return _visible; }
-	
+	void setAnimDir(int dir)		            { _frameDir = (dir<0)?-1:1; }	//anim start dir (frame +/-) +1 for forward, -1 for back
+	void setAnimRestart(Uint32 r, Uint32 d=0)	{ _restartA.start(_restart = r, d); }
+	void setVisible(bool b)			            { _visible = b; }
+	void pauseAnim(bool b = true)	            { _pauseA = b; }			//stop/start animating
+	void toggleAnim()				            { _pauseA = !_pauseA; }		//toggle pause state
+	void resetAnim()				            { _frame = _firstFrame; }	//start anim sequence at start
+	inline bool canAnim() const		            { return (_nFrames>1); }// && !_pauseA); }		//has more than 1 frame & not paused
+	inline bool isVisible() const 	            { return _visible; }
+
 	//main functions
 	virtual void work();	//calc new pos/frame etc
 	void draw(Surface *s);	//render the image
@@ -56,7 +58,7 @@ public:
 private:
 	//animating functions
 	void (ImageAnim::*pWorkFn)(void);
-	
+
 	void workNONE(void);
 	void workONCE(void);
 	void workHIDE(void);
@@ -74,7 +76,7 @@ protected:
 	Uint32	_lastFrame;	//last frame in anim loop etc (may not be max frame)
 	Uint32	_nFrames;	//number of frames in the sequence
 	int		_frameDir;	//+1 or -1
-	eAnim	_animType;	
+	eAnim	_animType;
 	Uint32	_repeat;	//number of times the LOOP or REVERSE is performed
 	Uint32	_restart;	//restart animation again in a number of ms after start (useful for 'pinging' an effect)
 
@@ -84,6 +86,9 @@ private:
 	Uint32	_rateA;		//rate of frame change (0 = every update, else ticks between)
 	Waiting _waitA;		//animation frame delay
 	Waiting _restartA;	//animation restart period
+
+	Waiting _delayA;	//animation delay before start
+	bool    _bDelayRestart; //if the delay is reset for each animation loop
 };
 
 #endif //_IMAGEANIM_H

@@ -43,29 +43,32 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "utils.h"
 #include <math.h>
 
-ImageAnim::ImageAnim() : 
-	Image(), _x(0.0), _y(0.0f), 
-	_frame(0), _firstFrame(0), _lastFrame(0), _nFrames(0), _frameDir(1), 
-	_repeat(1), _restart(0), _visible(true), _pauseA(true), _rateA(0), _restartA(0)
+ImageAnim::ImageAnim() :
+	Image(), _x(0.0), _y(0.0f),
+	_frame(0), _firstFrame(0), _lastFrame(0), _nFrames(0), _frameDir(1),
+	_repeat(1), _restart(0), _visible(true), _pauseA(true), _rateA(0), _restartA(0),
+	_delayA(0), _bDelayRestart(false)
 {
 	//default _nFrames = 0 so no anim possible, until setMaxFrame called
 }
 
 ImageAnim::ImageAnim(std::string fileName, bool bAlpha, Uint32 nFrames) :
-	Image(fileName, bAlpha), _x(0.0f), _y(0.0f), 
-	_frame(0), _firstFrame(0), _lastFrame(0), _nFrames(0), _frameDir(1), 
-	_repeat(1), _restart(0), _visible(true), _pauseA(true), _rateA(0), _restartA(0)
+	Image(fileName, bAlpha), _x(0.0f), _y(0.0f),
+	_frame(0), _firstFrame(0), _lastFrame(0), _nFrames(0), _frameDir(1),
+	_repeat(1), _restart(0), _visible(true), _pauseA(true), _rateA(0), _restartA(0),
+	_delayA(0), _bDelayRestart(false)
 {
 	//_nFrames curr set to 0 in case Image class not initialised,
-	//properly (due to bad image file etc), so now if it did init properly, 
+	//properly (due to bad image file etc), so now if it did init properly,
 	//set the max number of frames, as passed in to this ctor
 	if (Image::initDone()) setMaxFrame(nFrames);
 }
 
 ImageAnim::ImageAnim(const Image &img) :
-	Image(img), _x(0.0f), _y(0.0f), 
-	_frame(0), _firstFrame(0), _lastFrame(0), _nFrames(0), _frameDir(1), 
-	_repeat(1), _restart(0), _visible(true), _pauseA(true), _rateA(0), _restartA(0)
+	Image(img), _x(0.0f), _y(0.0f),
+	_frame(0), _firstFrame(0), _lastFrame(0), _nFrames(0), _frameDir(1),
+	_repeat(1), _restart(0), _visible(true), _pauseA(true), _rateA(0), _restartA(0),
+	_delayA(0), _bDelayRestart(false)
 {
 }
 
@@ -87,17 +90,20 @@ void ImageAnim::setMaxFrame(Uint32 nFrames)
 //params:
 //firstFrame - 0+
 //lastFrame - 0+ or -1 for all frames
-//animType - see ImageAnim::eAnim 
+//animType - see ImageAnim::eAnim
 //rate - ms per frame
 //repeat_N		- repeat N times or 0 for forever (default 0)
 //restart_ms	- restart the loop in N ms after starting (default 0 - disabled)
-void ImageAnim::startAnim(int firstFrame_0, int lastFrame_N, eAnim animType, Uint32 rate_ms, Uint32 repeat_N, Uint32 restartIn_ms)
+//delay ms      - time to wait before anim starts (caller should use setAnimDelay(ms, bool) to set repeat)
+void ImageAnim::startAnim(int firstFrame_0, int lastFrame_N, eAnim animType,
+                          Uint32 rate_ms, Uint32 repeat_N, Uint32 restartIn_ms, Uint32 delayStart_ms)
 {
 	setFrameRange((firstFrame_0<0)?0:firstFrame_0, (lastFrame_N<0)?_nFrames-1:lastFrame_N);
 	setFrame(firstFrame_0);
 	setAnimRate(rate_ms);
 	setAnimType(animType);
 	setAnimRestart(restartIn_ms);
+	setAnimDelay(delayStart_ms);
 	setRepeat(repeat_N);
 
 	//finally unpause animation if animation is possible
@@ -134,6 +140,7 @@ void ImageAnim::setAnimType(eAnim anim)
 		case ANI_REVERSE:
 			pWorkFn = &ImageAnim::workREVERSE;	//iterate then reverse iterate (repeat)
 			break;
+
 		default:
 			pWorkFn = &ImageAnim::workNONE;		//static, not moving
 			break;
@@ -142,18 +149,21 @@ void ImageAnim::setAnimType(eAnim anim)
 
 void ImageAnim::work()
 {
+	if (!_delayA.done(false)) return;
+
 	if (_restart && _restartA.done(true))
 	{
 		//start again... reset frame etc
 		setFrame(_firstFrame);
 		pauseAnim(false);
 		setVisible(true);	//caller must reset _restart to prevent any more anim
+//       _delayA.done(_bDelayRestart);
 	}
-	
+
 	if (!_waitA.done(true)) return;
-	
-	//update the frame (if more than 1 and not paused) 
-	if ( canAnim()  && !_pauseA ) 
+
+	//update the frame (if more than 1 and not paused)
+	if ( canAnim()  && !_pauseA )
 		(*this.*pWorkFn)();
 }
 
@@ -181,7 +191,7 @@ void ImageAnim::workONCE(void)
 			return;
 		}
 	}
-	_frame += _frameDir; 
+	_frame += _frameDir;
 
 }
 void ImageAnim::workHIDE(void)
@@ -206,7 +216,7 @@ void ImageAnim::workHIDE(void)
 			return;
 		}
 	}
-	_frame += _frameDir; 
+	_frame += _frameDir;
 }
 void ImageAnim::workLOOP(void)
 {
@@ -230,7 +240,7 @@ void ImageAnim::workLOOP(void)
 			return;
 		}
 	}
-	_frame += _frameDir; 
+	_frame += _frameDir;
 }
 void ImageAnim::workREVERSE(void)
 {
@@ -253,12 +263,12 @@ void ImageAnim::workREVERSE(void)
 		}
 
 	}
-	_frame += _frameDir; 
+	_frame += _frameDir;
 }
 
 void ImageAnim::draw(Surface *s)
 {
-	if (_visible) 
+	if (_visible)
 		blitTo(s, (int)round(_x), (int)round(_y), _frame);	//blit current frame to s at x, y
 }
 

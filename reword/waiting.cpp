@@ -37,7 +37,7 @@ Waiting::Waiting() : _period(0), _start(0), _delay(0)
 {
 }
 
-Waiting::Waiting(Uint32 period)
+Waiting::Waiting(Uint32 period) : _period(0), _start(0), _delay(0)
 {
 	start(period);	//start immediately
 }
@@ -47,11 +47,11 @@ void Waiting::start(Uint32 period /*=0*/, Uint32 delay /*=0*/)
 {
 	//reuse same period if param = 0
 	_period = (period)?period:_period;
-	
-	//Pass 0 to delay to start immediately.
+
+	//Pass 0 to delay, to start immediately.
 	//First time through delay might be set, then always resets to 0
 	//unless start() called with new delay and period params
-	_delay = delay;		
+	_delay = delay;
 
 	_start = SDL_GetTicks();
 }

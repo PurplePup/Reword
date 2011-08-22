@@ -51,6 +51,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "audio.h"
 #include "platform.h"
 #include <cassert>
+#include <algorithm>
 
 //#include <SDL_gfxPrimitives.h>
 
@@ -72,6 +73,9 @@ Uint32 countdown_callback(Uint32 interval, void *param)
 
 PlayGame::PlayGame(GameData& gd) : _gd(gd), _pPopup(0)
 {
+#ifdef _DEBUG
+	_dbg_display = false;
+#endif
 	_inputL  = _inputR = false;	//keys pressed + stick click to exit game
 	_running = false;	//not init yet
 	_init = false;		//ditto
@@ -92,6 +96,10 @@ void PlayGame::init(Input *input)
 	//once the class is initialised, init and running are set true
 	newGame();	//reset scores etc
 	newLevel();	//preparebackground, get next word etc
+
+    _nWordBoxHighlightOffset = (_gd._boxes.tileCount()/4); //4 blocks of word boxes
+    _nWordBoxEmptyOffset = ((_gd._boxes.tileCount()/4)*2); //4 blocks.. 3rd block
+    _nWordBoxNeededOffset = ((_gd._boxes.tileCount()/4)*3); //4 blocks.. 4th block
 
 	//set the repeat of the keys required
 	input->setRepeat(Input::UP, 250, 250);		//button, rate, delay
@@ -193,12 +201,12 @@ void PlayGame::render_play(Screen* s)
 	//		A warning "ping" is also sounded in the countdown callback fn each second...
 
 
-    //center the countdown text in the scorebar countdown [area]
-	_gd._fntBig.put_number_mid(s, _countdown0_y, _countdown0_x, //s->surface()->w - 54,
-        _countdown, "%d", (_countdown > 10)?YELLOW_COLOUR:RED_COLOUR, true);	//TIME:
-
 	if (PG_PLAY == _state)
 	{
+        //center the countdown text in the scorebar countdown [area]
+        _gd._fntBig.put_number_mid(s, _countdown0_y, _countdown0_x, //s->surface()->w - 54,
+            _countdown, "%d", (_countdown > 10)?YELLOW_COLOUR:RED_COLOUR, true);	//TIME:
+
 		//draw the tile background before any lower letters placed
 	    //expecting a scratch image list of: "[>][3][4][5][6][7][8]"
 	    //resolve to show: [>][>][3][4][5][6]   to   [>][>][>][5][6][7][8]
@@ -219,7 +227,8 @@ void PlayGame::render_play(Screen* s)
         _gd._gamemenu_icon.draw(s);
         _gd._gamemusic_icon.draw(s);
 
-        _gd._fntMed.put_text_mid(s, _gamemenu_y, _gamemenu_x, "MENU", BLACK_COLOUR, true);
+        //_gd._fntMed.put_text_mid(s, _gamemenu_y, _gamemenu_x, "MENU", YELLOW_COLOUR, true);
+        _gd._touch_menu.draw(s);
 
 		//draw game letters
 		_round.draw(s);
@@ -227,24 +236,22 @@ void PlayGame::render_play(Screen* s)
 		_gd._cursor.blitTo(s, _xScratch+(_round.currentX()*(CURSORW+2)),
 						(_round.cursorIsTop()?_yScratchTop:_yScratchBot), (int)_gd._diffLevel-1);
 	}
-
-#if defined(_DEBUG)
-	_gd._fntClean.put_text(s, 0, SCREEN_HEIGHT - _gd._fntClean.height(), _gd._words.getWord6().c_str(), BLUE_COLOUR);	//##DEBUG## shows first target word
-#endif
+	else
+	{
+	    //place [next] button over counter 'space'
+        _gd._touch_next.draw(s);
+	}
 
 	//draw word boxes 1 length at a time downwards (easier)
-	int yo = _yScratchBot + CURSORH + _boxOffsetY;	//start y offset
+	const int yo = _yScratchBot + CURSORH + _boxOffsetY;	//start y offset
 	tWordsFoundList::const_iterator it;
-
-    const int nWordBoxHighlightOffset = (_gd._boxes.tileCount()/3);
-    const int nWordBoxEmptyOffset = ((_gd._boxes.tileCount()/3)*2);
 
 	//[3..], [4...], [5....] and [6.....] letter boxes
 	for (xx=_shortestWordLen; xx<=_longestWordLen; ++xx)	//accross the screen
 	{
 		it = _wordsFound[xx].begin();
 		const int nWords = _gd._words.wordsOfLength(xx);
-		const bool bHighlightColumn = (PG_PLAY == _state && _round.getBottomWordLength() == xx);
+		const bool bHighlightWholeColumn = (PG_PLAY == _state && _round.getBottomWordLength() == xx);
 
 		if (nWords)	//column has words
 		{
@@ -253,8 +260,8 @@ void PlayGame::render_play(Screen* s)
 			    const int boxOffsetY = yo+(yy*(BOXH + BOXHGAP));  //same as in touch_end()
 
 				//As the old limit of 7 on screen word boxes has now been extended to 8, we can't use
-				//this fuction. If it ever goes back to 7 and includes more words than can fit in
-				//a 7 word column, we might use this again. But probably not!
+				//this fuction (as boxes reach to the very bottom of the screen). If it ever goes back
+				//to 7 and includes more words than can fit in a 7 word column, we might use this again.
 				if (yy >= MAX_WORD_COL)
 				{
 					//? there are more words than can fit on screen (7 down)
@@ -264,9 +271,9 @@ void PlayGame::render_play(Screen* s)
 					//		Just use a dictionary with > 7 words in any 3, 4, 5 or 6 letter words
 					//		for this functionality to work
 //#ifdef _DEBUG
-//					if (PG_PLAY == _state)
-//						_gd._fntTiny.put_number(s, _boxOffset[xx]-8, SCREEN_HEIGHT-22, nWords-_wordsFound[xx].size(), "%d",
-//							(nWords==(int)_wordsFound[xx].size())?GREEN_COLOUR:BLUE_COLOUR);
+					if (PG_PLAY == _state)
+						_gd._fntClean.put_number(s, _boxOffset[xx]+6, boxOffsetY, nWords-_wordsFound[xx].size(), "%d",
+							(nWords==(int)_wordsFound[xx].size())?GREEN_COLOUR:BLUE_COLOUR);
 
 					//render the "more" arrow under column
 //					_gd._moreWords
@@ -276,13 +283,15 @@ void PlayGame::render_play(Screen* s)
 
 				//draw the box for the word to be displayed in - using a highlighted box if
 				//not in play state and this is the curr word the selection is on.
-				_gd._boxes.blitTo( s, _boxOffset[xx], boxOffsetY,					//tile 0=3, 1=4, 2=5, 3=6 etc. letter words
-					(
-                        ((PG_PLAY != _state && xx == _xxWordHi && yy == _yyWordHi) || bHighlightColumn) ?
-                            xx+nWordBoxHighlightOffset:  //xx+(count/3) for n boxes in boxes.png
-                            xx
-                    )-3 );  //-3 to reset the xx back to 0 as the boxes.png starts at 3 letter tile
-
+//				_gd._boxes.blitTo( s, _boxOffset[xx], boxOffsetY,					//tile 0=3, 1=4, 2=5, 3=6 etc. letter words
+//					(
+//                        ((PG_PLAY != _state && xx == _xxWordHi && yy == _yyWordHi) || bHighlightWholeColumn) ?
+//                            xx+_nWordBoxHighlightOffset :  //xx+(count/4) for n box blocks in boxes.png
+//                            (PG_PLAY == _state && yy < _boxWordNeeded[xx]) ?
+//                                xx+_nWordBoxNeededOffset :
+//                                xx
+//                    )-3 );  //-3 to reset the xx back to 0 as the boxes.png starts at 3 letter tile
+//
 				if (it != _wordsFound[xx].end())
 				{
 					//display any dictionary def
@@ -308,22 +317,58 @@ void PlayGame::render_play(Screen* s)
 							_gd._fntClean.put_text(s, yd, "This word has no definition", GREY_COLOUR);
 					}
 
-					//display the word (in red or blue)
+                    //word for this box could be normal background or in Arcade mode, could be a highlight (green or yellow)
+                    _gd._boxes.blitTo( s, _boxOffset[xx], boxOffsetY,					//tile 0=3, 1=4, 2=5, 3=6 etc. letter words
+                        (
+                            ((PG_PLAY != _state && xx == _xxWordHi && yy == _yyWordHi) || bHighlightWholeColumn) ?
+                                xx+_nWordBoxHighlightOffset :  //xx+(count/4) for n box blocks in boxes.png
+                                (PG_PLAY == _state && _maxwordlen!=_longestWordLen && yy < _boxWordNeeded[xx]) ?
+                                    xx+_nWordBoxNeededOffset :      //yellow
+                                    xx //+_nWordBoxHighlightOffset     //green
+                        )-3 );  //-3 to reset the xx back to 0 as the boxes.png starts at 3 letter tile
+
+					//Display the word in red (not found) or blue (found)
+					//Only found words populate the container during play, so red only drawn at end of level
 					_gd._fntClean.put_text(s, _boxOffset[xx]+BOXTEXTOFFSETX, boxOffsetY+BOXTEXTOFFSETY,
 							(*it)._word.c_str(), ((*it)._found)?BLUE_COLOUR:RED_COLOUR);
 
-					++it;
+					++it;   //next found word
 				}
+				else
+                {
+                    //no word for this box so just empty (but possibly highlight for Arcade 'to be found' box)
+                    //or show in red if end of level (not in-play)
+                    _gd._boxes.blitTo( s, _boxOffset[xx], boxOffsetY,					//tile 0=3, 1=4, 2=5, 3=6 etc. letter words
+                        (
+                            ((PG_PLAY != _state && xx == _xxWordHi && yy == _yyWordHi) || bHighlightWholeColumn) ?
+                                xx+_nWordBoxHighlightOffset :  //xx+(count/4) for n box blocks in boxes.png
+                                (PG_PLAY == _state && _maxwordlen!=_longestWordLen && yy < _boxWordNeeded[xx]) ?
+                                    xx+_nWordBoxNeededOffset :
+                                    xx
+                        )-3 );  //-3 to reset the xx back to 0 as the boxes.png starts at 3 letter tile
+                }
 			}
 		}
 		else
 		{
-		    //draw empty rect to denote no words of xx length
+		    //draw empty rect to denote no words of xx length at all
             //using sdlGfxPrimitives: rectangleRGBA(s->surface(), _boxOffset[xx], yo, _boxOffset[xx]+_boxLength[xx], yo+BOXH, 100, 100, 100, 100); //grey, faded
-            if (GM_REWORD == _gd._mode) //only reword mode has empty boxes drawn
-                _gd._boxes.blitTo( s, _boxOffset[xx], yo, xx+(nWordBoxEmptyOffset-3));	//tile 0=3, 1=4, 2=5, 3=6 etc. letter words
+            if (_gd._mode <= GM_REWORD) //only ARCADE and REWORD modes have empty boxes drawn
+                _gd._boxes.blitTo( s, _boxOffset[xx], yo, xx+(_nWordBoxEmptyOffset-3));	//tile 0=3, 1=4, 2=5, 3=6 etc. letter words
 		}
 	}	//for
+
+#if defined(_DEBUG)
+    if (_dbg_display)
+    {
+
+        _gd._fntClean.put_text(s, 0, SCREEN_HEIGHT - _gd._fntClean.height(), _gd._words.getWord6().c_str(), BLUE_COLOUR);	//##DEBUG## shows first target word
+
+        _gd._fntClean.put_number(s, 0, SCREEN_HEIGHT-88, _debugTotalLetters, "%d", BLUE_COLOUR);
+        _gd._fntClean.put_number(s, 0, SCREEN_HEIGHT-66, _debugNeededAll, "%d", BLUE_COLOUR);
+        _gd._fntClean.put_number(s, 0, SCREEN_HEIGHT-44, _debugNeededNow, "%d", BLUE_COLOUR);
+    }
+#endif
 }
 
 void PlayGame::render_wait(Screen* s)
@@ -343,12 +388,22 @@ void PlayGame::render_end(Screen* s)
 	render_play(s);
 
 	//finished level so show success type and bonus etc
-	int minGap = _gd._fntSmall.height();	//useful distance based on small font
-	int yyTitle = _gd._scorebar.tileH() + minGap;
-	int yyReward = yyTitle +_gd._fntBig.height() + minGap;
-	int yyBonus = (_yScratchBot+CURSORH+_boxOffsetY) + (2*_gd._fntBig.height());
+	const int minGap = _gd._fntSmall.height();	//useful distance based on small font
+	const int yyTitle = _gd._scorebar.tileH() + minGap;
+	const int yyReward = yyTitle +_gd._fntBig.height() + minGap;
+	const int yyBonus = (_yScratchBot+CURSORH+_boxOffsetY) + (2*_gd._fntBig.height());
 	switch (_success)
 	{
+	case SU_ARCADE:		//WELL DONE! - You got enough
+		switch (_randomTitle)
+		{
+		case 0:_gd._fntBig.put_text(s, yyTitle, "ALRIGHT!", PURPLE_COLOUR, true);break;
+		case 1:_gd._fntBig.put_text(s, yyTitle, "WOOHOO!", PURPLE_COLOUR, true);break;
+		case 2:_gd._fntBig.put_text(s, yyTitle, "STORMING!", PURPLE_COLOUR, true);break;
+		default:_gd._fntBig.put_text(s, yyTitle, "WELL DONE!", PURPLE_COLOUR, true);break;
+		}
+		_gd._fntMed.put_number(s, yyReward, _bonusScore, "Just enough, add %d points", PURPLE_COLOUR, true);
+		break;
 	case SU_GOT6:		//WELL DONE! - You got the 6
 		switch (_randomTitle)
 		{
@@ -467,7 +522,7 @@ void PlayGame::render_dict(Screen* s)
 
 void PlayGame::render_pause(Screen* s)
 {
-	SDL_Colour c = BLACK_COLOUR;
+	const SDL_Colour c = BLACK_COLOUR;
 	s->drawSolidRect(0,0,s->width(), s->height(), c);
 	_roundPaused->draw(s);
 	return;
@@ -511,6 +566,8 @@ void PlayGame::work_play(Input* input, float speedFactor)
 	_gd._word_shuffle_pulse.work();
 	_gd._word_try_pulse.work();
 
+    _gd._touch_menu.work();
+
 // not animated icons so don't need to call work()
 //	_gd._gamemenu_icon.work();
 //	_gd._gamemusic_icon.work();
@@ -546,6 +603,8 @@ void PlayGame::work_dict(Input* input, float speedFactor)
 	_gd._arrowUp.work();
 	_gd._arrowDown.setVisible(_dictLine < (int)_dictDef.size()-_lines);
 	_gd._arrowDown.work();
+
+    _gd._touch_next.work();
 }
 void PlayGame::work_pause(Input* input, float speedFactor)
 {
@@ -558,7 +617,7 @@ void PlayGame::work_popup(Input* input, float speedFactor)
 
 void PlayGame::startPopup(Input *input)
 {
-	_pPopup = new PlayGamePopup(_gd, _maxwordlen==_longestWordLen);
+	_pPopup = new PlayGamePopup(_gd, foundEnoughWords());
 	if (_pPopup)
 		_pPopup->init(input);
    	_gd._gamemenu_icon.setFrame(1); //off (grey) mode
@@ -819,7 +878,7 @@ void PlayGame::touch(Point pt)
 		handlePopup();
 	}
 	else
-		(*this.*pTouchFn)(pt);
+		(*this.*pTouchFn)(pt);  //call one of the other touch_xxx functions
 }
 void PlayGame::touch_default(Point pt)
 {
@@ -830,7 +889,10 @@ void PlayGame::touch_play(Point pt)
 	if (_round.cursorAt(pt))
 	{
 		if (_round.cursorIsTop())
+        {
 			_round.moveLetterDown();
+			_round.cursorDown();
+        }
 		else
 		{
 			_round.moveLetterUp();
@@ -865,6 +927,11 @@ void PlayGame::touch_play(Point pt)
         _gd._gamemusic_icon.setFrame(_gd._options._bMusic?0:1);    //first frame (on) or second frame (off)
         Audio::instance()->pushPauseTrack();
     }
+    else if (_gd._touch_menu.contains(pt))
+    {
+//    	_gd._touch_menu.startAnim(0, 1, ImageAnim::ANI_ONCE, 400);
+       	_gd._touch_menu.setFrame(0);    //pressed
+    }
 	else
 		if (!_doubleClick.done())
 		    commandTryWord();
@@ -874,7 +941,7 @@ void PlayGame::touch_play(Point pt)
 void PlayGame::touch_end(Point pt)
 {
 	//test if word box selected (doubleclick to see word definition)
-	int yo = _yScratchBot + CURSORH + _boxOffsetY;	//start y offset
+	const int yo = _yScratchBot + CURSORH + _boxOffsetY;	//start y offset
 	//[3..], [4...], [5....] to [N.....] letter boxes
 	int xx, yy;
 	for (xx=_shortestWordLen; xx<=_longestWordLen; ++xx)	//accross the screen
@@ -905,6 +972,11 @@ void PlayGame::touch_end(Point pt)
 		}
 	}
 
+    if (_gd._touch_next.isVisible() && _gd._touch_next.contains(pt))
+    {
+       	_gd._touch_next.setFrame(0);    //pressed
+    }
+
 	//else somewhere else on screen
 	if (!_doubleClick.done())
 		doMoveOn();
@@ -932,6 +1004,25 @@ void PlayGame::touch_dict(Point pt)
 			doDictionary();
 		else
 			_doubleClick.start(300);
+}
+
+//releasing 'touch' press
+void PlayGame::tap(Point pt)
+{
+    if (_gd._touch_menu.contains(pt))
+    {
+//        _gd._touch_menu.setAnimDelay(200);  //before anim back to normal button state
+        _gd._touch_menu.startAnim(0, 3, ImageAnim::ANI_ONCE, 50, 0, 0, 200);
+         //need to push a key command instaed of starting as it needs an Input ptr
+        int key = Input::un_translate(Input::SELECT);
+        pp_g::pushSDL_EventKey(key);
+    }
+    else if (_gd._touch_next.isVisible() && _gd._touch_next.contains(pt))
+    {
+        //anim button back to neutral state
+        _gd._touch_next.startAnim(0, 3, ImageAnim::ANI_ONCE, 50, 0, 0, 200);
+        doMoveOn();
+    }
 }
 
 //command issued by player - to place last word in scratch pannel
@@ -976,8 +1067,8 @@ void PlayGame::handleEvent(SDL_Event &sdlevent)
 		else
 		if (USER_EV_END_COUNTDOWN == sdlevent.user.code)
 		{
-			if ((_longestWordLen == _maxwordlen && !_bAbort) 					//must be at least one 6 letter word found to continue
-				&& !(_countdown==0 && GM_TIMETRIAL==_gd._mode))	//and not timetrial that has reahed 0 (timetrial still going is ok though)
+			if (!_bAbort && foundEnoughWords() 					//must be at least one 6 letter word found to continue
+				&& !(_countdown==0 && GM_TIMETRIAL==_gd._mode))	//and not timetrial that has reached 0 (timetrial still going is ok though)
 			{
 				//if fastest show a flash of the bonus, maybe below the wordlist
 				//just to tell user they got the fastest time... and a bonus...?
@@ -985,7 +1076,7 @@ void PlayGame::handleEvent(SDL_Event &sdlevent)
 				if (!_gd._score.setCurrFastest(_fastest)) _fastest = 0;	//reset to 0 if not the fastest (so we can display)
 				if (_gd._score.currWords()==0) _fastest = 0;	//never bonus if first word, but has recorded it as fastest for scoreboard
 
-				if (_gd._mode == GM_REWORD && allWordsFound())
+				if (_gd._mode <= GM_REWORD && foundAllWords())
 				{
 					//wow! all words got so bonus and go to next level
 					Mix_PlayChannel(-1,_gd._fxBonus,0);
@@ -1004,10 +1095,12 @@ void PlayGame::handleEvent(SDL_Event &sdlevent)
 
 					Mix_PlayChannel(-1,_gd._fx6found,0);
 
-					if (GM_REWORD == _gd._mode)
+					if (_gd._mode <= GM_REWORD)
 					{
-						_gd._score.addCurrScore(SCORE_BONUS);
-						showSuccess(SU_GOT6, SCORE_BONUS);
+					    //if arcade, set arcade bonus unless got a all-letter word, give reword bonus
+					    int bonus = (_maxwordlen==_longestWordLen)?SCORE_BONUS:SCORE_ARCADE;
+						_gd._score.addCurrScore(bonus);
+						showSuccess((_maxwordlen==_longestWordLen)?SU_GOT6:SU_ARCADE, bonus);
 					}
 					else
 					{
@@ -1027,6 +1120,8 @@ void PlayGame::handleEvent(SDL_Event &sdlevent)
 					}
 				}
 				_gd._score.addCurrWords(1);
+				_gd._touch_next.setFrame(3);
+				_gd._touch_next.setVisible(true);
 			}
 			else
 			{
@@ -1058,8 +1153,10 @@ void PlayGame::doMoveOn()
 	//play over so do we go to next level or back to menu...?
 	switch (_success)
 	{
+    case SU_ARCADE:                 //Well done, you got enough words to continue
 	case SU_GOT6:					//WELL DONE! - You got the 6
 	case SU_SPEED6:					//or if in Speed6 mode, a 6 entered so move onto next level
+	case SU_BONUS:					//BONUS!! - You got all words
 		statePop(); 				//out of PG_END state
 		newLevel();
 		break;
@@ -1074,10 +1171,6 @@ void PlayGame::doMoveOn()
 			statePop(); 				//out of PG_END state
 			newLevel();
 		}
-		break;
-	case SU_BONUS:					//BONUS!! - You got all words
-		statePop(); 				//out of PG_END state
-		newLevel();
 		break;
 	case SU_BADLUCK:				//Bad Luck! - Out of time
 		exit(ST_MENU);
@@ -1163,7 +1256,7 @@ void PlayGame::doPauseGame()
 	if (PG_PLAY != _state) return;
 
 	//only on easy mode, or at least one 6 letter word found on this level
-	if (DIF_EASY == _gd._diffLevel || _wordsFound[3].size())
+	if (DIF_EASY == _gd._diffLevel || _wordsFound[_longestWordLen].size())
 	{
 		//pause the countdown timer
 		stopCountdown();
@@ -1297,7 +1390,7 @@ void PlayGame::newLevel()
 	{
 		xLen = (n*FOUND_WORD_CHR);	//xxx=40, xxxx=50, xxxxx=60, xxxxxx=70, etc
 
-		if (_gd._mode == GM_REWORD)	//classic mode
+		if (_gd._mode <= GM_REWORD)	//classic mode
 		{
 			_boxOffset[n] = nextPos;
 			_boxLength[n] = xLen;
@@ -1355,6 +1448,8 @@ void PlayGame::newLevel()
 	_gd._word_last_pulse.setPos(posRight, posBot);
 	_gd._gamemenu_icon.setPos(_gamemenu_icon_x, _gamemenu_icon_y);
 	_gd._gamemusic_icon.setPos(_gamemusic_icon_x, _gamemusic_icon_y);
+	_gd._touch_menu.setPos(3, 0);
+	_gd._touch_next.setPos(Screen::width() - _gd._touch_next.width() - 3, 0);
 
 	//don't want to show or allow touch controls if not on a touchscreen (or mouse/PC) device
 	_gd._word_shuffle_pulse.setVisible(_gd._bTouch);
@@ -1368,6 +1463,10 @@ void PlayGame::newLevel()
 
 	_gd._gamemenu_icon.setTouchable(_gd._bTouch);
 	_gd._gamemusic_icon.setTouchable(_gd._bTouch);
+	_gd._touch_menu.setVisible(_gd._bTouch);
+	_gd._touch_menu.setTouchable(_gd._bTouch);
+	_gd._touch_next.setVisible(false);  //until end of level
+	_gd._touch_next.setTouchable(_gd._bTouch);
 
 	_gd._word_last_pulse.setFrame(5);	//initially to last frame (button anim always goes back to last frame)
 	_gd._word_totop_pulse.setFrame(5);
@@ -1375,12 +1474,70 @@ void PlayGame::newLevel()
 	_gd._word_try_pulse.setFrame(5);
 	_gd._gamemusic_icon.setFrame(_gd._options._bMusic?0:1);    //first frame (on) or second frame (off)
 	_gd._gamemenu_icon.setFrame(0);    //first frame
+	_gd._touch_menu.setFrame(3);
+	_gd._touch_next.setFrame(3);
 
 //    Sprite *ps = new Sprite(
 //   _sprites.add(  )
 
+    calcArcadeNeededWords();
+
 	startCountdown();
 	clearEventBuffer();	//start fresh each level
+}
+
+//Calc how many words in each column needed to continue (in arcade mode)
+//Called after each word is found by player so new highlights can be drawn
+void PlayGame::calcArcadeNeededWords()
+{
+    memset(_boxWordNeeded, 0, sizeof(_boxWordNeeded));
+
+    if (GM_ARCADE == _gd._mode)
+    {
+        //depending on difficulty, need at least n words of each type to continue
+        //unlike Classic (Original Reword) mode that needs only a single all-letter
+        //word to continue.
+
+        int xx(0), yy(0), nTotalLetters(0);
+        //1. tot up the total number of letters in words available
+        for (xx=_shortestWordLen; xx<=_longestWordLen; ++xx)
+        {
+            //only count nWords on screen, not overflow
+            const int nWordsOnScreen = std::min(_gd._words.wordsOfLength(xx), MAX_WORD_COL);
+            nTotalLetters += nWordsOnScreen * xx;     //words * numChars
+        }
+_debugTotalLetters = nTotalLetters; //for debug display
+
+        //2. calc number of letters needed to continue (% based on difficulty)
+        //for easy, need to find 25% of all words, or an all-letter word
+        //for med, need to find 50% of all words, or an all-letter word
+        //for hard, need to find 75% of all words, or an all-letter word
+        const int pc = (DIF_EASY == _gd._diffLevel)?25:(DIF_MED == _gd._diffLevel)?50:75;
+        int needed = (nTotalLetters * ((float)pc/100));
+_debugNeededAll = needed; //for debug display
+
+        for (xx=_longestWordLen; xx>=_shortestWordLen; --xx)
+        {
+            //remove letters (in words) already found
+            needed -= (int)_wordsFound[xx].size() * xx;
+        }
+_debugNeededNow = needed;
+
+        for (xx=_longestWordLen; xx>=_shortestWordLen; --xx)
+        {
+            //only count nWords on screen, not overflow
+            const int nWords = std::min(_gd._words.wordsOfLength(xx), MAX_WORD_COL);
+            for (yy = 0; yy < nWords; ++yy)
+            {
+                if (needed >= xx)
+                {
+                    _boxWordNeeded[xx]++;
+                    needed -= xx;
+                    if (xx == _longestWordLen) break; //only need one longest word
+                }
+            }
+        }
+    }
 }
 
 //show a SUCCESS! screen over play area before continuing with next level
@@ -1415,19 +1572,21 @@ void PlayGame::tryWord()
 		else wordlen = -1;	//speed6 or timetrial badWord sound as < 6 letters
 	}
 
-	//must be GM_REWORD or bad word
+	//must be GM_ARCADE or GM_REWORD or bad word
 	if (wordlen >= _shortestWordLen && wordlen <= _longestWordLen)	//is 3,4,5, or 6 (or whatever)
 	{
 		_gd._score.addCurrScore( (_longestWordLen == wordlen)?SCORE_WORD6:SCORE_WORD );	//more for a 6 letter word
 		_round.clearAllToTop(true);	//remove hit word
 
-		if (allWordsFound())
+		if (foundAllWords())
 		{
 			pp_g::pushSDL_Event(USER_EV_END_COUNTDOWN); //pushes end of level
 			return;	//exit before sound, as success() plays fanfare sound
 		}
 		//it's a simple word find
 		Mix_PlayChannel(-1,(_longestWordLen == wordlen)?_gd._fx6found:_gd._fxFound,0);
+
+		calcArcadeNeededWords();
 	}
 	else	//0=already found, -1=not a 6 or in sub word list
 	{
@@ -1467,8 +1626,28 @@ int PlayGame::tryWordAgainstDict()
 	return newword.length();
 }
 
+//return true if a longest-word found or, in arcade mode, if words needed list is empty
+bool PlayGame::foundEnoughWords()
+{
+    if (_maxwordlen==_longestWordLen)
+        return true;
+
+    if (_gd._mode == GM_ARCADE)
+    {
+        int xx, iCount(0);
+        for (xx=_shortestWordLen; xx<=_longestWordLen; iCount += _boxWordNeeded[xx++]);
+        if (iCount == 0)
+            return true;
+    }
+
+    if (foundAllWords())
+        return true;
+
+    return false;
+}
+
 //return true if all words available for the 6 letter word have been found
-bool PlayGame::allWordsFound()
+bool PlayGame::foundAllWords()
 {
 	bool bAllWords = true;
 	int xx;
@@ -1599,6 +1778,7 @@ void PlayGame::prepareBackground()
 	Image *pImage = 0;
 	switch (_gd._mode)
 	{
+	case GM_ARCADE:		pImage = &_gd._game_arcade;	break;  //##TODO
 	case GM_REWORD:		pImage = &_gd._game_reword;	break;
 	case GM_SPEED6:		pImage = &_gd._game_speed6;	break;
 	case GM_TIMETRIAL:	pImage = &_gd._game_timetrial; break;

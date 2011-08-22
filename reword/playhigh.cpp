@@ -52,7 +52,7 @@ void PlayHigh::init(Input *input)
 {
 	//once the class is initialised, init and running are set true
 
-	//play menu music - if not already playing - as we could come 
+	//play menu music - if not already playing - as we could come
 	//here from the end of the game rather than from the menu
 	if (!Mix_PlayingMusic())
 		Mix_PlayMusic(_gd._musicMenu, -1);	//play 'forever'
@@ -60,7 +60,7 @@ void PlayHigh::init(Input *input)
 	//set up local difficulty settings
 	setDifficulty(_gd._diffLevel);
 	setMode(_gd._mode);	//calls prepareBackground();
-	
+
 	_currPos = 0;
 	//set pos to -1 if not editing a high score, ie -1=editing high score
 	_pos = (ST_HIGHEDIT==_gd._state)?_gd._score.isHiScore(_mode, _diff):-1;
@@ -76,7 +76,7 @@ void PlayHigh::init(Input *input)
 	input->setRepeat(Input::DOWN, 100, 300);
 	input->setRepeat(Input::LEFT, 100, 300);
 	input->setRepeat(Input::RIGHT, 100, 300);
-	
+
 	//set arrow (scroll positions)
 	_gd._arrowUp.setPos(SCREEN_WIDTH-_gd._arrowUp.tileW(), BG_LINE_TOP+2);		//positions dont change, just made visible or not if scroll available
 	_gd._arrowUp.setFrame(_gd._arrowUp.getMaxFrame()-1);			//last frame
@@ -96,7 +96,7 @@ void PlayHigh::init(Input *input)
 	int yUsed = (BG_LINE_BOT - BG_LINE_TOP) - (int)(_gd._fntClean.height() * 10.5);
 	_yyGap = yUsed / 11;
 
-	int itemGaps = 5;//(_mode != GM_REWORD) ? 4 : 3;	//between WWW 00000000 0000w 000s
+	int itemGaps = 5;	//between WWW 00000000 0000w 000s
 	_xInitsLen = _gd._fntClean.calc_text_length("WWW");
 	_xScoreLen = _gd._fntClean.calc_text_length("00000000");
 	_xWordsLen = _gd._fntClean.calc_text_length("0000w");
@@ -139,7 +139,7 @@ void PlayHigh::render(Screen *s)
 	int line = 0;			//'curr' line
 	int yyLine = 0;			//count lines so far
 	int yy = BG_LINE_TOP + _yyGap;	//actual line y pix pos
-	
+
 	_gd._fntClean.put_text(s, (_xxStart - _xDiffLen)/2, yy, _description.c_str(), _diffColour, false);
 
 	int xx(0);
@@ -161,7 +161,7 @@ void PlayHigh::render(Screen *s)
 			xx += _xScoreLen + _xxGap;
 			_gd._fntClean.put_number(s, xx, yy, _curr.words, "%04dw", _diffColour);
 			xx += _xWordsLen + _xxGap;
-			if (_mode != GM_REWORD)
+			if (_mode > GM_REWORD)  //speed or timetrial show speed
 				_gd._fntClean.put_number(s, xx, yy, _curr.fastest, "%03ds", _diffColour);
 		}
 		else
@@ -173,7 +173,7 @@ void PlayHigh::render(Screen *s)
 			xx += _xScoreLen + _xxGap;
 			_gd._fntClean.put_number(s, xx, yy, _gd._score.words(_mode, _diff, line), "%04dw", BLUE_COLOUR);
 			xx += _xWordsLen + _xxGap;
-			if (_mode != GM_REWORD)
+			if (_mode > GM_REWORD)  //speed or timetrial show speed
 				_gd._fntClean.put_number(s, xx, yy, _gd._score.fastest(_mode, _diff, line), "%03ds", BLUE_COLOUR);
 
 			++line;	//dont jump a score (ie line = 0->9, but yyLine will jump+1 if yyLine==pos
@@ -199,18 +199,18 @@ void PlayHigh::work(Input *input, float speedFactor)
 {
 	_title.work();
 
-	//animate the roundel title if it's not moving and 
+	//animate the roundel title if it's not moving and
 	//we have waited long enough since it animated last
 	if (!_title.isMoving() && _titleW.done(true))
 	{
 		if (_title.isInOrder())
-			_title.jumbleWord(true); 
+			_title.jumbleWord(true);
 		else
 			_title.unJumbleWord(true);
 	}
 
 	//Do repeat keys...
-	//if a key is pressed and the interval has expired process 
+	//if a key is pressed and the interval has expired process
 	//that button as if pressesd again
 
     if (input->repeat(Input::UP))	button(input, Input::UP);
@@ -221,7 +221,7 @@ void PlayHigh::work(Input *input, float speedFactor)
 	//_pos -1 = in edit hiscore initials mode
 	_gd._arrowUp.setVisible(_mode < GM_MAX-1 && !isEditing());
 	_gd._arrowUp.work();
-	_gd._arrowDown.setVisible(_mode > GM_REWORD && !isEditing());
+	_gd._arrowDown.setVisible(_mode > GM_ARCADE && !isEditing());
 	_gd._arrowDown.work();
 	_gd._arrowLeft.setVisible(_diff > DIF_EASY && !isEditing());
 	_gd._arrowLeft.work();
@@ -233,28 +233,28 @@ void PlayHigh::button(Input *input, Input::ButtonType b)
 {
 	switch (b)
 	{
-	case Input::UP: 
+	case Input::UP:
 		if (input->isPressed(b))
 			moveUp();
 		break;
-	case Input::DOWN: 
+	case Input::DOWN:
 		if (input->isPressed(b))
 			moveDown();
 		break;
-	case Input::LEFT: 
+	case Input::LEFT:
 		if (input->isPressed(b))
 			moveLeft();
 		break;
-	case Input::RIGHT: 
+	case Input::RIGHT:
 		if (input->isPressed(b))
 			moveRight();
 		break;
-	case Input::CLICK: 
-	case Input::B: 
+	case Input::CLICK:
+	case Input::B:
 		if (input->isPressed(b))
 		{
 			if (isEditing() && _currPos < 2)
-			{	
+			{
 				_currPos++;	//treat as button right unless on 3rd char
 				break;
 			}
@@ -264,14 +264,14 @@ void PlayHigh::button(Input *input, Input::ButtonType b)
 				_gd._score.insert(_mode, _diff, _pos, _curr);
 				_gd._score.save();	//save now so player can switch off or return to menu if wishes
 
-				_pos = -1;		//set to not-editing 
+				_pos = -1;		//set to not-editing
 				break;
 			}
-			//else pos is -1 (not editing) so follow on to exit...		
+			//else pos is -1 (not editing) so follow on to exit...
 		}
-		//follow on to exit to ST_MENU ... 
+		//follow on to exit to ST_MENU ...
 		//not break
-	case Input::X: 
+	case Input::X:
 		if (input->isPressed(b))
 		{
 			_gd._state = ST_MENU;
@@ -303,7 +303,7 @@ void PlayHigh::moveDown()
 	else
 		setMode((eGameMode)++_mode);
 }
-		
+
 void PlayHigh::moveLeft()
 {
 	if (isEditing())
@@ -374,8 +374,8 @@ void PlayHigh::setDifficulty(eGameDiff diff)
 //set mode locally
 void PlayHigh::setMode(eGameMode mode)
 {
-	if (mode < GM_REWORD) mode = GM_REWORD;
-	if (mode > GM_TIMETRIAL) mode = GM_TIMETRIAL;
+	if (mode < GM_ARCADE) mode = GM_ARCADE;
+	if (mode >= GM_MAX) mode = (eGameMode)((int)GM_MAX - 1);
 	_mode = mode;
 	setDescription();
 	prepareBackground();
@@ -394,7 +394,7 @@ void PlayHigh::setDescription()
 
 void PlayHigh::prepareBackground()
 {
-	//create the background to be used for this level, 
+	//create the background to be used for this level,
 	//pre drawing so we dont need to do it each frame.
 	//...
 	_menubg = std::auto_ptr<Image>(new Image());
@@ -405,6 +405,8 @@ void PlayHigh::prepareBackground()
 
 	switch (_mode)
 	{
+	case GM_ARCADE:		_menubg->blitFrom(&_gd._menu_arcade, -1, x, y); //##TODO
+						break;
 	case GM_REWORD:		_menubg->blitFrom(&_gd._menu_reword, -1, x, y);
 						break;
 	case GM_SPEED6:		_menubg->blitFrom(&_gd._menu_speed6, -1, x, y);

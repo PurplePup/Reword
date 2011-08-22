@@ -11,32 +11,33 @@
 #include "states.h"
 
 //score vaues
+const int SCORE_ARCADE = 30;    //bonus for getting enough words (but not the all-letter word)
 const int SCORE_BONUS = 100;	//given when word level completed
 const int SCORE_SECONDS = 10;	//multiplied by seconds remaining and added to bonus
-const int SCORE_WORD6 = 20;		//for all 6 letter words
-const int SCORE_WORD = 10;		//for each non 6 letter word
+const int SCORE_WORD6 = 20;		//for all all-letter letter words
+const int SCORE_WORD = 10;		//for each non all-letter word
 const int SCORE_FASTEST = 2;	//each time a speed6 or TT word is got faster than before
 
 //Make sure it's always the same packing
-//This is not portable over different endian systems but will at least 
-//play nicer on most. If I need to be truly cross platform with the score 
+//This is not portable over different endian systems but will at least
+//play nicer on most. If I need to be truly cross platform with the score
 //file, it needs to have its own serializer or be text (XML?)
 #pragma pack(push, 1)
 
-typedef struct 
+typedef struct
 {
 	char	inits[4];	//3 letters + \0
 	Uint32	words;
 	Uint32	score;
 } tHiScoreEntryPre04;		//pre v0.4 score format
 
-typedef struct 
+typedef struct
 {
 	//1 more than (10) to display, to allow insert when adding inits at last pos in table
 	tHiScoreEntryPre04 level[11];
 } tHiScoreLevelsPre04;
 
-typedef struct 
+typedef struct
 {
 	char	inits[4];	//3 letters + \0
 	Uint32	words;
@@ -45,10 +46,10 @@ typedef struct
 	Uint32	ttSeconds;	//amount of seconds - user can change for timetrial
 } tHiScoreEntry;
 
-typedef struct 
+typedef struct
 {
 	//1 more than (10) to display, to allow insert when adding inits at last pos in table
-	tHiScoreEntry level[11];	
+	tHiScoreEntry level[11];
 } tHiScoreLevels;
 
 //back to whatever the platform uses
@@ -62,7 +63,7 @@ public:
 	void init();
 	Uint32 load(std::string scorefile = "");
 	void save(std::string scorefile = "");
-	
+
 	int isHiScore(int mode, int diffLevel);
 	void insert(int mode, int diff, int pos, tHiScoreEntry &curr);
 
@@ -97,8 +98,9 @@ protected:
 	std::string		_scorefile;
 
 	tHiScoreEntry	_curr;			//current score, words and inits to save to scoretable
-	tHiScoreLevels	_hiScore[3];	//Reword - 3 difficulties (easy, med, hard) of 10x hi scores 
-	tHiScoreLevels	_hiScoreS6[3];	//Speed - 3 difficulties (easy, med, hard) of 10x hi scores 
+	tHiScoreLevels	_hiScoreRA[3];	//Reword Arcade - 3 difficulties (easy, med, hard) of 10x hi scores
+	tHiScoreLevels	_hiScore[3];	//Reword - 3 difficulties (easy, med, hard) of 10x hi scores
+	tHiScoreLevels	_hiScoreS6[3];	//Speed - 3 difficulties (easy, med, hard) of 10x hi scores
 	tHiScoreLevels	_hiScoreTT[3];	//TimeTrial - 3 difficulties (easy, med, hard) of 10x hi scores
 
     unsigned int 	_seed;

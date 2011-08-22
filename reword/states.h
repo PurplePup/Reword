@@ -10,12 +10,31 @@
 //namespace Game
 //{
 
-	enum eGameDiff { DIF_UNDEFINED, DIF_EASY, DIF_MED, DIF_HARD, DIF_MAX };	//DIF_MAX only used for calc countdown timer
+    //game difficulty states
+	enum eGameDiff { DIF_UNDEFINED,
+                     DIF_EASY,
+                     DIF_MED,
+                     DIF_HARD,
+                     DIF_MAX };	    //DIF_MAX only used for calc countdown timer
 
+    //game states (menu, in-play etc)
 	//ST_GAME and ST_RESUME are similar in that both start the game, but ST_RESUME loads previously saved state file
-	enum eGameState { ST_MENU, ST_MODE, ST_DIFF, ST_INST, ST_GAME, ST_RESUME, ST_HIGH, ST_HIGHEDIT, ST_EXIT };
+	enum eGameState { ST_MENU,      //main menu
+                      ST_MODE,      //mode screen
+                      ST_DIFF,      //difficulty screen
+                      ST_INST,      //instructions
+                      ST_GAME,      //in-play
+                      ST_RESUME,    //resume menu shown
+                      ST_HIGH,      //highscore screen
+                      ST_HIGHEDIT,  //highscore editing
+                      ST_EXIT };
 
-	enum eGameMode { GM_REWORD, GM_SPEED6, GM_TIMETRIAL, GM_MAX };		//GM_MAX only used to calc last entry
+    //game modes (std, timetrial etc)
+	enum eGameMode { GM_ARCADE,     //Reword but allows continue on partial completion
+                     GM_REWORD,     //Classic Reword (must get a long word to continue)
+                     GM_SPEED6,     //Must get a single long word to continue
+                     GM_TIMETRIAL,  //Get as many single long words before timer runs out
+                     GM_MAX };		//GM_MAX only used to calc last entry
 
 //}
 

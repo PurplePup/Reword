@@ -1,7 +1,7 @@
 //platform.h
 //
 
-#if defined(WIN32) || defined(_WIN32)
+#if defined(WIN32)
 //win32 pragmas to help prevent STL truncation warnings
 #pragma warning(disable:4503)
 #pragma warning(disable:4786)
@@ -15,7 +15,7 @@
 #endif
 
 //base data location depending on system
-#if defined(WIN32) || defined(_WIN32)
+#if defined(WIN32)
 #define RES_SYS_BASE	(std::string("../data/"))
 #else
 #define RES_SYS_BASE	(std::string("./data/"))

@@ -154,9 +154,13 @@ bool Words::rejectWord(const std::string &strWord)
 
 //using restartable rnd function to re-generate same
 //random sequence if given same seed again (for resume games)
-  unsigned int g_rndSeed  = 1234;
+unsigned int g_rndSeed  = 1234;
 
+#ifdef WIN32
+ptrdiff_t wrandom (ptrdiff_t i) { return rand_s(&g_rndSeed)%i;}
+#else
 ptrdiff_t wrandom (ptrdiff_t i) { return rand_r(&g_rndSeed)%i;}
+#endif
 // pointer object to it:
 ptrdiff_t (*pwrandom)(ptrdiff_t) = wrandom;
 
@@ -331,16 +335,15 @@ bool Words::checkCurrentWordTarget(const std::string &wordTarget)
 	{
 		iShortWords += _nWords[i];
 		//check if any exceed our rowcount max for a particular column
-		if (_nWords[i] > MAX_WORD_COL)
-		{
-			if (_bDebug) std::cout << "Too many size " << i << " (" << _nWords[i] << ") for word : " << wordTarget << std::endl;
-			bOk = false;
-			break;
-		}
+//		if (_nWords[i] > MAX_WORD_COL)
+//		{
+//			if (_bDebug) std::cout << "Too many size " << i << " (" << _nWords[i] << ") for word : " << wordTarget << std::endl;
+//			bOk = false;
+//		}
 	}
 
 	//only need to exclude target word if there are no short words at all for it
-	if (iShortWords == 0)	//exclude target word due to missing (short) 3, 4, 5 letter words
+	if (bOk && iShortWords == 0)	//exclude target word due to missing (short) 3, 4, 5 letter words
 	{
 		if (_bDebug) std::cout << "All short words missing for word : " << wordTarget << std::endl;
 		bOk = false;
@@ -377,7 +380,7 @@ bool Words::nextWord(std::string &retln, eGameDiff level,  eGameMode mode, bool 
 					//set the "current word" to that just found
 					_word = (*mapit).second;
 
-					if (GM_REWORD != mode)
+					if (mode > GM_REWORD)
 					{
 						//quick and dirty to strip non target length words from those just found
 						//as speed6 and time trial modes only use the higher target words

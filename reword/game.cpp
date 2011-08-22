@@ -65,12 +65,14 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <cassert>
 #include <sys/stat.h>	//to detect touch screen
 
+#ifndef WIN32
 //added for frame buffer vsync
 #include <linux/fb.h>
 #include <fcntl.h>
 #include <linux/mman.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
+#endif
 
 #define MAX_FRAME_RATE 60
 
@@ -79,7 +81,6 @@ Game::Game() :
 	_init(false), _screen(0), _input(0), //_audio(0),
 	_gd(0)
 {
-	atexit(SDL_Quit);	//auto cleanup, just in case
 }
 
 Game::~Game()
@@ -130,6 +131,8 @@ bool Game::init(const GameOptions &options)
 		setLastError("Unable to init SDL");
 		return false;
 	}
+
+	atexit(SDL_Quit);	//auto cleanup, just in case
 
 	_screen  = new Screen(SCREEN_WIDTH, SCREEN_HEIGHT);
 	if (!_screen->initDone())
@@ -267,7 +270,8 @@ bool Game::play(IPlay *p)
 	SDL_Event event;
 
 	int fbdev = open("/dev/fb0", O_RDONLY);
-	void *buffer = mmap(0, SCREEN_WIDTH*SCREEN_HEIGHT*2, PROT_WRITE, MAP_SHARED, fbdev, 0);
+//	void *buffer =
+        mmap(0, SCREEN_WIDTH*SCREEN_HEIGHT*2, PROT_WRITE, MAP_SHARED, fbdev, 0);
 
 	// Initialise play/level specific stuff
 	p->init(_input);
@@ -340,8 +344,15 @@ bool Game::play(IPlay *p)
 							break;
 						}
 
-#ifdef _DEBUG			//if Q key pressed, toggle capped framerate
-						if (event.key.keysym.sym == SDLK_q)	bCap = !bCap;
+#ifdef _DEBUG
+                        //if 'f' key pressed, toggle capped framerate
+						if (event.key.keysym.sym == SDLK_f)	bCap = !bCap;
+
+						// if 'd' key pressed, toggle debug display
+						if (event.key.keysym.sym == SDLK_d)
+                        {
+                            p->toggleDbgDisplay();
+                        }
 #endif
 
 						Input::ButtonType b = _input->translate(event.key.keysym.sym);
@@ -393,7 +404,7 @@ bool Game::play(IPlay *p)
 					break;
 
                     //tap denotes a release of the pointing device after a touch. The called code can act
-                    //on this or check the initial touch position to see if there was a slide waay to cancel.
+                    //on this or check the initial touch position to see if there was a slide away to cancel.
 					case SDL_MOUSEBUTTONUP:
 					{
 						p->tap(Point(event.button.x, event.button.y));

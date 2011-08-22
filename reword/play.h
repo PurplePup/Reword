@@ -52,6 +52,11 @@ public:
 
 	virtual ~IPlay() {}
 
+#ifdef _DEBUG
+    void toggleDbgDisplay() { _dbg_display = !_dbg_display; }
+	bool _dbg_display;  //if true, display debug info
+#endif
+
 protected:
 	bool _init;		//must be set true to render etc
 	bool _running;	//must be set true to not drop out of Game class

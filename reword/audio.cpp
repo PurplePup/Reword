@@ -47,7 +47,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <fcntl.h>
 #include <stdio.h>
 
-#ifndef _WIN32
+#ifndef WIN32
 #include <sys/ioctl.h>
 #include <linux/soundcard.h>
 #include <dirent.h>		//for dir search for songs...
@@ -309,7 +309,7 @@ std::string Audio::getPrevTrack()
 
 void Audio::loadTracks(const std::string &baseDir)
 {
-#ifndef _WIN32
+#ifndef WIN32
 	DIR           *d;
 	struct dirent *dir;
 

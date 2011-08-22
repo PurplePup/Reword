@@ -56,7 +56,7 @@ void Score::init()
 	memset(&_hiScore[0], 0, sizeof(_hiScore[0])*3);
 	memset(&_hiScoreS6[0], 0, sizeof(_hiScoreS6[0])*3);
 	memset(&_hiScoreTT[0], 0, sizeof(_hiScoreTT[0])*3);
-	
+
 	int item, diff;
 	for (diff=0; diff<3; ++diff)
 	{
@@ -77,7 +77,7 @@ void Score::init()
 // 		file mods without the player having to trash the score file and restart from scratch
 Uint32 Score::load(std::string scorefile)
 {
-	if (!scorefile.length()) 
+	if (!scorefile.length())
 		scorefile = _scorefile;	//none passed in so load from default file
 	else
 		_scorefile = scorefile;	//file passed in so save as default
@@ -289,6 +289,7 @@ tHiScoreLevels *Score::getLevel(int mode, int diff)
 	{
 	case GM_SPEED6: 	return &_hiScoreS6[diff];
 	case GM_TIMETRIAL: 	return &_hiScoreTT[diff];
+	case GM_ARCADE:     return &_hiScoreRA[diff];   //##TODO
 	case GM_REWORD:
 	default:
 	 	return &_hiScore[diff];

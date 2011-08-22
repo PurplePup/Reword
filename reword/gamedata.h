@@ -55,10 +55,12 @@ public:
 	//backgrounds & images
 	Image _menubg;
 	Image _menubg_plain;
+	Image _menu_arcade;
 	Image _menu_reword;
 	Image _menu_speed6;
 	Image _menu_timetrial;
 	Image _scorebar;
+	Image _game_arcade;
 	Image _game_reword;
 	Image _game_speed6;
 	Image _game_timetrial;
@@ -81,6 +83,10 @@ public:
 	Sprite _word_totop_pulse;
 	Sprite _word_shuffle_pulse;
 	Sprite _word_try_pulse;
+
+	Sprite _touch_menu;
+	Sprite _touch_next;
+	Sprite _touch_prev;
 
 	//sound effectes etc
 	Mix_Chunk *_fxCountdown;	//countdown ping noise
