@@ -10,14 +10,14 @@
 class Point
 {
 public:
+	int _x, _y;
 	Point() : _x(0), _y(0) {}
 	Point(int x, int y) : _x(x), _y(y) {}
-	int _x, _y;
-	Point add(Point pt) { return Point(_x+pt._x, _y+pt._y); }
-	Point sub(Point pt) { return Point(_x-pt._x, _y-pt._y); }
+	Point add(const Point &pt) { return Point(_x+pt._x, _y+pt._y); }
+	Point sub(const Point &pt) { return Point(_x-pt._x, _y-pt._y); }
 	Point mul(int i) { return Point(_x*i, _y*i); }
 	Point div(int i) { return Point(_x/i, _y/i); }
-	bool eq(Point pt) { return _x==pt._x && _y==pt._y; }
+	bool eq(const Point &pt) const { return _x==pt._x && _y==pt._y; }
 };
 
 class Rect {
@@ -41,7 +41,7 @@ public:
 	Rect addpt(Point pt) { return Rect(_min.add(pt), _max.add(pt)); }
 	Rect subpt(Point pt) { return Rect(_min.sub(pt), _max.sub(pt)); }
 	Rect inset(int n) { return Rect(_min.add(Point(n, n)), _max.sub(Point(n, n))); }
-	bool contains(Point pt) {
+	bool contains(const Point &pt) const {
 		return pt._x>=_min._x && pt._x<_max._x && pt._y>=_min._y && pt._y<_max._y;
 	}
 };

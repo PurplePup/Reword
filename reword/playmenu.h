@@ -51,9 +51,9 @@ public:
     virtual void choose(MenuItem i);
     virtual void render(Screen* s);
     virtual void work(Input* input, float speedFactor);
-    virtual void button(Input* input, Input::ButtonType b);
-    virtual void touch(Point pt);
-    virtual void tap(Point pt);
+    virtual void button(Input* input, IInput::eButtonType b);
+    virtual bool touch(const Point &pt);
+    virtual bool tap(const Point &pt);
 
     void        startMenuMusic();
     void        stopMenuMusic();

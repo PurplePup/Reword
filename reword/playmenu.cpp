@@ -41,6 +41,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "playmenu.h"
 #include "platform.h"
 #include "audio.h"
+#include "locator.h"
+
 #include <string>
 
 PlayMenu::PlayMenu(GameData &gd)  : _gd(gd)
@@ -87,11 +89,11 @@ void PlayMenu::startMenuMusic()
 void PlayMenu::stopMenuMusic()
 {
     //stop any menu music or personal music playing in the menu
-    Audio *pAudio = Audio::instance();
-    if (pAudio)
-    {
-        pAudio->stopTrack();
-    }
+//    Audio *pAudio = Audio::instance();
+//    if (pAudio)
+//        pAudio->stopTrack();
+
+    Locator::GetAudio().stopTrack();
 }
 
 void PlayMenu::choose(MenuItem i)
@@ -167,7 +169,7 @@ void PlayMenu::work(Input *input, float speedFactor)
     if (input->repeat(Input::DOWN))	button(input, Input::DOWN);
 }
 
-void PlayMenu::button(Input *input, Input::ButtonType b)
+void PlayMenu::button(Input *input, IInput::eButtonType b)
 {
 	switch (b)
 	{
@@ -202,7 +204,7 @@ void PlayMenu::button(Input *input, Input::ButtonType b)
 }
 
 //touch (press) to highlight the menu item
-void PlayMenu::touch(Point pt)
+bool PlayMenu::touch(const Point &pt)
 {
     _saveTouchPt._x = _saveTouchPt._y = 0;
 	Uint32 item(0);
@@ -212,7 +214,7 @@ void PlayMenu::touch(Point pt)
 		    _saveTouchPt = pt;      //so test if release pos is in same menu item
 			_item = item;	        //highlight the touched item
 			_delayHelp.start(500);  //wait before help line displayed
-			return;
+			return true;
 		}
 	}
 
@@ -225,11 +227,14 @@ void PlayMenu::touch(Point pt)
             startMenuMusic();
         else
             stopMenuMusic();
+        return true;
     }
+
+    return false;
 }
 
 //tap (release) to action the menu item
-void PlayMenu::tap(Point pt)
+bool PlayMenu::tap(const Point &pt)
 {
 	Uint32 item(0);
 	for (tMenuItems::iterator p = _itemList.begin(); p != _itemList.end(); ++item, ++p) {
@@ -237,9 +242,10 @@ void PlayMenu::tap(Point pt)
 		{
 		    if (p->_r.contains(_saveTouchPt))   //is same control originally touched (ie not move away to cancel)
                 choose(*p);
-			return;
+			return true;
 		}
 	}
+	return false;
 }
 
 void PlayMenu::setTitle(std::string title)

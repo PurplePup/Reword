@@ -3,6 +3,8 @@
 #ifndef _AUDIO_H
 #define _AUDIO_H
 
+#include "i_audio.h"    //interface
+
 #include "error.h"
 #include <SDL_mixer.h>
 #include <string>
@@ -13,39 +15,59 @@
 #include <mikmod.h>
 #endif
 
-//NOTE : Audio is now a singleton class
+//NOTE : NullAudio and Audio used in a Locator class
 
-class Audio : public Error
+class NullAudio : public IAudio
 {
-protected:
-	Audio();
 public:
-	~Audio();
+	virtual void init(bool bMusic, bool bSfx) { std::cout << "NullAudio (silent) initialised" << std::endl; }
+	virtual void setVolume(Sint16 newvol, bool test = true) {}
+	virtual void volumeUp() {}
+	virtual void volumeDown() {}
 
-    static Audio *instance();		// Create an instance of the object
-    static Audio &getRef();			// Get a reference to the object
-    static Audio *getPtr();			// Get a pointer to the object
-
-	void init(bool bMusic, bool bSfx);
-	void setVolume(Sint16 newvol, bool test = true);
-	void volumeUp();
-	void volumeDown();
-
-	void setBaseTrackDir(const std::string &baseMusicDir);
-	void startNextTrack();
-	void startPrevTrack();
-	void startTrack(const std::string &trackName);
-	void stopTrack();
-	void pauseTrack();
-	bool hasMusicTracks() { return _trackList.size() > 0; }
-	bool isPlayingMusic() { return _bPlayingTrack; }
-	bool isActuallyPlayingMusic() { return Mix_PlayingMusic()?true:false; }
+	virtual void setBaseTrackDir(const std::string &baseMusicDir) {}
+	virtual void startNextTrack() {}
+	virtual void startPrevTrack() {}
+	virtual void startTrack(const std::string &trackName) {}
+	virtual void stopTrack() {}
+	virtual void pauseTrack() {}
+	virtual bool hasMusicTracks() { return false; }
+	virtual bool isPlayingMusic() { return false; }
+	virtual bool isActuallyPlayingMusic() { return false; }
 
 	//event functions that effectively call the start/stop track functions
-	void pushNextTrack();
-	void pushPrevTrack();
-	void pushPauseTrack();	//toggle
-	void pushStopTrack();
+	virtual void pushNextTrack() {}
+	virtual void pushPrevTrack() {}
+	virtual void pushPauseTrack() {}
+	virtual void pushStopTrack() {}
+};
+
+class Audio : public IAudio
+{
+public:
+	Audio();
+	~Audio();
+
+	virtual void init(bool bMusic, bool bSfx);
+	virtual void setVolume(Sint16 newvol, bool test = true);
+	virtual void volumeUp();
+	virtual void volumeDown();
+
+	virtual void setBaseTrackDir(const std::string &baseMusicDir);
+	virtual void startNextTrack();
+	virtual void startPrevTrack();
+	virtual void startTrack(const std::string &trackName);
+	virtual void stopTrack();
+	virtual void pauseTrack();
+	virtual bool hasMusicTracks() { return _trackList.size() > 0; }
+	virtual bool isPlayingMusic() { return _bPlayingTrack; }
+	virtual bool isActuallyPlayingMusic() { return Mix_PlayingMusic()?true:false; }
+
+	//event functions that effectively call the start/stop track functions
+	virtual void pushNextTrack();
+	virtual void pushPrevTrack();
+	virtual void pushPauseTrack();	//toggle
+	virtual void pushStopTrack();
 
 protected:
 	static void pushEvent(int evCode);
@@ -55,14 +77,14 @@ protected:
 	std::string getPrevTrack();
 
 #ifdef _USE_MIKMOD
-public:
-	//MikMod functions
-	bool modLoad(std::string filename);
-	void modStart();
-	void modStop();
-	void modUpdate();
-protected:
-	MODULE		*_modMusic;
+//public:
+//	//MikMod functions
+//	bool modLoad(std::string filename);
+//	void modStart();
+//	void modStop();
+//	void modUpdate();
+//protected:
+//	MODULE		*_modMusic;
 #endif
 
 protected:
@@ -77,9 +99,6 @@ protected:
 	std::deque<std::string> _trackList;
 	bool		_bPlayingTrack;		//set true if start playing
 	bool        _bMusic, _bSfx;
-
-private:
-    static std::auto_ptr<Audio> _instance;	//singleton instance pointer
 
 };
 

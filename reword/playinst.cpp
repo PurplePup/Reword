@@ -64,10 +64,10 @@ void PlayInst::init(Input *input)
 
 	//set arrow (scroll positions)
 	_gd._arrowUp.setPos(SCREEN_WIDTH-_gd._arrowUp.tileW(), BG_LINE_TOP+2);		//positions dont change, just made visible or not if scroll available
-	_gd._arrowUp.setFrame(_gd._arrowUp.getMaxFrame()-1);			//last frame
+	_gd._arrowUp.setFrame(_gd._arrowUp.getMaxFrame());			//last frame
 	_gd._arrowUp.setTouchable(true);	//always touchable even if invisible
 	_gd._arrowDown.setPos(SCREEN_WIDTH-_gd._arrowDown.tileW(), BG_LINE_BOT-_gd._arrowDown.tileH()-2);
-	_gd._arrowDown.setFrame(_gd._arrowDown.getMaxFrame()-1);			//last frame
+	_gd._arrowDown.setFrame(_gd._arrowDown.getMaxFrame());			//last frame
 	_gd._arrowDown.setTouchable(true);	//always touchable even if invisible
 
 	//calc number of lines available for displaying instruction lines
@@ -158,7 +158,7 @@ void PlayInst::work(Input *input, float speedFactor)
 	_gd._arrowDown.work();
 }
 
-void PlayInst::button(Input *input, Input::ButtonType b)
+void PlayInst::button(Input *input, IInput::eButtonType b)
 {
 	switch (b)
 	{
@@ -207,7 +207,7 @@ void PlayInst::scrollUp()
 	if ((int)_inst.size()>_lines && _instLine < (int)_inst.size()-_lines) ++_instLine;
 }
 
-void PlayInst::touch(Point pt)
+bool PlayInst::touch(const Point &pt)
 {
 	//check if touch scroll arrows
 	if (_gd._arrowUp.contains(pt))
@@ -215,18 +215,24 @@ void PlayInst::touch(Point pt)
 		if (_gd._arrowUp.isTouchable())
 			_gd._arrowUp.startAnim(0, -1, ImageAnim::ANI_ONCE, 40);
 		scrollDown();
+		return true;
 	}
 	else if (_gd._arrowDown.contains(pt))
 	{
 		if (_gd._arrowDown.isTouchable())
 			_gd._arrowDown.startAnim(0, -1, ImageAnim::ANI_ONCE, 40);
 		scrollUp();
+		return true;
 	}
 	else
+	{
 		if (!_doubleClick.done())
 			nextPage();
 		else
 			_doubleClick.start(300);
+        return true;
+	}
+	return false;
 }
 
 void PlayInst::buildPage(int page)

@@ -18,7 +18,7 @@ History:		Version	Date		Change
 				-------	----------	--------------------------------
 				0.3.1	09.06.2007	set _xEnd to x and _yEnd to y in setPos(), was not clearing isMoving test
 				0.5.0	18.06.2008	Added touch screen support
-				
+
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by
 				the Free Software Foundation; either version 2 of the License, or
@@ -43,25 +43,25 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <math.h>
 
 
-Sprite::Sprite() : 
-	ImageAnim(), 
-	_xStart(0), _yStart(0), _xEnd(0), _yEnd(0), 
+Sprite::Sprite() :
+	ImageAnim(),
+	_xStart(0), _yStart(0), _xEnd(0), _yEnd(0),
 	_xDir(0), _yDir(0), _xVel(0), _yVel(0), _type(Sprite::SPR_NONE),
 	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true)
 {
 }
 
 Sprite::Sprite(std::string fileName, bool bAlpha, Uint32 nFrames) :
-	ImageAnim(fileName, bAlpha, nFrames), 
-	_xStart(0), _yStart(0), _xEnd(0), _yEnd(0), 
+	ImageAnim(fileName, bAlpha, nFrames),
+	_xStart(0), _yStart(0), _xEnd(0), _yEnd(0),
 	_xDir(0), _yDir(0), _xVel(0), _yVel(0), _type(Sprite::SPR_NONE),
 	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true)
 {
 }
 
 Sprite::Sprite(const Image &img) :
-	ImageAnim(img), 
-	_xStart(0), _yStart(0), _xEnd(0), _yEnd(0), 
+	ImageAnim(img),
+	_xStart(0), _yStart(0), _xEnd(0), _yEnd(0),
 	_xDir(0), _yDir(0), _xVel(0), _yVel(0), _type(Sprite::SPR_NONE),
 	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true)
 {
@@ -87,16 +87,16 @@ void Sprite::startMoveTo(int xEnd, int yEnd, Uint32 time, Uint32 delay)
 }
 
 //start move from A (curr pos) to B (to end) then stop or reverse etc.
-//Pass SM_NONE to x or y to start from the current position, 
+//Pass SM_NONE to x or y to start from the current position,
 //even before it has finished moving
-void Sprite::startMoveTo(int xEnd, int yEnd, 
-						 Uint32 rate, Uint32 delay,  
+void Sprite::startMoveTo(int xEnd, int yEnd,
+						 Uint32 rate, Uint32 delay,
 						 float xVel, float yVel,
 						 eSprite type /*Sprite::SPR_NONE*/)	//repeat, reverse etc
 {
 	//direction
 	//set by end x or y, or overridden by SM_ direction flags
-	if ( (SPR_LEFT & type) || (xEnd < getXPos()) ) 
+	if ( (SPR_LEFT & type) || (xEnd < getXPos()) )
 		_xDir = -1; else _xDir = 1;	//pos=right, neg=left
 	if ( (SPR_UP & type) || (yEnd < getYPos()) )
 		_yDir = -1; else _yDir = 1;	//pos=down, neg=up
@@ -176,7 +176,7 @@ void Sprite::work()
 }
 
 //if this sprite currently visible and clicked on return true
-bool Sprite::contains(Point pt)
+bool Sprite::contains(const Point &pt) const
 {
 	if (!isTouchable()) return false;
 	Point thisPt((int)getXPos(), (int)getYPos());
@@ -199,42 +199,42 @@ void Sprite::calcWaypoints(int x1, int y1, int x2, int y2)
 
     dx = abs(dx);
     dy = abs(dy);
-   
-    if(dx >= dy) 
+
+    if(dx >= dy)
 	{
 		dy <<= 1;
 		e = dy - dx;
 		dx <<= 1;
-//		while (x1 != x2) 
-		while (((inx>0)?(x1<x2):(x1>x2))) 
+//		while (x1 != x2)
+		while (((inx>0)?(x1<x2):(x1>x2)))
 		{
 			Point point(x1,y1);
 			_points.push_back(point);
-			if(e >= 0) 
+			if(e >= 0)
 			{
 				y1 += iny;
 				e -= dx;
 			}
-			e += dy; 
+			e += dy;
 			x1 += inx;
 		}
-    } 
-	else 
+    }
+	else
 	{
 		dx <<= 1;
 		e = dx - dy;
 		dy <<= 1;
-//		while (y1 != y2) 
-		while (((iny>0)?(y1<y2):(y1>y2))) 
+//		while (y1 != y2)
+		while (((iny>0)?(y1<y2):(y1>y2)))
 		{
 			Point point(x1,y1);
 			_points.push_back(point);
-			if(e >= 0) 
+			if(e >= 0)
 			{
 				x1 += inx;
 				e -= dy;
 			}
-			e += dx; 
+			e += dx;
 			y1 += iny;
 		}
     }

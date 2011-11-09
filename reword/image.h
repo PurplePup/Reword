@@ -48,9 +48,9 @@ public:
 	void blitFrom(Image* source, int tileNum = -1, int destX = 0, int destY = 0);
 
 //	SDL_Rect *clip() {return _clip;}
-	int tileW() {return _tileW;}
-	int tileH() {return _tileH;}
-	int tileCount()	{return _tileCount;}
+	int tileW() const       {return _tileW;}
+	int tileH() const       {return _tileH;}
+	int tileCount()	const   {return _tileCount;}
 
 	//static functions available to all
 	static SDL_Rect tile(int i, int w, int h);	//[static] just return the Rect for requested tile

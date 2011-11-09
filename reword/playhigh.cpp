@@ -82,13 +82,13 @@ void PlayHigh::init(Input *input)
 	_gd._arrowUp.setFrame(_gd._arrowUp.getMaxFrame()-1);			//last frame
 	_gd._arrowUp.setTouchable(true);	//always touchable even if invisible
 	_gd._arrowDown.setPos(SCREEN_WIDTH-_gd._arrowDown.tileW(), BG_LINE_BOT-_gd._arrowDown.tileH()-2);
-	_gd._arrowDown.setFrame(_gd._arrowDown.getMaxFrame()-1);			//last frame
+	_gd._arrowDown.setFrame(_gd._arrowDown.getMaxFrame());			//last frame
 	_gd._arrowDown.setTouchable(true);	//always touchable even if invisible
 	_gd._arrowLeft.setPos(2, BG_LINE_BOT-_gd._arrowDown.tileH()-2);		//positions dont change, just made visible or not if scroll available
-	_gd._arrowLeft.setFrame(_gd._arrowLeft.getMaxFrame()-1);			//last) frame
+	_gd._arrowLeft.setFrame(_gd._arrowLeft.getMaxFrame());			//last) frame
 	_gd._arrowLeft.setTouchable(true);	//always touchable even if invisible
 	_gd._arrowRight.setPos(SCREEN_WIDTH-(_gd._arrowDown.tileW()*2), BG_LINE_BOT-_gd._arrowDown.tileH()-2);
-	_gd._arrowRight.setFrame(_gd._arrowRight.getMaxFrame()-1);			//last frame
+	_gd._arrowRight.setFrame(_gd._arrowRight.getMaxFrame());			//last frame
 	_gd._arrowRight.setTouchable(true);	//always touchable even if invisible
 
 	//calc hiscore table element positions
@@ -229,7 +229,7 @@ void PlayHigh::work(Input *input, float speedFactor)
 	_gd._arrowRight.work();
 }
 
-void PlayHigh::button(Input *input, Input::ButtonType b)
+void PlayHigh::button(Input *input, IInput::eButtonType b)
 {
 	switch (b)
 	{
@@ -324,7 +324,7 @@ void PlayHigh::moveRight()
 		setDifficulty((eGameDiff)(_diff+1));
 }
 
-void PlayHigh::touch(Point pt)
+bool PlayHigh::touch(const Point &pt)
 {
 	//check if touch scroll arrows
 	if (_gd._arrowUp.contains(pt))
@@ -332,26 +332,31 @@ void PlayHigh::touch(Point pt)
 		if (_gd._arrowUp.isTouchable())
 			_gd._arrowUp.startAnim(0, -1, ImageAnim::ANI_ONCE, 40);
 		moveDown();
+        return true;
 	}
 	else if (_gd._arrowDown.contains(pt))
 	{
 		if (_gd._arrowDown.isTouchable())
 			_gd._arrowDown.startAnim(0, -1, ImageAnim::ANI_ONCE, 40);
 		moveUp();
+        return true;
 	}
 	else if (_gd._arrowLeft.contains(pt))
 	{
 		if (_gd._arrowLeft.isTouchable())
 			_gd._arrowLeft.startAnim(0, -1, ImageAnim::ANI_ONCE, 40);
 		moveLeft();
+        return true;
 	}
 	else if (_gd._arrowRight.contains(pt))
 	{
 		if (_gd._arrowRight.isTouchable())
 			_gd._arrowRight.startAnim(0, -1, ImageAnim::ANI_ONCE, 40);
 		moveRight();
+        return true;
 	}
 	else
+	{
 		if (!_doubleClick.done())
 		{
 			_gd._state = ST_MENU;
@@ -359,6 +364,9 @@ void PlayHigh::touch(Point pt)
 		}
 		else
 			_doubleClick.start(300);
+        return true;
+    }
+    return false;
 
 }
 

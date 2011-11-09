@@ -40,6 +40,10 @@
 		<Unit filename="button.cpp" />
 		<Unit filename="button.h" />
 		<Unit filename="constants.h" />
+		<Unit filename="control.cpp" />
+		<Unit filename="control.h" />
+		<Unit filename="controls.cpp" />
+		<Unit filename="controls.h" />
 		<Unit filename="error.cpp" />
 		<Unit filename="error.h" />
 		<Unit filename="fontttf.cpp" />
@@ -53,12 +57,15 @@
 		<Unit filename="global.h" />
 		<Unit filename="helpers.cpp" />
 		<Unit filename="helpers.h" />
+		<Unit filename="i_audio.h" />
 		<Unit filename="image.cpp" />
 		<Unit filename="image.h" />
 		<Unit filename="imageanim.cpp" />
 		<Unit filename="imageanim.h" />
 		<Unit filename="input.cpp" />
 		<Unit filename="input.h" />
+		<Unit filename="locator.cpp" />
+		<Unit filename="locator.h" />
 		<Unit filename="platform.h" />
 		<Unit filename="play.cpp" />
 		<Unit filename="play.h" />
@@ -66,6 +73,8 @@
 		<Unit filename="playdiff.h" />
 		<Unit filename="playgame.cpp" />
 		<Unit filename="playgame.h" />
+		<Unit filename="playgamedict.cpp" />
+		<Unit filename="playgamedict.h" />
 		<Unit filename="playgamepopup.cpp" />
 		<Unit filename="playgamepopup.h" />
 		<Unit filename="playhigh.cpp" />

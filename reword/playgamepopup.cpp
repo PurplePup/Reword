@@ -83,13 +83,16 @@ void PlayGamePopup::init(Input *input)
 	_itemList[++i] = MenuItem(POP_SKIP, ORANGE_COLOUR, "Next word/Level", (_hasMaxWord)?"Move on to next word/level":"You must have a Re-word first!", _hasMaxWord);
     if (_gd._options._bMusic)
     {
-        bool bIsPlaying = false, bHasMusic = false;
-        Audio * pAudio = Audio::instance();
-        if (pAudio)
-        {
-            bIsPlaying = pAudio->isPlayingMusic();	//may be playing/fading menu music so uses isPlaying... rather than isActuallyPl...
-            bHasMusic = pAudio->hasMusicTracks();
-        }
+//        bool bIsPlaying = false, bHasMusic = false;
+//        Audio * pAudio = Audio::instance();
+//        if (pAudio)
+//        {
+//            bIsPlaying = pAudio->isPlayingMusic();	//may be playing/fading menu music so uses isPlaying... rather than isActuallyPl...
+//            bHasMusic = pAudio->hasMusicTracks();
+//        }
+        bool bIsPlaying = Locator::GetAudio().isPlayingMusic();	//may be playing/fading menu music so uses isPlaying... rather than isActuallyPl...
+        bool bHasMusic = Locator::GetAudio().hasMusicTracks();
+
         _itemList[++i] = MenuItem(POP_TOGGLEMUSIC, BLUE_COLOUR, bIsPlaying?"Music Stop":"Music Start", bIsPlaying?"Stop current track":"Start a song", bHasMusic);
         _itemList[++i] = MenuItem(POP_NEXTTRACK, BLUE_COLOUR, "Next Track", "Play next song", bHasMusic);
         _itemList[++i] = MenuItem(POP_PREVTRACK, BLUE_COLOUR, "Prev Track", "Play previous song", bHasMusic);
@@ -163,7 +166,7 @@ void PlayGamePopup::work(Input *input, float speedFactor)
     if (input->repeat(Input::DOWN))	button(input, Input::DOWN);
 }
 
-void PlayGamePopup::button(Input *input, Input::ButtonType b)
+void PlayGamePopup::button(Input *input, IInput::eButtonType b)
 {
 	switch (b)
 	{
@@ -196,7 +199,7 @@ void PlayGamePopup::button(Input *input, Input::ButtonType b)
 
 }
 
-void PlayGamePopup::touch(Point pt)
+bool PlayGamePopup::touch(const Point &pt)
 {
 	Rect r;
 	for (tMenuMap::iterator it = _pItems->begin(); it != _pItems->end(); ++it)
@@ -210,9 +213,10 @@ void PlayGamePopup::touch(Point pt)
 				_doubleClick.start(300);	//start dbl click timer
 				_menuoption = it->first;		//highlight the touched item
 			}
-			break;
+			return true;
 		}
 	}
+	return false;
 }
 
 void PlayGamePopup::choose()
@@ -259,24 +263,26 @@ void PlayGamePopup::choose()
 		}
 		if (pItem->_id == POP_TOGGLEMUSIC)
 		{
-			Audio *p = Audio::getPtr();
-			if (p)
+//			Audio *p = Audio::getPtr();
+//			if (p)
 			{
 				if (Mix_PlayingMusic())
-					p->pushStopTrack();
+					Locator::GetAudio().pushStopTrack();// p->pushStopTrack();
 				else
-					p->pushNextTrack();
+					Locator::GetAudio().pushNextTrack();//p->pushNextTrack();
 			}
 		}
 		if (pItem->_id == POP_NEXTTRACK)
 		{
-			Audio *p = Audio::getPtr();
-			if (p) p->pushNextTrack();
+//			Audio *p = Audio::getPtr();
+//			if (p) p->pushNextTrack();
+            Locator::GetAudio().pushNextTrack();
 		}
 		if (pItem->_id == POP_PREVTRACK)
 		{
-			Audio *p = Audio::getPtr();
-			if (p) p->pushPrevTrack();
+//			Audio *p = Audio::getPtr();
+//			if (p) p->pushPrevTrack();
+            Locator::GetAudio().pushPrevTrack();
 		}
 
 	}

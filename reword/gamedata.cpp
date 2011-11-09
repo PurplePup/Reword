@@ -68,7 +68,6 @@ GameData::GameData() : _bTouch(false),  _init(false)
 	bErr |= !_game_speed6.load(RES_BASE + "images/game_speed6.png");
 	bErr |= !_game_timetrial.load(RES_BASE + "images/game_timetrial.png");
 	bErr |= !_gamemenu.load(RES_BASE + "images/popup_menu.png", 200);
-    bErr |= !_gamemenu_icon.load(RES_BASE + "images/btn_menu.png",255, 2);     //2 state press on/off
     bErr |= !_gamemusic_icon.load(RES_BASE + "images/btn_music.png", 255, 2);        //2 states on/off
 	bErr |= !_cursor.load(RES_BASE + "images/cursors.png");
 	bErr |= !_cursor.setTileSize(CURSORW,CURSORH);
@@ -82,12 +81,6 @@ GameData::GameData() : _bTouch(false),  _init(false)
 	bErr |= !_word_totop_pulse.load(RES_BASE + "images/btn_word_totop.png", -1, 6);
 	bErr |= !_word_shuffle_pulse.load(RES_BASE + "images/btn_word_shuffle.png", -1, 6);
 	bErr |= !_word_try_pulse.load(RES_BASE + "images/btn_word_try.png", -1, 6);
-
-	bErr |= !_touch_menu.load(RES_BASE + "images/touch_menu.png", 255, 4);
-	bErr |= !_touch_menu.setTileSize(106, 52, Image::TILE_VERT);
-	bErr |= !_touch_next.load(RES_BASE + "images/touch_next.png", 255, 2);
-	bErr |= !_touch_next.setTileSize(106, 52, Image::TILE_VERT);
-//	bErr |= !_touch_prev.load(RES_BASE + "images/touch_prev.png", 255, 2);
 
 	//SPRITES
 	bErr |= !_arrowUp.load(RES_BASE + "images/btn_scroll_up.png", 255, 3);

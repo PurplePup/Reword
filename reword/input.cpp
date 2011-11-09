@@ -39,7 +39,7 @@ using namespace std;
 
 // Input handler
 
-Input::Input(void) : joy(0), _init(false)
+Input::Input(void) : joy(0)
 {
     initJoy();
 }
@@ -62,7 +62,7 @@ void Input::initJoy(void)
 
     if (SDL_InitSubSystem (SDL_INIT_JOYSTICK) == -1)
     {
-        setLastError("Unable to initialise joystick");
+//        setLastError("Unable to initialise joystick");    //TODO - reimplement error or throw
 		return;
     }
 
@@ -70,7 +70,6 @@ void Input::initJoy(void)
     {
 		joy = SDL_JoystickOpen(0);
     }
-
 
     if (joy)
     {
@@ -81,27 +80,27 @@ void Input::initJoy(void)
 }
 
 // Button pressed
-void Input::down(ButtonType b)
+void Input::down(eButtonType b)
 {
     buttons[b].down();
 }
 
 // Button released
-void Input::up(ButtonType b)
+void Input::up(eButtonType b)
 {
     buttons[b].up();
 }
 
 // Returns true if button is pressed
-bool Input::isPressed(ButtonType b) const
+bool Input::isPressed(eButtonType b) const
 {
     return buttons[b].isPressed();
 }
 
 // Translate key to buttons
-Input::ButtonType Input::translate(int key)
+Input::eButtonType Input::translate(int key)
 {
-    ButtonType res = NUMBER_OF_BUTTONS;
+    eButtonType res = NUMBER_OF_BUTTONS;
     switch (key)
     {
 #if defined(PANDORA)
@@ -147,7 +146,7 @@ Input::ButtonType Input::translate(int key)
 }
 
 // Translate button to key (reverse of normal translate fn)
-int Input::un_translate(ButtonType b)
+int Input::un_translate(eButtonType b)
 {
     int key = 0;
     switch (b)
@@ -193,12 +192,12 @@ int Input::un_translate(ButtonType b)
 }
 
 // Returns true if button repeats
-bool Input::repeat(ButtonType b)
+bool Input::repeat(eButtonType b)
 {
     return (buttons[b].repeat());
 }
 
-void Input::setRepeat(ButtonType b, Uint32 rate, Uint32 delay)
+void Input::setRepeat(eButtonType b, Uint32 rate, Uint32 delay)
 {
 	buttons[b].setRepeat(rate, delay);
 }
@@ -206,7 +205,7 @@ void Input::setRepeat(ButtonType b, Uint32 rate, Uint32 delay)
 void Input::clearRepeat()
 {
 	//default delay and rate to 0 - turn off all ...
-	for (int i=0; i<Input::NUMBER_OF_BUTTONS; buttons[i++].setRepeat(0, 0))
+	for (int i=0; i<IInput::NUMBER_OF_BUTTONS; buttons[i++].setRepeat(0, 0))
 		;
 }
 

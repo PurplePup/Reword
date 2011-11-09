@@ -78,7 +78,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 
 Game::Game() :
-	_init(false), _screen(0), _input(0), //_audio(0),
+	_init(false), _screen(0), _input(0), _audio(0),
 	_gd(0)
 {
 }
@@ -90,7 +90,7 @@ Game::~Game()
 	//now unload the SDL stuff
 	delete _screen;
 	delete _input;
-//	delete _audio;
+	delete _audio;
 
 	if (_init)
 	{
@@ -134,6 +134,15 @@ bool Game::init(const GameOptions &options)
 
 	atexit(SDL_Quit);	//auto cleanup, just in case
 
+
+//	Audio *pAudio = Audio::instance();
+//	if (pAudio) pAudio->init(options._bMusic, options._bSfx);
+    if (init_flags && SDL_INIT_AUDIO == 0)
+        Locator::InitAudio();   //NullAudio
+    else
+        Locator::RegisterAudio(_audio = new Audio());
+    _audio->init(options._bMusic, options._bSfx);
+
 	_screen  = new Screen(SCREEN_WIDTH, SCREEN_HEIGHT);
 	if (!_screen->initDone())
 	{
@@ -163,9 +172,6 @@ bool Game::init(const GameOptions &options)
 	std::cout << "Using window, Caption REWORD" << std::endl;
 #endif
 
-
-	Audio *pAudio = Audio::instance();
-	if (pAudio) pAudio->init(options._bMusic, options._bSfx);
 
 	//load all game data (images, fonts, etc, etc)
 	_gd = new GameData();
@@ -199,14 +205,14 @@ bool Game::run(void)
 	assert(_init);  //should have called Init() by now
 
 	//call different play classes
-#ifdef _USE_MIKMOD
-    if (_gd->_options._bMusic)
-    {
-        std::cout << "Using MikMod audio directly" << std::endl;
-        Audio *audio = Audio::instance();
-        audio->modStart();
-    }
-#endif
+//#ifdef _USE_MIKMOD
+//    if (_gd->_options._bMusic)
+//    {
+//        std::cout << "Using MikMod audio directly" << std::endl;
+//        Audio *audio = Audio::instance();
+//        audio->modStart();
+//    }
+//#endif
 
 	IPlay *p = 0;
 	bool b = true;
@@ -235,9 +241,9 @@ bool Game::run(void)
 		delete p;
 	}
 
-#ifdef _USE_MIKMOD
-	if (_gd->_options._bMusic) audio->modStop();
-#endif
+//#ifdef _USE_MIKMOD
+//	if (_gd->_options._bMusic) audio->modStop();
+//#endif
 
 	return b;
 }
@@ -258,7 +264,7 @@ bool Game::play(IPlay *p)
 	int touchX(0), touchY(0);
 #endif
 
-	Audio *audio = Audio::getPtr();
+//	Audio *audio = Audio::getPtr();
 
 /*	//tinkering... Fixed interval time-based animation variables
 	double lastFrameTime = SDL_GetTicks();//0.0;
@@ -320,8 +326,8 @@ bool Game::play(IPlay *p)
 
 					case SDL_KEYDOWN:
 					{
-						Input::ButtonType b = _input->translate(event.key.keysym.sym);
-						if (b != Input::NUMBER_OF_BUTTONS)
+						IInput::eButtonType b = _input->translate(event.key.keysym.sym);
+						if (b != IInput::NUMBER_OF_BUTTONS)
 						{
 							_input->down(b);
 							p->button(_input,b);
@@ -355,18 +361,18 @@ bool Game::play(IPlay *p)
                         }
 #endif
 
-						Input::ButtonType b = _input->translate(event.key.keysym.sym);
-						if (b != Input::NUMBER_OF_BUTTONS)
+						IInput::eButtonType b = _input->translate(event.key.keysym.sym);
+						if (b != IInput::NUMBER_OF_BUTTONS)
 						{
 							_input->up(b);
 							p->button(_input, b);
 						}
 
-						if (Input::VOLUP == b)
-							audio->volumeUp();
+						if (IInput::VOLUP == b)
+							_audio->volumeUp();
 						else
-							if (Input::VOLDOWN == b)
-								audio->volumeDown();
+							if (IInput::VOLDOWN == b)
+								_audio->volumeDown();
 
 					}
 					break;
@@ -375,21 +381,21 @@ bool Game::play(IPlay *p)
 
 					case SDL_JOYBUTTONUP:
 					{
-						Input::ButtonType b = static_cast<Input::ButtonType>(event.jbutton.button);
+						IInput::eButtonType b = static_cast<IInput::eButtonType>(event.jbutton.button);
 						_input->up(b);
 						p->button(_input, b);
 
-						if (Input::VOLUP == b)
-							audio->volumeUp();
+						if (IInput::VOLUP == b)
+							_audio->volumeUp();
 						else
-							if (Input::VOLDOWN == b)
-								audio->volumeDown();
+							if (IInput::VOLDOWN == b)
+								_audio->volumeDown();
 					}
 					break;
 
 					case SDL_JOYBUTTONDOWN:
 					{
-						Input::ButtonType b = static_cast<Input::ButtonType>(event.jbutton.button);
+						IInput::eButtonType b = static_cast<IInput::eButtonType>(event.jbutton.button);
 						_input->down(b);
 						p->button(_input, b);
 					}
@@ -422,16 +428,16 @@ bool Game::play(IPlay *p)
 							switch (event.user.code)
 							{
 							case USER_EV_STOP_TRACK:
-								audio->stopTrack();
+								_audio->stopTrack();
 								break;
 							case USER_EV_NEXT_TRACK:
-								audio->startNextTrack();
+								_audio->startNextTrack();
 								break;
 							case USER_EV_PREV_TRACK:
-								audio->startPrevTrack();
+								_audio->startPrevTrack();
 								break;
                             case USER_EV_PAUSE_TRACK:
-                                audio->pauseTrack();
+                                _audio->pauseTrack();
                                 break;
 /*							case USER_EV_SAVE_STATE:
 								_gd->saveQuickState();
@@ -482,9 +488,9 @@ bool Game::play(IPlay *p)
 
 		if (bCap) fr.capFrames();
 
-#ifdef _USE_MIKMOD
-		audio->modUpdate();
-#endif
+//#ifdef _USE_MIKMOD
+//		audio->modUpdate();
+//#endif
 
     }	//while p->running()
 

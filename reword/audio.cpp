@@ -41,6 +41,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "helpers.h"
 #include "utils.h"
 #include "platform.h"
+#include "locator.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -70,6 +71,7 @@ Audio::~Audio()
 	}
 }
 
+/*
 std::auto_ptr<Audio> Audio::_instance(0);
 
 Audio * Audio::instance()			// Create an instance of the object
@@ -89,6 +91,7 @@ Audio * Audio::getPtr()			// Get a pointer to the object
 {
 	return _instance.get();
 }
+*/
 
 void Audio::init(bool bMusic, bool bSfx)
 {
@@ -108,16 +111,16 @@ void Audio::init(bool bMusic, bool bSfx)
 	_volTest = Mix_LoadWAV(std::string(RES_BASE + "sounds/ping.wav").c_str()); //also used in game
 	setVolume((MIX_MAX_VOLUME / 2), false); //no test sound
 
-#ifdef _USE_MIKMOD
-    MikMod_RegisterAllDrivers();
-    MikMod_RegisterAllLoaders();
-    md_mode |= DMODE_SOFT_MUSIC;
-    if(MikMod_Init(""))
-    {
-    	//setLastError("Warning: Couldn't init MikMod audio\nReason: %s\n");
-        return;	//failed
-    }
-#endif //_USE_MIKMOD
+//#ifdef _USE_MIKMOD
+//    MikMod_RegisterAllDrivers();
+//    MikMod_RegisterAllLoaders();
+//    md_mode |= DMODE_SOFT_MUSIC;
+//    if(MikMod_Init(""))
+//    {
+//    	//setLastError("Warning: Couldn't init MikMod audio\nReason: %s\n");
+//        return;	//failed
+//    }
+//#endif //_USE_MIKMOD
 
     if (_bMusic)
         loadTracks(_baseTrackDir);
@@ -204,9 +207,12 @@ void AudioTrackDone()
 {
 	//Music has finished playing - for whatever reason
 	//NOTE: NEVER call SDL_Mixer functions, nor SDL_LockAudio, from a callback function
-	Audio *pAudio = Audio::instance();
-	if (pAudio)
-		pAudio->pushNextTrack();	//not call mix functions directly, push and exit
+
+//	Audio *pAudio = Audio::instance();
+//	if (pAudio)
+//		pAudio->pushNextTrack();	//not call mix functions directly, push and exit
+
+    Locator::GetAudio().pushNextTrack();
 }
 
 void Audio::pushNextTrack()
@@ -336,35 +342,35 @@ void Audio::loadTracks(const std::string &baseDir)
 }
 
 #ifdef _USE_MIKMOD
-bool Audio::modLoad(std::string filename)
-{
-	char * fn = const_cast<char*>(filename.c_str());
-    _modMusic = Player_Load(fn, 64, 0);
-    if(!_modMusic) {
-        return false;
-    }
-    MikMod_EnableOutput();
-
-    return true;
-}
-
-void Audio::modStart()
-{
-	if (_modMusic)
-	    Player_Start(_modMusic);
-
-	//Player_SetVolume( 0..128 )
-}
-
-void Audio::modStop()
-{
-	if (_modMusic)
-		Player_Stop();
-}
-
-void Audio::modUpdate()	//regular update call
-{
-	if (Player_Active()) MikMod_Update();
-}
+//bool Audio::modLoad(std::string filename)
+//{
+//	char * fn = const_cast<char*>(filename.c_str());
+//    _modMusic = Player_Load(fn, 64, 0);
+//    if(!_modMusic) {
+//        return false;
+//    }
+//    MikMod_EnableOutput();
+//
+//    return true;
+//}
+//
+//void Audio::modStart()
+//{
+//	if (_modMusic)
+//	    Player_Start(_modMusic);
+//
+//	//Player_SetVolume( 0..128 )
+//}
+//
+//void Audio::modStop()
+//{
+//	if (_modMusic)
+//		Player_Stop();
+//}
+//
+//void Audio::modUpdate()	//regular update call
+//{
+//	if (Player_Active()) MikMod_Update();
+//}
 #endif  //_USE_MIKMOD
 

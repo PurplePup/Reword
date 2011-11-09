@@ -1,5 +1,5 @@
 //playhigh.h
- 
+
 #ifndef _PLAYHIGH_H
 #define _PLAYHIGH_H
 
@@ -21,9 +21,10 @@ public:
     virtual void init(Input *input);
     virtual void render(Screen* s);
     virtual void work(Input* input, float speedFactor);
-    virtual void button(Input* input, Input::ButtonType b);
-	virtual void touch(Point pt);
-	
+    virtual void button(Input* input, IInput::eButtonType b);
+
+	virtual bool touch(const Point &pt);
+
 protected:
 	void setDifficulty(eGameDiff diff);
 	void setMode(eGameMode mode);
@@ -35,11 +36,11 @@ protected:
 	void moveRight();
 	bool isEditing() { return _pos != -1; }
 	void setEditing(bool b) { _pos = b?0:-1; }
-	
+
 private:
 	GameData &	_gd;		//shared data between screens (play classes)
 	std::auto_ptr<Image> _menubg;
-	
+
 	int			_pos;
 	int			_currPos;		//which of the 3 inits you are currently editing
 	int			_yyGap;			//gap between hiscore lines
@@ -51,7 +52,7 @@ private:
 	int			_xScoreLen;		//len of score col
 	int			_xWordsLen;		// .. words
 	int			_xTimesLen;		// .. times
-	
+
 	tHiScoreEntry _curr;		//temp inits during payer editing
 
 	int			_diff;			//curr difficulty hiscore table to display

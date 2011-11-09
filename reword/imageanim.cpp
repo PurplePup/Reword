@@ -115,11 +115,12 @@ void ImageAnim::setFrameRange(Uint32 firstFrame, Uint32 lastFrame)
 {
 	_firstFrame = (firstFrame>=_nFrames)?0:firstFrame;	//make sure its not > num frames
 	_lastFrame = (lastFrame>=_nFrames)?_nFrames-1:lastFrame;
+	setAnimDir((_firstFrame < _lastFrame)?DIR_FORWARD:DIR_BACKWARD);
 }
 
 void ImageAnim::setFrame(Uint32 frame)
 {
-	_frame = (frame < _nFrames)?frame:0;	//must be valid frame num
+	_frame = (frame >= 0 && frame < _nFrames)?frame:0;	//must be valid frame num
 }
 
 void ImageAnim::setAnimType(eAnim anim)

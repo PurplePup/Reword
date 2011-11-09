@@ -11,6 +11,7 @@
 #include "spritemgr.h"
 #include "roundels.h"
 #include "playgamepopup.h"
+#include "controls.h"
 
 #include <string>
 #include <memory>
@@ -82,15 +83,12 @@ public:
 	PlayGame(GameData& gd);
 	virtual ~PlayGame() { stopCountdown(); delete _pPopup; }
 
-	enum eSuccess { SU_NONE=0, SU_ARCADE, SU_GOT6, SU_BONUS, SU_BADLUCK, SU_SPEED6, SU_TIMETRIAL, SU_GAMEOVER };
-	enum eState { PG_PLAY=0, PG_WAIT, PG_END, PG_DICT, PG_PAUSE }; //, PG_POPUP };
-
     virtual void init(Input *input);
     virtual void render(Screen* s);
     virtual void work(Input* input, float speedFactor);
-    virtual void button(Input* input, Input::ButtonType b);
-    virtual void touch(Point pt);   //press
-    virtual void tap(Point pt);     //release
+    virtual void button(Input* input, IInput::eButtonType b);
+    virtual bool touch(const Point &pt);   //press
+    virtual bool tap(const Point &pt);     //release
 
 //	static 	void pushSDL_Event(int code, void *data1 = NULL, void *data2 = NULL);
 
@@ -123,35 +121,35 @@ protected:
 	void doPauseGame();
 	void doDictionary();
 	void prepareBackground();
-	void scrollDictUp();
-	void scrollDictDown();
+//	void scrollDictUp();
+//	void scrollDictDown();
     void calcArcadeNeededWords();
 
 	void render_play(Screen*);	//main play render fn
 	void render_wait(Screen*);	//waiting for PG_END, do "game over" anim etc
 	void render_end(Screen*);	//main play at end
-	void render_dict(Screen*);	//dictionary display
+//	void render_dict(Screen*);	//dictionary display
 	void render_pause(Screen*);	//pause screen
 	void render_popup(Screen*);	//popup menu
 
     void work_play(Input*, float);
     void work_wait(Input*, float);
     void work_end(Input*, float);
-    void work_dict(Input*, float);
+ //   void work_dict(Input*, float);
     void work_pause(Input*, float);
     void work_popup(Input*, float);
 
-    void button_play(Input*, Input::ButtonType);
-    void button_wait(Input*, Input::ButtonType);
-    void button_end(Input*, Input::ButtonType);
-    void button_dict(Input*, Input::ButtonType);
-    void button_pause(Input*, Input::ButtonType);
-    void button_popup(Input*, Input::ButtonType);
+    void button_play(Input*, IInput::eButtonType);
+    void button_wait(Input*, IInput::eButtonType);
+    void button_end(Input*, IInput::eButtonType);
+//    void button_dict(Input*, IInput::eButtonType);
+    void button_pause(Input*, IInput::eButtonType);
+    void button_popup(Input*, IInput::eButtonType);
 
-	void touch_play(Point pt);
-	void touch_end(Point pt);
-	void touch_default(Point pt);
-	void touch_dict(Point pt);
+	bool touch_play(const Point &pt);
+	bool touch_end(const Point &pt);
+	bool touch_default(const Point &pt);
+//	bool touch_dict(const Point &pt);
 
 	void commandWordToLast();
 	void commandClearAllToTop();
@@ -161,6 +159,15 @@ protected:
 private:
 	GameData &	_gd;			//shared data between screens (play classes)
 	std::auto_ptr<Image> _gamebg;
+
+	//function pointers for render(), work(), button() etc
+	void (PlayGame::*pRenderFn)(Screen*);
+    void (PlayGame::*pWorkFn)(Input*, float);
+	void (PlayGame::*pButtonFn)(Input*, IInput::eButtonType);
+	bool (PlayGame::*pTouchFn)(const Point &pt);
+
+    Controls    _controlsPlay;
+//    Controls    _controlsDict;
 
 	std::string _tmpStr;		//used in render()
 	std::string _tmpStr2;		//used in render()
@@ -175,9 +182,11 @@ private:
 	bool _bAbort;				//if user presses L+R+CLICK
 
 	int _xxWordHi, _yyWordHi;	//highlight position of word to display description of
-	std::vector<std::string> _dictDef;
-	int	_dictLine;				//offset into _dictDef (ie start at _dictDef.begin+_dictLine)
-	int _lines;					//number of lines we can display dictionary entry without scrolling
+
+	std::string _dictWord;      //used to pass to dict screen
+//	std::vector<std::string> _dictDef;
+//	int	_dictLine;				//offset into _dictDef (ie start at _dictDef.begin+_dictLine)
+//	int _lines;					//number of lines we can display dictionary entry without scrolling
 
 	//x offsets to draw 3, 4, 5 and 6 (etc) word boxes under main display
 	int _boxOffsetY;				//added position below scratch area
@@ -218,19 +227,16 @@ private:
 	Waiting		_waiting;		//for PG_WAIT state, wait before continuing (after level finished)
 	Waiting		_doubleClick;
 	int			_randomTitle;
+	int         _ctrl_id;       //id of pressed control
 
 	Roundels	_round;			//for roundel game letter sprites
 	std::auto_ptr<Roundels>	_roundPaused;	//"PAUSED" in middle of screen
 	std::auto_ptr<Roundels>	_roundDict;		//"xxxxx" word highlighted for dictionary display
 
-	//function pointers for render(), work(), button() etc
-	void (PlayGame::*pRenderFn)(Screen*);
-    void (PlayGame::*pWorkFn)(Input*, float);
-	void (PlayGame::*pButtonFn)(Input*, Input::ButtonType);
-	void (PlayGame::*pTouchFn)(Point pt);
-
 	//...
 	PlayGamePopup	*_pPopup;
+//	std::auto_ptr<IPlay>    _play;  //play classes (eg. PlayGame, PlayDict, PlayPause etc)
+    IPlay *_play;
 
     int _debugTotalLetters, _debugNeededAll, _debugNeededNow;
 };

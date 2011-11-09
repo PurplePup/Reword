@@ -76,17 +76,12 @@ public:
 	Sprite _arrowLeft;
 	Sprite _arrowRight;
 	Sprite _star;
-	Sprite _gamemenu_icon;
 	Sprite _gamemusic_icon;        //2 frames, not animated
 
 	Sprite _word_last_pulse;
 	Sprite _word_totop_pulse;
 	Sprite _word_shuffle_pulse;
 	Sprite _word_try_pulse;
-
-	Sprite _touch_menu;
-	Sprite _touch_next;
-	Sprite _touch_prev;
 
 	//sound effectes etc
 	Mix_Chunk *_fxCountdown;	//countdown ping noise

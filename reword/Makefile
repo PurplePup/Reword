@@ -2,6 +2,8 @@ PROG_NAME = reword
 SOURCES = reword.cpp \
 		audio.cpp \
 		button.cpp \
+		control.cpp \
+		controls.cpp \
 		error.cpp \
 		fontttf.cpp \
 		framerate.cpp \
@@ -36,13 +38,13 @@ OBJECTS = $(SOURCES:.cpp=.o)
 BIN = $(PROG_NAME)
 
 ifdef pc
-CXX = g++ 
+CXX = g++
 # LDFLAGS = -lm -lg -lpthread -lSDL -lSDL_image -lSDL_mixer -lSDL_ttf
-# CXX = g++ 
+# CXX = g++
 # CXXFLAGS = -c -Wall `sdl-config --cflags` -ggdb -D_DEBUG -I/usr/include/SDL
-LDFLAGS = -lm -lg -lpthread -lSDL -lSDL_mixer -lSDL_image -lSDL_ttf `sdl-config --static-libs` 
+LDFLAGS = -lm -lg -lpthread -lSDL -lSDL_mixer -lSDL_image -lSDL_ttf `sdl-config --static-libs`
 #LDFLAGS = -L/lib -DGP2X -lSDL_image  -lSDL_gfx  -lSDL_ttf  -ljpeg -lpng12 -lz -lSDL_mixer -lvorbisidec -lmikmod -lmad -lSDL -lgcc -lm -lc -lexpat -lpthread -msoft-float
-#-lfreetype 
+#-lfreetype
 #=====BUILD DEBUG
 CXXFLAGS = -c -Wall `sdl-config --cflags` -ggdb -D_DEBUG -I/usr/include/SDL
 STRIP = ls -l
@@ -66,24 +68,24 @@ LD_LIBRARY_PATH=$(CROSS_PATH)/usr/lib
 LD_RUN_PATH=$(CROSS_PATH)/bin
 LD_AOUT_LIBRARY_PATH=$(LD_RUN_PATH)
 SDL_CONFIG = $(CROSS_PATH)/usr/bin/sdl-config
-#LDFLAGS = -L$(CROSS_PATH)/usr/lib -L$(CROSS_PATH)/lib -static -DPANDORA -lm -lg -lpthread -lSDL -lSDL_mixer -lSDL_image -lSDL_ttf `$(SDL_CONFIG) --static-libs` 
+#LDFLAGS = -L$(CROSS_PATH)/usr/lib -L$(CROSS_PATH)/lib -static -DPANDORA -lm -lg -lpthread -lSDL -lSDL_mixer -lSDL_image -lSDL_ttf `$(SDL_CONFIG) --static-libs`
 LDFLAGS = -L$(CROSS_PATH)/lib -L$(CROSS_PATH)/usr/lib
 LDFLAGS	+= -lm -lg -lpthread -lts -lfreetype -lSDL -lSDL_mixer -lSDL_image -lSDL_ttf
-#CC = $(CROSS_PATH)/bin/arm-none-linux-gnueabi-gcc 
+#CC = $(CROSS_PATH)/bin/arm-none-linux-gnueabi-gcc
 #CXX = $(CROSS_PATH)/bin/arm-none-linux-gnueabi-g++ -v -shared
-CXX = $(CROSS_PATH)/bin/arm-none-linux-gnueabi-g++ 
+CXX = $(CROSS_PATH)/bin/arm-none-linux-gnueabi-g++
 LD = $(CROSS_PATH)/bin/arm-none-linux-gnueabi-ld
-CXXFLAGS = -DPANDORA -c -Wall `$(SDL_CONFIG) --cflags` -I$(CROSS_PATH)/usr/include -I$(CROSS_PATH)/usr/include/SDL 
+CXXFLAGS = -DPANDORA -c -Wall `$(SDL_CONFIG) --cflags` -I$(CROSS_PATH)/usr/include -I$(CROSS_PATH)/usr/include/SDL
 STRIP = $(CROSS_PATH)/bin/arm-none-linux-gnueabi-strip
 endif
 
-all: 
+all:
 	make pcversion pc=1
 #to make both versions at once include the following
 #	make cleanobjs
 #	make gpversion arm=1
 
-pc: 
+pc:
 	make pcversion pc=1
 
 gp2x:
@@ -98,10 +100,10 @@ gpversion: $(SOURCES) $(BIN)
 
 panversion: $(SOURCES) $(BIN)
 
-$(BIN): $(OBJECTS) 
+$(BIN): $(OBJECTS)
 	$(CXX) $(LDFLAGS) $(OBJECTS) -o $@
 	$(STRIP) $(BIN)
-	
+
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $< -o $@
 
@@ -110,7 +112,7 @@ cleanobjs:
 
 clean:
 	rm -f $(BIN) *~ *.o *.bak
-	
+
 
 
 

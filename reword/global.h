@@ -3,6 +3,7 @@
 #ifndef _GAME_GLOBAL_H_
 #define _GAME_GLOBAL_H_
 
+#include "locator.h"    //as it's effectivly a global
 #include "platform.h"
 #include "SDL.h"
 
@@ -40,6 +41,7 @@ const int COUNTDOWN_TIMETRIAL	= 120;
 #define USER_EV_PAUSE_TRACK			5
 #define USER_EV_STOP_TRACK			6
 #define USER_EV_SAVE_STATE			7
+#define USER_EV_EXIT_SUB_SCREEN     8
 
 #endif //_GAME_GLOBAL_H_
 

@@ -28,12 +28,11 @@
 #include "error.h"
 #include "platform.h"
 
-class Input : Error
+class IInput
 {
 public:
-
     // mapped button values
-    enum ButtonType
+    enum eButtonType
     {
 		UP,
 		UPLEFT,
@@ -58,23 +57,45 @@ public:
 		NUMBER_OF_BUTTONS
     };
 
+    IInput() : _init(false) {}
+	virtual ~IInput() {}
+
+	virtual bool initDone() const { return _init; };
+
+	virtual void cleanUp() = 0;
+    virtual eButtonType translate(int key) = 0;	    // Translate key to button
+    virtual int un_translate(eButtonType b) = 0;     // Reverse translation
+    virtual void down(eButtonType b) = 0;        	// Button pressed
+    virtual void up(eButtonType b) = 0;      		// Button released
+    virtual bool isPressed(eButtonType b) const = 0;	// Return true if button is pressed
+    virtual bool repeat(eButtonType b) = 0;      	// Returns true if button repeats
+	virtual void setRepeat(eButtonType b, Uint32 rate, Uint32 delay) = 0;
+	virtual void clearRepeat() = 0;
+
+protected:
+	bool _init;
+};
+
+class Input : public IInput
+{
+public:
+
     // Constructor
-    Input(void);
-	~Input();
+    Input();
+	virtual ~Input();
 
-	bool initDone() const { return _init; };
-	void cleanUp();
-    ButtonType translate(int key);	        // Translate key to button
-    static int un_translate(ButtonType b);  // Reverse translation (from anywhere)
+	virtual void cleanUp();
+    virtual eButtonType translate(int key);	        // Translate key to button
+    virtual int un_translate(eButtonType b);  // Reverse translation (from anywhere)
 
-    void down(ButtonType b);	// Button pressed
-    void up(ButtonType b);		// Button released
-    bool isPressed(ButtonType b) const;	// Return true if button is pressed
-    bool repeat(ButtonType b);	// Returns true if button repeats
-	void setRepeat(ButtonType b, Uint32 rate, Uint32 delay);
-	void clearRepeat();
+    virtual void down(eButtonType b);	// Button pressed
+    virtual void up(eButtonType b);		// Button released
+    virtual bool isPressed(eButtonType b) const;	// Return true if button is pressed
+    virtual bool repeat(eButtonType b);	// Returns true if button repeats
+	virtual void setRepeat(eButtonType b, Uint32 rate, Uint32 delay);
+	virtual void clearRepeat();
 
-private:
+protected:
     // Initise joystick
     void initJoy(void);
 
@@ -84,7 +105,6 @@ private:
     // Button states
     Button buttons[NUMBER_OF_BUTTONS];
 
-	bool _init;
 };
 
 #endif // INPUT_H

@@ -17,6 +17,7 @@ public:
 					ANI_LOOP = 4,		//loop forever, restarting frame 1 when last frame done
 					ANI_REVERSE = 8		//reverse movement when end/start point reached
 				};
+    enum eAnimDir { DIR_FORWARD, DIR_BACKWARD };
 
 	ImageAnim();
 	ImageAnim(std::string fileName, bool bAlpha, Uint32 nFrames);
@@ -26,8 +27,8 @@ public:
 
 	//position
 	virtual void setPos(float x, float y)	{ _x = x; _y = y; }
-	float getXPos()					{ return _x; }
-	float getYPos()					{ return _y; }
+	float getXPos() const			{ return _x; }
+	float getYPos()	const			{ return _y; }
 
 	//animation
 	void setMaxFrame(Uint32 nFrames);
@@ -35,14 +36,15 @@ public:
                 Uint32 rate_ms, Uint32 repeat_N = 0, Uint32 restartIn_ms = 0, Uint32 delayStart_ms = 0);
 	void setFrameRange(Uint32 firstFrame, Uint32 lastFrame);
 	void setFrame(Uint32 frame);
+	void setFrameLast()             { _frame = (_nFrames > 0)?_nFrames-1:0; }   //force to last frame (so caller not need to know nFrames)
 	Uint32 getFrame() const			{ return _frame; }
-	Uint32 getMaxFrame() const		{ return _nFrames; }
+	Uint32 getMaxFrame() const		{ return _nFrames-1; }
 	void setRepeat(Uint32 r)		{ _repeat = r; }
 
     void setAnimDelay(Uint32 delay, bool bRestart = false) { _delayA.start(delay); _bDelayRestart = bRestart; }   //before anim starts & each repeat?
 	void setAnimRate(Uint32 rate)	            { _waitA.start(_rateA = rate, 0); }
 	void setAnimType(eAnim anim);
-	void setAnimDir(int dir)		            { _frameDir = (dir<0)?-1:1; }	//anim start dir (frame +/-) +1 for forward, -1 for back
+	void setAnimDir(eAnimDir dir)		        { _frameDir = (dir == DIR_BACKWARD)?-1:1; }	//anim start dir (frame +/-) +1 for forward, -1 for back
 	void setAnimRestart(Uint32 r, Uint32 d=0)	{ _restartA.start(_restart = r, d); }
 	void setVisible(bool b)			            { _visible = b; }
 	void pauseAnim(bool b = true)	            { _pauseA = b; }			//stop/start animating

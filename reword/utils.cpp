@@ -3,7 +3,7 @@
 
 File:			utils.cpp
 
-Class impl:		Error
+Class impl:		none
 
 Description:	Some useful utility functions.
 				Mainly string functions at the moment

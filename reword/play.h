@@ -10,8 +10,6 @@
 
 #include "screen.h"	//physical screen handling class
 #include "input.h"	//button/joystich handling class
-#include "gamedata.h"  //shared data between screens (play classes)
-#include "sprite.h"
 
 // interface class for all play classes, one for each "screen"
 // This way each new screen has its own class with screen and
@@ -23,6 +21,9 @@
 class IPlay
 {
 public:
+	enum eSuccess { SU_NONE=0, SU_ARCADE, SU_GOT6, SU_BONUS, SU_BADLUCK, SU_SPEED6, SU_TIMETRIAL, SU_GAMEOVER };
+	enum eState { PG_PLAY=0, PG_WAIT, PG_END, PG_DICT, PG_PAUSE }; //, PG_POPUP };
+	enum eControls { CTRLID_NONE = 0, CTRLID_MENU, CTRLID_NEXT, CTRLID_PREV, CTRLID_EXIT };
 
 	//pure virtual functions - must be implemented
 	///////////////////////////////////////////////
@@ -34,15 +35,18 @@ public:
     // other processing
     virtual void work(Input* /*input*/, float /*speedFactor*/) = 0;
     // notification of button/input state change
-    virtual void button(Input* /*input*/, Input::ButtonType /*b*/) = 0;
+    virtual void button(Input* /*input*/, IInput::eButtonType /*b*/) = 0;
 
 	//virtual functions - dont need to be implemented if not needed
 	////////////////////////////////////////////////////////////////
 
 	// screen touch (press)
-	virtual void touch(Point /*pt*/) { /*do nothing*/ }
+	virtual bool touch(const Point &/*pt*/) { return false; /*do nothing*/ }
 	// screen touch (release)
-	virtual void tap(Point /*pt*/) { /*do nothing*/ }
+	virtual bool tap(const Point &/*pt*/) { return false; /*do nothing*/ }
+    // dragging (with button or finger down) for slides/drag/highlight etc
+//  virtual bool drag(const Point &/*pt*/) { return false; /*do nothing*/ }
+
 	//handle events other than buttons and touches
 	virtual void handleEvent(SDL_Event &/*sdlevent*/) { /*do nothing*/ }
 	//determine if the play class should exit (used by Game class)
@@ -52,14 +56,16 @@ public:
 
 	virtual ~IPlay() {}
 
+protected:
+	bool _init;		//must be set true to render etc
+	bool _running;	//must be set true to not drop out of Game class
+
 #ifdef _DEBUG
+public:
     void toggleDbgDisplay() { _dbg_display = !_dbg_display; }
 	bool _dbg_display;  //if true, display debug info
 #endif
 
-protected:
-	bool _init;		//must be set true to render etc
-	bool _running;	//must be set true to not drop out of Game class
 };
 
 

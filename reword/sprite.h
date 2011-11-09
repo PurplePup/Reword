@@ -7,11 +7,12 @@
 #include "utils.h"
 #include <deque>
 
-typedef std::deque<Point> tPoints;
 
 class Sprite : public ImageAnim
 {
 public:
+    typedef std::deque<Point> tPoints;
+
 	enum eSprite {	SPR_NONE = 0,		//static, not moving
 					SPR_LEFT = 1,
 					SPR_RIGHT = 2,
@@ -26,8 +27,8 @@ public:
 
 	//start move from A to B then stop or repeat
 	void startMoveTo(int xEnd, int yEnd, Uint32 time = 100, Uint32 delay = 0);
-	void startMoveTo(int xEnd, int yEnd, 
-					Uint32 rate, Uint32 delay,  
+	void startMoveTo(int xEnd, int yEnd,
+					Uint32 rate, Uint32 delay,
 					float xVel, float yVel,
 					eSprite type = Sprite::SPR_NONE);
 	void calcWaypoints(int x1, int y1, int x2, int y2);
@@ -37,19 +38,19 @@ public:
 	Uint32 calcXYRate(Uint32 time, int x1, int y1, int x2, int y2, float &deltaX, float &deltaY);
 
 	void setTouchable(bool b)		{ _touchable = b; }
-	bool isTouchable()				{ return _touchable; }
+	bool isTouchable() const		{ return _touchable; }
 
 	void setMoveRate(Uint32 rate, Uint32 delay)	{ _waitM.start(_rateM = rate, delay); }
 	void setMoveLoop(bool loop)		{ _loopM = loop;}			//keep moving each time?
 	void pauseMove(bool b = true)	{ _pauseM = b; }			//stop/start moving
 	void toggleMove()				{ _pauseM = !_pauseM; }		//toggle pause state
-	bool canMove()		{ return ((_xVel || _yVel) && (_xDir || _yDir)); } 
-	bool isMoving()		{ return !(_x == _xEnd && _y == _yEnd); }	//has it reached end point yet
+	bool canMove() const            { return ((_xVel || _yVel) && (_xDir || _yDir)); }
+	bool isMoving() const       	{ return !(_x == _xEnd && _y == _yEnd); }	//has it reached end point yet
 
 	//overridden functions
 	virtual void setPos(float x, float y);
 	virtual void work();	//update movement, and call parent anim update
-	virtual bool contains(Point pt);
+	virtual bool contains(const Point &pt) const;
 
 protected:
 

@@ -29,7 +29,7 @@ private:
 
 	Screen		*_screen;
 	Input		*_input;
-//	Audio		*_audio;
+	IAudio		*_audio;
 	GameData	*_gd;
 
 };
