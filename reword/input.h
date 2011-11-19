@@ -1,8 +1,8 @@
-//based on Dave Parkers code
+//originally based on Dave Parkers code
 
 /***************************************************************************
  *   Copyright (C) 2006 by Dave Parker                                     *
- *   drparker@freenet.co.uk                                                *
+ *                                              *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -28,83 +28,53 @@
 #include "error.h"
 #include "platform.h"
 
-class IInput
+#include "i_input.h"
+
+//Null input implementtaion for testing
+class NullInput : public IInput
 {
 public:
-    // mapped button values
-    enum eButtonType
-    {
-		UP,
-		UPLEFT,
-		LEFT,
-		DOWNLEFT,
-		DOWN,
-		DOWNRIGHT,
-		RIGHT,
-		UPRIGHT,
-		START,
-		SELECT,
-		L,
-		R,
-		A,
-		B,
-		Y,
-		X,
-		VOLUP,
-		VOLDOWN,
-		CLICK,
-		PAUSE,
-		NUMBER_OF_BUTTONS
-    };
-
-    IInput() : _init(false) {}
-	virtual ~IInput() {}
-
-	virtual bool initDone() const { return _init; };
-
-	virtual void cleanUp() = 0;
-    virtual eButtonType translate(int key) = 0;	    // Translate key to button
-    virtual int un_translate(eButtonType b) = 0;     // Reverse translation
-    virtual void down(eButtonType b) = 0;        	// Button pressed
-    virtual void up(eButtonType b) = 0;      		// Button released
-    virtual bool isPressed(eButtonType b) const = 0;	// Return true if button is pressed
-    virtual bool repeat(eButtonType b) = 0;      	// Returns true if button repeats
-	virtual void setRepeat(eButtonType b, Uint32 rate, Uint32 delay) = 0;
-	virtual void clearRepeat() = 0;
-
-protected:
-	bool _init;
+    virtual void init() { std::cout << "NullInput (no control) initialised" << std::endl; }
+	virtual bool initDone() { return true; };
+    virtual pp_i::eButtonType translate(int key) { return pp_i::UP; }
+    virtual int un_translate(pp_i::eButtonType b) { return 0; }
+    virtual void down(pp_i::eButtonType b) {}
+    virtual void up(pp_i::eButtonType b) {}
+    virtual bool isPressed(pp_i::eButtonType b) const { return false; }
+    virtual bool repeat(pp_i::eButtonType b) { return false; }
+	virtual void setRepeat(pp_i::eButtonType b, Uint32 rate, Uint32 delay) {}
+	virtual void clearRepeat() {}
 };
 
+//Standard input implementation
 class Input : public IInput
 {
 public:
-
-    // Constructor
     Input();
 	virtual ~Input();
-
-	virtual void cleanUp();
-    virtual eButtonType translate(int key);	        // Translate key to button
-    virtual int un_translate(eButtonType b);  // Reverse translation (from anywhere)
-
-    virtual void down(eButtonType b);	// Button pressed
-    virtual void up(eButtonType b);		// Button released
-    virtual bool isPressed(eButtonType b) const;	// Return true if button is pressed
-    virtual bool repeat(eButtonType b);	// Returns true if button repeats
-	virtual void setRepeat(eButtonType b, Uint32 rate, Uint32 delay);
+    virtual void init();
+	virtual bool initDone() { return _init; };
+    virtual pp_i::eButtonType translate(int key);	        // Translate key to button
+    virtual int un_translate(pp_i::eButtonType b);  // Reverse translation (from anywhere)
+    virtual void down(pp_i::eButtonType b);	// Button pressed
+    virtual void up(pp_i::eButtonType b);		// Button released
+    virtual bool isPressed(pp_i::eButtonType b) const;	// Return true if button is pressed
+    virtual bool repeat(pp_i::eButtonType b);	// Returns true if button repeats
+	virtual void setRepeat(pp_i::eButtonType b, Uint32 rate, Uint32 delay);
 	virtual void clearRepeat();
 
 protected:
     // Initise joystick
     void initJoy(void);
+	void cleanUp();
 
     // SDL joystick handle
     SDL_Joystick* joy;
 
     // Button states
-    Button buttons[NUMBER_OF_BUTTONS];
+    Button buttons[pp_i::NUMBER_OF_BUTTONS];
 
+	bool _init;
 };
 
 #endif // INPUT_H

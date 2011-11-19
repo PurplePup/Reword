@@ -81,12 +81,12 @@ class PlayGame : public IPlay
 {
 public:
 	PlayGame(GameData& gd);
-	virtual ~PlayGame() { stopCountdown(); delete _pPopup; }
+	virtual ~PlayGame();
 
     virtual void init(Input *input);
     virtual void render(Screen* s);
     virtual void work(Input* input, float speedFactor);
-    virtual void button(Input* input, IInput::eButtonType b);
+    virtual void button(Input* input, pp_i::eButtonType b);
     virtual bool touch(const Point &pt);   //press
     virtual bool tap(const Point &pt);     //release
 
@@ -121,35 +121,29 @@ protected:
 	void doPauseGame();
 	void doDictionary();
 	void prepareBackground();
-//	void scrollDictUp();
-//	void scrollDictDown();
     void calcArcadeNeededWords();
 
 	void render_play(Screen*);	//main play render fn
 	void render_wait(Screen*);	//waiting for PG_END, do "game over" anim etc
 	void render_end(Screen*);	//main play at end
-//	void render_dict(Screen*);	//dictionary display
 	void render_pause(Screen*);	//pause screen
 	void render_popup(Screen*);	//popup menu
 
     void work_play(Input*, float);
     void work_wait(Input*, float);
     void work_end(Input*, float);
- //   void work_dict(Input*, float);
     void work_pause(Input*, float);
     void work_popup(Input*, float);
 
-    void button_play(Input*, IInput::eButtonType);
-    void button_wait(Input*, IInput::eButtonType);
-    void button_end(Input*, IInput::eButtonType);
-//    void button_dict(Input*, IInput::eButtonType);
-    void button_pause(Input*, IInput::eButtonType);
-    void button_popup(Input*, IInput::eButtonType);
+    void button_play(Input*, pp_i::eButtonType);
+    void button_wait(Input*, pp_i::eButtonType);
+    void button_end(Input*, pp_i::eButtonType);
+    void button_pause(Input*, pp_i::eButtonType);
+    void button_popup(Input*, pp_i::eButtonType);
 
 	bool touch_play(const Point &pt);
 	bool touch_end(const Point &pt);
 	bool touch_default(const Point &pt);
-//	bool touch_dict(const Point &pt);
 
 	void commandWordToLast();
 	void commandClearAllToTop();
@@ -163,11 +157,10 @@ private:
 	//function pointers for render(), work(), button() etc
 	void (PlayGame::*pRenderFn)(Screen*);
     void (PlayGame::*pWorkFn)(Input*, float);
-	void (PlayGame::*pButtonFn)(Input*, IInput::eButtonType);
+	void (PlayGame::*pButtonFn)(Input*, pp_i::eButtonType);
 	bool (PlayGame::*pTouchFn)(const Point &pt);
 
     Controls    _controlsPlay;
-//    Controls    _controlsDict;
 
 	std::string _tmpStr;		//used in render()
 	std::string _tmpStr2;		//used in render()
@@ -184,9 +177,6 @@ private:
 	int _xxWordHi, _yyWordHi;	//highlight position of word to display description of
 
 	std::string _dictWord;      //used to pass to dict screen
-//	std::vector<std::string> _dictDef;
-//	int	_dictLine;				//offset into _dictDef (ie start at _dictDef.begin+_dictLine)
-//	int _lines;					//number of lines we can display dictionary entry without scrolling
 
 	//x offsets to draw 3, 4, 5 and 6 (etc) word boxes under main display
 	int _boxOffsetY;				//added position below scratch area
@@ -228,15 +218,15 @@ private:
 	Waiting		_doubleClick;
 	int			_randomTitle;
 	int         _ctrl_id;       //id of pressed control
+	Rect        _pause_rect;
 
 	Roundels	_round;			//for roundel game letter sprites
 	std::auto_ptr<Roundels>	_roundPaused;	//"PAUSED" in middle of screen
 	std::auto_ptr<Roundels>	_roundDict;		//"xxxxx" word highlighted for dictionary display
 
-	//...
+	//different modes during play that are handled by different classes
 	PlayGamePopup	*_pPopup;
-//	std::auto_ptr<IPlay>    _play;  //play classes (eg. PlayGame, PlayDict, PlayPause etc)
-    IPlay *_play;
+    IPlay           *_play;
 
     int _debugTotalLetters, _debugNeededAll, _debugNeededNow;
 };

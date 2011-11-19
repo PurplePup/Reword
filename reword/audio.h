@@ -17,6 +17,7 @@
 
 //NOTE : NullAudio and Audio used in a Locator class
 
+//Null audio for disabling audio completely
 class NullAudio : public IAudio
 {
 public:
@@ -42,6 +43,7 @@ public:
 	virtual void pushStopTrack() {}
 };
 
+//Standard audio implementation
 class Audio : public IAudio
 {
 public:

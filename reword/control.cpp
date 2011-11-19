@@ -73,7 +73,7 @@ void Control::work(Input* input, float speedFactor)
 };
 
 // notification of button/input state change
-void Control::button(Input* /*input*/, IInput::eButtonType /*b*/)
+void Control::button(Input* /*input*/, pp_i::eButtonType /*b*/)
 {
 };
 

@@ -58,13 +58,12 @@ public:
 protected:
 	void cleanUp();
 
-	int _tileW, _tileH; //actual individual tile w & h withing image
-	int _tileCount;	    //number of tiles in image (if setTileSize() used)
-
-    int _tileWOffset, _tileHOffset;     //value or 0, depend on eTileDir to multiply by
+	int     _tileW, _tileH; //actual individual tile w & h withing image
+	int     _tileCount;	    //number of tiles in image (if setTileSize() used)
+    int     _tileWOffset, _tileHOffset;     //value or 0, depend on eTileDir to multiply by
 
 private:
-	bool _init;
+	bool    _init;
 };
 
 

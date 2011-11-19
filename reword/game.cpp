@@ -163,6 +163,8 @@ bool Game::init(const GameOptions &options)
 	}
 
 	_input = new Input();
+	Locator::RegisterInput(_input);
+	_input->init();
 
 #if ((defined(GP2X) || defined(PANDORA)))
 	//SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_VIDEO);
@@ -209,8 +211,7 @@ bool Game::run(void)
 //    if (_gd->_options._bMusic)
 //    {
 //        std::cout << "Using MikMod audio directly" << std::endl;
-//        Audio *audio = Audio::instance();
-//        audio->modStart();
+//        Locator::GetAudio().modStart();
 //    }
 //#endif
 
@@ -326,8 +327,8 @@ bool Game::play(IPlay *p)
 
 					case SDL_KEYDOWN:
 					{
-						IInput::eButtonType b = _input->translate(event.key.keysym.sym);
-						if (b != IInput::NUMBER_OF_BUTTONS)
+						pp_i::eButtonType b = _input->translate(event.key.keysym.sym);
+						if (b != pp_i::NUMBER_OF_BUTTONS)
 						{
 							_input->down(b);
 							p->button(_input,b);
@@ -361,17 +362,17 @@ bool Game::play(IPlay *p)
                         }
 #endif
 
-						IInput::eButtonType b = _input->translate(event.key.keysym.sym);
-						if (b != IInput::NUMBER_OF_BUTTONS)
+						pp_i::eButtonType b = _input->translate(event.key.keysym.sym);
+						if (b != pp_i::NUMBER_OF_BUTTONS)
 						{
 							_input->up(b);
 							p->button(_input, b);
 						}
 
-						if (IInput::VOLUP == b)
+						if (pp_i::VOLUP == b)
 							_audio->volumeUp();
 						else
-							if (IInput::VOLDOWN == b)
+							if (pp_i::VOLDOWN == b)
 								_audio->volumeDown();
 
 					}
@@ -381,21 +382,21 @@ bool Game::play(IPlay *p)
 
 					case SDL_JOYBUTTONUP:
 					{
-						IInput::eButtonType b = static_cast<IInput::eButtonType>(event.jbutton.button);
+						pp_i::eButtonType b = static_cast<pp_i::eButtonType>(event.jbutton.button);
 						_input->up(b);
 						p->button(_input, b);
 
-						if (IInput::VOLUP == b)
+						if (pp_i::VOLUP == b)
 							_audio->volumeUp();
 						else
-							if (IInput::VOLDOWN == b)
+							if (pp_i::VOLDOWN == b)
 								_audio->volumeDown();
 					}
 					break;
 
 					case SDL_JOYBUTTONDOWN:
 					{
-						IInput::eButtonType b = static_cast<IInput::eButtonType>(event.jbutton.button);
+						pp_i::eButtonType b = static_cast<pp_i::eButtonType>(event.jbutton.button);
 						_input->down(b);
 						p->button(_input, b);
 					}

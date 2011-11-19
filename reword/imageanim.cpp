@@ -46,7 +46,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 ImageAnim::ImageAnim() :
 	Image(), _x(0.0), _y(0.0f),
 	_frame(0), _firstFrame(0), _lastFrame(0), _nFrames(0), _frameDir(1),
-	_repeat(1), _restart(0), _visible(true), _pauseA(true), _rateA(0), _restartA(0),
+	_repeat(1), _restart(0), _inflateBy(0),
+	_visible(true), _pauseA(true), _rateA(0), _restartA(0),
 	_delayA(0), _bDelayRestart(false)
 {
 	//default _nFrames = 0 so no anim possible, until setMaxFrame called
@@ -55,7 +56,8 @@ ImageAnim::ImageAnim() :
 ImageAnim::ImageAnim(std::string fileName, bool bAlpha, Uint32 nFrames) :
 	Image(fileName, bAlpha), _x(0.0f), _y(0.0f),
 	_frame(0), _firstFrame(0), _lastFrame(0), _nFrames(0), _frameDir(1),
-	_repeat(1), _restart(0), _visible(true), _pauseA(true), _rateA(0), _restartA(0),
+	_repeat(1), _restart(0), _inflateBy(0),
+	_visible(true), _pauseA(true), _rateA(0), _restartA(0),
 	_delayA(0), _bDelayRestart(false)
 {
 	//_nFrames curr set to 0 in case Image class not initialised,
@@ -67,7 +69,8 @@ ImageAnim::ImageAnim(std::string fileName, bool bAlpha, Uint32 nFrames) :
 ImageAnim::ImageAnim(const Image &img) :
 	Image(img), _x(0.0f), _y(0.0f),
 	_frame(0), _firstFrame(0), _lastFrame(0), _nFrames(0), _frameDir(1),
-	_repeat(1), _restart(0), _visible(true), _pauseA(true), _rateA(0), _restartA(0),
+	_repeat(1), _restart(0), _inflateBy(0),
+	_visible(true), _pauseA(true), _rateA(0), _restartA(0),
 	_delayA(0), _bDelayRestart(false)
 {
 }
@@ -272,4 +275,27 @@ void ImageAnim::draw(Surface *s)
 	if (_visible)
 		blitTo(s, (int)round(_x), (int)round(_y), _frame);	//blit current frame to s at x, y
 }
+
+//add or subtract a border around the tile size border
+//default 0 (same size as image tile)
+void ImageAnim::setBounds(int inflateBy)
+{
+    _inflateBy = inflateBy;
+    assert(inflateBy >= 0 || //positive, 0 or
+           (abs(inflateBy) < std::max(_tileW, _tileH)));    //less than max side if negative
+}
+//always size of the image tile in its current position with
+Rect ImageAnim::bounds() const
+{
+    Rect r(_x, _y, _x+_tileW, _y+_tileH);
+    if (_inflateBy)
+        return r.inset(_inflateBy);
+    return r;
+}
+
+
+
+
+
+
 

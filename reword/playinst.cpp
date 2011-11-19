@@ -59,8 +59,8 @@ void PlayInst::init(Input *input)
 	_titleW.start(3000, 1000);
 
 	//set the repeat of the keys required
-	input->setRepeat(Input::UP, 250, 250);		//button, rate, delay
-	input->setRepeat(Input::DOWN, 250, 250);
+	input->setRepeat(pp_i::UP, 250, 250);		//button, rate, delay
+	input->setRepeat(pp_i::DOWN, 250, 250);
 
 	//set arrow (scroll positions)
 	_gd._arrowUp.setPos(SCREEN_WIDTH-_gd._arrowUp.tileW(), BG_LINE_TOP+2);		//positions dont change, just made visible or not if scroll available
@@ -149,8 +149,8 @@ void PlayInst::work(Input *input, float speedFactor)
 			_title.unJumbleWord(true);
 	}
 
-    if (input->repeat(Input::UP))	button(input, Input::UP);
-    if (input->repeat(Input::DOWN)) button(input, Input::DOWN);
+    if (input->repeat(pp_i::UP))	button(input, pp_i::UP);
+    if (input->repeat(pp_i::DOWN)) button(input, pp_i::DOWN);
 
 	_gd._arrowUp.setVisible(_instLine > 0);
 	_gd._arrowUp.work();
@@ -158,30 +158,30 @@ void PlayInst::work(Input *input, float speedFactor)
 	_gd._arrowDown.work();
 }
 
-void PlayInst::button(Input *input, IInput::eButtonType b)
+void PlayInst::button(Input *input, pp_i::eButtonType b)
 {
 	switch (b)
 	{
-	case Input::UP:
+	case pp_i::UP:
 		if (input->isPressed(b))
 			//move the _instLine offset var up a line
 			scrollDown();
 		break;
-	case Input::DOWN:
+	case pp_i::DOWN:
 		if (input->isPressed(b))
 			//move the _instLine offset var down a line
 			scrollUp();
 		break;
-	case Input::Y:
-	case Input::START:
+	case pp_i::Y:
+	case pp_i::START:
 		if (input->isPressed(b))	//exit back to menu
 		{
 			_gd._state = ST_MENU;
 			_running = false;	//exit this class running state
 		}
 		break;
-	case Input::CLICK:
-	case Input::B:
+	case pp_i::CLICK:
+	case pp_i::B:
 		if (input->isPressed(b))
 			nextPage();
 		break;

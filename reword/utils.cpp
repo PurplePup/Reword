@@ -87,6 +87,7 @@ void pushSDL_EventKey(int key)
 	//push keyboard event instead of user pressing the key
 	//allows us to automate some things
     SDL_Event event;
+    //event.type = SDL_KEYDOWN;
     event.key.type = SDL_KEYDOWN;
     event.key.state = SDL_PRESSED;
     event.key.keysym.sym = (SDLKey)key;

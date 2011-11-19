@@ -1,5 +1,5 @@
-#ifndef IAUDIO_H
-#define IAUDIO_H
+#ifndef I_AUDIO_H_INCLUDED
+#define I_AUDIO_H_INCLUDED
 
 #include <SDL_mixer.h>
 #include <string>
@@ -29,4 +29,4 @@ public:
 	virtual void pushStopTrack() = 0;
 };
 
-#endif // IAUDIO_H
+#endif // I_AUDIO_H_INCLUDED

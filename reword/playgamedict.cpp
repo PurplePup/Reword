@@ -54,10 +54,10 @@ PlayGameDict::~PlayGameDict()
 void PlayGameDict::init(Input *input)
 {
 	//set the repeat of the keys required
-	input->setRepeat(Input::UP, 250, 250);		//button, rate, delay
-	input->setRepeat(Input::DOWN, 250, 250);
-	input->setRepeat(Input::LEFT, 250, 250);
-	input->setRepeat(Input::RIGHT, 250, 250);
+	input->setRepeat(pp_i::UP, 250, 250);		//button, rate, delay
+	input->setRepeat(pp_i::DOWN, 250, 250);
+	input->setRepeat(pp_i::LEFT, 250, 250);
+	input->setRepeat(pp_i::RIGHT, 250, 250);
 
     //set arrow (scroll positions)
     _gd._arrowUp.setPos(SCREEN_WIDTH-_gd._arrowUp.tileW(), BG_LINE_TOP+2);		//positions dont change, just made visible or not if scroll available
@@ -82,14 +82,12 @@ void PlayGameDict::init(Input *input)
     _roundDict->setWordCenterHoriz(_dictWord, _gd._letters, (BG_LINE_TOP-_gd._letters.tileH())/2, 4);
     _roundDict->startMoveFrom(Screen::width(), 0, 10, 50, 18, 0);
 
-
-
     //[PREV] dictionary screen buttons - only shown in dict display
     boost::shared_ptr<Sprite> pPrev(new Sprite(RES_BASE + "images/touch_prev.png", 255, 4));
-    pPrev->setPos(3, 0);
     pPrev->setTileSize(106, 52, Image::TILE_VERT);
     pPrev->setFrameLast();  //unselected
-//    pPrev->setVisible(false);  //not available until countdown finished
+    pPrev->setPos(3, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - pPrev->tileH())/2));
+    pPrev->setVisible(true);
     Control cPrev(pPrev, CTRLID_PREV);
     _controlsDict.add(cPrev);
 
@@ -139,10 +137,10 @@ void PlayGameDict::work(Input* input, float speedFactor)
 	//if a key is pressed and the interval has expired process
 	//that button as if pressesd again
 
-    if (input->repeat(Input::UP))	button(input, Input::UP);
-    if (input->repeat(Input::DOWN)) button(input, Input::DOWN);
-    if (input->repeat(Input::LEFT))	button(input, Input::LEFT);
-    if (input->repeat(Input::RIGHT)) button(input, Input::RIGHT);
+    if (input->repeat(pp_i::UP))	button(input, pp_i::UP);
+    if (input->repeat(pp_i::DOWN)) button(input, pp_i::DOWN);
+    if (input->repeat(pp_i::LEFT))	button(input, pp_i::LEFT);
+    if (input->repeat(pp_i::RIGHT)) button(input, pp_i::RIGHT);
 
 	_roundDict->work();
 
@@ -155,24 +153,24 @@ void PlayGameDict::work(Input* input, float speedFactor)
 
 }
 
-void PlayGameDict::button(Input* input, IInput::eButtonType b)
+void PlayGameDict::button(Input* input, pp_i::eButtonType b)
 {
 	switch (b)
 	{
-	case Input::UP:
+	case pp_i::UP:
 		if (input->isPressed(b))
 			//move the _dictLine offset var up a line
 			scrollDictDown();
 		break;
-	case Input::DOWN:
+	case pp_i::DOWN:
 		if (input->isPressed(b))
 			//move the _dictLine offset var down a line
 			scrollDictUp();
 		break;
-	case Input::Y:
-	case Input::CLICK:
-//		if (input->isPressed(b)) doDictionary();
-        pp_g::pushSDL_Event(USER_EV_EXIT_SUB_SCREEN);
+	case pp_i::Y:
+	case pp_i::CLICK:
+		if (input->isPressed(b))
+            pp_g::pushSDL_Event(USER_EV_EXIT_SUB_SCREEN);
 		break;
 
 	default:break;
@@ -190,6 +188,7 @@ void PlayGameDict::scrollDictDown()
 bool PlayGameDict::touch(const Point &pt)
 {
     _controlsDict.touched(pt);    //needed to highlight a touched control
+
 	//check if touch scroll arrows
 	if (_gd._arrowUp.contains(pt))
 	{
@@ -203,12 +202,12 @@ bool PlayGameDict::touch(const Point &pt)
 			_gd._arrowDown.startAnim(0, -1, ImageAnim::ANI_ONCE, 40);
 		scrollDictUp();
 	}
-//disable the tab background feature
-//	else
-//		if (!_doubleClick.done())
-//			doDictionary();
-//		else
-//			_doubleClick.start(300);
+    //tap background to exit dict screen
+	else
+		if (!_doubleClick.done())
+			pp_g::pushSDL_Event(USER_EV_EXIT_SUB_SCREEN);
+		else
+			_doubleClick.start(300);
 
     return true;
 }
@@ -220,7 +219,6 @@ bool PlayGameDict::tap(const Point &pt)
 
     if (_ctrl_id == CTRLID_PREV)
     {
-//        doDictionary();
         pp_g::pushSDL_Event(USER_EV_EXIT_SUB_SCREEN);
         return true;
     }

@@ -55,7 +55,7 @@ void Locator::RegisterAudio(IAudio* audio)
         _audio = audio;
 }
 
-/*
+
 //////////////////////////////// INPUT /////////////////////////////
 
 static IInput * _input = 0;
@@ -79,7 +79,7 @@ void Locator::RegisterInput(IInput* input)
 }
 
 //////////////////////////////// DATA /////////////////////////////
-
+/*
 static IGamedata * _data = 0;
 static NullGamedata _nulldata;
 

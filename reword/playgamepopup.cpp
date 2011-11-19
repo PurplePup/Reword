@@ -83,13 +83,6 @@ void PlayGamePopup::init(Input *input)
 	_itemList[++i] = MenuItem(POP_SKIP, ORANGE_COLOUR, "Next word/Level", (_hasMaxWord)?"Move on to next word/level":"You must have a Re-word first!", _hasMaxWord);
     if (_gd._options._bMusic)
     {
-//        bool bIsPlaying = false, bHasMusic = false;
-//        Audio * pAudio = Audio::instance();
-//        if (pAudio)
-//        {
-//            bIsPlaying = pAudio->isPlayingMusic();	//may be playing/fading menu music so uses isPlaying... rather than isActuallyPl...
-//            bHasMusic = pAudio->hasMusicTracks();
-//        }
         bool bIsPlaying = Locator::GetAudio().isPlayingMusic();	//may be playing/fading menu music so uses isPlaying... rather than isActuallyPl...
         bool bHasMusic = Locator::GetAudio().hasMusicTracks();
 
@@ -162,15 +155,15 @@ void PlayGamePopup::work(Input *input, float speedFactor)
 
 	//Do repeat keys...if a key is pressed and the interval
 	//has expired process that button as if pressesd again
-    if (input->repeat(Input::UP)) button(input, Input::UP);
-    if (input->repeat(Input::DOWN))	button(input, Input::DOWN);
+    if (input->repeat(pp_i::UP)) button(input, pp_i::UP);
+    if (input->repeat(pp_i::DOWN))	button(input, pp_i::DOWN);
 }
 
-void PlayGamePopup::button(Input *input, IInput::eButtonType b)
+void PlayGamePopup::button(Input *input, pp_i::eButtonType b)
 {
 	switch (b)
 	{
-	case Input::UP:
+	case pp_i::UP:
 		if (input->isPressed(b))
 		{
 			if (0==_menuoption)
@@ -179,7 +172,7 @@ void PlayGamePopup::button(Input *input, IInput::eButtonType b)
 				_menuoption--;
 		}
 		break;
-	case Input::DOWN:
+	case pp_i::DOWN:
 		if (input->isPressed(b))
 		{
 			if (_menuoption == (int)_pItems->size()-1)
@@ -188,8 +181,8 @@ void PlayGamePopup::button(Input *input, IInput::eButtonType b)
 				_menuoption++;
 		}
 		break;
-	case Input::CLICK:
-	case Input::B:
+	case pp_i::CLICK:
+	case pp_i::B:
 		if (input->isPressed(b))
 			choose();
 		break;

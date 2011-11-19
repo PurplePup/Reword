@@ -196,7 +196,7 @@ void Surface::drawSolidRectA(int x, int y, int w, int h, const SDL_Color& c, int
 }
 
 //void Surface::putPixel (int x, int y, const Colour& c)
-void Surface::PutPixel(int x, int y, Uint32 colour)
+void Surface::putPixel(int x, int y, Uint32 colour)
 {
 	// Put pixel of colour c at x,y
 	// If colour is NONE - no pixel is ploted

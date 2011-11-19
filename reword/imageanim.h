@@ -30,6 +30,9 @@ public:
 	float getXPos() const			{ return _x; }
 	float getYPos()	const			{ return _y; }
 
+	void setBounds(int inflateBy);
+    Rect bounds() const;
+
 	//animation
 	void setMaxFrame(Uint32 nFrames);
 	void startAnim(int firstFrame_0, int lastFrame_N, eAnim animType,
@@ -81,6 +84,8 @@ protected:
 	eAnim	_animType;
 	Uint32	_repeat;	//number of times the LOOP or REVERSE is performed
 	Uint32	_restart;	//restart animation again in a number of ms after start (useful for 'pinging' an effect)
+
+	int     _inflateBy;	//to increase image bounding rect by
 
 private:
 	bool	_visible;	//render or not?

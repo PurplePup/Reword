@@ -20,7 +20,7 @@ public:
     virtual void init(Input *input);
     virtual void render(Screen* s);
     virtual void work(Input* input, float speedFactor);
-    virtual void button(Input* input, IInput::eButtonType b);
+    virtual void button(Input* input, pp_i::eButtonType b);
 
 	// screen touch (press)
 	virtual bool touch(const Point &/*pt*/);
@@ -41,6 +41,7 @@ private:
     Controls    _controlsDict;
 	int         _ctrl_id;       //id of pressed control
 
+	Waiting		_doubleClick;
     std::string _dictWord;
 	std::vector<std::string> _dictDef;
 	int	_dictLine;				//offset into _dictDef (ie start at _dictDef.begin+_dictLine)

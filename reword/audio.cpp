@@ -41,7 +41,6 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "helpers.h"
 #include "utils.h"
 #include "platform.h"
-#include "locator.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -70,28 +69,6 @@ Audio::~Audio()
         Mix_CloseAudio();
 	}
 }
-
-/*
-std::auto_ptr<Audio> Audio::_instance(0);
-
-Audio * Audio::instance()			// Create an instance of the object
-{
-	if (_instance.get() == 0)
-//		_instance.reset(new Audio());
-		_instance = std::auto_ptr<Audio>(new Audio());
-	return _instance.get();
-}
-
-Audio & Audio::getRef()			// Get a reference to the object
-{
-	return *_instance;
-}
-
-Audio * Audio::getPtr()			// Get a pointer to the object
-{
-	return _instance.get();
-}
-*/
 
 void Audio::init(bool bMusic, bool bSfx)
 {
@@ -125,6 +102,7 @@ void Audio::init(bool bMusic, bool bSfx)
     if (_bMusic)
         loadTracks(_baseTrackDir);
 
+    std::cout << "Standard audio initialised" << std::endl;
 	_init = true;
 }
 
@@ -207,11 +185,6 @@ void AudioTrackDone()
 {
 	//Music has finished playing - for whatever reason
 	//NOTE: NEVER call SDL_Mixer functions, nor SDL_LockAudio, from a callback function
-
-//	Audio *pAudio = Audio::instance();
-//	if (pAudio)
-//		pAudio->pushNextTrack();	//not call mix functions directly, push and exit
-
     Locator::GetAudio().pushNextTrack();
 }
 

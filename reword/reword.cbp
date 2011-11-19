@@ -58,6 +58,7 @@
 		<Unit filename="helpers.cpp" />
 		<Unit filename="helpers.h" />
 		<Unit filename="i_audio.h" />
+		<Unit filename="i_input.h" />
 		<Unit filename="image.cpp" />
 		<Unit filename="image.h" />
 		<Unit filename="imageanim.cpp" />

@@ -24,7 +24,7 @@ public:
     // other processing
     virtual void work(Input * input, float speedFactor);
     // notification of button/input state change
-    virtual void button(Input * input, IInput::eButtonType b);
+    virtual void button(Input * input, pp_i::eButtonType b);
 
 	// screen touch (press)
 	virtual bool touch(const Point &pt) { assert(0); }   //do not confuse touched()

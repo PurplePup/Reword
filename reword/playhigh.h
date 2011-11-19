@@ -21,7 +21,7 @@ public:
     virtual void init(Input *input);
     virtual void render(Screen* s);
     virtual void work(Input* input, float speedFactor);
-    virtual void button(Input* input, IInput::eButtonType b);
+    virtual void button(Input* input, pp_i::eButtonType b);
 
 	virtual bool touch(const Point &pt);
 

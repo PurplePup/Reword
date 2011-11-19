@@ -72,10 +72,10 @@ void PlayHigh::init(Input *input)
 	_titleW.start(3000, 1000);
 
 	//set the repeat of the keys required
-	input->setRepeat(Input::UP, 100, 300);		//button, rate, delay
-	input->setRepeat(Input::DOWN, 100, 300);
-	input->setRepeat(Input::LEFT, 100, 300);
-	input->setRepeat(Input::RIGHT, 100, 300);
+	input->setRepeat(pp_i::UP, 100, 300);		//button, rate, delay
+	input->setRepeat(pp_i::DOWN, 100, 300);
+	input->setRepeat(pp_i::LEFT, 100, 300);
+	input->setRepeat(pp_i::RIGHT, 100, 300);
 
 	//set arrow (scroll positions)
 	_gd._arrowUp.setPos(SCREEN_WIDTH-_gd._arrowUp.tileW(), BG_LINE_TOP+2);		//positions dont change, just made visible or not if scroll available
@@ -213,10 +213,10 @@ void PlayHigh::work(Input *input, float speedFactor)
 	//if a key is pressed and the interval has expired process
 	//that button as if pressesd again
 
-    if (input->repeat(Input::UP))	button(input, Input::UP);
-    if (input->repeat(Input::DOWN)) button(input, Input::DOWN);
-    if (input->repeat(Input::LEFT))	button(input, Input::LEFT);
-    if (input->repeat(Input::RIGHT)) button(input, Input::RIGHT);
+    if (input->repeat(pp_i::UP))	button(input, pp_i::UP);
+    if (input->repeat(pp_i::DOWN)) button(input, pp_i::DOWN);
+    if (input->repeat(pp_i::LEFT))	button(input, pp_i::LEFT);
+    if (input->repeat(pp_i::RIGHT)) button(input, pp_i::RIGHT);
 
 	//_pos -1 = in edit hiscore initials mode
 	_gd._arrowUp.setVisible(_mode < GM_MAX-1 && !isEditing());
@@ -229,28 +229,28 @@ void PlayHigh::work(Input *input, float speedFactor)
 	_gd._arrowRight.work();
 }
 
-void PlayHigh::button(Input *input, IInput::eButtonType b)
+void PlayHigh::button(Input *input, pp_i::eButtonType b)
 {
 	switch (b)
 	{
-	case Input::UP:
+	case pp_i::UP:
 		if (input->isPressed(b))
 			moveUp();
 		break;
-	case Input::DOWN:
+	case pp_i::DOWN:
 		if (input->isPressed(b))
 			moveDown();
 		break;
-	case Input::LEFT:
+	case pp_i::LEFT:
 		if (input->isPressed(b))
 			moveLeft();
 		break;
-	case Input::RIGHT:
+	case pp_i::RIGHT:
 		if (input->isPressed(b))
 			moveRight();
 		break;
-	case Input::CLICK:
-	case Input::B:
+	case pp_i::CLICK:
+	case pp_i::B:
 		if (input->isPressed(b))
 		{
 			if (isEditing() && _currPos < 2)
@@ -271,7 +271,7 @@ void PlayHigh::button(Input *input, IInput::eButtonType b)
 		}
 		//follow on to exit to ST_MENU ...
 		//not break
-	case Input::X:
+	case pp_i::X:
 		if (input->isPressed(b))
 		{
 			_gd._state = ST_MENU;

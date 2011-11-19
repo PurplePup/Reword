@@ -17,13 +17,13 @@ public:
     static void     InitAudio();
     static IAudio&  GetAudio();
     static void     RegisterAudio(IAudio* audio);
-/*
+
 //INPUT
 public:
     static void     InitInput();
     static IInput&  GetInput();
     static void     RegisterInput(IInput* input);
-
+/*
 //GAMEDATA
 public:
     static void     InitData();

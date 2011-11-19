@@ -35,7 +35,7 @@ public:
     // other processing
     virtual void work(Input* /*input*/, float /*speedFactor*/) = 0;
     // notification of button/input state change
-    virtual void button(Input* /*input*/, IInput::eButtonType /*b*/) = 0;
+    virtual void button(Input* /*input*/, pp_i::eButtonType /*b*/) = 0;
 
 	//virtual functions - dont need to be implemented if not needed
 	////////////////////////////////////////////////////////////////

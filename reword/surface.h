@@ -41,7 +41,7 @@ public:
  //   void drawRect(int x, int y, int w, int h, const SDL_Color& c);
     void drawSolidRect(int x, int y, int w, int h, const SDL_Color& c);
     void drawSolidRectA(int x, int y, int w, int h, const SDL_Color& c, int iAlpha);
-	void PutPixel(int x, int y, Uint32 colour);
+	void putPixel(int x, int y, Uint32 colour);
 
 	static void blit_surface(SDL_Surface* source, SDL_Rect* srcRect, SDL_Surface* dest, int destX, int destY);
 	void blit_surface(SDL_Surface* source, SDL_Rect* srcRect, int destX, int destY );

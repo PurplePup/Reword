@@ -39,7 +39,7 @@ using namespace std;
 
 // Input handler
 
-Input::Input(void) : joy(0)
+Input::Input() : joy(0), _init(false)
 {
     initJoy();
 }
@@ -47,6 +47,11 @@ Input::Input(void) : joy(0)
 Input::~Input()
 {
 	cleanUp();
+}
+
+void Input::init()
+{
+    std::cout << "Standard input initialised" << std::endl;
 }
 
 void Input::cleanUp()
@@ -80,63 +85,63 @@ void Input::initJoy(void)
 }
 
 // Button pressed
-void Input::down(eButtonType b)
+void Input::down(pp_i::eButtonType b)
 {
     buttons[b].down();
 }
 
 // Button released
-void Input::up(eButtonType b)
+void Input::up(pp_i::eButtonType b)
 {
     buttons[b].up();
 }
 
 // Returns true if button is pressed
-bool Input::isPressed(eButtonType b) const
+bool Input::isPressed(pp_i::eButtonType b) const
 {
     return buttons[b].isPressed();
 }
 
 // Translate key to buttons
-Input::eButtonType Input::translate(int key)
+pp_i::eButtonType Input::translate(int key)
 {
-    eButtonType res = NUMBER_OF_BUTTONS;
+    pp_i::eButtonType res = pp_i::NUMBER_OF_BUTTONS;
     switch (key)
     {
 #if defined(PANDORA)
-	case SDLK_LEFT:		res = LEFT;break;
-    case SDLK_RIGHT:	res = RIGHT;break;
-    case SDLK_UP:		res = UP;break;
-    case SDLK_DOWN:		res = DOWN;break;
-    case SDLK_HOME:		res = A;break;
-    case SDLK_END:		res = B;break;
-    case SDLK_PAGEDOWN:	res = X;break;
-    case SDLK_PAGEUP:	res = Y;break;
+	case SDLK_LEFT:		res = pp_i::LEFT;break;
+    case SDLK_RIGHT:	res = pp_i::RIGHT;break;
+    case SDLK_UP:		res = pp_i::UP;break;
+    case SDLK_DOWN:		res = pp_i::DOWN;break;
+    case SDLK_HOME:		res = pp_i::A;break;
+    case SDLK_END:		res = pp_i::B;break;
+    case SDLK_PAGEDOWN:	res = pp_i::X;break;
+    case SDLK_PAGEUP:	res = pp_i::Y;break;
     case SDLK_SPACE:	//for kbd
-	case SDLK_LALT:		res = START;break;
+	case SDLK_LALT:		res = pp_i::START;break;
     case SDLK_RETURN:	//for kbd
-	case SDLK_LCTRL:	res = SELECT;break;
-	case SDLK_RSHIFT:	res = L;break;
-	case SDLK_RCTRL:	res = R;break;
-    case SDLK_EQUALS:	res = VOLUP;break;
-    case SDLK_MINUS:	res = VOLDOWN;break;
-    case SDLK_c:		res = CLICK;break;
+	case SDLK_LCTRL:	res = pp_i::SELECT;break;
+	case SDLK_RSHIFT:	res = pp_i::L;break;
+	case SDLK_RCTRL:	res = pp_i::R;break;
+    case SDLK_EQUALS:	res = pp_i::VOLUP;break;
+    case SDLK_MINUS:	res = pp_i::VOLDOWN;break;
+    case SDLK_c:		res = pp_i::CLICK;break;
 #else
-	case SDLK_LEFT:		res = LEFT;break;
-    case SDLK_RIGHT:	res = RIGHT;break;
-    case SDLK_UP:		res = UP;break;
-    case SDLK_DOWN:		res = DOWN;break;
-    case SDLK_a:		res = A;break;
-    case SDLK_b:		res = B;break;
-    case SDLK_x:		res = X;break;
-    case SDLK_y:		res = Y;break;
-    case SDLK_SPACE:	res = START;break;
-    case SDLK_RETURN:	res = SELECT;break;
-	case SDLK_l:		res = L;break;
-	case SDLK_r:		res = R;break;
-    case SDLK_EQUALS:	res = VOLUP;break;
-    case SDLK_MINUS:	res = VOLDOWN;break;
-    case SDLK_c:		res = CLICK;break;
+	case SDLK_LEFT:		res = pp_i::LEFT;break;
+    case SDLK_RIGHT:	res = pp_i::RIGHT;break;
+    case SDLK_UP:		res = pp_i::UP;break;
+    case SDLK_DOWN:		res = pp_i::DOWN;break;
+    case SDLK_a:		res = pp_i::A;break;
+    case SDLK_b:		res = pp_i::B;break;
+    case SDLK_x:		res = pp_i::X;break;
+    case SDLK_y:		res = pp_i::Y;break;
+    case SDLK_SPACE:	res = pp_i::START;break;
+    case SDLK_RETURN:	res = pp_i::SELECT;break;
+	case SDLK_l:		res = pp_i::L;break;
+	case SDLK_r:		res = pp_i::R;break;
+    case SDLK_EQUALS:	res = pp_i::VOLUP;break;
+    case SDLK_MINUS:	res = pp_i::VOLDOWN;break;
+    case SDLK_c:		res = pp_i::CLICK;break;
 #endif
 	default: break;
     }
@@ -146,43 +151,43 @@ Input::eButtonType Input::translate(int key)
 }
 
 // Translate button to key (reverse of normal translate fn)
-int Input::un_translate(eButtonType b)
+int Input::un_translate(pp_i::eButtonType b)
 {
     int key = 0;
     switch (b)
     {
 #if defined(PANDORA)
-	case LEFT:	    	key = SDLK_LEFT;    break;
-    case RIGHT:	        key = SDLK_RIGHT;   break;
-    case UP:		    key = SDLK_UP;      break;
-    case DOWN:		    key = SDLK_DOWN;    break;
-    case A:	    	    key = SDLK_HOME;    break;
-    case B:		        key = SDLK_END;     break;
-    case X:	            key = SDLK_PAGEDOWN;break;
-    case Y:	            key = SDLK_PAGEUP;  break;
-    case START:	        key = SDLK_SPACE;   break;
-    case SELECT:        key = SDLK_RETURN;  break;
-	case L:	            key = SDLK_RSHIFT;  break;
-	case R:         	key = SDLK_RCTRL;   break;
-    case VOLUP:	        key = SDLK_EQUALS;  break;
-    case VOLDOWN:	    key = SDLK_MINUS;   break;
-    case CLICK:	    	key = SDLK_c;       break;
+	case pp_i::LEFT:	        key = SDLK_LEFT;    break;
+    case pp_i::RIGHT:	        key = SDLK_RIGHT;   break;
+    case pp_i::UP:		        key = SDLK_UP;      break;
+    case pp_i::DOWN:		    key = SDLK_DOWN;    break;
+    case pp_i::A:	    	    key = SDLK_HOME;    break;
+    case pp_i::B:		        key = SDLK_END;     break;
+    case pp_i::X:	            key = SDLK_PAGEDOWN;break;
+    case pp_i::Y:	            key = SDLK_PAGEUP;  break;
+    case pp_i::START:	        key = SDLK_SPACE;   break;
+    case pp_i::SELECT:          key = SDLK_RETURN;  break;
+	case pp_i::L:	            key = SDLK_RSHIFT;  break;
+	case pp_i::R:         	    key = SDLK_RCTRL;   break;
+    case pp_i::VOLUP:	        key = SDLK_EQUALS;  break;
+    case pp_i::VOLDOWN:	        key = SDLK_MINUS;   break;
+    case pp_i::CLICK:	    	key = SDLK_c;       break;
 #else
-	case LEFT:  		key = SDLK_LEFT;    break;
-    case RIGHT:	        key = SDLK_RIGHT;   break;
-    case UP:		    key = SDLK_UP;      break;
-    case DOWN:		    key = SDLK_DOWN;    break;
-    case A:		        key = SDLK_a;       break;
-    case B:		        key = SDLK_b;       break;
-    case X:		        key = SDLK_x;       break;
-    case Y:		        key = SDLK_y;       break;
-    case START:	        key = SDLK_SPACE;   break;
-    case SELECT:	    key = SDLK_RETURN;  break;
-	case L:		        key = SDLK_l;       break;
-	case R:		        key = SDLK_r;       break;
-    case VOLUP:	        key = SDLK_EQUALS;  break;
-    case VOLDOWN:   	key = SDLK_MINUS;   break;
-    case CLICK:	    	key = SDLK_c;       break;
+	case pp_i::LEFT:  		    key = SDLK_LEFT;    break;
+    case pp_i::RIGHT:	        key = SDLK_RIGHT;   break;
+    case pp_i::UP:		        key = SDLK_UP;      break;
+    case pp_i::DOWN:		    key = SDLK_DOWN;    break;
+    case pp_i::A:		        key = SDLK_a;       break;
+    case pp_i::B:		        key = SDLK_b;       break;
+    case pp_i::X:		        key = SDLK_x;       break;
+    case pp_i::Y:		        key = SDLK_y;       break;
+    case pp_i::START:	        key = SDLK_SPACE;   break;
+    case pp_i::SELECT:	        key = SDLK_RETURN;  break;
+	case pp_i::L:		        key = SDLK_l;       break;
+	case pp_i::R:		        key = SDLK_r;       break;
+    case pp_i::VOLUP:	        key = SDLK_EQUALS;  break;
+    case pp_i::VOLDOWN:   	    key = SDLK_MINUS;   break;
+    case pp_i::CLICK:	    	key = SDLK_c;       break;
 #endif
 	default: break;
     }
@@ -192,12 +197,12 @@ int Input::un_translate(eButtonType b)
 }
 
 // Returns true if button repeats
-bool Input::repeat(eButtonType b)
+bool Input::repeat(pp_i::eButtonType b)
 {
     return (buttons[b].repeat());
 }
 
-void Input::setRepeat(eButtonType b, Uint32 rate, Uint32 delay)
+void Input::setRepeat(pp_i::eButtonType b, Uint32 rate, Uint32 delay)
 {
 	buttons[b].setRepeat(rate, delay);
 }
@@ -205,7 +210,7 @@ void Input::setRepeat(eButtonType b, Uint32 rate, Uint32 delay)
 void Input::clearRepeat()
 {
 	//default delay and rate to 0 - turn off all ...
-	for (int i=0; i<IInput::NUMBER_OF_BUTTONS; buttons[i++].setRepeat(0, 0))
+	for (int i=0; i<pp_i::NUMBER_OF_BUTTONS; buttons[i++].setRepeat(0, 0))
 		;
 }
 

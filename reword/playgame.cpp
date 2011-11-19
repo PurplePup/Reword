@@ -79,7 +79,7 @@ PlayGame::PlayGame(GameData& gd) : _gd(gd), _pPopup(NULL), _play(NULL)
 #ifdef _DEBUG
 	_dbg_display = false;
 #endif
-	_inputL  = _inputR = false;	//keys pressed + stick click to exit game
+	_inputL  = _inputR = false;	//keys pressed + stick click (GP2X) to exit game
 	_running = false;	//not init yet
 	_init = false;		//ditto
 	_bAbort = false;	//until L+R+CLICK which exits game to hiscore if needed or to menu
@@ -88,12 +88,17 @@ PlayGame::PlayGame(GameData& gd) : _gd(gd), _pPopup(NULL), _play(NULL)
 	statePush(PG_PLAY);		//also sets default to PG_PLAY
 }
 
+PlayGame::~PlayGame()
+{
+    stopCountdown();
+    delete _pPopup;
+    delete _play;
+}
+
 void PlayGame::init(Input *input)
 {
 	//fade out any menu music (but only if no game music still playing)
 	//Game music handled seperately froim in-game music (mp3 dir etc ?)
-//	Audio * pAudio = Audio::instance();
-//	if (pAudio && pAudio->isPlayingMusic()==false)
     if (Locator::GetAudio().isPlayingMusic()==false)
 		Mix_FadeOutMusic(3000);
 
@@ -106,12 +111,12 @@ void PlayGame::init(Input *input)
     _nWordBoxNeededOffset = ((_gd._boxes.tileCount()/4)*3); //4 blocks.. 4th block
 
 	//set the repeat of the keys required
-	input->setRepeat(IInput::UP, 250, 250);		//button, rate, delay
-	input->setRepeat(IInput::DOWN, 250, 250);
-	input->setRepeat(IInput::LEFT, 250, 250);
-	input->setRepeat(IInput::RIGHT, 250, 250);
+	input->setRepeat(pp_i::UP, 250, 250);		//button, rate, delay
+	input->setRepeat(pp_i::DOWN, 250, 250);
+	input->setRepeat(pp_i::LEFT, 250, 250);
+	input->setRepeat(pp_i::RIGHT, 250, 250);
 
-    //[MENU] shows in top left (unless [EXIT} shown)
+    //[MENU] shows in top left (unless [EXIT] shown)
     boost::shared_ptr<Sprite> pMenu(new Sprite(RES_BASE + "images/touch_menu.png", 255, 4));
     pMenu->setPos(3, 0);
     pMenu->setTileSize(106, 52, Image::TILE_VERT);
@@ -138,19 +143,9 @@ void PlayGame::init(Input *input)
     Control cNext(pNext, CTRLID_NEXT);
     _controlsPlay.add(cNext);
 
-//##DICT
-//    //dictionary screen buttons - only shown in dict display
-//    boost::shared_ptr<Sprite> pPrev(new Sprite(RES_BASE + "images/touch_prev.png", 255, 4));
-//    pPrev->setPos(3, 0);
-//    pPrev->setTileSize(106, 52, Image::TILE_VERT);
-//    pPrev->setFrameLast();  //unselected
-//    Control cPrev(pPrev, CTRLID_PREV);
-//    _controlsDict.add(cPrev);
-
-//##DICT
-//	//calc number of lines available for displaying dictionary lines
-//	//end of display area minus start of screen lines+title height, div by line height. Minus 1 for a reasonable gap
-//	_lines = ((BG_LINE_BOT - BG_LINE_TOP - _gd._fntMed.height()) / _gd._fntClean.height()) - 1;
+    //bounding rect of [NEXT} button placed over countdown timer
+    //doesn't move so can be cached here
+    _pause_rect = pNext->bounds();
 
 	//need to set the _init and _running flags
 	_init = true;
@@ -169,7 +164,7 @@ void PlayGame::exit(eGameState toState)
 //do not call directly. Use statePush() & statePop()
 void PlayGame::stateFn(eState state)
 {
-    if (_play && _play != this)
+    if (_play)
     {
         delete _play;
         _play = NULL;
@@ -190,13 +185,11 @@ void PlayGame::stateFn(eState state)
 					pTouchFn = &PlayGame::touch_end;
 					break;
 
-//	case PG_DICT:	pRenderFn = &PlayGame::render_dict;
-//					pWorkFn = &PlayGame::work_dict;
-//					pButtonFn = &PlayGame::button_dict;
-//					pTouchFn = &PlayGame::touch_dict;
-//					break;
-    case PG_DICT:   //_play = std::auto_ptr<PlayGameDict>(new PlayGameDict(_gd, _dictWord));
+    case PG_DICT:   {
                     _play = new PlayGameDict(_gd, _dictWord);
+                    Input &i = static_cast<Input&>(Locator::GetInput());
+                    _play->init(&i);
+                    }
                     break;
 
 	case PG_PAUSE:	pRenderFn = &PlayGame::render_pause;
@@ -548,37 +541,6 @@ void PlayGame::render_end(Screen* s)
 	}
 }
 
-//void PlayGame::render_dict(Screen* s)
-//{
-//	_gd._menubg.blitTo( s );
-//
-//	_roundDict->draw(s);
-//
-//	_gd._fntClean.put_text(s, BG_LINE_TOP, "Definition:", GREY_COLOUR, true);
-//
-//	//draw the dictionary text here... previously split into vector string "lines"
-//	int yy = BG_LINE_TOP + _gd._fntClean.height() +
-//			(((int)_dictDef.size() > _lines)?0:(((_lines-(int)_dictDef.size())/2)*_gd._fntClean.height()));
-//	std::vector<std::string>::const_iterator it = _dictDef.begin() + _dictLine;	//add offset
-//	int lines = 0;
-//	while (it != _dictDef.end())
-//	{
-//		_gd._fntClean.put_text(s, yy, (*it).c_str(), BLACK_COLOUR, false);
-//		lines++;
-//		yy+=_gd._fntClean.height();
-//		if (lines >= _lines) break;
-//		++it;
-//	}
-//
-//	_gd._arrowUp.draw(s);		//only if set visible (more lines than screen shows)
-//	_gd._arrowDown.draw(s);		//..
-//
-//	int helpYpos = BG_LINE_BOT+((SCREEN_HEIGHT-BG_LINE_BOT-_gd._fntClean.height())/2);
-//	_gd._fntClean.put_text(s, helpYpos, "Press Y or CLICK to continue", PURPLE_COLOUR, true);
-//
-//	_controlsDict.render(s);
-//}
-
 void PlayGame::render_pause(Screen* s)
 {
 	const SDL_Colour c = BLACK_COLOUR;
@@ -604,7 +566,7 @@ void PlayGame::work(Input* input, float speedFactor)
         _play->work(input, speedFactor);
         return;
     }
-    	//depending on state, call the function pointer of the
+    //depending on state, call the function pointer of the
 	//correctly mapped work function
 
 	(*this.*pWorkFn)(input, speedFactor);
@@ -612,6 +574,8 @@ void PlayGame::work(Input* input, float speedFactor)
 	//handle popup menu on top of curr screen
 	if (_pPopup)
         work_popup(input, speedFactor);
+
+    _controlsPlay.work(input, speedFactor);
 }
 
 
@@ -621,10 +585,10 @@ void PlayGame::work_play(Input* input, float speedFactor)
 	//if a key is pressed and the interval has expired, process
 	//that button as if pressesd again
 
-    if (input->repeat(IInput::UP))	button(input, Input::UP);
-    if (input->repeat(IInput::DOWN)) button(input, Input::DOWN);
-    if (input->repeat(IInput::LEFT))	button(input, Input::LEFT);
-    if (input->repeat(IInput::RIGHT)) button(input, Input::RIGHT);
+    if (input->repeat(pp_i::UP))	button(input, pp_i::UP);
+    if (input->repeat(pp_i::DOWN))  button(input, pp_i::DOWN);
+    if (input->repeat(pp_i::LEFT))	button(input, pp_i::LEFT);
+    if (input->repeat(pp_i::RIGHT)) button(input, pp_i::RIGHT);
 
 	_round.work();
 	_gd._word_last_pulse.work();
@@ -632,10 +596,10 @@ void PlayGame::work_play(Input* input, float speedFactor)
 	_gd._word_shuffle_pulse.work();
 	_gd._word_try_pulse.work();
 
-// not animated icons so don't need to call work()
+//  audio not animated icons so don't need to call work()
 //	_gd._gamemusic_icon.work();
 
-    _controlsPlay.work(input, speedFactor);
+//    _controlsPlay.work(input, speedFactor);
 
 }
 void PlayGame::work_wait(Input* input, float speedFactor)
@@ -651,27 +615,6 @@ void PlayGame::work_wait(Input* input, float speedFactor)
 void PlayGame::work_end(Input* input, float speedFactor)
 {
 }
-//void PlayGame::work_dict(Input* input, float speedFactor)
-//{
-//	//Do repeat keys...
-//	//if a key is pressed and the interval has expired process
-//	//that button as if pressesd again
-//
-//    if (input->repeat(IInput::UP))	button(input, Input::UP);
-//    if (input->repeat(IInput::DOWN)) button(input, Input::DOWN);
-//    if (input->repeat(IInput::LEFT))	button(input, Input::LEFT);
-//    if (input->repeat(IInput::RIGHT)) button(input, Input::RIGHT);
-//
-//	_roundDict->work();
-//
-//	_gd._arrowUp.setVisible(_dictLine > 0);
-//	_gd._arrowUp.work();
-//	_gd._arrowDown.setVisible(_dictLine < (int)_dictDef.size()-_lines);
-//	_gd._arrowDown.work();
-//
-//    _controlsDict.work(input, speedFactor);
-//
-//}
 void PlayGame::work_pause(Input* input, float speedFactor)
 {
 	_roundPaused->work();
@@ -679,8 +622,9 @@ void PlayGame::work_pause(Input* input, float speedFactor)
 void PlayGame::work_popup(Input* input, float speedFactor)
 {
 	_pPopup->work(input, speedFactor);
+
 	//and still allow the play controls to work during popup
-    _controlsPlay.work(input, speedFactor);
+//    _controlsPlay.work(input, speedFactor);
 }
 
 void PlayGame::startPopup(Input *input)
@@ -696,18 +640,18 @@ void PlayGame::stopPopup()
 	_pPopup = NULL;
 }
 
-void PlayGame::button(Input* input, IInput::eButtonType b)
+void PlayGame::button(Input* input, pp_i::eButtonType b)
 {
 	//first handle any global keys
 	switch (b)
 	{
-	case IInput::L:
+	case pp_i::L:
 		_inputL = input->isPressed(b);
 		break;
-	case IInput::R:
+	case pp_i::R:
 		_inputR = input->isPressed(b);
 		break;
-	case IInput::SELECT:
+	case pp_i::SELECT:
 		if (input->isPressed(b) && (_state != PG_PAUSE))
 		{
 			if (_pPopup)
@@ -716,7 +660,7 @@ void PlayGame::button(Input* input, IInput::eButtonType b)
 				startPopup(input);
 		}
 		break;
-	case IInput::CLICK:
+	case pp_i::CLICK:
 		if (input->isPressed(b))
 		{
 			if (_inputL && _inputR)
@@ -749,38 +693,38 @@ void PlayGame::button(Input* input, IInput::eButtonType b)
 
 }
 
-void PlayGame::button_play(Input* input, IInput::eButtonType b)
+void PlayGame::button_play(Input* input, pp_i::eButtonType b)
 {
 	if (!_waiting.done()) return;	//no user input until finished waiting
 
 	//not waiting so allow button use...
 	switch (b)
 	{
-	case IInput::LEFT:
+	case pp_i::LEFT:
 		if (input->isPressed(b)) _round.cursorPrev();
 		break;
-	case IInput::RIGHT:
+	case pp_i::RIGHT:
 		if (input->isPressed(b)) _round.cursorNext();
 		break;
-	case IInput::UP:
+	case pp_i::UP:
 		if (input->isPressed(b)) _round.cursorUp();
 		break;
-	case IInput::DOWN:
+	case pp_i::DOWN:
 		if (input->isPressed(b)) _round.cursorDown(); //will only go down if letters exist
 		break;
-	case IInput::L:
+	case pp_i::L:
 		if (input->isPressed(b)) commandWordToLast();
 		break;
-	case IInput::R:
+	case pp_i::R:
 		if (input->isPressed(b)) commandWordToLast();
 		break;
-	case IInput::A:
+	case pp_i::A:
 		if (input->isPressed(b))
 		{
 			commandJumbleWord();
 		}
 		break;
-	case IInput::B:
+	case pp_i::B:
 		if (input->isPressed(b))
 		{
 			//user still in play so select curr letter
@@ -795,34 +739,34 @@ void PlayGame::button_play(Input* input, IInput::eButtonType b)
 //			_round.cursorNext();	//dont use as it confuses player (well me anyway)
 		}
 		break;
-	case IInput::START:
+	case pp_i::START:
 		if (input->isPressed(b)) doPauseGame();
 		break;
-	case IInput::Y:
+	case pp_i::Y:
 		if (input->isPressed(b)) commandClearAllToTop();
 		break;
-	case IInput::X:
+	case pp_i::X:
 		if (input->isPressed(b)) commandTryWord();
 		break;
 
 	default:break;
 	}
 }
-void PlayGame::button_wait(Input* input, IInput::eButtonType b)
+void PlayGame::button_wait(Input* input, pp_i::eButtonType b)
 {
 	//same as play state
 	button_play(input, b);
 }
-void PlayGame::button_end(Input* input, IInput::eButtonType b)
+void PlayGame::button_end(Input* input, pp_i::eButtonType b)
 {
 	//in end state, not waiting so allow button use...
 	switch (b)
 	{
-	case IInput::B:
+	case pp_i::B:
 		if (input->isPressed(b))
 			doMoveOn();
 		break;
-	case IInput::LEFT:
+	case pp_i::LEFT:
 		if (input->isPressed(b))
 		{
 			do {	//repeat jump left if finds a gap (missing 3, 4, 5 letter word)
@@ -831,7 +775,7 @@ void PlayGame::button_end(Input* input, IInput::eButtonType b)
 			if (_yyWordHi > _gd._words.wordsOfLength(_xxWordHi)-1) _yyWordHi = _gd._words.wordsOfLength(_xxWordHi)-1;
 		}
 		break;
-	case IInput::RIGHT:
+	case pp_i::RIGHT:
 		if (input->isPressed(b))
 		{
 			do {	//repeat jump right if finds a gap (missing 3, 4, 5 letter word)
@@ -840,21 +784,21 @@ void PlayGame::button_end(Input* input, IInput::eButtonType b)
 			if (_yyWordHi > _gd._words.wordsOfLength(_xxWordHi)-1) _yyWordHi = _gd._words.wordsOfLength(_xxWordHi)-1;
 		}
 		break;
-	case IInput::UP:
+	case pp_i::UP:
 		if (input->isPressed(b))
 		{
 			if (_yyWordHi-1 < 0) _yyWordHi = _gd._words.wordsOfLength(_xxWordHi)-1; else --_yyWordHi;
 		}
 		break;
-	case IInput::DOWN:
+	case pp_i::DOWN:
 		if (input->isPressed(b))
 		{
 			if (_yyWordHi+1 > _gd._words.wordsOfLength(_xxWordHi)-1) _yyWordHi = 0; else ++_yyWordHi;
 		}
 		break;
 
-	case IInput::Y:
-	case IInput::CLICK:
+	case pp_i::Y:
+	case pp_i::CLICK:
 //		if (!_bAbort && //make sure global L+R+Click not pressed
 		if (input->isPressed(b))
 		{
@@ -866,50 +810,20 @@ void PlayGame::button_end(Input* input, IInput::eButtonType b)
 	}
 
 }
-//void PlayGame::button_dict(Input* input, IInput::eButtonType b)
-//{
-//	switch (b)
-//	{
-//	case IInput::UP:
-//		if (input->isPressed(b))
-//			//move the _dictLine offset var up a line
-//			scrollDictDown();
-//		break;
-//	case IInput::DOWN:
-//		if (input->isPressed(b))
-//			//move the _dictLine offset var down a line
-//			scrollDictUp();
-//		break;
-//	case IInput::Y:
-//	case IInput::CLICK:
-//		if (input->isPressed(b)) doDictionary();
-//		break;
-//
-//	default:break;
-//	}
-//}
-//void PlayGame::scrollDictUp()
-//{
-//	if ((int)_dictDef.size()>_lines && _dictLine < (int)_dictDef.size()-_lines) ++_dictLine;
-//}
-//void PlayGame::scrollDictDown()
-//{
-//	if ((int)_dictDef.size()>_lines && _dictLine > 0) --_dictLine;
-//}
 
-void PlayGame::button_pause(Input* input, IInput::eButtonType b)
+void PlayGame::button_pause(Input* input, pp_i::eButtonType b)
 {
 	switch (b)
 	{
-	case IInput::START:
-	case IInput::B:
-		if (input->isPressed(b)) doPauseGame();	//will un-pause as it's in pause mode
+	case pp_i::START:
+	case pp_i::B:
+		if (input->isPressed(b)) doPauseGame();	//will un-pause if it's in pause mode
 		break;
 
 	default:break;
 	}
 }
-void PlayGame::button_popup(Input* input, IInput::eButtonType b)
+void PlayGame::button_popup(Input* input, pp_i::eButtonType b)
 {
 	_pPopup->button(input, b);
 	handlePopup();
@@ -968,6 +882,7 @@ bool PlayGame::touch_default(const Point &pt)
 bool PlayGame::touch_play(const Point &pt)
 {
     _controlsPlay.touched(pt);    //needed to highlight a touched control
+
 	if (_round.cursorAt(pt))
 	{
 		if (_round.cursorIsTop())
@@ -1001,8 +916,11 @@ bool PlayGame::touch_play(const Point &pt)
     {
         _gd._options._bMusic = !_gd._options._bMusic;
         _gd._gamemusic_icon.setFrame(_gd._options._bMusic?0:1);    //first frame (on) or second frame (off)
-//        Audio::instance()->pushPauseTrack();
         Locator::GetAudio().pushPauseTrack();
+    }
+    else if (_pause_rect.contains(pt))
+    {
+        doPauseGame();
     }
 	else
 		if (!_doubleClick.done())
@@ -1047,39 +965,14 @@ bool PlayGame::touch_end(const Point &pt)
 		}
 	}
 
-	//else somewhere else on screen
-	if (!_doubleClick.done())
-		doMoveOn();
-	else
-		_doubleClick.start(300);
+//	//uncomment to allow click somewhere else on screen to continue
+//	if (!_doubleClick.done())
+//		doMoveOn();
+//	else
+//		_doubleClick.start(300);
 
     return true;
 }
-//bool PlayGame::touch_dict(const Point &pt)
-//{
-//    _controlsDict.touched(pt);    //needed to highlight a touched control
-//	//check if touch scroll arrows
-//	if (_gd._arrowUp.contains(pt))
-//	{
-//		if (_gd._arrowUp.isTouchable())
-//			_gd._arrowUp.startAnim(0, -1, ImageAnim::ANI_ONCE, 40);
-//		scrollDictDown();
-//	}
-//	else if (_gd._arrowDown.contains(pt))
-//	{
-//		if (_gd._arrowDown.isTouchable())
-//			_gd._arrowDown.startAnim(0, -1, ImageAnim::ANI_ONCE, 40);
-//		scrollDictUp();
-//	}
-//	else
-//		if (!_doubleClick.done())
-//			doDictionary();
-//		else
-//			_doubleClick.start(300);
-//
-//    return true;
-//}
-
 
 //releasing 'touch' press
 bool PlayGame::tap(const Point &pt)
@@ -1094,8 +987,8 @@ bool PlayGame::tap(const Point &pt)
     if (_ctrl_id == CTRLID_MENU)
     {
         //need to push a key command instaed of starting as it needs an Input ptr
-//        int key = Input::un_translate(IInput::SELECT);        //##TODO: fix as now not static !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//        pp_g::pushSDL_EventKey(key);
+        int key = Locator::GetInput().un_translate(pp_i::SELECT);
+        pp_g::pushSDL_EventKey(key);
         return true;
     }
     else if (_ctrl_id == CTRLID_NEXT || _ctrl_id == CTRLID_EXIT)
@@ -1108,15 +1001,6 @@ bool PlayGame::tap(const Point &pt)
             return true;
         }
     }
-//##DICT
-//    else if (_ctrl_id == CTRLID_PREV)
-//    {
-//        if (PG_DICT == _state)
-//        {
-//            doDictionary();
-//            return true;
-//        }
-//    }
 
     return false;
 }
@@ -1304,7 +1188,6 @@ void PlayGame::doDictionary()
 	else if (PG_END == _state) 	//fix, was doing dict in PAUSE
 	{
 		//get the word currently highlighted
-//		std::string dictWord, dictDefinition, dictDefLine;
         _dictWord.empty();
 
 		tWordsFoundList::const_iterator it;
@@ -1319,29 +1202,6 @@ void PlayGame::doDictionary()
 			++it;
 		}
 
-//##DICT
-//		//set arrow (scroll positions)
-//		_gd._arrowUp.setPos(SCREEN_WIDTH-_gd._arrowUp.tileW(), BG_LINE_TOP+2);		//positions dont change, just made visible or not if scroll available
-//		_gd._arrowUp.setFrame(_gd._arrowUp.getMaxFrame());			//last (white) frame
-//		_gd._arrowUp.setTouchable(true);	//always touchable even if invisible
-//		_gd._arrowDown.setPos(SCREEN_WIDTH-_gd._arrowDown.tileW(), BG_LINE_BOT-_gd._arrowDown.tileH()-2);
-//		_gd._arrowDown.setFrame(_gd._arrowDown.getMaxFrame());
-//		_gd._arrowDown.setTouchable(true);
-//
-//		//get the dictionary definition into one long string
-//		dictDefinition = _gd._words.getDictForWord(dictWord)._description;
-//		pp_s::trimLeft(dictDefinition, " \t\n\r");	//NOTE need \n\r on GP2X
-//		pp_s::trimRight(dictDefinition, " \t\n\r"); //ditto
-//		if (!dictDefinition.length()) dictDefinition = "** sorry, not defined **";	//blank word - no dictionary entry
-//		//now build definition strings to display (on seperate lines)
-//		_dictLine = 0;	//start on first line
-//		pp_s::buildTextPage(dictDefinition, FONT_CLEAN_MAX, _dictDef);
-//
-//		//prepare roundel class ready for a dictionary display
-//		_roundDict= std::auto_ptr<Roundels>(new Roundels());
-//		_roundDict->setWordCenterHoriz(dictWord, _gd._letters, (BG_LINE_TOP-_gd._letters.tileH())/2, 4);
-//		_roundDict->startMoveFrom(Screen::width(), 0, 10, 50, 18, 0);
-//
 		//display current highlighted word on seperate 'screen'
 		statePush(PG_DICT); //_state = PG_DICT;
 	}

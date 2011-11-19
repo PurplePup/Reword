@@ -74,7 +74,6 @@ private:
 	bool	_loopM;		//loop the movement (default=true), or just once through
 	Uint32	_rateM;		//rate of auto movement change
 	Waiting _waitM;		//movement delay
-	Rect	_bounds;	//sprite bounding rect - for touch support
 	bool	_touchable;
 };
 
