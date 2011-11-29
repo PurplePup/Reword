@@ -16,6 +16,12 @@
 *.plg
 *.depend
 *.layout
+build/
+bin/
+obj/
+work/
+[Dd]ebug/
+[Rr]elease/
 debug-arm
 depend
 depend.bak
@@ -30,11 +36,8 @@ cscope*
 .scon*
 config.py
 .svn
-build/
-bin/
-obj/
-work/
 hiscore.dat
 .quickstate.save
+
 
 

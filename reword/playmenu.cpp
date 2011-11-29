@@ -72,7 +72,7 @@ void PlayMenu::init(Input *input)
     //music on/off icon
 	_gd._gamemusic_icon.setPos(5, 5);
 	_gd._gamemusic_icon.setTouchable(_gd._bTouch);
-	_gd._gamemusic_icon.setFrame(_gd._options._bMusic?0:1);    //first frame (on) or second frame (off)
+	_gd._gamemusic_icon.setFrame(Locator::GetAudio().musicEnabled()?0:1);    //first frame (on) or second frame (off)
 
 	//need to set the _init and _running flags
 	_init = true;
@@ -82,7 +82,7 @@ void PlayMenu::init(Input *input)
 void PlayMenu::startMenuMusic()
 {
 	//play menu music - if not already playing
-	if (_gd._options._bMusic && !Mix_PlayingMusic())
+	if (Locator::GetAudio().musicEnabled() && !Mix_PlayingMusic())
 		Mix_PlayMusic(_gd._musicMenu, -1);	//play 'forever'
 
 }
@@ -214,12 +214,13 @@ bool PlayMenu::touch(const Point &pt)
 		}
 	}
 
-    //game music icon action on press not tap(release)
-    if (_gd._gamemusic_icon.contains(pt))
+    //game music icon action on press, not tap(release)
+    if (_gd._gamemusic_icon.contains(pt) && Locator::GetAudio().musicEnabled())
     {
-        _gd._options._bMusic = !_gd._options._bMusic;
-        _gd._gamemusic_icon.setFrame(_gd._options._bMusic?0:1);    //first frame (on) or second frame (off)
-        if (_gd._options._bMusic)
+        IAudio &a = Locator::GetAudio();
+        a.musicMute(a.musicEnabled());
+        _gd._gamemusic_icon.setFrame(a.musicEnabled()?0:1);    //first frame (on) or second frame (off)
+        if (a.musicEnabled())
             startMenuMusic();
         else
             stopMenuMusic();

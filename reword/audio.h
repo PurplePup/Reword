@@ -15,24 +15,38 @@
 #include <mikmod.h>
 #endif
 
+
 //NOTE : NullAudio and Audio used in a Locator class
 
 //Null audio for disabling audio completely
 class NullAudio : public IAudio
 {
 public:
-	virtual void init(bool bMusic, bool bSfx) { std::cout << "NullAudio (silent) initialised" << std::endl; }
+	virtual void setup(bool bMusic, bool bSfx);
+	virtual void closedown() {}
+
+	virtual int  getVolume() { return 0; }
 	virtual void setVolume(Sint16 newvol, bool test = true) {}
 	virtual void volumeUp() {}
 	virtual void volumeDown() {}
 
+	virtual bool sfxEnabled() { return false; }
+	virtual void sfxMute(bool bMute = true) {}
+    virtual int  getSfxVol() { return 0; }
+    virtual void setSfxVol(Sint16 newvol, bool bTest = true) {}
+
+	virtual bool musicEnabled() { return false; }
+	virtual void musicMute(bool bMute = true) {}
+    virtual int  getMusicVol() { return 0; }
+    virtual void setMusicVol(Sint16 newvol, bool bTest = true) {}
+
+	virtual bool hasMusicTracks() { return false; }
 	virtual void setBaseTrackDir(const std::string &baseMusicDir) {}
 	virtual void startNextTrack() {}
 	virtual void startPrevTrack() {}
 	virtual void startTrack(const std::string &trackName) {}
 	virtual void stopTrack() {}
 	virtual void pauseTrack() {}
-	virtual bool hasMusicTracks() { return false; }
 	virtual bool isPlayingMusic() { return false; }
 	virtual bool isActuallyPlayingMusic() { return false; }
 
@@ -43,17 +57,45 @@ public:
 	virtual void pushStopTrack() {}
 };
 
+//options and settings for audio volume etc
+struct AudioOptions
+{
+    AudioOptions()
+//        : _bMusic(true), _musicVol(50) _bSfx(true), _sfxVol(50)
+    {
+        _bMusic = _bSfx = true;
+        _musicVol = _sfxVol = 50;
+    }
+
+    bool        _bMusic;
+    Sint16		_musicVol;      //music vol
+    bool        _bSfx;
+    Sint16		_sfxVol;        //sfx vol
+};
+
 //Standard audio implementation
 class Audio : public IAudio
 {
 public:
 	Audio();
 	~Audio();
+	virtual void setup(bool bMusic, bool bSfx);
+	virtual void closedown();
 
-	virtual void init(bool bMusic, bool bSfx);
+	virtual int  getVolume();
 	virtual void setVolume(Sint16 newvol, bool test = true);
 	virtual void volumeUp();
 	virtual void volumeDown();
+
+	virtual bool sfxEnabled();
+	virtual void sfxMute(bool bMute = true);
+    virtual int  getSfxVol();
+    virtual void setSfxVol(Sint16 newvol, bool bTest = true);
+
+	virtual bool musicEnabled();
+	virtual void musicMute(bool bMute = true);
+    virtual int  getMusicVol();
+    virtual void setMusicVol(Sint16 newvol, bool bTest = true);
 
 	virtual void setBaseTrackDir(const std::string &baseMusicDir);
 	virtual void startNextTrack();
@@ -72,8 +114,6 @@ public:
 	virtual void pushStopTrack();
 
 protected:
-	static void pushEvent(int evCode);
-
 	void loadTracks(const std::string &baseDir);
 	std::string getNextTrack();
 	std::string getPrevTrack();
@@ -91,17 +131,16 @@ protected:
 
 protected:
 	bool		_init;
-	Sint16		_volume;		//current volume setting (fx and music)
 	Mix_Chunk	*_volTest;
 
-	//music vars
+	//music track vars
 	Mix_Music 	*_musicTrack;
 	int			_lastTrack;
 	std::string _baseTrackDir;
 	std::deque<std::string> _trackList;
 	bool		_bPlayingTrack;		//set true if start playing
-	bool        _bMusic, _bSfx;
 
+    AudioOptions _opt;
 };
 
 #endif //_AUDIO_H

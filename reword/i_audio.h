@@ -7,10 +7,23 @@
 class IAudio
 {
 public:
-	virtual void init(bool bMusic, bool bSfx) = 0;
+	virtual void setup(bool bMusic, bool bSfx) = 0;
+	virtual void closedown() = 0;
+
+	virtual int  getVolume() = 0;
 	virtual void setVolume(Sint16 newvol, bool test = true) = 0;
 	virtual void volumeUp() = 0;
 	virtual void volumeDown() = 0;
+
+	virtual bool sfxEnabled() = 0;
+	virtual void sfxMute(bool bMute = true) = 0;
+    virtual int  getSfxVol() = 0;
+    virtual void setSfxVol(Sint16 newvol, bool bTest = true) = 0;
+
+	virtual bool musicEnabled() = 0;
+	virtual void musicMute(bool bMute = true) = 0;
+    virtual int  getMusicVol() = 0;
+    virtual void setMusicVol(Sint16 newvol, bool bTest = true) = 0;
 
 	virtual void setBaseTrackDir(const std::string &baseMusicDir) = 0;
 	virtual void startNextTrack() = 0;

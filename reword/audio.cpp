@@ -53,28 +53,26 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <dirent.h>		//for dir search for songs...
 #endif
 
-Audio::Audio() : _init(false), _volume(0), _volTest(0), _musicTrack(0), _lastTrack(0), _bPlayingTrack(false)
+
+void NullAudio::setup(bool bMusic, bool bSfx)
+{
+    std::cout << "NullAudio (silent) initialised" << std::endl;
+}
+
+
+Audio::Audio() : _init(false), _volTest(0), _musicTrack(0), _lastTrack(0), _bPlayingTrack(false)
 {
 	_baseTrackDir = RES_BASE + "music";
 }
 
 Audio::~Audio()
 {
-	if (_volTest)
-		Mix_FreeChunk(_volTest);
-
-	if (_init)
-    {
-        stopTrack();
-        Mix_CloseAudio();
-	}
+    closedown();
 }
 
-void Audio::init(bool bMusic, bool bSfx)
+void Audio::setup(bool bMusic, bool bSfx)
 {
 	if (_init) return;
-	_bMusic = bMusic;
-	_bSfx = bSfx;
 
 	//open audio with chunksize of 128 for gp2x, as smaller this is,
 	//the more often the sound hooks will be called, reducing lag
@@ -88,22 +86,47 @@ void Audio::init(bool bMusic, bool bSfx)
 	_volTest = Mix_LoadWAV(std::string(RES_BASE + "sounds/ping.wav").c_str()); //also used in game
 	setVolume((MIX_MAX_VOLUME / 2), false); //no test sound
 
+	_opt._bMusic = bMusic;
+	_opt._bSfx = bSfx;
+
 //#ifdef _USE_MIKMOD
-//    MikMod_RegisterAllDrivers();
-//    MikMod_RegisterAllLoaders();
-//    md_mode |= DMODE_SOFT_MUSIC;
-//    if(MikMod_Init(""))
+//    if (_gd->_options._bMusic)
 //    {
-//    	//setLastError("Warning: Couldn't init MikMod audio\nReason: %s\n");
-//        return;	//failed
-//    }
+//      MikMod_RegisterAllDrivers();
+//      MikMod_RegisterAllLoaders();
+//      md_mode |= DMODE_SOFT_MUSIC;
+//      if(MikMod_Init(""))
+//      {
+//    	    //setLastError("Warning: Couldn't init MikMod audio\nReason: %s\n");
+//          return;	//failed
+//      }
+//      std::cout << "Using MikMod audio directly" << std::endl;
+//      modStart();
 //#endif //_USE_MIKMOD
 
-    if (_bMusic)
+    if (bMusic)
         loadTracks(_baseTrackDir);
 
     std::cout << "Standard audio initialised" << std::endl;
 	_init = true;
+}
+
+void Audio::closedown()
+{
+//#ifdef _USE_MIKMOD
+//	if (_bMusic) modStop();
+//#endif
+
+	if (_volTest)
+		Mix_FreeChunk(_volTest);
+
+	if (_init)
+    {
+        stopTrack();
+        Mix_CloseAudio();
+	}
+
+    _init = false;
 }
 
 /*
@@ -138,6 +161,12 @@ static int gp2x_get_volume(void)
 }
 */
 
+int Audio::getVolume()
+{
+    //curr only using single vol level
+    return _opt._sfxVol;
+}
+
 void Audio::setVolume(Sint16 newvol, bool bTest)
 {
 #if defined(WIN32)
@@ -157,22 +186,64 @@ void Audio::setVolume(Sint16 newvol, bool bTest)
 	close(soundDev);
 #endif
 
-	//save curr volume level
-	_volume = newvol;
+    //currently the same vol as overall volume...
+    _opt._sfxVol = _opt._musicVol = newvol;
 
 	//play a test beep/sound at the new volume so player can tell
-	if (bTest && _bSfx) Mix_PlayChannel(-1,_volTest,0);
+	if (bTest && _opt._bSfx) Mix_PlayChannel(-1,_volTest,0);
 
 }
 
 void Audio::volumeUp()
 {
-	setVolume(_volume+=8);
+	setVolume(_opt._sfxVol+=8);
 }
 
 void Audio::volumeDown()
 {
-	setVolume(_volume-=8);
+	setVolume(_opt._sfxVol-=8);
+}
+
+int  Audio::getSfxVol()
+{
+    return _opt._sfxVol;
+}
+
+bool Audio::sfxEnabled()
+{
+    return (_opt._bSfx && _opt._sfxVol > 0);
+}
+
+void Audio::sfxMute(bool bMute)
+{
+    _opt._bSfx = !bMute;
+}
+
+void Audio::setSfxVol(Sint16 newvol, bool bTest)
+{
+    //TODO - set individual sfx vol
+    setVolume(newvol, bTest);
+}
+
+int  Audio::getMusicVol()
+{
+    return _opt._musicVol;
+}
+
+bool Audio::musicEnabled()
+{
+    return (_opt._bMusic && _opt._musicVol > 0);
+}
+
+void Audio::musicMute(bool bMute)
+{
+    _opt._bMusic = !bMute;
+}
+
+void Audio::setMusicVol(Sint16 newvol, bool bTest)
+{
+    //TODO - set individual music vol
+    setVolume(newvol, bTest);
 }
 
 void Audio::setBaseTrackDir(const std::string &baseTrackDir)
@@ -190,35 +261,19 @@ void AudioTrackDone()
 
 void Audio::pushNextTrack()
 {
-	pushEvent(USER_EV_NEXT_TRACK);
+	pp_g::pushSDL_Event(USER_EV_NEXT_TRACK);
 }
 void Audio::pushPrevTrack()
 {
-	pushEvent(USER_EV_PREV_TRACK);
+	pp_g::pushSDL_Event(USER_EV_PREV_TRACK);
 }
 void Audio::pushPauseTrack()
 {
-	pushEvent(USER_EV_PAUSE_TRACK);
+	pp_g::pushSDL_Event(USER_EV_PAUSE_TRACK);
 }
 void Audio::pushStopTrack()
 {
-	pushEvent(USER_EV_STOP_TRACK);
-}
-
-void Audio::pushEvent(int evCode)
-{
-	SDL_Event event;
-	SDL_UserEvent userevent;
-
-	userevent.type = SDL_USEREVENT;
-	userevent.code = evCode;
-	userevent.data1 = NULL;
-	userevent.data2 = NULL;
-
-	event.type = SDL_USEREVENT;
-	event.user = userevent;
-
-	SDL_PushEvent(&event);
+	pp_g::pushSDL_Event(USER_EV_STOP_TRACK);
 }
 
 void Audio::stopTrack()
@@ -241,7 +296,7 @@ void Audio::startTrack(const std::string &trackName)
 {
 	stopTrack();	//stop any existing music
 
-	if (_bMusic && trackName.length() > 0)
+	if (_opt._bMusic && trackName.length() > 0)
 	{
 		printf("Play: %s\n", trackName.c_str());
 		std::string newTrack = _baseTrackDir + "/" + trackName;

@@ -546,6 +546,8 @@ void PlayGame::render_pause(Screen* s)
 	const SDL_Colour c = BLACK_COLOUR;
 	s->drawSolidRect(0,0,s->width(), s->height(), c);
 	_roundPaused->draw(s);
+    _gd._fntClean.put_text(s, (SCREEN_HEIGHT/2) + 30,
+                        "10 second penalty", WHITE_COLOUR, false);
 	return;
 }
 
@@ -912,11 +914,12 @@ bool PlayGame::touch_play(const Point &pt)
 	{
 		commandTryWord();
 	}
-    else if (_gd._gamemusic_icon.contains(pt))
+    else if (_gd._gamemusic_icon.contains(pt) && Locator::GetAudio().musicEnabled())
     {
-        _gd._options._bMusic = !_gd._options._bMusic;
-        _gd._gamemusic_icon.setFrame(_gd._options._bMusic?0:1);    //first frame (on) or second frame (off)
-        Locator::GetAudio().pushPauseTrack();
+        IAudio &a = Locator::GetAudio();
+        a.musicMute(!a.musicEnabled());
+        _gd._gamemusic_icon.setFrame(a.musicEnabled()?0:1);    //first frame (on) or second frame (off)
+        a.pushPauseTrack();
     }
     else if (_pause_rect.contains(pt))
     {
@@ -1434,7 +1437,7 @@ void PlayGame::newLevel()
 	_gd._word_totop_pulse.setFrame(5);
 	_gd._word_shuffle_pulse.setFrame(5);
 	_gd._word_try_pulse.setFrame(5);
-	_gd._gamemusic_icon.setFrame(_gd._options._bMusic?0:1);    //first frame (on) or second frame (off)
+	_gd._gamemusic_icon.setFrame(Locator::GetAudio().musicEnabled()?0:1);    //first frame (on) or second frame (off)
 
     calcArcadeNeededWords();    //arcade mode highlights
 

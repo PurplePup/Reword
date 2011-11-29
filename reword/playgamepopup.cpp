@@ -81,7 +81,7 @@ void PlayGamePopup::init(Input *input)
 	_itemList.clear();
 	_itemList[i=0] = MenuItem(POP_CANCEL, GREEN_COLOUR, "Resume Game", "Continue game");
 	_itemList[++i] = MenuItem(POP_SKIP, ORANGE_COLOUR, "Next word/Level", (_hasMaxWord)?"Move on to next word/level":"You must have a Re-word first!", _hasMaxWord);
-    if (_gd._options._bMusic)
+    if (Locator::GetAudio().musicEnabled())
     {
         bool bIsPlaying = Locator::GetAudio().isPlayingMusic();	//may be playing/fading menu music so uses isPlaying... rather than isActuallyPl...
         bool bHasMusic = Locator::GetAudio().hasMusicTracks();

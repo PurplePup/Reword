@@ -139,8 +139,8 @@ int main(int argc, char* argv[]) // <- this must match exactly, since SDL rewrit
 				<< std::endl
 				<< "  Params:  " << std::endl
 				<< "  -nosound  -  disable all sound (sfx and music)" << std::endl
-				<< "  -nosfx    -  disable sound effects" << std::endl
-				<< "  -nomusic  -  disable music" << std::endl
+				<< "  -nosfx    -  start with mute sound effects" << std::endl
+				<< "  -nomusic  -  start with mute music" << std::endl
 				<< std::endl;
 
         return 0;

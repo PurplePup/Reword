@@ -17,13 +17,6 @@
 #include "score.h"
 #include "sprite.h"
 
-struct GameOptions
-{
-    GameOptions() : _bSfx(true), _bMusic(true) {}
-    bool _bSfx;
-    bool _bMusic;
-};
-
 
 //to persist global data throughout app
 class GameData
@@ -118,8 +111,6 @@ public:
 	int			_current_w;			//used to store screen width
 
 	bool 		_bTouch;			//true if touchscreen/mouse detected
-
-	GameOptions _options;
 
 private:
 	bool		_init;

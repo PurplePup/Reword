@@ -11,6 +11,13 @@
 #include "play.h"	//IPlay interface decl
 #include "gamedata.h"
 
+struct GameOptions
+{
+    GameOptions() : _bSfx(true), _bMusic(true) {}
+    bool _bSfx;
+    bool _bMusic;
+};
+
 class Game : public Error
 {
 public:

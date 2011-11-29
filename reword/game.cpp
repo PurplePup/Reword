@@ -116,7 +116,6 @@ bool Game::init(const GameOptions &options)
 
 	//sanity check
 	assert(false==_init);	//shouldn't be called once initialised successfully
-//	if (_init) return false;
 
     Uint32 init_flags = SDL_INIT_EVERYTHING;
     if (!options._bSfx && !options._bMusic)
@@ -134,14 +133,11 @@ bool Game::init(const GameOptions &options)
 
 	atexit(SDL_Quit);	//auto cleanup, just in case
 
-
-//	Audio *pAudio = Audio::instance();
-//	if (pAudio) pAudio->init(options._bMusic, options._bSfx);
-    if (init_flags && SDL_INIT_AUDIO == 0)
+    if ((init_flags & SDL_INIT_AUDIO) == 0)
         Locator::InitAudio();   //NullAudio
     else
         Locator::RegisterAudio(_audio = new Audio());
-    _audio->init(options._bMusic, options._bSfx);
+    Locator::GetAudio().setup(options._bMusic, options._bSfx);
 
 	_screen  = new Screen(SCREEN_WIDTH, SCREEN_HEIGHT);
 	if (!_screen->initDone())
@@ -179,7 +175,6 @@ bool Game::init(const GameOptions &options)
 	_gd = new GameData();
 	_gd->_current_w = _screen->width();
 	_gd->_current_h = _screen->height();
-    _gd->_options = options;
 
 #if defined(_USE_OGG)
 	//load mp3/ogg menu music
@@ -207,14 +202,6 @@ bool Game::run(void)
 	assert(_init);  //should have called Init() by now
 
 	//call different play classes
-//#ifdef _USE_MIKMOD
-//    if (_gd->_options._bMusic)
-//    {
-//        std::cout << "Using MikMod audio directly" << std::endl;
-//        Locator::GetAudio().modStart();
-//    }
-//#endif
-
 	IPlay *p = 0;
 	bool b = true;
 	while (b &&_gd->_state != ST_EXIT)
@@ -242,9 +229,7 @@ bool Game::run(void)
 		delete p;
 	}
 
-//#ifdef _USE_MIKMOD
-//	if (_gd->_options._bMusic) audio->modStop();
-//#endif
+	std::cout << "Exiting Reword" << std::endl;
 
 	return b;
 }
@@ -264,8 +249,6 @@ bool Game::play(IPlay *p)
 #ifdef GP2X
 	int touchX(0), touchY(0);
 #endif
-
-//	Audio *audio = Audio::getPtr();
 
 /*	//tinkering... Fixed interval time-based animation variables
 	double lastFrameTime = SDL_GetTicks();//0.0;
@@ -370,10 +353,10 @@ bool Game::play(IPlay *p)
 						}
 
 						if (pp_i::VOLUP == b)
-							_audio->volumeUp();
+							Locator::GetAudio().volumeUp();
 						else
 							if (pp_i::VOLDOWN == b)
-								_audio->volumeDown();
+								Locator::GetAudio().volumeDown();
 
 					}
 					break;
@@ -387,10 +370,10 @@ bool Game::play(IPlay *p)
 						p->button(_input, b);
 
 						if (pp_i::VOLUP == b)
-							_audio->volumeUp();
+							Locator::GetAudio().volumeUp();
 						else
 							if (pp_i::VOLDOWN == b)
-								_audio->volumeDown();
+								Locator::GetAudio().volumeDown();
 					}
 					break;
 
@@ -429,16 +412,16 @@ bool Game::play(IPlay *p)
 							switch (event.user.code)
 							{
 							case USER_EV_STOP_TRACK:
-								_audio->stopTrack();
+								Locator::GetAudio().stopTrack();
 								break;
 							case USER_EV_NEXT_TRACK:
-								_audio->startNextTrack();
+								Locator::GetAudio().startNextTrack();
 								break;
 							case USER_EV_PREV_TRACK:
-								_audio->startPrevTrack();
+								Locator::GetAudio().startPrevTrack();
 								break;
                             case USER_EV_PAUSE_TRACK:
-                                _audio->pauseTrack();
+                                Locator::GetAudio().pauseTrack();
                                 break;
 /*							case USER_EV_SAVE_STATE:
 								_gd->saveQuickState();
@@ -490,7 +473,7 @@ bool Game::play(IPlay *p)
 		if (bCap) fr.capFrames();
 
 //#ifdef _USE_MIKMOD
-//		audio->modUpdate();
+//		Locator::GetAudio().modUpdate();
 //#endif
 
     }	//while p->running()
