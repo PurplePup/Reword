@@ -144,6 +144,7 @@ protected:
 	bool touch_play(const Point &pt);
 	bool touch_end(const Point &pt);
 	bool touch_default(const Point &pt);
+    bool touch_pause(const Point &pt);
 
 	void commandWordToLast();
 	void commandClearAllToTop();

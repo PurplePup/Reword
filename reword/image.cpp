@@ -110,6 +110,24 @@ void Image::createThisFromImage(Image &image, int tileNum /*=-1*/, int iAlpha /*
 	blitFrom(&image, tileNum);	//into "this" newly created 'copy'
 }
 
+//create this image from another image (tile)
+void Image::createThisFromImage(Image &image, Rect &r, int iAlpha /*=-1*/)
+{
+	cleanUp();
+	_init = Surface::create(r.width(), r.height(), iAlpha);
+
+	if (image.surface()->format->Amask && iAlpha!=-1)
+		//source image has alpha so set alpha in this new dest image too
+		SDL_SetAlpha(this->_surface, SDL_SRCALPHA, iAlpha);
+	else
+		//prefill with alpha colour so the final surface contains it where curr see through
+		drawSolidRect(0,0,r.width(), r.height(), ALPHA_COLOUR);
+	setTileSize(r.width(), r.height());
+
+	SDL_Rect sdlR = r.toSDL(); //{r.left(), r.top(), r.width(), r.height()};
+	blit_surface(image._surface, &sdlR, 0,0);   //into "this" newly created 'copy'
+}
+
 /*
 //create this image from another image (tile)
 bool Image::createThisFromImage(Image &image, int tileNum , int iAlpha )

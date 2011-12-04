@@ -51,6 +51,7 @@ PlayMenu::PlayMenu(GameData &gd)  : _gd(gd)
 	_running = false;
 	_item = 0;
 	_nextYpos = 0;
+	_menuRect = Rect(0, BG_LINE_TOP, SCREEN_WIDTH, BG_LINE_BOT);
 }
 
 void PlayMenu::init(Input *input)
@@ -77,6 +78,12 @@ void PlayMenu::init(Input *input)
 	//need to set the _init and _running flags
 	_init = true;
 	_running = true;
+}
+
+void PlayMenu::setMenuArea(const Rect &r)
+{
+    _menuRect = r;
+    recalcItemPositions();
 }
 
 void PlayMenu::startMenuMusic()
@@ -109,35 +116,35 @@ void PlayMenu::render(Screen *s)
 	_gd._fntTiny.put_text_right(s, 5, 0, VERSION_STRING, BLACK_COLOUR); //display vN.N at top right
 
 	int selected = getSelected()._id;
-	int y = MENU_HI_Y+MENU_HI_OFF;
+	int nextY = 0;
 	Rect r;
 	for (tMenuItems::iterator p = _itemList.begin(); p != _itemList.end(); p++)
 	{
 		if (p->_id == selected)
 		{
-			r = _gd._fntMed.put_text(s, y-2, p->_title.c_str(), p->_hoverOn, true);
-			r._min._x -= 30;
-			_gd._star.setPos(r._min._x, y-2);
+            _gd._fntMed.put_text(s, p->_r.left(), p->_r.top(), p->_title.c_str(), p->_hoverOn, true);
+			r = p->_r.addpt(Point(-30,0));
+			_gd._star.setPos(r.left(), r.top()-2);
 
 			//show comment for selected item - might be blank
             if (_delayHelp.done())
             {
-                _gd._fntClean.put_text(s, BG_LINE_BOT - (_gd._fntClean.height()+2) , p->_comment.c_str(), BLACK_COLOUR, false);
+                _gd._fntClean.put_text(s,
+                        BG_LINE_BOT + (((SCREEN_HEIGHT-BG_LINE_BOT-(_gd._fntClean.height()*2))/3)),
+                        p->_comment.c_str(), p->_hoverOn, false);
             }
 		}
 		else
 		{
-			r = _gd._fntMed.put_text(s, y, p->_title.c_str(), p->_hoverOff, false);
+            _gd._fntMed.put_text(s, p->_r.left(), p->_r.top(), p->_title.c_str(), p->_hoverOff, false);
 		}
-		// Make the touch area bigger
-		p->_r = r.inset(-5);
-		y += MENU_HI_GAP;
+        nextY = p->_r.bottom();
 	}
-	_nextYpos = y;	//useful for placing help text after items
+	_nextYpos = nextY;	//useful for placing help text after all items drawn
 
 	_gd._star.draw(s);
 
-    int helpYpos = BG_LINE_BOT+((SCREEN_HEIGHT-BG_LINE_BOT-_gd._fntClean.height())/2);
+    int helpYpos = BG_LINE_BOT + (2*( (SCREEN_HEIGHT-BG_LINE_BOT-_gd._fntClean.height())/3 ));
     _gd._fntClean.put_text(s, helpYpos, _help.c_str(), _helpColor, true);
 
 }
@@ -205,7 +212,7 @@ bool PlayMenu::touch(const Point &pt)
     _saveTouchPt._x = _saveTouchPt._y = 0;
 	Uint32 item(0);
 	for (tMenuItems::iterator p = _itemList.begin(); p != _itemList.end(); ++item, ++p) {
-		if (p->_enabled && p->_r.contains(pt))
+		if (p->_enabled && p->_rBox.contains(pt))
 		{
 		    _saveTouchPt = pt;      //so test if release pos is in same menu item
 			_item = item;	        //highlight the touched item
@@ -215,7 +222,7 @@ bool PlayMenu::touch(const Point &pt)
 	}
 
     //game music icon action on press, not tap(release)
-    if (_gd._gamemusic_icon.contains(pt) && Locator::GetAudio().musicEnabled())
+    if (_gd._gamemusic_icon.contains(pt))
     {
         IAudio &a = Locator::GetAudio();
         a.musicMute(a.musicEnabled());
@@ -235,7 +242,7 @@ bool PlayMenu::tap(const Point &pt)
 {
 	Uint32 item(0);
 	for (tMenuItems::iterator p = _itemList.begin(); p != _itemList.end(); ++item, ++p) {
-		if (p->_enabled && p->_r.contains(pt))
+		if (p->_enabled && p->_rBox.contains(pt))
 		{
 		    if (p->_r.contains(_saveTouchPt))   //is same control originally touched (ie not move away to cancel)
                 choose(*p);
@@ -245,20 +252,39 @@ bool PlayMenu::tap(const Point &pt)
 	return false;
 }
 
-void PlayMenu::setTitle(std::string title)
+void PlayMenu::setTitle(const std::string &title)
 {
 	_title.setWordCenterHoriz(title, _gd._letters, (BG_LINE_TOP-_gd._letters.tileH())/2, 2);
 }
 
-void PlayMenu::setHelp(std::string help, SDL_Color c)
+void PlayMenu::setHelp(const std::string &help, SDL_Color c)
 {
 	_help = help;
 	_helpColor = c;
 }
 
+//calc each item pos based on number of curr loaded items and
+//any min/max (top/bot) placing points
+void PlayMenu::recalcItemPositions()
+{
+    const int items = (int)_itemList.size();
+    const int freeHeight = (_menuRect.height()) - (items * _gd._fntMed.height());
+    const int gapHeight = freeHeight / (items + 1);
+    int y = _menuRect.top() + gapHeight;
+	for (int i=0; i<items; i++)
+    {
+        const int len = _gd._fntMed.calc_text_length(_itemList[i]._title.c_str(), false);
+        const int x = (SCREEN_WIDTH-len)/2;
+        _itemList[i]._r = Rect(x, y, x+len, y+_gd._fntMed.height());
+        _itemList[i]._rBox = _itemList[i]._r.inset(-5);
+        y += gapHeight + _gd._fntMed.height();
+    }
+}
+
 Uint32 PlayMenu::addItem(MenuItem mi)
 {
 	_itemList.push_back(mi);
+    recalcItemPositions();
 	return _itemList.size();	//return new no. of items in menu
 }
 

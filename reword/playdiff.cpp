@@ -53,6 +53,9 @@ void PlayDiff::init(Input *input)
 	addItem(MenuItem(DIF_HARD, RED_COLOUR,
 		"Hard", ""));
 	setItem((int)_gd._diffLevel);
+	//limit items to smaller area
+	setMenuArea(Rect(0, BG_LINE_TOP, SCREEN_WIDTH, (int)(BG_LINE_TOP + ((BG_LINE_BOT - BG_LINE_TOP)*0.85))));
+
 	PlayMenu::init(input);
 }
 
@@ -65,28 +68,31 @@ void PlayDiff::choose(MenuItem i)
 
 void PlayDiff::render(Screen *s)
 {
+    //use base class to drawmenu items
 	PlayMenu::render(s);
+
+	//now render helpful messages underneath
 	MenuItem i = getSelected();
 	std::stringstream times;
 	times << "Reword " << ((int)DIF_MAX - i._id)*COUNTDOWN_REWORD << " sec, " <<
 			  "SpeedWord " << ((int)DIF_MAX - i._id)*COUNTDOWN_SPEED6 << ", " <<
 			  "TimeTrial " << ((int)DIF_MAX - i._id)*COUNTDOWN_TIMETRIAL;
 
-	int yy(getNextYPos());
-	int htPlusGap = _gd._fntClean.height() + ( _gd._fntClean.height()/6 );
+	int htAndGap = _gd._fntClean.height() + (_gd._fntClean.height()/4);
+	int yy = BG_LINE_BOT - (htAndGap*2);     //(getNextYPos());
 	switch (i._id)
 	{
 	case DIF_EASY:
-		_gd._fntClean.put_text(s, yy, times.str().c_str(), GREEN_COLOUR, true);
-		_gd._fntClean.put_text(s, yy+htPlusGap, "Only easy words used. Can pause game.", GREEN_COLOUR, true);
+		_gd._fntClean.put_text(s, yy, times.str().c_str(), GREEN_COLOUR, true);     //10 sec pause penalty
+		_gd._fntClean.put_text(s, yy+htAndGap, "Only 'easy' words used. Can pause game.", GREEN_COLOUR, true);
 		break;
 	case DIF_MED:
-		_gd._fntClean.put_text(s, yy, times.str().c_str(), ORANGE_COLOUR, true);
-		_gd._fntClean.put_text(s, yy+htPlusGap, "Also includes easy words. No pause.", ORANGE_COLOUR, true);
+		_gd._fntClean.put_text(s, yy, times.str().c_str(), ORANGE_COLOUR, true);    //15 sec pause penalty
+		_gd._fntClean.put_text(s, yy+htAndGap, "Also includes 'easy' words. Can pause game.", ORANGE_COLOUR, true);
 		break;
 	case DIF_HARD:
 		_gd._fntClean.put_text(s, yy, times.str().c_str(), RED_COLOUR, true);
-		_gd._fntClean.put_text(s, yy+htPlusGap, "Also easy and medium words. No Pause", RED_COLOUR, true);
+		_gd._fntClean.put_text(s, yy+htAndGap, "Also 'easy' and 'medium' words. No Pause", RED_COLOUR, true);
 		break;
 	default:break;
 	}

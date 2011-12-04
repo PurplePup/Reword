@@ -15,7 +15,7 @@ Date:			06 April 2007
 History:		Version	Date		Change
 				-------	----------	--------------------------------
 				0.4.0	11.02.2008	implemented
-				0.5		16.05.2008	Implement PlayMenu base class and touch screen 
+				0.5		16.05.2008	Implement PlayMenu base class and touch screen
 
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by
@@ -46,13 +46,13 @@ void PlayMainMenu::init(Input *input)
 {
 	setTitle("REWORD");
 	setHelp("Press B to select option", GREY_COLOUR);
-	addItem(MenuItem(0, GREEN_COLOUR, "Play", ""));
+	addItem(MenuItem(0, GREEN_COLOUR, "Play", "Go for it"));
 	std::string s = "Difficulty ";
 	s += (_gd._diffLevel==DIF_EASY)?"(easy)":(_gd._diffLevel==DIF_MED)?"(med)":"(hard)";
-	addItem(MenuItem(1, ORANGE_COLOUR, s, ""));
-	addItem(MenuItem(2, BLUE_COLOUR, "Highscores", ""));
-	addItem(MenuItem(3, PURPLE_COLOUR, "Instructions", ""));
-	addItem(MenuItem(4, RED_COLOUR, "Exit", ""));
+	addItem(MenuItem(1, ORANGE_COLOUR, s, "How brave are you feeling?"));
+	addItem(MenuItem(2, BLUE_COLOUR, "Highscores", "Past Heroes"));
+	addItem(MenuItem(3, PURPLE_COLOUR, "Instructions", "How to play"));
+	addItem(MenuItem(4, RED_COLOUR, "Exit", "Quit game"));
 	setItem(_gd._mainmenuoption);
 	PlayMenu::init(input);
 }

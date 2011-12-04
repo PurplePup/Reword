@@ -195,7 +195,7 @@ void PlayGame::stateFn(eState state)
 	case PG_PAUSE:	pRenderFn = &PlayGame::render_pause;
 					pWorkFn = &PlayGame::work_pause;
 					pButtonFn = &PlayGame::button_pause;
-					pTouchFn = &PlayGame::touch_default;
+					pTouchFn = &PlayGame::touch_pause;
 					break;
 //	case PG_PAUSE:	_play = new PlayGamePause(_gd, _dictWord);
 //					break;
@@ -293,12 +293,14 @@ void PlayGame::render_play(Screen* s)
 	const int yo = _yScratchBot + CURSORH + _boxOffsetY;	//start y offset
 	tWordsFoundList::const_iterator it;
 
+    const bool bHighlightAllColumns = foundEnoughWords() && PG_PLAY == _state;
+
 	//[3..], [4...], [5....] and [6.....] letter boxes
 	for (xx=_shortestWordLen; xx<=_longestWordLen; ++xx)	//accross the screen
 	{
 		it = _wordsFound[xx].begin();
 		const int nWords = _gd._words.wordsOfLength(xx);
-		const bool bHighlightWholeColumn = (PG_PLAY == _state && _round.getBottomWordLength() == xx);
+		const bool bHighlightWholeColumn = bHighlightAllColumns || (PG_PLAY == _state && _round.getBottomWordLength() == xx);
 
 		if (nWords)	//column has words
 		{
@@ -328,17 +330,6 @@ void PlayGame::render_play(Screen* s)
 					break;	//out of this n letters loop
 				}
 
-				//draw the box for the word to be displayed in - using a highlighted box if
-				//not in play state and this is the curr word the selection is on.
-//				_gd._boxes.blitTo( s, _boxOffset[xx], boxOffsetY,					//tile 0=3, 1=4, 2=5, 3=6 etc. letter words
-//					(
-//                        ((PG_PLAY != _state && xx == _xxWordHi && yy == _yyWordHi) || bHighlightWholeColumn) ?
-//                            xx+_nWordBoxHighlightOffset :  //xx+(count/4) for n box blocks in boxes.png
-//                            (PG_PLAY == _state && yy < _boxWordNeeded[xx]) ?
-//                                xx+_nWordBoxNeededOffset :
-//                                xx
-//                    )-3 );  //-3 to reset the xx back to 0 as the boxes.png starts at 3 letter tile
-//
 				if (it != _wordsFound[xx].end())
 				{
 					//display short dictionary def
@@ -881,6 +872,13 @@ bool PlayGame::touch_default(const Point &pt)
 {
 	return true;
 }
+
+bool PlayGame::touch_pause(const Point &pt)
+{
+    doPauseGame();
+    return true;
+}
+
 bool PlayGame::touch_play(const Point &pt)
 {
     _controlsPlay.touched(pt);    //needed to highlight a touched control
@@ -1468,10 +1466,10 @@ void PlayGame::calcArcadeNeededWords()
 _debugTotalLetters = nTotalLetters; //for debug display
 
         //2. calc number of letters needed to continue (% based on difficulty)
-        //for easy, need to find 25% of all words, or an all-letter word
-        //for med, need to find 50% of all words, or an all-letter word
-        //for hard, need to find 75% of all words, or an all-letter word
-        const int pc = (DIF_EASY == _gd._diffLevel)?25:(DIF_MED == _gd._diffLevel)?50:75;
+        //for easy, need to find 20% of all words, or an all-letter word
+        //for med, need to find 40% of all words, or an all-letter word
+        //for hard, need to find 60% of all words, or an all-letter word
+        const int pc = (DIF_EASY == _gd._diffLevel)?20:(DIF_MED == _gd._diffLevel)?40:60;
         int needed = (nTotalLetters * ((float)pc/100));
 _debugNeededAll = needed; //for debug display
 

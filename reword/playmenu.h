@@ -20,22 +20,22 @@ struct MenuItem
 	std::string _comment;	//tooltip type help text
 	bool		_enabled;	//greyed out?
 	bool		_highlight;	//set to highlight even when not hover over (eg diff setting prev selected in diff menu)
-	// "Active" dimensions for touch selection.
+
+	// "Active" box dimensions for touch selection.
 	// Should be set by render().
-	Rect		_r;
+	Rect		_r;     //object rect position/size
+	Rect        _rBox;  //box hit test area usually slightly bigger than object
+
 	MenuItem() :
 		_id(-1),
 		_hoverOff(BLACK_COLOUR),
 		_hoverOn(BLACK_COLOUR),
-		_title(""), _comment(""),
-		_enabled(false), _highlight(false),
-		_r(0, 0, 0, 0) {};
+		_enabled(false), _highlight(false) {};
 	MenuItem(int id, SDL_Color colour, std::string title, std::string comment, bool enabled=true) :
 		_id(id),
 		_hoverOff(BLACK_COLOUR), _hoverOn(colour),
 		_title(title), _comment(comment),
-		_enabled(enabled), _highlight(false),
-		_r(0, 0, 0, 0) {};
+		_enabled(enabled), _highlight(false) {};
 
 };
 
@@ -57,8 +57,9 @@ public:
 
     void        startMenuMusic();
     void        stopMenuMusic();
-	void		setTitle(std::string title);
-	void		setHelp(std::string help, SDL_Color c);
+	void		setTitle(const std::string &title);
+	void		setHelp(const std::string &help, SDL_Color c);
+	void        setMenuArea(const Rect &r);
 	Uint32		addItem(MenuItem i);	//returns item number
 	void		setItem(int item);	//sets the current highlighted item
 	MenuItem	getItem(int item);	//gets the ...
@@ -68,6 +69,7 @@ public:
 	GameData &	_gd;			//shared data between screens (play classes)
 
 private:
+    void        recalcItemPositions();
 
 	Roundels	_title;
 	Waiting		_titleW;		//delay between jumbling
@@ -75,6 +77,7 @@ private:
 	SDL_Color	_helpColor;
 	tMenuItems	_itemList;		//list of menu items
 	Uint32		_item;			//current item highlighted
+	Rect        _menuRect;      //area menu items are placed in
 	int			_nextYpos;
 	Point       _saveTouchPt;   //save pt at which touch/press occurred
 	Waiting     _delayHelp;

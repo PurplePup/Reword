@@ -255,7 +255,14 @@ void PlayInst::buildPage(int page)
 			_bCentered = true;
 			break;
 	case 2:strstr <<
-			"During play:\n\n"
+            "Touch screen options:\n\n"
+            "Tap a menu option to select, or tap and hold to display "
+            "helpful messages. Slide away while holding to cancel "
+            "the selection.\n"
+            "Press buttons on screen where given, or anywhere else for "
+            "the default action."
+            "\n\n"
+			"Controls during play:\n\n"
 			"B  -  select a letter\n"
 			"X  -  try the word against dictionary\n"
 			"Y  -  clear the word\n"
@@ -271,36 +278,47 @@ void PlayInst::buildPage(int page)
 			_txtColour = BLACK_COLOUR;
 			break;
 	case 3:	strstr <<	//instructions
-			"There are three game modes to play, with three difficulty levels "
+			"There are four game modes to play, with three difficulty levels "
 			"each. Time allowed and bonuses depend on the difficulty. "
 			"You must find at least one of the maximum length words (a Re-word) "
 			"to progress or get to the next level in each mode. Other, shorter words "
-			"found are a bonus.\n\n"
-			"1) Reword\n"
+			"found are a bonus. Pausing causes time penalty, and not available "
+			"on hardest difficulty.\n\n"
+			"1) Arcade\n"
+			"A quick game, allowing you to progress even if you can't get the "
+			"all-letter word, as long as you get enough other length words shown "
+			"by the highlighted boxes. Longer words for quicker progress."
+			"\n\n"
+			"2) Reword (Original)\n"
 			"Make as many words from the letters given, aiming to use all letters. "
 			"You must make at least one word with all letters (a Re-word) in each "
 			"round to move on to the next round. If all words are found, "
 			"a bonus is given for each second remaining."
 			"\n\n"
-			"2) SpeedWord\n"
+			"3) SpeedWord\n"
 			"You must get a single all-letter (Re-word) word to continue to the "
 			"next round.\nA bonus is given each time a fastest word is achieved."
 			"\n\n"
-			"3) TimeTrial\n"
+			"4) TimeTrial\n"
 			"You must get as many all-letter (Re-word) words as you can in the time "
 			"allowed.\nA bonus is given each time a fastest word is achieved.\n"
 			"Note that the timer will continue to count down even after a word has been "
 			"found. You must move on as quickly as possible for a good score!"
 			"\n\n"
 			"General Info:\n"
-			"Press SELECT or the yellow menu-star in-game icon to access music tracks, "
-			"quick advance and exit options.\n"
+			"Press SELECT or touch Menu button in-game to access music tracks, "
+			"quick advance, save and exit options.\n"
 			;
 			_txtColour = BLACK_COLOUR;
 			break;
 
 	case 4: strstr <<	//scoring
-			"In Reword:\n" <<
+            "In Arcade:\n" <<
+            SCORE_ARCADE << " for enough words to get next level\n" <<
+			SCORE_SECONDS << " * seconds left, if ALL words found\n" <<
+			SCORE_WORD6 << " for each all-letter word found\n" <<
+			SCORE_WORD << " for each smaller letter words\n" <<
+			"\nIn Reword:\n" <<
 			SCORE_BONUS <<" for each level passed\n" <<
 			SCORE_SECONDS << " * seconds left, if ALL words found\n" <<
 			SCORE_WORD6 << " for each all-letter word found\n" <<

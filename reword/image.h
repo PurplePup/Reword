@@ -37,6 +37,7 @@ public:
 	bool initImage(SDL_Surface *newSurface, int iAlpha = -1);
 
 	Image * createImageFromThis(int tileNum, int iAlpha = -1);	//return a new image from a tile in this image
+    void createThisFromImage(Image &image, Rect &r, int iAlpha /*=-1*/);
 	void createThisFromImage(Image &image, int tileNum = -1, int iAlpha = -1);	//create this image using an existing image (tile)
 
 	virtual bool load(std::string fileName, int iAlpha = -1);	//default no alpha

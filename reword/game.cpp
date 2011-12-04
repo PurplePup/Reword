@@ -134,7 +134,7 @@ bool Game::init(const GameOptions &options)
 	atexit(SDL_Quit);	//auto cleanup, just in case
 
     if ((init_flags & SDL_INIT_AUDIO) == 0)
-        Locator::InitAudio();   //NullAudio
+        Locator::InitAudio();   //NullAudioin logs window
     else
         Locator::RegisterAudio(_audio = new Audio());
     Locator::GetAudio().setup(options._bMusic, options._bSfx);

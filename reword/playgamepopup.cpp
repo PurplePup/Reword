@@ -108,16 +108,15 @@ void PlayGamePopup::init(Input *input)
 void PlayGamePopup::render(Screen *s)
 {
 	//draw menu overlay
-	int x = (s->_width - _gd._gamemenu.tileW()) / 2;
-	int y = (s->_height - _gd._gamemenu.tileH()) / 2;
-	_gd._gamemenu.blitTo(s, x, y, 0);
-//	_menubg->blitTo(s, 0, 0, 0);
+	const int x = (s->_width - _gd._gamemenu.tileW()) / 2;
+	const int y = (s->_height - _gd._gamemenu.tileH()) / 2;
+	_menubg->blitTo(s, x, y, 0);
 
 	//calculate best text gap
-	int maxGap = _gd._fntSmall.height()*2; //max gap
+	const int maxGap = _gd._fntSmall.height()*2; //max gap
 	int topGap = _gd._fntSmall.height();
-	int h = _gd._gamemenu.tileH() - (_gd._fntSmall.height()*3) - 10; //10=5pix*2 border
-	int texth = _pItems->size() * _gd._fntSmall.height();
+	const int h = _gd._gamemenu.tileH() - (_gd._fntSmall.height()*3) - 10; //10=5pix*2 border
+	const int texth = _pItems->size() * _gd._fntSmall.height();
 	int gap = (h - texth) / (_pItems->size()-1);
 	if (gap > maxGap)
 	{
@@ -256,25 +255,17 @@ void PlayGamePopup::choose()
 		}
 		if (pItem->_id == POP_TOGGLEMUSIC)
 		{
-//			Audio *p = Audio::getPtr();
-//			if (p)
-			{
-				if (Mix_PlayingMusic())
-					Locator::GetAudio().pushStopTrack();// p->pushStopTrack();
-				else
-					Locator::GetAudio().pushNextTrack();//p->pushNextTrack();
-			}
+            if (Mix_PlayingMusic())
+                Locator::GetAudio().pushStopTrack();
+            else
+                Locator::GetAudio().pushNextTrack();
 		}
 		if (pItem->_id == POP_NEXTTRACK)
 		{
-//			Audio *p = Audio::getPtr();
-//			if (p) p->pushNextTrack();
             Locator::GetAudio().pushNextTrack();
 		}
 		if (pItem->_id == POP_PREVTRACK)
 		{
-//			Audio *p = Audio::getPtr();
-//			if (p) p->pushPrevTrack();
             Locator::GetAudio().pushPrevTrack();
 		}
 
@@ -285,10 +276,8 @@ void PlayGamePopup::choose()
 
 void PlayGamePopup::prepareBackground()
 {
-//	int w = SCREEN_WIDTH; //-(SCREEN_WIDTH/2);
-//	int h = SCREEN_HEIGHT; //-(SCREEN_HEIGHT/2);
-//	_menubg = std::auto_ptr<Image>(new Image(w , h, 220));
-//	_menubg->drawSolidRectA(0, 0, w, h, WHITE_COLOUR, 220 );
+	_menubg = std::auto_ptr<Image>(new Image());
+	_menubg->createThisFromImage(_gd._gamemenu);	//in game popupmenu
 }
 
 int PlayGamePopup::ItemFromId(int id)
