@@ -13,7 +13,7 @@ Date:			06 April 2007
 
 History:		Version	Date		Change
 				-------	----------	--------------------------------
-				0.4.0	25.02.2008	Added game modes - "reword" "speed6" and "time trial"
+				0.4.0	25.02.2008	Added game modes - "reword" "speeder" and "time trial"
  				0.5.0	18.06.2008	Added touch support and some animated touch icons
  				0.5.1	07.10.2008	seperate some gfx to allow diff screen sizes
 
@@ -60,12 +60,14 @@ GameData::GameData() : _bTouch(false),  _init(false)
 
 	bErr |= !_menubg.load(RES_BASE + "images/menubg.png");		//solid background (no alpha)
 	bErr |= !_menubg_plain.load(RES_BASE + "images/menubg_plain.png");
+	bErr |= !_menu_arcade.load(RES_BASE + "images/menu_arcade.png");
 	bErr |= !_menu_reword.load(RES_BASE + "images/menu_reword.png");
-	bErr |= !_menu_speed6.load(RES_BASE + "images/menu_speed6.png");
+	bErr |= !_menu_speeder.load(RES_BASE + "images/menu_speeder.png");
 	bErr |= !_menu_timetrial.load(RES_BASE + "images/menu_timetrial.png");
 	bErr |= !_scorebar.load(RES_BASE + "images/scorebar.png");
+	bErr |= !_game_arcade.load(RES_BASE + "images/game_arcade.png");
 	bErr |= !_game_reword.load(RES_BASE + "images/game_reword.png");
-	bErr |= !_game_speed6.load(RES_BASE + "images/game_speed6.png");
+	bErr |= !_game_speeder.load(RES_BASE + "images/game_speeder.png");
 	bErr |= !_game_timetrial.load(RES_BASE + "images/game_timetrial.png");
 	bErr |= !_gamemenu.load(RES_BASE + "images/popup_menu.png", 200);
     bErr |= !_gamemusic_icon.load(RES_BASE + "images/btn_music.png", 255, 2);        //2 states on/off

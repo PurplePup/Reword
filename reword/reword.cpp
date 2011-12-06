@@ -42,7 +42,7 @@ History:		Version	Date		Change
 										words during play once they know the 6 letter word.
 									Various changes, see other sources and README.txt
 				0.3.1	09.06.2007	Minor fix point release for v0.3
-				0.4.0	17.03.2008	Added speed6 and timetrial modes
+				0.4.0	17.03.2008	Added speeder and timetrial modes
 				0.5.0	18.06.2008	Added touch screen support
 
 Description:	A simple word game where you need to find as many words

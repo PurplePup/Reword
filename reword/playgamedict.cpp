@@ -126,7 +126,7 @@ void PlayGameDict::render(Screen* s)
 	_gd._arrowDown.draw(s);		//..
 
 	int helpYpos = BG_LINE_BOT+((SCREEN_HEIGHT-BG_LINE_BOT-_gd._fntClean.height())/2);
-	_gd._fntClean.put_text(s, helpYpos, "Press Y or CLICK to continue", PURPLE_COLOUR, true);
+	_gd._fntClean.put_text(s, helpYpos, "Press Y or CLICK to continue", GREY_COLOUR, true);
 
 	_controlsDict.render(s);
 }

@@ -13,7 +13,8 @@ Date:			06 April 2007
 
 History:		Version	Date		Change
 				-------	----------	--------------------------------
-				0.4		03.03.2008	New format score file incl. speed6 & TimeTrial
+				0.4		03.03.2008	New format score file incl. speeder & TimeTrial
+				0.6     01.12.2011  Add Arcade mode scoring
 
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by
@@ -56,6 +57,7 @@ void Score::init()
 	memset(&_hiScore[0], 0, sizeof(_hiScore[0])*3);
 	memset(&_hiScoreS6[0], 0, sizeof(_hiScoreS6[0])*3);
 	memset(&_hiScoreTT[0], 0, sizeof(_hiScoreTT[0])*3);
+	memset(&_hiScoreRA[0], 0, sizeof(_hiScoreRA[0])*3);
 
 	int item, diff;
 	for (diff=0; diff<3; ++diff)
@@ -65,6 +67,7 @@ void Score::init()
 			memcpy(_hiScore[diff].level[item].inits, "---\0", 4);
 			memcpy(_hiScoreS6[diff].level[item].inits, "---\0", 4);
 			memcpy(_hiScoreTT[diff].level[item].inits, "---\0", 4);
+			memcpy(_hiScoreRA[diff].level[item].inits, "---\0", 4);
 		}
 	}
 
@@ -105,16 +108,22 @@ Uint32 Score::load(std::string scorefile)
 			//straight dump of all 3 _hiScore entries (see old code in else block)
 			format = in.get();
 			if (in.bad()) return 0; 	//can't read version char - poss corrupt file
-			if (0x01 == format)		//first generation format
+			if (format >= 0x01)		//first generation format
 			{
 				//load a version 0.4 save file
 				for (diff=0; diff<3; ++diff)	//3 levels easy, med, hard
 					in.read(reinterpret_cast<char*>(&_hiScore[diff]), sizeof(_hiScore[0]));
-				//from v0.4, speed6 and TimeTrial included in scores
+				//from v0.4, speeder and TimeTrial included in scores
 				for (diff=0; diff<3; ++diff)
 					in.read(reinterpret_cast<char*>(&_hiScoreS6[diff]), sizeof(_hiScoreS6[0]));
 				for (diff=0; diff<3; ++diff)
 					in.read(reinterpret_cast<char*>(&_hiScoreTT[diff]), sizeof(_hiScoreTT[0]));
+			}
+			if (format >= 0x02)		//2nd generation format
+			{
+				//load arade scores
+				for (diff=0; diff<3; ++diff)	//3 levels easy, med, hard
+					in.read(reinterpret_cast<char*>(&_hiScoreRA[diff]), sizeof(_hiScoreRA[0]));
 			}
 			//else - no other versions needed yet
 		}
@@ -144,6 +153,7 @@ Uint32 Score::load(std::string scorefile)
 		for (tpos=0, p=(unsigned char*)&_hiScore[0]; tpos < (int)sizeof(_hiScore[0])*3; ++tpos) { total += (unsigned int)*p; ++p; }
 		for (tpos=0, p=(unsigned char*)&_hiScoreS6[0]; tpos < (int)sizeof(_hiScoreS6[0])*3; ++tpos) { total += (unsigned int)*p; ++p; }
 		for (tpos=0, p=(unsigned char*)&_hiScoreTT[0]; tpos < (int)sizeof(_hiScoreTT[0])*3; ++tpos) { total += (unsigned int)*p; ++p; }
+		for (tpos=0, p=(unsigned char*)&_hiScoreRA[0]; tpos < (int)sizeof(_hiScoreRA[0])*3; ++tpos) { total += (unsigned int)*p; ++p; }
 	}
 	_seed = total;
 	return total;
@@ -156,18 +166,22 @@ void Score::save(std::string scorefile)
 	std::ofstream out(scorefile.c_str(), std::ios::out|std::ifstream::binary);
 	if (out)
 	{
-	  out.put( 0x00 );	//format: 0x00 byte first denotes >= v0.4 score file
-	  out.put( 0x01 );	//version: 0x01 denotes first generation format
+        out.put( 0x00 );	//format: 0x00 byte first denotes >= v0.4 score file
+        out.put( 0x02 );	//version: 0x02 denotes 2nd generation format
 
-	  int diff;
-	  for (diff=0; diff<3; ++diff)	//3 levels easy, med, hard
-		  out.write(reinterpret_cast<char*>(&_hiScore[diff]), sizeof(_hiScore[0]));		//Reword
+        int diff;
+        for (diff=0; diff<3; ++diff)	//3 levels easy, med, hard
+            out.write(reinterpret_cast<char*>(&_hiScore[diff]), sizeof(_hiScore[0]));		//Reword
 
-	  //from v0.4, speed6 and TimeTrial included in scores
-	  for (diff=0; diff<3; ++diff)
-		  out.write(reinterpret_cast<char*>(&_hiScoreS6[diff]), sizeof(_hiScoreS6[0]));	//Speed6
-	  for (diff=0; diff<3; ++diff)
-		  out.write(reinterpret_cast<char*>(&_hiScoreTT[diff]), sizeof(_hiScoreTT[0]));	//TimeTrial
+        //from v0.4, speeder and TimeTrial included in scores
+        for (diff=0; diff<3; ++diff)
+            out.write(reinterpret_cast<char*>(&_hiScoreS6[diff]), sizeof(_hiScoreS6[0]));	//Speeder
+        for (diff=0; diff<3; ++diff)
+            out.write(reinterpret_cast<char*>(&_hiScoreTT[diff]), sizeof(_hiScoreTT[0]));	//TimeTrial
+
+        //from v0.6, arcade mode
+        for (diff=0; diff<3; ++diff)
+            out.write(reinterpret_cast<char*>(&_hiScoreRA[diff]), sizeof(_hiScoreRA[0]));	//Arcade
 	}
 	else
 	{
@@ -287,9 +301,10 @@ tHiScoreLevels *Score::getLevel(int mode, int diff)
 	if (diff >= DIF_EASY && diff < DIF_MAX) --diff; else diff = 0;
 	switch ((eGameMode)mode)
 	{
-	case GM_SPEED6: 	return &_hiScoreS6[diff];
+	case GM_SPEEDER: 	return &_hiScoreS6[diff];
 	case GM_TIMETRIAL: 	return &_hiScoreTT[diff];
-	case GM_ARCADE:     return &_hiScoreRA[diff];   //##TODO
+	case GM_ARCADE:     return &_hiScoreRA[diff];
+
 	case GM_REWORD:
 	default:
 	 	return &_hiScore[diff];

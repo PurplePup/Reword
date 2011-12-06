@@ -50,12 +50,12 @@ public:
 	Image _menubg_plain;
 	Image _menu_arcade;
 	Image _menu_reword;
-	Image _menu_speed6;
+	Image _menu_speeder;
 	Image _menu_timetrial;
 	Image _scorebar;
 	Image _game_arcade;
 	Image _game_reword;
-	Image _game_speed6;
+	Image _game_speeder;
 	Image _game_timetrial;
 	Image _cursor;
 	Image _letters;

@@ -14,7 +14,7 @@ Date:			06 April 2007
 
 History:		Version	Date		Change
 				-------	----------	--------------------------------
-				0.4		06.03.2008	Added speed6 and timetrial displays and mode logos
+				0.4		06.03.2008	Added speeder and timetrial displays and mode logos
 				0.5		28.05.08	Added touchscreen support
 				0.5.1	08.12.08	Pandora screen size support
 
@@ -96,18 +96,14 @@ void PlayHigh::init(Input *input)
 	int yUsed = (BG_LINE_BOT - BG_LINE_TOP) - (int)(_gd._fntClean.height() * 10.5);
 	_yyGap = yUsed / 11;
 
-	int itemGaps = 5;	//between WWW 00000000 0000w 000s
+	_xDiffLen = _gd._fntClean.calc_text_length("MEDIUM");	//longest of EASY/MEDIUM/HARD
+	_xCharLen = _gd._fntClean.calc_text_length("W");
+
 	_xInitsLen = _gd._fntClean.calc_text_length("WWW");
 	_xScoreLen = _gd._fntClean.calc_text_length("00000000");
 	_xWordsLen = _gd._fntClean.calc_text_length("0000w");
 	_xTimesLen = _gd._fntClean.calc_text_length("000s");
-	int xUsed = _xInitsLen + _xScoreLen + _xWordsLen + _xTimesLen;
-	_xDiffLen = _gd._fntClean.calc_text_length("MEDIUM");	//longest of EASY/MEDIUM/HARD
-	_xCharLen = _gd._fntClean.calc_text_length("W");
-	int maxGap = _gd._fntClean.calc_text_length("XXXXX");
-	_xxGap = (Screen::width() - (_xDiffLen + xUsed)) / itemGaps;
-	if (_xxGap > maxGap) _xxGap = maxGap;	//for smaller screens (GP2X)
-	_xxStart = _xDiffLen + _xxGap;
+	_maxGap    = _gd._fntClean.calc_text_length("XXXXX");
 
 	//need to set the _init and _running flags
 	_init = true;
@@ -131,16 +127,33 @@ void PlayHigh::render(Screen *s)
 
 	_menubg->blitTo( s );
 
-	//draw screen title
+	//draw screen title roundals
 	_title.draw(s);
 
-	char sLetter[2] = {0x00, 0x00};	//"string" to hold editable letters
+	char sLetter[2] = {0x00, 0x00};	//null terminated 'char' string to hold editable letters
 
 	int line = 0;			//'curr' line
 	int yyLine = 0;			//count lines so far
 	int yy = BG_LINE_TOP + _yyGap;	//actual line y pix pos
 
-	_gd._fntClean.put_text(s, (_xxStart - _xDiffLen)/2, yy, _description.c_str(), _diffColour, false);
+    if (_mode > GM_REWORD)  //with time column
+    {
+        const int xUsed = _xDiffLen + _xInitsLen + _xScoreLen + _xWordsLen + _xTimesLen;
+        _xxGap = (Screen::width() - xUsed) / 6; //between "DIFF WWW 00000000 0000w 000s"
+        if (_xxGap > _maxGap) _xxGap = _maxGap;	//for smaller screens (GP2X)
+        const int xDiffTrail = (Screen::width() - xUsed - (_xxGap*6) ) / 2;
+        _xxStart = _xxGap + _xDiffLen + xDiffTrail;
+    }
+    else
+    {
+        const int xUsed = _xDiffLen + _xInitsLen + _xScoreLen + _xWordsLen;
+        _xxGap = (Screen::width() - xUsed) / 5; //between "DIFF WWW 00000000 0000w"
+        if (_xxGap > _maxGap) _xxGap = _maxGap;	//for smaller screens (GP2X)
+        const int xDiffTrail = (Screen::width() - xUsed - (_xxGap*5) ) / 2;
+        _xxStart = _xxGap + _xDiffLen + xDiffTrail;
+    }
+
+	_gd._fntClean.put_text(s, _xxGap, yy, _description.c_str(), _diffColour, false);
 
 	int xx(0);
 	while (yyLine < 10)
@@ -413,11 +426,11 @@ void PlayHigh::prepareBackground()
 
 	switch (_mode)
 	{
-	case GM_ARCADE:		_menubg->blitFrom(&_gd._menu_arcade, -1, x, y); //##TODO
+	case GM_ARCADE:		_menubg->blitFrom(&_gd._menu_arcade, -1, x, y);
 						break;
 	case GM_REWORD:		_menubg->blitFrom(&_gd._menu_reword, -1, x, y);
 						break;
-	case GM_SPEED6:		_menubg->blitFrom(&_gd._menu_speed6, -1, x, y);
+	case GM_SPEEDER:	_menubg->blitFrom(&_gd._menu_speeder, -1, x, y);
 						break;
 	case GM_TIMETRIAL:	_menubg->blitFrom(&_gd._menu_timetrial, -1, x, y);
 						break;

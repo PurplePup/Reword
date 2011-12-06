@@ -75,7 +75,7 @@ void PlayDiff::render(Screen *s)
 	MenuItem i = getSelected();
 	std::stringstream times;
 	times << "Reword " << ((int)DIF_MAX - i._id)*COUNTDOWN_REWORD << " sec, " <<
-			  "SpeedWord " << ((int)DIF_MAX - i._id)*COUNTDOWN_SPEED6 << ", " <<
+			  "Speeder " << ((int)DIF_MAX - i._id)*COUNTDOWN_SPEEDER << ", " <<
 			  "TimeTrial " << ((int)DIF_MAX - i._id)*COUNTDOWN_TIMETRIAL;
 
 	int htAndGap = _gd._fntClean.height() + (_gd._fntClean.height()/4);

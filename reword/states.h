@@ -32,7 +32,7 @@
     //game modes (std, timetrial etc)
 	enum eGameMode { GM_ARCADE,     //Reword but allows continue on partial completion
                      GM_REWORD,     //Classic Reword (must get a long word to continue)
-                     GM_SPEED6,     //Must get a single long word to continue
+                     GM_SPEEDER,    //Must get a single long word to continue
                      GM_TIMETRIAL,  //Get as many single long words before timer runs out
                      GM_MAX };		//GM_MAX only used to calc last entry
 

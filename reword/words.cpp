@@ -383,7 +383,7 @@ bool Words::nextWord(std::string &retln, eGameDiff level,  eGameMode mode, bool 
 					if (mode > GM_REWORD)
 					{
 						//quick and dirty to strip non target length words from those just found
-						//as speed6 and time trial modes only use the higher target words
+						//as speeder and time trial modes only use the higher target words
 						for (int i=0; i<=TARGET_MAX; ++i)
 							if (i != (int)_word._word.length()) _nWords[i] = 0;	//keep selected word count
 					}

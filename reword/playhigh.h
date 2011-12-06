@@ -45,13 +45,14 @@ private:
 	int			_currPos;		//which of the 3 inits you are currently editing
 	int			_yyGap;			//gap between hiscore lines
 	int			_xxGap;			//gap between hiscore items on line
-	int 		_xxStart;		//offset to start items at
+	int 		_xxStart;       //offset to start items at
 	int			_xDiffLen;		//len of difficulty string
 	int			_xCharLen;		//single char length for calc initials input
 	int			_xInitsLen;		//len of inits col
 	int			_xScoreLen;		//len of score col
 	int			_xWordsLen;		// .. words
 	int			_xTimesLen;		// .. times
+	int         _maxGap;
 
 	tHiScoreEntry _curr;		//temp inits during payer editing
 

@@ -78,6 +78,7 @@ PlayGame::PlayGame(GameData& gd) : _gd(gd), _pPopup(NULL), _play(NULL)
 {
 #ifdef _DEBUG
 	_dbg_display = false;
+    _debugTotalLetters = _debugNeededAll = _debugNeededNow = 0;
 #endif
 	_inputL  = _inputR = false;	//keys pressed + stick click (GP2X) to exit game
 	_running = false;	//not init yet
@@ -476,7 +477,7 @@ void PlayGame::render_end(Screen* s)
 		_gd._fntMed.put_text(s, yyReward, "Out of time", RED_COLOUR, false);
 		break;
 
-	case SU_SPEED6:		//Speed 6 mode - a single 6 letter word achieved
+	case SU_SPEEDER:		//Speeder mode - a single 6 letter word achieved
 		if (_fastest)
 		{
 			_gd._fntBig.put_text(s, yyTitle, "FASTEST YET!", GOLD_COLOUR, true);
@@ -1069,7 +1070,7 @@ void PlayGame::handleEvent(SDL_Event &sdlevent)
 				else
 				{
 					//great! at least one 6 letter found so go to next level
-					//If in SPEED6 or TIMETRIAL mode, only one 6 letter word needed to move on...
+					//If in SPEEDER or TIMETRIAL mode, only one 6 letter word needed to move on...
 
 					//fill rest of found words list with words to be found and
 					//display them in diff colour to show player what they missed
@@ -1086,13 +1087,13 @@ void PlayGame::handleEvent(SDL_Event &sdlevent)
 					}
 					else
 					{
-						//it's GM_SPEED6 or GM_TIMETRIAL so add score and any fastest bonus,
+						//it's GM_SPEEDER or GM_TIMETRIAL so add score and any fastest bonus,
 						//then move to next word
 						_gd._score.addCurrScore(SCORE_WORD6);
 						if (_fastest) _gd._score.addCurrScore((maxCountdown()-_fastest)*SCORE_FASTEST);
-						if (GM_SPEED6 == _gd._mode)
+						if (GM_SPEEDER == _gd._mode)
 						{
-							showSuccess(SU_SPEED6);
+							showSuccess(SU_SPEEDER);
 						}
 						else //GM_TIMETRIAL
 						{
@@ -1149,7 +1150,7 @@ void PlayGame::doMoveOn()
 	{
     case SU_ARCADE:                 //Well done, you got enough words to continue
 	case SU_GOT6:					//WELL DONE! - You got the 6
-	case SU_SPEED6:					//or if in Speed6 mode, a 6 entered so move onto next level
+	case SU_SPEEDER:				//or if in Speeder mode, a 6 entered so move onto next level
 	case SU_BONUS:					//BONUS!! - You got all words
 		statePop(); 				//out of PG_END state
 		newLevel();
@@ -1214,7 +1215,7 @@ void PlayGame::doPauseGame()
 	if (PG_PAUSE == _state)
 	{
 		//is paused so unpause
-		statePop(); //_state = _oldState;
+		statePop();
 
 		//penalty for pause, at least 10 seconds used
 		if (_countdown > 10) _countdown-=10;
@@ -1228,13 +1229,14 @@ void PlayGame::doPauseGame()
 	//if not in play mode dont need to pause the game
 	if (PG_PLAY != _state) return;
 
-	//only on easy mode, or at least one 6 letter word found on this level
-	if (DIF_EASY == _gd._diffLevel || _wordsFound[_longestWordLen].size())
+	//only on easy/med mode, or at least one 6 letter word found on this level
+	//or enough letters/words in arcade mode entered.
+	if (_gd._diffLevel < DIF_HARD || foundEnoughWords())
 	{
 		//pause the countdown timer
 		stopCountdown();
 
-		statePush(PG_PAUSE); //_state = PG_PAUSE;
+		statePush(PG_PAUSE);
 
 		//prepare roundel class ready for a pause
 		_roundPaused = std::auto_ptr<Roundels>(new Roundels());
@@ -1319,8 +1321,8 @@ int PlayGame::maxCountdown()
 //#ifndef _DEBUG
 	if (_gd._mode == GM_TIMETRIAL)
 		return ((int)DIF_MAX - _gd._diffLevel)*COUNTDOWN_TIMETRIAL;
-	if (_gd._mode == GM_SPEED6)
-		return ((int)DIF_MAX - _gd._diffLevel)*COUNTDOWN_SPEED6;
+	if (_gd._mode == GM_SPEEDER)
+		return ((int)DIF_MAX - _gd._diffLevel)*COUNTDOWN_SPEEDER;
 	//else its REWORD
 	return ((int)DIF_MAX - _gd._diffLevel)*COUNTDOWN_REWORD;
 //#else
@@ -1346,7 +1348,7 @@ void PlayGame::newLevel()
 	//X pos of scratch area depends on length of word so calc here at each new level/word)
 	_xScratch = (SCREEN_WIDTH - ((_longestWordLen * (CURSORW+2)) -2) ) /2;
 
-	_boxOffsetY = 9;	//default y offset under scratch area - reset by speed6 and timetrial to be slightly lower
+	_boxOffsetY = 9;	//default y offset under scratch area - reset by speeder and timetrial to be slightly lower
 
 	//simple algo for now just using box offset and len - until found boxes wrap around or whatever...
 	int xLen = 0;	//length of all word boxes added together
@@ -1369,7 +1371,7 @@ void PlayGame::newLevel()
 			_boxLength[n] = xLen;
 			nextPos = _boxOffset[n] + _boxLength[n] + xGap;
 		}
-		else	//GM_SPEED6 or GM_TIMETRIAL
+		else	//GM_SPEEDER or GM_TIMETRIAL
 		{
 			//current_w is not supported in my gp2x SDL build, so saved from video setup
 //			const SDL_VideoInfo *pVI = SDL_GetVideoInfo();	//for pVI->current_w
@@ -1395,7 +1397,7 @@ void PlayGame::newLevel()
 	//than having to loop through and blit each box every frame as in prev versions
 	prepareBackground();
 
-	//if in REWORD or SPEED6 then reset the timer. TimeTrial keeps counting down...
+	//if in REWORD or SPEEDER then reset the timer. TimeTrial keeps counting down...
 	if (_gd._mode != GM_TIMETRIAL)
 		_countdown = maxCountdown();	//60 seconds for hard, 120 for med, 180 for easy
 
@@ -1518,15 +1520,15 @@ void PlayGame::tryWord()
 {
 	int wordlen = tryWordAgainstDict();
 
-	 //speed6 and timetrial only need a 6 to continue
-	if (GM_TIMETRIAL == _gd._mode || GM_SPEED6 == _gd._mode)
+	 //speeder and timetrial only need a 6 to continue
+	if (GM_TIMETRIAL == _gd._mode || GM_SPEEDER == _gd._mode)
 	{
 		if (_longestWordLen == wordlen)
 		{
 			pp_g::pushSDL_Event(USER_EV_END_COUNTDOWN);	//pushes end of level
 			return;
 		}
-		else wordlen = -1;	//speed6 or timetrial badWord sound as < 6 letters
+		else wordlen = -1;	//speeder or timetrial badWord sound as < 6 letters
 	}
 
 	//must be GM_ARCADE or GM_REWORD or bad word
@@ -1727,9 +1729,9 @@ void PlayGame::prepareBackground()
 	Image *pImage = 0;
 	switch (_gd._mode)
 	{
-	case GM_ARCADE:		pImage = &_gd._game_arcade;	break;  //##TODO
+	case GM_ARCADE:		pImage = &_gd._game_arcade;	break;
 	case GM_REWORD:		pImage = &_gd._game_reword;	break;
-	case GM_SPEED6:		pImage = &_gd._game_speed6;	break;
+	case GM_SPEEDER:	pImage = &_gd._game_speeder; break;
 	case GM_TIMETRIAL:	pImage = &_gd._game_timetrial; break;
 	default:break;
 	}

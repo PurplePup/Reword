@@ -130,7 +130,7 @@ void PlayMenu::render(Screen *s)
             if (_delayHelp.done())
             {
                 _gd._fntClean.put_text(s,
-                        BG_LINE_BOT + (((SCREEN_HEIGHT-BG_LINE_BOT-(_gd._fntClean.height()*2))/3)),
+                        BG_LINE_BOT + (((SCREEN_HEIGHT-BG_LINE_BOT-(_gd._fntClean.height()*2))/4)),
                         p->_comment.c_str(), p->_hoverOn, false);
             }
 		}
@@ -144,7 +144,7 @@ void PlayMenu::render(Screen *s)
 
 	_gd._star.draw(s);
 
-    int helpYpos = BG_LINE_BOT + (2*( (SCREEN_HEIGHT-BG_LINE_BOT-_gd._fntClean.height())/3 ));
+    int helpYpos = BG_LINE_BOT + (2*( (SCREEN_HEIGHT-BG_LINE_BOT-_gd._fntClean.height())/2.5 ));
     _gd._fntClean.put_text(s, helpYpos, _help.c_str(), _helpColor, true);
 
 }

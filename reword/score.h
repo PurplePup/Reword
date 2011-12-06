@@ -16,7 +16,7 @@ const int SCORE_BONUS = 100;	//given when word level completed
 const int SCORE_SECONDS = 10;	//multiplied by seconds remaining and added to bonus
 const int SCORE_WORD6 = 20;		//for all all-letter letter words
 const int SCORE_WORD = 10;		//for each non all-letter word
-const int SCORE_FASTEST = 2;	//each time a speed6 or TT word is got faster than before
+const int SCORE_FASTEST = 2;	//each time a speeder or TT word is got faster than before
 
 //Make sure it's always the same packing
 //This is not portable over different endian systems but will at least

@@ -27,7 +27,7 @@ const SDL_Color GAMEBG_COLOUR	= {0xF6,0xF6,0xBD,0};	//same as bg on word_btn_xxx
 
 //seconds per diff level ( ie diff medium = 2 so ((diff_max-2)*COUNTDOWN_xxx) )
 const int COUNTDOWN_REWORD		= 60;
-const int COUNTDOWN_SPEED6		= 40;
+const int COUNTDOWN_SPEEDER		= 40;
 const int COUNTDOWN_TIMETRIAL	= 120;
 
 //User defined SDL_Event codes - caught in game.cpp loop
