@@ -64,10 +64,10 @@ int Utils::RandomInt(unsigned int limit)
 }
 */
 
-namespace pp_g	//pp game functions
+namespace ppg	//pp game functions
 {
 
-//push an user event into the SDL event queue
+//push a user event into the SDL event queue
 void pushSDL_Event(int code, void *data1, void *data2)
 {
 	//push event (e.g. "end of level" or other user defined event)
@@ -96,5 +96,5 @@ void pushSDL_EventKey(int key)
 }
 
 
-}	//namespace pp_g
+}	//namespace ppg
 

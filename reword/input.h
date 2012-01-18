@@ -36,13 +36,13 @@ class NullInput : public IInput
 public:
     virtual void init() { std::cout << "NullInput (no control) initialised" << std::endl; }
 	virtual bool initDone() { return true; };
-    virtual pp_i::eButtonType translate(int key) { return pp_i::UP; }
-    virtual int un_translate(pp_i::eButtonType b) { return 0; }
-    virtual void down(pp_i::eButtonType b) {}
-    virtual void up(pp_i::eButtonType b) {}
-    virtual bool isPressed(pp_i::eButtonType b) const { return false; }
-    virtual bool repeat(pp_i::eButtonType b) { return false; }
-	virtual void setRepeat(pp_i::eButtonType b, Uint32 rate, Uint32 delay) {}
+    virtual ppkey::eButtonType translate(int key) { return ppkey::UP; }
+    virtual int un_translate(ppkey::eButtonType b) { return 0; }
+    virtual void down(ppkey::eButtonType b) {}
+    virtual void up(ppkey::eButtonType b) {}
+    virtual bool isPressed(ppkey::eButtonType b) const { return false; }
+    virtual bool repeat(ppkey::eButtonType b) { return false; }
+	virtual void setRepeat(ppkey::eButtonType b, Uint32 rate, Uint32 delay) {}
 	virtual void clearRepeat() {}
 };
 
@@ -54,13 +54,13 @@ public:
 	virtual ~Input();
     virtual void init();
 	virtual bool initDone() { return _init; };
-    virtual pp_i::eButtonType translate(int key);	        // Translate key to button
-    virtual int un_translate(pp_i::eButtonType b);  // Reverse translation (from anywhere)
-    virtual void down(pp_i::eButtonType b);	// Button pressed
-    virtual void up(pp_i::eButtonType b);		// Button released
-    virtual bool isPressed(pp_i::eButtonType b) const;	// Return true if button is pressed
-    virtual bool repeat(pp_i::eButtonType b);	// Returns true if button repeats
-	virtual void setRepeat(pp_i::eButtonType b, Uint32 rate, Uint32 delay);
+    virtual ppkey::eButtonType translate(int key);	        // Translate key to button
+    virtual int un_translate(ppkey::eButtonType b);  // Reverse translation (from anywhere)
+    virtual void down(ppkey::eButtonType b);	// Button pressed
+    virtual void up(ppkey::eButtonType b);		// Button released
+    virtual bool isPressed(ppkey::eButtonType b) const;	// Return true if button is pressed
+    virtual bool repeat(ppkey::eButtonType b);	// Returns true if button repeats
+	virtual void setRepeat(ppkey::eButtonType b, Uint32 rate, Uint32 delay);
 	virtual void clearRepeat();
 
 protected:
@@ -72,7 +72,7 @@ protected:
     SDL_Joystick* joy;
 
     // Button states
-    Button buttons[pp_i::NUMBER_OF_BUTTONS];
+    Button buttons[ppkey::NUMBER_OF_BUTTONS];
 
 	bool _init;
 };

@@ -90,7 +90,7 @@
 #define MENU_HI_OFF		20
 #define FONT_SMALL		20
 #define FONT_MEDIUM		26
-#define FONT_BIG		44
+#define FONT_BIG		34
 #define FONT_TINY		18
 #define FONT_CLEAN		22
 #define FONT_CLEAN_MAX	80
@@ -133,8 +133,8 @@
 #define MENU_HI_OFF		20
 #define FONT_SMALL		20
 #define FONT_MEDIUM		26
-#define FONT_BIG		44
-#define FONT_TINY		18
+#define FONT_BIG		34
+#define FONT_TINY		14
 #define FONT_CLEAN		22
 #define FONT_CLEAN_MAX	80
 #define ROUNDEL_VEL		20

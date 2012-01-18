@@ -48,7 +48,7 @@ int Controls::add(Control &ctrl)
 
 Control * Controls::getControl(int id)
 {
-    //find the control matchng the id and return a ref to it
+    //find the control matchng the id and return a ptr to it
     t_controls::iterator it = _controls.begin();
     t_controls::iterator end = _controls.end();
     for ( ; it != end; ++it)
@@ -56,6 +56,7 @@ Control * Controls::getControl(int id)
         if (it->getID() == id)
             return &(*it);
     }
+    assert(0);
     return 0; //nullptr
 }
 
@@ -63,6 +64,7 @@ Sprite * Controls::getControlSprite(int id)
 {
     Control *pc = getControl(id);
     if (pc) return pc->getSprite();
+    assert(0);
     return 0; //nullptr
 }
 
@@ -91,7 +93,7 @@ void Controls::work(Input* input, float speedFactor)
     }
 };
 // notification of button/input state change
-void Controls::button(Input* /*input*/, pp_i::eButtonType /*b*/)
+void Controls::button(Input* /*input*/, ppkey::eButtonType /*b*/)
 {
 };
 
@@ -125,27 +127,47 @@ int Controls::tapped(const Point &pt)
         {
             //return the id of the control
             id = it->getID();
+            //loop to end
         }
         else if (it->isPressed()) it->fade();
     }
     return id;
 }
 
-//helper fn to enable or disable a control
-bool Controls::enableControl(bool bEnable, int id)
+//helper fn to show or hide a control
+bool Controls::showControl(bool bShow, int id)
 {
     Sprite *ps = getControlSprite(id);
     if (ps)
     {
-        ps->setVisible(bEnable);
+        ps->setVisible(bShow);
         return true;
     }
-    return false;
+    return false;   //id not found
 }
 
-//enable or disable all controls in one go, with possible exception of a single control
-//so enable all but hide one, or disable all but show one.
-void Controls::enableAllControls(bool bShow /*=true*/, int exceptID /*=0*/)
+//helper fn to show or hide a defined group of controls
+void Controls::showGroup(bool bShow, unsigned int groupMask)
+{
+    t_controls::iterator it = _controls.begin();
+    t_controls::iterator end = _controls.end();
+    for ( ; it != end; ++it)
+    {
+        if (groupMask & it->getGroup())
+        {
+            Sprite *ps = it->getSprite();
+            if (ps)
+            {
+                ps->setVisible(bShow);
+            }
+        }
+    }
+}
+
+//show or hide all controls in one go, with possible exception of a single control
+//so enable all but hide one, or disable all but show one. Useful for [Next] or [Exit]
+//only situations.
+void Controls::showAllControls(bool bShow /*=true*/, int exceptID /*=0*/)
 {
     t_controls::iterator it = _controls.begin();
     t_controls::iterator end = _controls.end();
@@ -163,3 +185,25 @@ void Controls::enableAllControls(bool bShow /*=true*/, int exceptID /*=0*/)
         }
     }
 }
+
+//show 'disabled' frame (0) or default active frame (last)
+bool Controls::enableControl(bool bEnable, int id)
+{
+    Sprite *ps = getControlSprite(id);
+    if (ps)
+    {
+        if (bEnable)
+        {
+            ps->setTouchable(true);
+            ps->setFrameLast();
+        }
+        else
+        {
+            ps->setTouchable(false);
+            ps->setFrame(0);
+        }
+        return true;
+    }
+    return false;   //id not found
+}
+

@@ -41,7 +41,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 //#include <iostream>
 //#include <cerrno>
 
-namespace pp_s
+namespace pptxt
 {
 
 void makeUpper(std::string &s)
@@ -128,8 +128,8 @@ bool splitKeyValuePair(const std::string &line, std::string &key, std::string &v
 		if (pos < line.length())
 			value = line.substr(pos+1);
 		std::string whitespace("\"= \r\n\t\'");
-		pp_s::trim(key, whitespace);
-		pp_s::trim(value, whitespace);
+		pptxt::trim(key, whitespace);
+		pptxt::trim(value, whitespace);
 		//std::cout << "split '" << line << "' into : '" << key << "' and '" << value << "'" << std::endl;		//##DEBUG
 		return true;
 	}
@@ -137,5 +137,5 @@ bool splitKeyValuePair(const std::string &line, std::string &key, std::string &v
 	return false;
 }
 
-} //namespace pp_s
+} //namespace pptxt
 

@@ -23,7 +23,11 @@ class IPlay
 public:
 	enum eSuccess { SU_NONE=0, SU_ARCADE, SU_GOT6, SU_BONUS, SU_BADLUCK, SU_SPEEDER, SU_TIMETRIAL, SU_GAMEOVER };
 	enum eState { PG_PLAY=0, PG_WAIT, PG_END, PG_DICT, PG_PAUSE }; //, PG_POPUP };
-	enum eControls { CTRLID_NONE = 0, CTRLID_MENU, CTRLID_NEXT, CTRLID_PREV, CTRLID_EXIT };
+	enum eControls { CTRLID_NONE = 0,
+            CTRLID_MENU, CTRLID_NEXT, CTRLID_BACK, CTRLID_EXIT, //[Next] square buttons
+            CTRLID_SHUFFLE, CTRLID_TRYWORD, CTRLID_TOTOP, CTRLID_LAST,   //(?) round buttons etc
+            CTRLID_SCROLL_UP, CTRLID_SCROLL_DOWN, CTRLID_SCROLL_LEFT, CTRLID_SCROLL_RIGHT   //(<) scroll bar buttons
+         };
 
 	//pure virtual functions - must be implemented
 	///////////////////////////////////////////////
@@ -35,7 +39,7 @@ public:
     // other processing
     virtual void work(Input* /*input*/, float /*speedFactor*/) = 0;
     // notification of button/input state change
-    virtual void button(Input* /*input*/, pp_i::eButtonType /*b*/) = 0;
+    virtual void button(Input* /*input*/, ppkey::eButtonType /*b*/) = 0;
 
 	//virtual functions - dont need to be implemented if not needed
 	////////////////////////////////////////////////////////////////

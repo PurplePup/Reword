@@ -86,7 +86,7 @@ public:
     virtual void init(Input *input);
     virtual void render(Screen* s);
     virtual void work(Input* input, float speedFactor);
-    virtual void button(Input* input, pp_i::eButtonType b);
+    virtual void button(Input* input, ppkey::eButtonType b);
     virtual bool touch(const Point &pt);   //press
     virtual bool tap(const Point &pt);     //release
 
@@ -135,11 +135,11 @@ protected:
     void work_pause(Input*, float);
     void work_popup(Input*, float);
 
-    void button_play(Input*, pp_i::eButtonType);
-    void button_wait(Input*, pp_i::eButtonType);
-    void button_end(Input*, pp_i::eButtonType);
-    void button_pause(Input*, pp_i::eButtonType);
-    void button_popup(Input*, pp_i::eButtonType);
+    void button_play(Input*, ppkey::eButtonType);
+    void button_wait(Input*, ppkey::eButtonType);
+    void button_end(Input*, ppkey::eButtonType);
+    void button_pause(Input*, ppkey::eButtonType);
+    void button_popup(Input*, ppkey::eButtonType);
 
 	bool touch_play(const Point &pt);
 	bool touch_end(const Point &pt);
@@ -151,6 +151,9 @@ protected:
 	void commandJumbleWord();
 	void commandTryWord();
 
+    void slideRoundButtonsIn();
+    void slideRoundButtonsOut();
+
 private:
 	GameData &	_gd;			//shared data between screens (play classes)
 	std::auto_ptr<Image> _gamebg;
@@ -158,9 +161,10 @@ private:
 	//function pointers for render(), work(), button() etc
 	void (PlayGame::*pRenderFn)(Screen*);
     void (PlayGame::*pWorkFn)(Input*, float);
-	void (PlayGame::*pButtonFn)(Input*, pp_i::eButtonType);
+	void (PlayGame::*pButtonFn)(Input*, ppkey::eButtonType);
 	bool (PlayGame::*pTouchFn)(const Point &pt);
 
+    enum { CTRLGRP_BUTTONS = 1, CTRLGRP_LETTERS=2 };    //...4,8,16 etc
     Controls    _controlsPlay;
 
 	std::string _tmpStr;		//used in render()
@@ -184,6 +188,7 @@ private:
 	int _boxOffset[TARGET_MAX+1];	//pos across screen for found word boxes
 	int _boxLength[TARGET_MAX+1];	//and pixel length of each box displayed (for touch support)
     int _boxWordNeeded[TARGET_MAX+1];   //number of required/needed words in a column (in Arcade mode)
+    int _boxStartYCursor[TARGET_MAX+1]; //offset into column word list so we can scroll down list
 
     int _nWordBoxHighlightOffset;   //highlighting a word (for dictionary)
     int _nWordBoxEmptyOffset;       //column with no words
@@ -192,6 +197,9 @@ private:
 	int	_xScratch;		//positions for roundels, change depending on platform
 	int _yScratchTop;
 	int _yScratchBot;
+
+    //round action buttonpositions next to main letters
+   	int _posRButtonLeft, _posRButtonRight, _posRButtonTop, _posRButtonBot;
 
 	int _gamemenu_x, _gamemenu_icon_x, _gamemusic_icon_x, _score0_x, _words0_x, _countdown0_x;
 	int _gamemenu_y, _gamemenu_icon_y, _gamemusic_icon_y, _score0_y, _words0_y, _countdown0_y;
@@ -218,7 +226,6 @@ private:
 	Waiting		_waiting;		//for PG_WAIT state, wait before continuing (after level finished)
 	Waiting		_doubleClick;
 	int			_randomTitle;
-	int         _ctrl_id;       //id of pressed control
 	Rect        _pause_rect;
 
 	Roundels	_round;			//for roundel game letter sprites

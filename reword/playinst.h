@@ -9,6 +9,7 @@
 #include "gamedata.h"	//also holds constants and stuff
 #include "states.h"
 #include "roundels.h"
+#include "controls.h"
 
 #include <string>
 #include <vector>
@@ -22,15 +23,18 @@ public:
     virtual void init(Input *input);
     virtual void render(Screen* s);
     virtual void work(Input* input, float speedFactor);
-    virtual void button(Input* input, pp_i::eButtonType b);
+    virtual void button(Input* input, ppkey::eButtonType b);
 
 	virtual bool touch(const Point &pt);
+	virtual bool tap(const Point &pt);
 
 protected:
 	void nextPage();
 	void buildPage(int page);
 	void scrollUp();
 	void scrollDown();
+    void updateScrollButtons();
+    void ControlEvent(int event, int control_id);
 
 private:
 
@@ -39,6 +43,7 @@ private:
 	Roundels	_title;
 	Waiting		_titleW;		//delay between jumbling
 	Waiting		_doubleClick;
+	Controls    _controlsInst;
 
 	std::vector<std::string> _inst;
 	int	_instLine;				//offset into _dictDef (ie start at _dictDef.begin+_dictLine)

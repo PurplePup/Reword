@@ -14,8 +14,12 @@ public:
     int add(Control &ctrl);
     Control * getControl(int id);       //IPlay interface
     Sprite *  getControlSprite(int id); //Sprite data
+
+    bool showControl(bool bShow, int id);
+    void showGroup(bool bShow, unsigned int groupMask);
+    void showAllControls(bool bShow = true, int exceptID = 0);
+
     bool enableControl(bool bEnable, int id);
-    void enableAllControls(bool bEnable = true, int exceptID = 0);
 
     //init the level/screen
     virtual void init(Input * input);
@@ -24,7 +28,7 @@ public:
     // other processing
     virtual void work(Input * input, float speedFactor);
     // notification of button/input state change
-    virtual void button(Input * input, pp_i::eButtonType b);
+    virtual void button(Input * input, ppkey::eButtonType b);
 
 	// screen touch (press)
 	virtual bool touch(const Point &pt) { assert(0); }   //do not confuse touched()

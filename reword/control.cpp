@@ -10,7 +10,9 @@ Description:	A class to manage a single on screen control (button)
                 and an id that uniquely identifies the control.
                 This is specific to the style of buttons I'm using which are
                 animated using several frames, with the first frame being the
-                'selected' one.
+                disabled one and the first being the 'selected' or highlighted
+                one. Then each next frame reverts back to the default idle frame:
+                [grey][bright][light][lighter][...][idle]
 
 Author:			Al McLuckie (al-at-purplepup-dot-org)
 
@@ -42,14 +44,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "global.h"
 #include "platform.h"
 
-//Control::Control() :
-//    _id(0), _touchID(0), _tapID(0)
-//{
-//    //ctor
-//}
-
-Control::Control(t_pControl &pCtrl, int id) :
-    _pCtrl(pCtrl), _id(id), _touchID(0), _tapID(0), _bPressed(false)
+Control::Control(t_pControl &pCtrl, int id, unsigned int group) :
+    _pCtrl(pCtrl), _id(id), _touchID(0), _tapID(0), _bPressed(false), _group(group)
 {
     assert (pCtrl.get() != 0);  //must construct with valid control
     assert (id != 0);           //must give it an id (pref unique)
@@ -73,7 +69,7 @@ void Control::work(Input* input, float speedFactor)
 };
 
 // notification of button/input state change
-void Control::button(Input* /*input*/, pp_i::eButtonType /*b*/)
+void Control::button(Input* /*input*/, ppkey::eButtonType /*b*/)
 {
 };
 
@@ -81,12 +77,12 @@ void Control::button(Input* /*input*/, pp_i::eButtonType /*b*/)
 bool Control::touch(const Point &pt)
 {
     //if control has a touch ID, then send it if touched
-    if (_pCtrl->isVisible() && _pCtrl->contains(pt))
+    if (_pCtrl->isVisible() && _pCtrl->isTouchable() && _pCtrl->contains(pt))
     {
-        //set 'active' frame
-        _pCtrl->setFrame(0);
+        //set 'active' highlight frame
+        _pCtrl->setFrame(1);
         _bPressed = true;
-        if (_touchID) pp_g::pushSDL_Event(_touchID, 0 ,0);
+		ppg::pushSDL_Event(USER_EV_CONTROL_TOUCH, reinterpret_cast<void *>(_id), 0);
         return true;
     }
     return false;
@@ -96,10 +92,10 @@ bool Control::touch(const Point &pt)
 bool Control::tap(const Point &pt)
 {
     //if control has a tap ID, then send it when tapped
-    if (_pCtrl->isVisible() && _pCtrl->contains(pt))
+    if (_pCtrl->isVisible() && _pCtrl->isTouchable() && _pCtrl->contains(pt))
     {
         fade();
-        if (_tapID) pp_g::pushSDL_Event(_tapID, 0 ,0);
+		ppg::pushSDL_Event(USER_EV_CONTROL_TAP, reinterpret_cast<void *>(_id), 0);
         return true;
     }
     return false;
@@ -109,5 +105,5 @@ bool Control::tap(const Point &pt)
 void Control::fade()
 {
     _bPressed = false;
-    _pCtrl->startAnim(0, _pCtrl->getMaxFrame(), ImageAnim::ANI_ONCE, 50, 0, 0, 100); //unpress
+    _pCtrl->startAnim(1, _pCtrl->getMaxFrame(), ImageAnim::ANI_ONCE, 50, 0, 0, 100); //unpress
 }

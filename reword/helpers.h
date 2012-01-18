@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace pp_s	//pp string functions
+namespace pptxt	//pp string functions
 {
 
 	//string functions

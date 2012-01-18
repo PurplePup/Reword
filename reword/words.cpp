@@ -110,10 +110,10 @@ bool Words::splitDictLine(std::string text, DictWord &dictword)
         if (end == std::string::npos)
             end = text.length() + 1;
 		newword = text.substr(0,end);
-		pp_s::trim(newword, " \r\n\t\'");
+		pptxt::trim(newword, " \r\n\t\'");
 		switch (count)
 		{
-		case 0:	pp_s::makeUpper(newword);
+		case 0:	pptxt::makeUpper(newword);
 				dictword._word = newword;
 				break;
 		case 1:	dictword._level = atoi(newword.c_str());

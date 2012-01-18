@@ -43,12 +43,13 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "utils.h"
 #include <math.h>
 
+
 ImageAnim::ImageAnim() :
 	Image(), _x(0.0), _y(0.0f),
 	_frame(0), _firstFrame(0), _lastFrame(0), _nFrames(0), _frameDir(1),
 	_repeat(1), _restart(0), _inflateBy(0),
 	_visible(true), _pauseA(true), _rateA(0), _restartA(0),
-	_delayA(0), _bDelayRestart(false)
+	_delayA(0), _bDelayRestart(false), _frameCustom(0)
 {
 	//default _nFrames = 0 so no anim possible, until setMaxFrame called
 }
@@ -58,7 +59,7 @@ ImageAnim::ImageAnim(std::string fileName, bool bAlpha, Uint32 nFrames) :
 	_frame(0), _firstFrame(0), _lastFrame(0), _nFrames(0), _frameDir(1),
 	_repeat(1), _restart(0), _inflateBy(0),
 	_visible(true), _pauseA(true), _rateA(0), _restartA(0),
-	_delayA(0), _bDelayRestart(false)
+	_delayA(0), _bDelayRestart(false), _frameCustom(0)
 {
 	//_nFrames curr set to 0 in case Image class not initialised,
 	//properly (due to bad image file etc), so now if it did init properly,
@@ -71,7 +72,7 @@ ImageAnim::ImageAnim(const Image &img) :
 	_frame(0), _firstFrame(0), _lastFrame(0), _nFrames(0), _frameDir(1),
 	_repeat(1), _restart(0), _inflateBy(0),
 	_visible(true), _pauseA(true), _rateA(0), _restartA(0),
-	_delayA(0), _bDelayRestart(false)
+	_delayA(0), _bDelayRestart(false), _frameCustom(0)
 {
 }
 
@@ -89,6 +90,21 @@ void ImageAnim::setMaxFrame(Uint32 nFrames)
 	_nFrames = tileCount();
 }
 
+void ImageAnim::clearAnimCustom()
+{
+    _animCustom.clear();
+}
+
+bool ImageAnim::addAnimCustom(Uint32 frame)
+{
+    if (frame >= 0 && frame < _nFrames)
+    {
+        _animCustom.push_back(frame);
+        return true;
+    }
+    return false;
+}
+
 //helper fn making anim startup easier
 //params:
 //firstFrame - 0+
@@ -101,8 +117,19 @@ void ImageAnim::setMaxFrame(Uint32 nFrames)
 void ImageAnim::startAnim(int firstFrame_0, int lastFrame_N, eAnim animType,
                           Uint32 rate_ms, Uint32 repeat_N, Uint32 restartIn_ms, Uint32 delayStart_ms)
 {
-	setFrameRange((firstFrame_0<0)?0:firstFrame_0, (lastFrame_N<0)?_nFrames-1:lastFrame_N);
-	setFrame(firstFrame_0);
+    if (animType == ANI_CUSTOM)
+    {
+        if (_animCustom.empty()) return;    //fail - setAnimCustom() not called yet
+
+        _frameCustom = 0;
+        setFrame(_animCustom[_frameCustom]);
+    }
+    else
+    {
+        setFrameRange((firstFrame_0<0)?0:firstFrame_0, (lastFrame_N<0)?_nFrames-1:lastFrame_N);
+        setFrame(firstFrame_0);
+    }
+
 	setAnimRate(rate_ms);
 	setAnimType(animType);
 	setAnimRestart(restartIn_ms);
@@ -144,7 +171,9 @@ void ImageAnim::setAnimType(eAnim anim)
 		case ANI_REVERSE:
 			pWorkFn = &ImageAnim::workREVERSE;	//iterate then reverse iterate (repeat)
 			break;
-
+        case ANI_CUSTOM:
+            pWorkFn = &ImageAnim::workCUSTOM;   //custom frame list
+            break;
 		default:
 			pWorkFn = &ImageAnim::workNONE;		//static, not moving
 			break;
@@ -183,6 +212,7 @@ void ImageAnim::workONCE(void)
 		if (_frame >= _lastFrame)
 		{
 			pauseAnim();
+			_sigEvent(USER_EV_END_ANIMATION, 0);    //no id
 			return;
 		}
 	}
@@ -268,6 +298,17 @@ void ImageAnim::workREVERSE(void)
 
 	}
 	_frame += _frameDir;
+}
+
+void ImageAnim::workCUSTOM(void)
+{
+    if (_frameCustom >= (Uint32)_animCustom.size())
+    {
+        pauseAnim();
+		_sigEvent(USER_EV_END_ANIMATION, 0);    //no id
+        return;
+    }
+    _frame = _animCustom[_frameCustom++];
 }
 
 void ImageAnim::draw(Surface *s)

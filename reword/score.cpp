@@ -352,7 +352,7 @@ bool QuickState::quickStateLoad()
 	{
 		while (std::getline(infile, line, '\n'))
 		{
-			pp_s::splitKeyValuePair(line, key, value);
+			pptxt::splitKeyValuePair(line, key, value);
 			if (key == "words")
 				_qStateSave.words = atoi(value.c_str());
 			else if (key == "score")

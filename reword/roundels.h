@@ -33,6 +33,7 @@ public:
 	void setWordCenterVert(std::string wrd, Image &letters, int x = 0, int gap =0);
 	void startMoveFrom(int deltaX, int deltaY, Uint32 rate, Uint32 delay, int xVel, int yVel, Sprite::eSprite type = Sprite::SPR_NONE);
 	void setTopAndBottomYPos(int yPosTop, int yPosBot);
+    int getLastId();
 
 	bool isInOrder();
 	bool jumbleWord(bool bAnimate = true);

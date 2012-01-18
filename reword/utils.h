@@ -80,7 +80,7 @@ public:
 
 static RandInt g_randInt;
 
-namespace pp_g 	//pp game functions
+namespace ppg 	//pp game functions
 {
 
 	void pushSDL_Event(int code, void *data1 = 0, void *data2 = 0);

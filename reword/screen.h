@@ -34,7 +34,7 @@ public:
     // Construct 16 bit colour screen of given size
     Screen (int w, int h);
     ~Screen();
-        
+
 	void lock(void);		// Lock screen
     void unlock(void);		// Unlock screen
     void update(void);		// Update whole screen (flip)

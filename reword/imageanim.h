@@ -7,15 +7,18 @@
 #include "waiting.h"
 
 #include <string>
+#include <vector>
+#include <boost/signal.hpp>
 
 class ImageAnim : public Image
 {
 public:
-	enum eAnim {	ANI_NONE = 0,		//static, not moving
-					ANI_ONCE = 1,		//iterate then stop
-					ANI_HIDE = 2,		//hide/stop when end point reached
-					ANI_LOOP = 4,		//loop forever, restarting frame 1 when last frame done
-					ANI_REVERSE = 8		//reverse movement when end/start point reached
+	enum eAnim {	ANI_NONE,		//static, not moving
+					ANI_ONCE,		//iterate then stop
+					ANI_HIDE,		//hide/stop when end point reached
+					ANI_LOOP,		//loop forever, restarting frame 1 when last frame done
+					ANI_REVERSE,	//reverse movement when end/start point reached
+					ANI_CUSTOM      //set a custom frame sequence
 				};
     enum eAnimDir { DIR_FORWARD, DIR_BACKWARD };
 
@@ -33,6 +36,9 @@ public:
 	void setBounds(int inflateBy);
     Rect bounds() const;
 
+    typedef boost::signal<void (int, int)> EventSignal;
+    EventSignal _sigEvent;
+
 	//animation
 	void setMaxFrame(Uint32 nFrames);
 	void startAnim(int firstFrame_0, int lastFrame_N, eAnim animType,
@@ -43,6 +49,8 @@ public:
 	Uint32 getFrame() const			{ return _frame; }
 	Uint32 getMaxFrame() const		{ return _nFrames-1; }
 	void setRepeat(Uint32 r)		{ _repeat = r; }
+    void clearAnimCustom();
+    bool addAnimCustom(Uint32 frame);
 
     void setAnimDelay(Uint32 delay, bool bRestart = false) { _delayA.start(delay); _bDelayRestart = bRestart; }   //before anim starts & each repeat?
 	void setAnimRate(Uint32 rate)	            { _waitA.start(_rateA = rate, 0); }
@@ -69,6 +77,7 @@ private:
 	void workHIDE(void);
 	void workLOOP(void);
 	void workREVERSE(void);
+	void workCUSTOM(void);
 
 protected:
 
@@ -96,6 +105,9 @@ private:
 
 	Waiting _delayA;	//animation delay before start
 	bool    _bDelayRestart; //if the delay is reset for each animation loop
+
+	std::vector<Uint32> _animCustom;    //custom frame iteration
+	Uint32              _frameCustom;   //custom count
 };
 
 #endif //_IMAGEANIM_H

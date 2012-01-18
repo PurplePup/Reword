@@ -10,6 +10,7 @@
 #include "states.h"
 #include "roundels.h"
 #include "image.h"
+#include "controls.h"
 #include <memory>
 
 class PlayHigh : public IPlay
@@ -21,9 +22,10 @@ public:
     virtual void init(Input *input);
     virtual void render(Screen* s);
     virtual void work(Input* input, float speedFactor);
-    virtual void button(Input* input, pp_i::eButtonType b);
+    virtual void button(Input* input, ppkey::eButtonType b);
 
 	virtual bool touch(const Point &pt);
+	virtual bool tap(const Point &pt);
 
 protected:
 	void setDifficulty(eGameDiff diff);
@@ -36,6 +38,8 @@ protected:
 	void moveRight();
 	bool isEditing() { return _pos != -1; }
 	void setEditing(bool b) { _pos = b?0:-1; }
+    void updateScrollButtons();
+    void ControlEvent(int event, int control_id);
 
 private:
 	GameData &	_gd;		//shared data between screens (play classes)
@@ -64,6 +68,8 @@ private:
 	Roundels	_title;
 	Waiting		_titleW;		//delay between jumbling
 	Waiting		_doubleClick;	//touch support
+
+    Controls    _controlsHigh;
 };
 
 #endif //_PLAYHIGH_H

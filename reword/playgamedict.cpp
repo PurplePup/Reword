@@ -54,10 +54,10 @@ PlayGameDict::~PlayGameDict()
 void PlayGameDict::init(Input *input)
 {
 	//set the repeat of the keys required
-	input->setRepeat(pp_i::UP, 250, 250);		//button, rate, delay
-	input->setRepeat(pp_i::DOWN, 250, 250);
-	input->setRepeat(pp_i::LEFT, 250, 250);
-	input->setRepeat(pp_i::RIGHT, 250, 250);
+	input->setRepeat(ppkey::UP, 250, 250);		//button, rate, delay
+	input->setRepeat(ppkey::DOWN, 250, 250);
+	input->setRepeat(ppkey::LEFT, 250, 250);
+	input->setRepeat(ppkey::RIGHT, 250, 250);
 
     //set arrow (scroll positions)
     _gd._arrowUp.setPos(SCREEN_WIDTH-_gd._arrowUp.tileW(), BG_LINE_TOP+2);		//positions dont change, just made visible or not if scroll available
@@ -70,26 +70,24 @@ void PlayGameDict::init(Input *input)
     //get the dictionary definition into one long string
 	std::string dictDefinition, dictDefLine;
     dictDefinition = _gd._words.getDictForWord(_dictWord)._description;
-    pp_s::trimLeft(dictDefinition, " \t\n\r");	//NOTE need \n\r on GP2X
-    pp_s::trimRight(dictDefinition, " \t\n\r"); //ditto
+    pptxt::trimLeft(dictDefinition, " \t\n\r");	//NOTE need \n\r on GP2X
+    pptxt::trimRight(dictDefinition, " \t\n\r"); //ditto
     if (!dictDefinition.length()) dictDefinition = "** sorry, not defined **";	//blank word - no dictionary entry
     //now build definition strings to display (on seperate lines)
     _dictLine = 0;	//start on first line
-    pp_s::buildTextPage(dictDefinition, FONT_CLEAN_MAX, _dictDef);
+    pptxt::buildTextPage(dictDefinition, FONT_CLEAN_MAX, _dictDef);
 
     //prepare roundel class ready for a dictionary display
     _roundDict= std::auto_ptr<Roundels>(new Roundels());
     _roundDict->setWordCenterHoriz(_dictWord, _gd._letters, (BG_LINE_TOP-_gd._letters.tileH())/2, 4);
     _roundDict->startMoveFrom(Screen::width(), 0, 10, 50, 18, 0);
 
-    //[PREV] dictionary screen buttons - only shown in dict display
-    boost::shared_ptr<Sprite> pPrev(new Sprite(RES_BASE + "images/touch_prev.png", 255, 4));
-    pPrev->setTileSize(106, 52, Image::TILE_VERT);
-    pPrev->setFrameLast();  //unselected
-    pPrev->setPos(3, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - pPrev->tileH())/2));
-    pPrev->setVisible(true);
-    Control cPrev(pPrev, CTRLID_PREV);
-    _controlsDict.add(cPrev);
+    //[BACK] dictionary screen buttons - only shown in dict display
+    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/touch_back.png", 255, 5));
+    p->setFrameLast();  //unselected
+    p->setPos(3, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
+    Control c(p, CTRLID_BACK);
+    _controlsDict.add(c);
 
 	//calc number of lines available for displaying dictionary lines
 	//end of display area minus start of screen lines+title height, div by line height. Minus 1 for a reasonable gap
@@ -137,10 +135,10 @@ void PlayGameDict::work(Input* input, float speedFactor)
 	//if a key is pressed and the interval has expired process
 	//that button as if pressesd again
 
-    if (input->repeat(pp_i::UP))	button(input, pp_i::UP);
-    if (input->repeat(pp_i::DOWN)) button(input, pp_i::DOWN);
-    if (input->repeat(pp_i::LEFT))	button(input, pp_i::LEFT);
-    if (input->repeat(pp_i::RIGHT)) button(input, pp_i::RIGHT);
+    if (input->repeat(ppkey::UP))	button(input, ppkey::UP);
+    if (input->repeat(ppkey::DOWN)) button(input, ppkey::DOWN);
+    if (input->repeat(ppkey::LEFT))	button(input, ppkey::LEFT);
+    if (input->repeat(ppkey::RIGHT)) button(input, ppkey::RIGHT);
 
 	_roundDict->work();
 
@@ -153,24 +151,24 @@ void PlayGameDict::work(Input* input, float speedFactor)
 
 }
 
-void PlayGameDict::button(Input* input, pp_i::eButtonType b)
+void PlayGameDict::button(Input* input, ppkey::eButtonType b)
 {
 	switch (b)
 	{
-	case pp_i::UP:
+	case ppkey::UP:
 		if (input->isPressed(b))
 			//move the _dictLine offset var up a line
 			scrollDictDown();
 		break;
-	case pp_i::DOWN:
+	case ppkey::DOWN:
 		if (input->isPressed(b))
 			//move the _dictLine offset var down a line
 			scrollDictUp();
 		break;
-	case pp_i::Y:
-	case pp_i::CLICK:
+	case ppkey::Y:
+	case ppkey::CLICK:
 		if (input->isPressed(b))
-            pp_g::pushSDL_Event(USER_EV_EXIT_SUB_SCREEN);
+            ppg::pushSDL_Event(USER_EV_EXIT_SUB_SCREEN);
 		break;
 
 	default:break;
@@ -205,7 +203,7 @@ bool PlayGameDict::touch(const Point &pt)
     //tap background to exit dict screen
 	else
 		if (!_doubleClick.done())
-			pp_g::pushSDL_Event(USER_EV_EXIT_SUB_SCREEN);
+			ppg::pushSDL_Event(USER_EV_EXIT_SUB_SCREEN);
 		else
 			_doubleClick.start(300);
 
@@ -215,11 +213,11 @@ bool PlayGameDict::touch(const Point &pt)
 //releasing 'touch' press
 bool PlayGameDict::tap(const Point &pt)
 {
-    _ctrl_id = _controlsDict.tapped(pt);
+    const int ctrl_id = _controlsDict.tapped(pt);
 
-    if (_ctrl_id == CTRLID_PREV)
+    if (ctrl_id == CTRLID_BACK)
     {
-        pp_g::pushSDL_Event(USER_EV_EXIT_SUB_SCREEN);
+        ppg::pushSDL_Event(USER_EV_EXIT_SUB_SCREEN);
         return true;
     }
 

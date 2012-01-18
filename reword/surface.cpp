@@ -35,11 +35,11 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 // #include <SDL_gfxPrimitives.h>
 
-Surface::Surface() : _surface(0)
+Surface::Surface() : _surface(0), _objectId(0)
 {
 }
 
-Surface::Surface(SDL_Surface *s)
+Surface::Surface(SDL_Surface *s) : _surface(0), _objectId(0)
 {
 	_surface = s;
 	s->refcount++;

@@ -261,19 +261,19 @@ void AudioTrackDone()
 
 void Audio::pushNextTrack()
 {
-	pp_g::pushSDL_Event(USER_EV_NEXT_TRACK);
+	ppg::pushSDL_Event(USER_EV_NEXT_TRACK);
 }
 void Audio::pushPrevTrack()
 {
-	pp_g::pushSDL_Event(USER_EV_PREV_TRACK);
+	ppg::pushSDL_Event(USER_EV_PREV_TRACK);
 }
 void Audio::pushPauseTrack()
 {
-	pp_g::pushSDL_Event(USER_EV_PAUSE_TRACK);
+	ppg::pushSDL_Event(USER_EV_PAUSE_TRACK);
 }
 void Audio::pushStopTrack()
 {
-	pp_g::pushSDL_Event(USER_EV_STOP_TRACK);
+	ppg::pushSDL_Event(USER_EV_STOP_TRACK);
 }
 
 void Audio::stopTrack()
@@ -355,7 +355,7 @@ void Audio::loadTracks(const std::string &baseDir)
 			std::string sTrack = dir->d_name;
 			if (sTrack.length()>0 && sTrack[0] != '.')
 			{
-				if (pp_s::endsWith(sTrack, "OGG") || pp_s::endsWith(sTrack, "MP3"))
+				if (pptxt::endsWith(sTrack, "OGG") || pptxt::endsWith(sTrack, "MP3"))
 				{
 					printf("%s\n", dir->d_name);
 					_trackList.push_back(std::string(dir->d_name));

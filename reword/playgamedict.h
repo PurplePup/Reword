@@ -20,7 +20,7 @@ public:
     virtual void init(Input *input);
     virtual void render(Screen* s);
     virtual void work(Input* input, float speedFactor);
-    virtual void button(Input* input, pp_i::eButtonType b);
+    virtual void button(Input* input, ppkey::eButtonType b);
 
 	// screen touch (press)
 	virtual bool touch(const Point &/*pt*/);
@@ -37,9 +37,7 @@ private:
 private:
 
 	GameData &	_gd;			//shared data between screens (play classes)
-
     Controls    _controlsDict;
-	int         _ctrl_id;       //id of pressed control
 
 	Waiting		_doubleClick;
     std::string _dictWord;

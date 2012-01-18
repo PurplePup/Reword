@@ -155,6 +155,8 @@ void Sprite::work()
 			_x = _xEnd;	//make sure it stops at the exact end point given
 			_y = _yEnd;
 			pauseMove();
+
+			ppg::pushSDL_Event(USER_EV_END_MOVEMENT, reinterpret_cast<void *>(_objectId), 0);
 		}
 
 /*

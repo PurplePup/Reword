@@ -61,8 +61,8 @@ void PlayMenu::init(Input *input)
     startMenuMusic();
 
 	//set the repeat of the keys required
-	input->setRepeat(pp_i::UP, 150, 300);		//button, rate, delay
-	input->setRepeat(pp_i::DOWN, 150, 300);
+	input->setRepeat(ppkey::UP, 150, 300);		//button, rate, delay
+	input->setRepeat(ppkey::DOWN, 150, 300);
 
 	_title.startMoveFrom( 0, -(_gd._letters.tileH()*2), 15, 100, 0, ROUNDEL_VEL);
 	_titleW.start(3000, 1000);
@@ -168,15 +168,15 @@ void PlayMenu::work(Input *input, float speedFactor)
 	//if a key is pressed and the interval has expired process
 	//that button as if pressesd again
 
-    if (input->repeat(pp_i::UP)) button(input, pp_i::UP);
-    if (input->repeat(pp_i::DOWN))	button(input, pp_i::DOWN);
+    if (input->repeat(ppkey::UP)) button(input, ppkey::UP);
+    if (input->repeat(ppkey::DOWN))	button(input, ppkey::DOWN);
 }
 
-void PlayMenu::button(Input *input, pp_i::eButtonType b)
+void PlayMenu::button(Input *input, ppkey::eButtonType b)
 {
 	switch (b)
 	{
-	case pp_i::UP:
+	case ppkey::UP:
 		if (input->isPressed(b) && _itemList.size())
 		{
 			if (0==_item)
@@ -185,7 +185,7 @@ void PlayMenu::button(Input *input, pp_i::eButtonType b)
 				_item--;
 		}
 		break;
-	case pp_i::DOWN:
+	case ppkey::DOWN:
 		if (input->isPressed(b) && _itemList.size())
 		{
 			if (_itemList.size()-1==_item)
@@ -194,10 +194,10 @@ void PlayMenu::button(Input *input, pp_i::eButtonType b)
 				_item++;
 		}
 		break;
-	case pp_i::SELECT:
-	case pp_i::CLICK:
-	case pp_i::START:
-	case pp_i::B:
+	case ppkey::SELECT:
+	case ppkey::CLICK:
+	case ppkey::START:
+	case ppkey::B:
 		if (input->isPressed(b) && _itemList[_item]._enabled)
 			choose(_itemList[_item]);
 		break;

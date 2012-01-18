@@ -3,7 +3,7 @@
 
 #include <SDL.h>
 
-namespace pp_i
+namespace ppkey
 {
 // mapped button values
 enum eButtonType
@@ -37,13 +37,13 @@ class IInput
 public:
     virtual void init() = 0;
     virtual bool initDone() = 0;
-    virtual pp_i::eButtonType translate(int key) = 0;	    // Translate key to button
-    virtual int un_translate(pp_i::eButtonType b) = 0;      // Reverse translation
-    virtual void down(pp_i::eButtonType b) = 0;        	    // Button pressed
-    virtual void up(pp_i::eButtonType b) = 0;      		    // Button released
-    virtual bool isPressed(pp_i::eButtonType b) const = 0;	// Return true if button is pressed
-    virtual bool repeat(pp_i::eButtonType b) = 0;      	    // Returns true if button repeats
-	virtual void setRepeat(pp_i::eButtonType b, Uint32 rate, Uint32 delay) = 0; // Set a repeat speed for a key
+    virtual ppkey::eButtonType translate(int key) = 0;	    // Translate key to button
+    virtual int un_translate(ppkey::eButtonType b) = 0;      // Reverse translation
+    virtual void down(ppkey::eButtonType b) = 0;        	    // Button pressed
+    virtual void up(ppkey::eButtonType b) = 0;      		    // Button released
+    virtual bool isPressed(ppkey::eButtonType b) const = 0;	// Return true if button is pressed
+    virtual bool repeat(ppkey::eButtonType b) = 0;      	    // Returns true if button repeats
+	virtual void setRepeat(ppkey::eButtonType b, Uint32 rate, Uint32 delay) = 0; // Set a repeat speed for a key
 	virtual void clearRepeat() = 0;                         // Clear any repeats set
 };
 

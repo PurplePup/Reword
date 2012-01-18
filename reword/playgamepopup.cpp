@@ -154,15 +154,15 @@ void PlayGamePopup::work(Input *input, float speedFactor)
 
 	//Do repeat keys...if a key is pressed and the interval
 	//has expired process that button as if pressesd again
-    if (input->repeat(pp_i::UP)) button(input, pp_i::UP);
-    if (input->repeat(pp_i::DOWN))	button(input, pp_i::DOWN);
+    if (input->repeat(ppkey::UP)) button(input, ppkey::UP);
+    if (input->repeat(ppkey::DOWN))	button(input, ppkey::DOWN);
 }
 
-void PlayGamePopup::button(Input *input, pp_i::eButtonType b)
+void PlayGamePopup::button(Input *input, ppkey::eButtonType b)
 {
 	switch (b)
 	{
-	case pp_i::UP:
+	case ppkey::UP:
 		if (input->isPressed(b))
 		{
 			if (0==_menuoption)
@@ -171,7 +171,7 @@ void PlayGamePopup::button(Input *input, pp_i::eButtonType b)
 				_menuoption--;
 		}
 		break;
-	case pp_i::DOWN:
+	case ppkey::DOWN:
 		if (input->isPressed(b))
 		{
 			if (_menuoption == (int)_pItems->size()-1)
@@ -180,8 +180,8 @@ void PlayGamePopup::button(Input *input, pp_i::eButtonType b)
 				_menuoption++;
 		}
 		break;
-	case pp_i::CLICK:
-	case pp_i::B:
+	case ppkey::CLICK:
+	case ppkey::B:
 		if (input->isPressed(b))
 			choose();
 		break;

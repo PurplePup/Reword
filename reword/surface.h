@@ -26,6 +26,9 @@ public:
 		return *this;
 	}
 
+    void setObjectId(int id) { _objectId = id; }
+    int getObjectId() { return _objectId; }
+
 	bool create(unsigned int w, unsigned int h, int iAlpha = -1);	//create a surface of specific size
 	void copy(Surface &s);
 
@@ -53,6 +56,7 @@ protected:
 
 protected:
 	SDL_Surface *_surface;
+	int _objectId;          //used for event notification in surface/image/imageanim/sprite classes
 
 private:
 	SDL_Rect _r;			//temp, used in blit fns

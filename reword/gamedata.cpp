@@ -76,19 +76,13 @@ GameData::GameData() : _bTouch(false),  _init(false)
 	bErr |= !_letters.load(RES_BASE + "images/roundel_letters.png", 255);
 	bErr |= !_letters.setTileSize(LETTERW,LETTERH);
 
-	bErr |= !_scratch.load(RES_BASE + "images/scratch_2.png", -1, 7);
-
-    //in-game actionbuttons
-	bErr |= !_word_last_pulse.load(RES_BASE + "images/btn_word_last.png", -1, 6);
-	bErr |= !_word_totop_pulse.load(RES_BASE + "images/btn_word_totop.png", -1, 6);
-	bErr |= !_word_shuffle_pulse.load(RES_BASE + "images/btn_word_shuffle.png", -1, 6);
-	bErr |= !_word_try_pulse.load(RES_BASE + "images/btn_word_try.png", -1, 6);
+	bErr |= !_scratch.load(RES_BASE + "images/scratch.png", -1, 7);
 
 	//SPRITES
-	bErr |= !_arrowUp.load(RES_BASE + "images/btn_scroll_up.png", 255, 3);
-	bErr |= !_arrowDown.load(RES_BASE + "images/btn_scroll_down.png", 255, 3);
-	bErr |= !_arrowLeft.load(RES_BASE + "images/btn_scroll_left.png", 255, 3);
-	bErr |= !_arrowRight.load(RES_BASE + "images/btn_scroll_right.png", 255, 3);
+	bErr |= !_arrowUp.load(RES_BASE + "images/btn_round_scroll_up.png", 0, 5);
+	bErr |= !_arrowDown.load(RES_BASE + "images/btn_round_scroll_down.png", 0, 5);
+	bErr |= !_arrowLeft.load(RES_BASE + "images/btn_round_scroll_left.png", 0, 5);
+	bErr |= !_arrowRight.load(RES_BASE + "images/btn_round_scroll_right.png", 0, 5);
 	bErr |= !_star.load(RES_BASE + "images/star.png", 255, 7);
 
 //	bErr |= !_moreWords.load(RES_BASE + "images/morewords.png",255, 2);	//frame 1=more_to_get, 2=more_all_got

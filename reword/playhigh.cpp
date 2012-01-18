@@ -41,6 +41,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "platform.h"
 #include <cassert>
 #include <memory>
+#include <boost/bind.hpp>
+
 
 PlayHigh::PlayHigh(GameData &gd)  : _gd(gd)
 {
@@ -72,24 +74,55 @@ void PlayHigh::init(Input *input)
 	_titleW.start(3000, 1000);
 
 	//set the repeat of the keys required
-	input->setRepeat(pp_i::UP, 100, 300);		//button, rate, delay
-	input->setRepeat(pp_i::DOWN, 100, 300);
-	input->setRepeat(pp_i::LEFT, 100, 300);
-	input->setRepeat(pp_i::RIGHT, 100, 300);
+	input->setRepeat(ppkey::UP, 100, 300);		//button, rate, delay
+	input->setRepeat(ppkey::DOWN, 100, 300);
+	input->setRepeat(ppkey::LEFT, 100, 300);
+	input->setRepeat(ppkey::RIGHT, 100, 300);
 
-	//set arrow (scroll positions)
-	_gd._arrowUp.setPos(SCREEN_WIDTH-_gd._arrowUp.tileW(), BG_LINE_TOP+2);		//positions dont change, just made visible or not if scroll available
-	_gd._arrowUp.setFrame(_gd._arrowUp.getMaxFrame()-1);			//last frame
-	_gd._arrowUp.setTouchable(true);	//always touchable even if invisible
-	_gd._arrowDown.setPos(SCREEN_WIDTH-_gd._arrowDown.tileW(), BG_LINE_BOT-_gd._arrowDown.tileH()-2);
-	_gd._arrowDown.setFrame(_gd._arrowDown.getMaxFrame());			//last frame
-	_gd._arrowDown.setTouchable(true);	//always touchable even if invisible
-	_gd._arrowLeft.setPos(2, BG_LINE_BOT-_gd._arrowDown.tileH()-2);		//positions dont change, just made visible or not if scroll available
-	_gd._arrowLeft.setFrame(_gd._arrowLeft.getMaxFrame());			//last) frame
-	_gd._arrowLeft.setTouchable(true);	//always touchable even if invisible
-	_gd._arrowRight.setPos(SCREEN_WIDTH-(_gd._arrowDown.tileW()*2), BG_LINE_BOT-_gd._arrowDown.tileH()-2);
-	_gd._arrowRight.setFrame(_gd._arrowRight.getMaxFrame());			//last frame
-	_gd._arrowRight.setTouchable(true);	//always touchable even if invisible
+	//set arrow controls (scroll positions)
+    {
+    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_scroll_up.png", 0, 5));
+    p->setFrameLast();  //unselected
+    p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2);
+    p->_sigEvent.connect(boost::bind(&PlayHigh::ControlEvent, this, _1, _2));
+    Control c(p, CTRLID_SCROLL_UP);
+    _controlsHigh.add(c);
+    }
+    {
+    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_scroll_down.png", 0, 5));
+    p->setFrameLast();  //unselected
+    p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2+p->tileH()+6);
+    p->_sigEvent.connect(boost::bind(&PlayHigh::ControlEvent, this, _1, _2));
+    Control c(p, CTRLID_SCROLL_DOWN);
+    _controlsHigh.add(c);
+    }
+    {
+    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_scroll_left.png", 0, 5));
+    p->setFrameLast();  //unselected
+    p->setPos(SCREEN_WIDTH-(p->tileW()*2)-8, BG_LINE_BOT-p->tileH()-2);
+    p->_sigEvent.connect(boost::bind(&PlayHigh::ControlEvent, this, _1, _2));
+    Control c(p, CTRLID_SCROLL_LEFT);
+    _controlsHigh.add(c);
+    }
+    {
+    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_scroll_right.png", 0, 5));
+    p->setFrameLast();  //unselected
+    p->setPos(SCREEN_WIDTH-(p->tileW())-2, BG_LINE_BOT-p->tileH()-2);
+    p->_sigEvent.connect(boost::bind(&PlayHigh::ControlEvent, this, _1, _2));
+    Control c(p, CTRLID_SCROLL_RIGHT);
+    _controlsHigh.add(c);
+    }
+
+    //[EXIT] hi score screen buttons
+    {
+    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/touch_exit.png", 255, 5));
+    p->setFrameLast();  //unselected
+    p->setPos(3, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
+    Control c(p, CTRLID_EXIT);
+    _controlsHigh.add(c);
+    }
+
+    updateScrollButtons();  //show initial state
 
 	//calc hiscore table element positions
 
@@ -201,11 +234,7 @@ void PlayHigh::render(Screen *s)
 	else
 		_gd._fntClean.put_text(s, helpYpos, "Enter initials then B to save", GREY_COLOUR, true);
 
-	_gd._arrowUp.draw(s);		//only if set visible (more lines than screen shows)
-	_gd._arrowDown.draw(s);
-	_gd._arrowLeft.draw(s);
-	_gd._arrowRight.draw(s);
-
+	_controlsHigh.render(s);
 }
 
 void PlayHigh::work(Input *input, float speedFactor)
@@ -226,44 +255,36 @@ void PlayHigh::work(Input *input, float speedFactor)
 	//if a key is pressed and the interval has expired process
 	//that button as if pressesd again
 
-    if (input->repeat(pp_i::UP))	button(input, pp_i::UP);
-    if (input->repeat(pp_i::DOWN)) button(input, pp_i::DOWN);
-    if (input->repeat(pp_i::LEFT))	button(input, pp_i::LEFT);
-    if (input->repeat(pp_i::RIGHT)) button(input, pp_i::RIGHT);
+    if (input->repeat(ppkey::UP))	button(input, ppkey::UP);
+    if (input->repeat(ppkey::DOWN)) button(input, ppkey::DOWN);
+    if (input->repeat(ppkey::LEFT))	button(input, ppkey::LEFT);
+    if (input->repeat(ppkey::RIGHT)) button(input, ppkey::RIGHT);
 
-	//_pos -1 = in edit hiscore initials mode
-	_gd._arrowUp.setVisible(_mode < GM_MAX-1 && !isEditing());
-	_gd._arrowUp.work();
-	_gd._arrowDown.setVisible(_mode > GM_ARCADE && !isEditing());
-	_gd._arrowDown.work();
-	_gd._arrowLeft.setVisible(_diff > DIF_EASY && !isEditing());
-	_gd._arrowLeft.work();
-	_gd._arrowRight.setVisible(_diff < DIF_MAX-1 && !isEditing());
-	_gd._arrowRight.work();
+    _controlsHigh.work(input, speedFactor);
 }
 
-void PlayHigh::button(Input *input, pp_i::eButtonType b)
+void PlayHigh::button(Input *input, ppkey::eButtonType b)
 {
 	switch (b)
 	{
-	case pp_i::UP:
+	case ppkey::UP:
 		if (input->isPressed(b))
 			moveUp();
 		break;
-	case pp_i::DOWN:
+	case ppkey::DOWN:
 		if (input->isPressed(b))
 			moveDown();
 		break;
-	case pp_i::LEFT:
+	case ppkey::LEFT:
 		if (input->isPressed(b))
 			moveLeft();
 		break;
-	case pp_i::RIGHT:
+	case ppkey::RIGHT:
 		if (input->isPressed(b))
 			moveRight();
 		break;
-	case pp_i::CLICK:
-	case pp_i::B:
+	case ppkey::CLICK:
+	case ppkey::B:
 		if (input->isPressed(b))
 		{
 			if (isEditing() && _currPos < 2)
@@ -277,14 +298,14 @@ void PlayHigh::button(Input *input, pp_i::eButtonType b)
 				_gd._score.insert(_mode, _diff, _pos, _curr);
 				_gd._score.save();	//save now so player can switch off or return to menu if wishes
 
-				_pos = -1;		//set to not-editing
+				setEditing(false);		//set to not-editing
 				break;
 			}
 			//else pos is -1 (not editing) so follow on to exit...
 		}
 		//follow on to exit to ST_MENU ...
 		//not break
-	case pp_i::X:
+	case ppkey::X:
 		if (input->isPressed(b))
 		{
 			_gd._state = ST_MENU;
@@ -293,6 +314,8 @@ void PlayHigh::button(Input *input, pp_i::eButtonType b)
 		break;
 	default:break;
 	}
+	//update show/hide enable/disable after key press or setEditing(false) etc
+	updateScrollButtons();
 }
 
 void PlayHigh::moveUp()
@@ -337,50 +360,69 @@ void PlayHigh::moveRight()
 		setDifficulty((eGameDiff)(_diff+1));
 }
 
+void PlayHigh::updateScrollButtons()
+{
+    if (isEditing())
+    {
+        _controlsHigh.showAllControls(false);
+        return;
+    }
+
+    _controlsHigh.showAllControls(true);
+    _controlsHigh.enableControl((_mode < GM_MAX-1), CTRLID_SCROLL_UP);
+    _controlsHigh.enableControl((_mode > GM_ARCADE), CTRLID_SCROLL_DOWN);
+    _controlsHigh.enableControl((_diff > DIF_EASY), CTRLID_SCROLL_LEFT);
+    _controlsHigh.enableControl((_diff < DIF_MAX-1), CTRLID_SCROLL_RIGHT);
+}
+
+//event signal from imageanim indicating end of animation
+void PlayHigh::ControlEvent(int event, int control_id)
+{
+    if (event == USER_EV_END_ANIMATION)
+    {
+        updateScrollButtons();
+    }
+}
+
 bool PlayHigh::touch(const Point &pt)
 {
-	//check if touch scroll arrows
-	if (_gd._arrowUp.contains(pt))
+    _controlsHigh.touched(pt);    //needed to highlight a touched control
+    return true;
+}
+
+//releasing 'touch' press
+bool PlayHigh::tap(const Point &pt)
+{
+    const int crtl_id = _controlsHigh.tapped(pt);
+
+    if (crtl_id == CTRLID_EXIT)
+    {
+        _gd._state = ST_MENU;
+        _running = false;	//exit this class running state
+        return true;
+    }
+    else if (crtl_id == CTRLID_SCROLL_UP)
 	{
-		if (_gd._arrowUp.isTouchable())
-			_gd._arrowUp.startAnim(0, -1, ImageAnim::ANI_ONCE, 40);
 		moveDown();
         return true;
 	}
-	else if (_gd._arrowDown.contains(pt))
+	else if (crtl_id == CTRLID_SCROLL_DOWN)
 	{
-		if (_gd._arrowDown.isTouchable())
-			_gd._arrowDown.startAnim(0, -1, ImageAnim::ANI_ONCE, 40);
 		moveUp();
         return true;
 	}
-	else if (_gd._arrowLeft.contains(pt))
+	else if (crtl_id == CTRLID_SCROLL_LEFT)
 	{
-		if (_gd._arrowLeft.isTouchable())
-			_gd._arrowLeft.startAnim(0, -1, ImageAnim::ANI_ONCE, 40);
 		moveLeft();
         return true;
 	}
-	else if (_gd._arrowRight.contains(pt))
+	else if (crtl_id == CTRLID_SCROLL_RIGHT)
 	{
-		if (_gd._arrowRight.isTouchable())
-			_gd._arrowRight.startAnim(0, -1, ImageAnim::ANI_ONCE, 40);
 		moveRight();
         return true;
 	}
-	else
-	{
-		if (!_doubleClick.done())
-		{
-			_gd._state = ST_MENU;
-			_running = false;	//exit this class running state
-		}
-		else
-			_doubleClick.start(300);
-        return true;
-    }
-    return false;
 
+    return false;
 }
 
 //set difficulty locally

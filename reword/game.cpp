@@ -310,8 +310,8 @@ bool Game::play(IPlay *p)
 
 					case SDL_KEYDOWN:
 					{
-						pp_i::eButtonType b = _input->translate(event.key.keysym.sym);
-						if (b != pp_i::NUMBER_OF_BUTTONS)
+						ppkey::eButtonType b = _input->translate(event.key.keysym.sym);
+						if (b != ppkey::NUMBER_OF_BUTTONS)
 						{
 							_input->down(b);
 							p->button(_input,b);
@@ -345,17 +345,17 @@ bool Game::play(IPlay *p)
                         }
 #endif
 
-						pp_i::eButtonType b = _input->translate(event.key.keysym.sym);
-						if (b != pp_i::NUMBER_OF_BUTTONS)
+						ppkey::eButtonType b = _input->translate(event.key.keysym.sym);
+						if (b != ppkey::NUMBER_OF_BUTTONS)
 						{
 							_input->up(b);
 							p->button(_input, b);
 						}
 
-						if (pp_i::VOLUP == b)
+						if (ppkey::VOLUP == b)
 							Locator::GetAudio().volumeUp();
 						else
-							if (pp_i::VOLDOWN == b)
+							if (ppkey::VOLDOWN == b)
 								Locator::GetAudio().volumeDown();
 
 					}
@@ -365,21 +365,21 @@ bool Game::play(IPlay *p)
 
 					case SDL_JOYBUTTONUP:
 					{
-						pp_i::eButtonType b = static_cast<pp_i::eButtonType>(event.jbutton.button);
+						ppkey::eButtonType b = static_cast<ppkey::eButtonType>(event.jbutton.button);
 						_input->up(b);
 						p->button(_input, b);
 
-						if (pp_i::VOLUP == b)
+						if (ppkey::VOLUP == b)
 							Locator::GetAudio().volumeUp();
 						else
-							if (pp_i::VOLDOWN == b)
+							if (ppkey::VOLDOWN == b)
 								Locator::GetAudio().volumeDown();
 					}
 					break;
 
 					case SDL_JOYBUTTONDOWN:
 					{
-						pp_i::eButtonType b = static_cast<pp_i::eButtonType>(event.jbutton.button);
+						ppkey::eButtonType b = static_cast<ppkey::eButtonType>(event.jbutton.button);
 						_input->down(b);
 						p->button(_input, b);
 					}

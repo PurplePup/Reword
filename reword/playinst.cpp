@@ -39,7 +39,9 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "helpers.h"
 #include "platform.h"
 #include <sstream>
+#include <boost/bind.hpp>
 
+enum { CTRLGRP_SCROLL = 1,CTRLGRP_BUTTONS = 2 };
 
 PlayInst::PlayInst(GameData &gd)  : _gd(gd)
 {
@@ -59,20 +61,48 @@ void PlayInst::init(Input *input)
 	_titleW.start(3000, 1000);
 
 	//set the repeat of the keys required
-	input->setRepeat(pp_i::UP, 250, 250);		//button, rate, delay
-	input->setRepeat(pp_i::DOWN, 250, 250);
-
-	//set arrow (scroll positions)
-	_gd._arrowUp.setPos(SCREEN_WIDTH-_gd._arrowUp.tileW(), BG_LINE_TOP+2);		//positions dont change, just made visible or not if scroll available
-	_gd._arrowUp.setFrame(_gd._arrowUp.getMaxFrame());			//last frame
-	_gd._arrowUp.setTouchable(true);	//always touchable even if invisible
-	_gd._arrowDown.setPos(SCREEN_WIDTH-_gd._arrowDown.tileW(), BG_LINE_BOT-_gd._arrowDown.tileH()-2);
-	_gd._arrowDown.setFrame(_gd._arrowDown.getMaxFrame());			//last frame
-	_gd._arrowDown.setTouchable(true);	//always touchable even if invisible
+	input->setRepeat(ppkey::UP, 250, 250);		//button, rate, delay
+	input->setRepeat(ppkey::DOWN, 250, 250);
 
 	//calc number of lines available for displaying instruction lines
 	//end of display area minus start of screen lines+title height, div by line height. Minus 1 for a reasonable gap
 	_lines = ((BG_LINE_BOT - BG_LINE_TOP - _gd._fntMed.height()) / _gd._fntClean.height()) - 1;
+
+	//set arrow controls (scroll positions)
+    {
+    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_scroll_up.png", 0, 5));
+    p->setFrameLast();  //unselected
+    p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2);
+    p->_sigEvent.connect(boost::bind(&PlayInst::ControlEvent, this, _1, _2));
+    Control c(p, CTRLID_SCROLL_UP, CTRLGRP_SCROLL);
+    _controlsInst.add(c);
+    }
+    {
+    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_scroll_down.png", 0, 5));
+    p->setFrameLast();  //unselected
+    p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_BOT-p->tileH()-2);
+    p->_sigEvent.connect(boost::bind(&PlayInst::ControlEvent, this, _1, _2));
+    Control c(p, CTRLID_SCROLL_DOWN, CTRLGRP_SCROLL);
+    _controlsInst.add(c);
+    }
+
+    updateScrollButtons();  //show initial state
+
+    //load EXIT/NEXT buttons
+    {
+    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/touch_exit.png", 255, 5));
+    p->setFrameLast();  //unselected
+    p->setPos(3, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
+    Control c(p, CTRLID_EXIT);
+    _controlsInst.add(c);
+    }
+    {
+    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/touch_next.png", 255, 5));
+    p->setFrameLast();  //unselected
+    p->setPos(SCREEN_WIDTH - p->tileW() - 3, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
+    Control c(p, CTRLID_NEXT);
+    _controlsInst.add(c);
+    }
 
 	//need to set the _init and _running flags
 	_init = true;
@@ -130,9 +160,7 @@ void PlayInst::render(Screen *s)
 		++it;
 	}
 
-	_gd._arrowUp.draw(s);		//only if set visible (more lines than screen shows)
-	_gd._arrowDown.draw(s);		//..
-
+    _controlsInst.render(s);
 }
 
 void PlayInst::work(Input *input, float speedFactor)
@@ -149,44 +177,68 @@ void PlayInst::work(Input *input, float speedFactor)
 			_title.unJumbleWord(true);
 	}
 
-    if (input->repeat(pp_i::UP))	button(input, pp_i::UP);
-    if (input->repeat(pp_i::DOWN)) button(input, pp_i::DOWN);
+    if (input->repeat(ppkey::UP))	button(input, ppkey::UP);
+    if (input->repeat(ppkey::DOWN)) button(input, ppkey::DOWN);
 
-	_gd._arrowUp.setVisible(_instLine > 0);
-	_gd._arrowUp.work();
-	_gd._arrowDown.setVisible(_instLine < (int)_inst.size()-_lines);
-	_gd._arrowDown.work();
+    _controlsInst.work(input, speedFactor);
+
+//    //update scroll button visibility
+//    _controlsInst.showControl((_instLine > 0), CTRLID_SCROLL_UP);
+//	_controlsInst.showControl((_instLine < (int)_inst.size()-_lines), CTRLID_SCROLL_DOWN);
 }
 
-void PlayInst::button(Input *input, pp_i::eButtonType b)
+void PlayInst::updateScrollButtons()
+{
+    const bool bShow = ((int)_inst.size()>_lines && _page > 0);
+    _controlsInst.showGroup(bShow, CTRLGRP_SCROLL);
+    if (bShow)
+    {
+        _controlsInst.enableControl((_instLine > 0), CTRLID_SCROLL_UP);
+        _controlsInst.enableControl((_instLine < (int)_inst.size()-_lines), CTRLID_SCROLL_DOWN);
+    }
+}
+
+//event signal from imageanim indicating end of animation
+void PlayInst::ControlEvent(int event, int control_id)
+{
+    if (event == USER_EV_END_ANIMATION)
+    {
+        updateScrollButtons();
+    }
+}
+
+
+void PlayInst::button(Input *input, ppkey::eButtonType b)
 {
 	switch (b)
 	{
-	case pp_i::UP:
+	case ppkey::UP:
 		if (input->isPressed(b))
 			//move the _instLine offset var up a line
 			scrollDown();
 		break;
-	case pp_i::DOWN:
+	case ppkey::DOWN:
 		if (input->isPressed(b))
 			//move the _instLine offset var down a line
 			scrollUp();
 		break;
-	case pp_i::Y:
-	case pp_i::START:
+	case ppkey::Y:
+	case ppkey::START:
 		if (input->isPressed(b))	//exit back to menu
 		{
 			_gd._state = ST_MENU;
 			_running = false;	//exit this class running state
 		}
 		break;
-	case pp_i::CLICK:
-	case pp_i::B:
+	case ppkey::CLICK:
+	case ppkey::B:
 		if (input->isPressed(b))
 			nextPage();
 		break;
 	default:break;
 	}
+
+    updateScrollButtons();
 }
 
 void PlayInst::nextPage()
@@ -197,6 +249,7 @@ void PlayInst::nextPage()
 		_gd._state = ST_MENU;		//back to menu
 		_running = false;
 	}
+    updateScrollButtons();
 }
 void PlayInst::scrollDown()
 {
@@ -209,32 +262,49 @@ void PlayInst::scrollUp()
 
 bool PlayInst::touch(const Point &pt)
 {
+    const int crtl_id = _controlsInst.touched(pt);    //needed to highlight a touched control
+
 	//check if touch scroll arrows
-	if (_gd._arrowUp.contains(pt))
+	if (crtl_id == CTRLID_SCROLL_UP)
 	{
-		if (_gd._arrowUp.isTouchable())
-			_gd._arrowUp.startAnim(0, -1, ImageAnim::ANI_ONCE, 40);
 		scrollDown();
 		return true;
 	}
-	else if (_gd._arrowDown.contains(pt))
+	else if (crtl_id == CTRLID_SCROLL_DOWN)
 	{
-		if (_gd._arrowDown.isTouchable())
-			_gd._arrowDown.startAnim(0, -1, ImageAnim::ANI_ONCE, 40);
 		scrollUp();
 		return true;
 	}
-	else
-	{
-		if (!_doubleClick.done())
-			nextPage();
-		else
-			_doubleClick.start(300);
-        return true;
-	}
+//	else
+//	{
+//		if (!_doubleClick.done())
+//			nextPage();
+//		else
+//			_doubleClick.start(300);
+//        return true;
+//	}
 	return false;
 }
 
+//releasing 'touch' press
+bool PlayInst::tap(const Point &pt)
+{
+    const int crtl_id = _controlsInst.tapped(pt);
+
+    if (crtl_id == CTRLID_NEXT)
+    {
+        nextPage();
+        return true;
+    }
+    if (crtl_id == CTRLID_EXIT)
+    {
+		_gd._state = ST_MENU;		//back to menu
+		_running = false;
+        return true;
+    }
+
+    return false;
+}
 void PlayInst::buildPage(int page)
 {
 	//now build the scrolling instructions strings to display (on seperate lines)
@@ -336,7 +406,7 @@ void PlayInst::buildPage(int page)
 	default:return;	//not used
 	}
 	str = strstr.str();
-	pp_s::buildTextPage(str, FONT_CLEAN_MAX, _inst);	//pass max chars wide displayable
+	pptxt::buildTextPage(str, FONT_CLEAN_MAX, _inst);	//pass max chars wide displayable
 }
 
 

@@ -41,7 +41,12 @@ const int COUNTDOWN_TIMETRIAL	= 120;
 #define USER_EV_PAUSE_TRACK			5
 #define USER_EV_STOP_TRACK			6
 #define USER_EV_SAVE_STATE			7
+//others
 #define USER_EV_EXIT_SUB_SCREEN     8
+#define USER_EV_END_ANIMATION       9
+#define USER_EV_END_MOVEMENT        10
+#define USER_EV_CONTROL_TOUCH       11
+#define USER_EV_CONTROL_TAP         12
 
 #endif //_GAME_GLOBAL_H_
 
