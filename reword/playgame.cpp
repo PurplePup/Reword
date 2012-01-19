@@ -65,11 +65,11 @@ Uint32 countdown_callback(Uint32 interval, void *param)
 {
 	if (_countdown <= 0)
 	{
-		pp_g::pushSDL_Event(USER_EV_END_COUNTDOWN); //pushEndOfLevel();
+		ppg::pushSDL_Event(USER_EV_END_COUNTDOWN); //pushEndOfLevel();
 		return 0;
 	}
 
-	pp_g::pushSDL_Event(USER_EV_PING_COUNTDOWN);
+	ppg::pushSDL_Event(USER_EV_PING_COUNTDOWN);
 
 	return(interval);
 }
@@ -103,6 +103,72 @@ void PlayGame::init(Input *input)
     if (Locator::GetAudio().isPlayingMusic()==false)
 		Mix_FadeOutMusic(3000);
 
+
+    //[MENU] shows in top left (unless [EXIT] shown)
+    {
+    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/touch_menu.png", 255, 5));
+    p->setPos(3, 0);
+    p->setFrameLast();  //unselected
+    Control c(p, CTRLID_MENU, CTRLGRP_BUTTONS);
+    _controlsPlay.add(c);
+    }
+    {
+    //[EXIT] goes in same place as [MENU] when game over
+    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/touch_exit.png", 255, 5));
+    p->setPos(3, 0);
+    p->setFrameLast();  //unselected
+    p->setVisible(false);  //not available until countdown finished
+    Control c(p, CTRLID_EXIT, CTRLGRP_BUTTONS);
+    _controlsPlay.add(c);
+    }
+    {
+    //[NEXT] goes over the countdown position
+    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/touch_next.png", 255, 5));
+    p->setPos(Screen::width() - p->tileW() - 3, 0);
+    p->setFrameLast();  //unselected
+    p->setVisible(false);  //not available until countdown finished
+    Control c(p, CTRLID_NEXT, CTRLGRP_BUTTONS);
+    _controlsPlay.add(c);
+
+    //bounding rect of [NEXT] button placed over countdown timer
+    //doesn't move so can be cached here
+    _pause_rect = p->bounds();
+    }
+
+    //now the four letter/word controls... positions set in newLevel()
+    {
+    //shuffle
+    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_word_shuffle.png", 0, 5));
+    p->setTileSize(48, 48);
+    p->setFrameLast();  //unselected
+    Control c(p, CTRLID_SHUFFLE, CTRLGRP_LETTERS);
+    _controlsPlay.add(c);
+    }
+    {
+    //try word
+    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_word_try.png", 0, 5));
+    p->setTileSize(48, 48);
+    p->setFrameLast();  //unselected
+    Control c(p, CTRLID_TRYWORD, CTRLGRP_LETTERS);
+    _controlsPlay.add(c);
+    }
+    {
+    //totop
+    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_word_totop.png", 0, 5));
+    p->setTileSize(48, 48);
+    p->setFrameLast();  //unselected
+    Control c(p, CTRLID_TOTOP, CTRLGRP_LETTERS);
+    _controlsPlay.add(c);
+    }
+    {
+    //last
+    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_word_last.png", 0, 5));
+    p->setTileSize(48, 48);
+    p->setFrameLast();  //unselected
+    Control c(p, CTRLID_LAST, CTRLGRP_LETTERS);
+    _controlsPlay.add(c);
+    }
+
 	//once the class is initialised, init and running are set true
 	newGame();	//reset scores etc
 	newLevel();	//preparebackground, get next word etc
@@ -112,41 +178,10 @@ void PlayGame::init(Input *input)
     _nWordBoxNeededOffset = ((_gd._boxes.tileCount()/4)*3); //4 blocks.. 4th block
 
 	//set the repeat of the keys required
-	input->setRepeat(pp_i::UP, 250, 250);		//button, rate, delay
-	input->setRepeat(pp_i::DOWN, 250, 250);
-	input->setRepeat(pp_i::LEFT, 250, 250);
-	input->setRepeat(pp_i::RIGHT, 250, 250);
-
-    //[MENU] shows in top left (unless [EXIT] shown)
-    boost::shared_ptr<Sprite> pMenu(new Sprite(RES_BASE + "images/touch_menu.png", 255, 4));
-    pMenu->setPos(3, 0);
-    pMenu->setTileSize(106, 52, Image::TILE_VERT);
-    pMenu->setFrameLast();  //unselected
-    pMenu->setVisible(true);  //menu option always visible during game (unless EXIT to be shown)
-    Control cMenu(pMenu, CTRLID_MENU);
-    _controlsPlay.add(cMenu);
-
-    //[EXIT] goes in same place as [MENU] when game over
-    boost::shared_ptr<Sprite> pExit(new Sprite(RES_BASE + "images/touch_exit.png", 255, 4));
-    pExit->setPos(3, 0);
-    pExit->setTileSize(106, 52, Image::TILE_VERT);
-    pExit->setFrameLast();  //unselected
-    pExit->setVisible(false);  //not available until countdown finished
-    Control cExit(pExit, CTRLID_EXIT);
-    _controlsPlay.add(cExit);
-
-    //[NEXT] goes over the countdown position
-    boost::shared_ptr<Sprite> pNext(new Sprite(RES_BASE + "images/touch_next.png", 255, 4));
-    pNext->setPos(Screen::width() - pNext->width() - 3, 0);
-    pNext->setTileSize(106, 52, Image::TILE_VERT);
-    pNext->setFrameLast();  //unselected
-    pNext->setVisible(false);  //not available until countdown finished
-    Control cNext(pNext, CTRLID_NEXT);
-    _controlsPlay.add(cNext);
-
-    //bounding rect of [NEXT} button placed over countdown timer
-    //doesn't move so can be cached here
-    _pause_rect = pNext->bounds();
+	input->setRepeat(ppkey::UP, 250, 250);		//button, rate, delay
+	input->setRepeat(ppkey::DOWN, 250, 250);
+	input->setRepeat(ppkey::LEFT, 250, 250);
+	input->setRepeat(ppkey::RIGHT, 250, 250);
 
 	//need to set the _init and _running flags
 	_init = true;
@@ -198,7 +233,7 @@ void PlayGame::stateFn(eState state)
 					pButtonFn = &PlayGame::button_pause;
 					pTouchFn = &PlayGame::touch_pause;
 					break;
-//	case PG_PAUSE:	_play = new PlayGamePause(_gd, _dictWord);
+//	case PG_PAUSE:	_play = new PlayGamePause(_gd, _dictWord);  //TODO...
 //					break;
 
 	case PG_PLAY:
@@ -276,11 +311,7 @@ void PlayGame::render_play(Screen* s)
 			_gd._scratch.blitTo(s, _xScratch+(xx*(CURSORW+2)), _yScratchBot, nTile);
 		}
 
-		//draw touch controls
-		_gd._word_last_pulse.draw(s);
-		_gd._word_totop_pulse.draw(s);
-		_gd._word_shuffle_pulse.draw(s);
-		_gd._word_try_pulse.draw(s);
+		//draw touch controls not in controls container
         _gd._gamemusic_icon.draw(s);
 
 		//draw game letters
@@ -296,38 +327,30 @@ void PlayGame::render_play(Screen* s)
 
     const bool bHighlightAllColumns = foundEnoughWords() && PG_PLAY == _state;
 
-	//[3..], [4...], [5....] and [6.....] letter boxes
+	//[3..], [4...], [5....], [N.....] letter boxes
 	for (xx=_shortestWordLen; xx<=_longestWordLen; ++xx)	//accross the screen
 	{
-		it = _wordsFound[xx].begin();
+	    const int yyWordOff = _boxWordOffset[xx];
+		it = _wordsFound[xx].begin()+yyWordOff;
 		const int nWords = _gd._words.wordsOfLength(xx);
 		const bool bHighlightWholeColumn = bHighlightAllColumns || (PG_PLAY == _state && _round.getBottomWordLength() == xx);
 
 		if (nWords)	//column has words
 		{
-			for (yy=0; yy<nWords; ++yy)	//down the screen
+		    yy = 0;
+			for (int yyCur = yyWordOff; yyCur<nWords; ++yyCur)	//down the screen
 			{
 			    const int boxOffsetY = yo+(yy*(BOXH + BOXHGAP));  //same as in touch_end()
 
-				//As the old limit of 7 on screen word boxes has now been extended to 8, we can't use
-				//this fuction (as boxes reach to the very bottom of the screen). If it ever goes back
-				//to 7 and includes more words than can fit in a 7 word column, we might use this again.
+				//A gap exists below the last word box in the column whch can display the number of
+				//remaining words that can be found but not displayable in the list.
 				if (yy >= MAX_WORD_COL)
 				{
-					//? there are more words than can fit on screen (7 down)
-					//  so show remaining count which turns green when all words are found
-					//NOTE: this is currently not used as the dictionary file only has words
-					//		with up to seven 3, 4, 5 and 6 letter words that make up those available
-					//		Just use a dictionary with > 7 words in any 3, 4, 5 or 6 letter words
-					//		for this functionality to work
-//#ifdef _DEBUG
 					if (PG_PLAY == _state)
-						_gd._fntClean.put_number(s, _boxOffset[xx]+6, boxOffsetY, nWords-_wordsFound[xx].size(), "%d",
+						_gd._fntTiny.put_number(s, _boxOffset[xx]+6, boxOffsetY,
+                              nWords-_wordsFound[xx].size()-MAX_WORD_COL, "%d more",
 							(nWords==(int)_wordsFound[xx].size())?GREEN_COLOUR:BLUE_COLOUR);
 
-					//render the "more" arrow under column
-//					_gd._moreWords
-//#endif
 					break;	//out of this n letters loop
 				}
 
@@ -386,6 +409,8 @@ void PlayGame::render_play(Screen* s)
                                     xx
                         )-3 );  //-3 to reset the xx back to 0 as the boxes.png starts at 3 letter tile
                 }
+
+                ++yy;
 			}
 		}
 		else
@@ -444,7 +469,7 @@ void PlayGame::render_end(Screen* s)
 		case 2:_gd._fntBig.put_text(s, yyTitle, "STORMING!", PURPLE_COLOUR, true);break;
 		default:_gd._fntBig.put_text(s, yyTitle, "WELL DONE!", PURPLE_COLOUR, true);break;
 		}
-		_gd._fntMed.put_number(s, yyReward, _bonusScore, "Just enough, add %d points", PURPLE_COLOUR, true);
+		_gd._fntMed.put_number(s, yyReward, _bonusScore, "Just enough, add %d points", PURPLE_COLOUR, false);
 		break;
 	case SU_GOT6:		//WELL DONE! - You got the 6
 		switch (_randomTitle)
@@ -454,7 +479,7 @@ void PlayGame::render_end(Screen* s)
 		case 2:_gd._fntBig.put_text(s, yyTitle, "COOL!", PURPLE_COLOUR, true);break;
 		default:_gd._fntBig.put_text(s, yyTitle, "WELL DONE!", PURPLE_COLOUR, true);break;
 		}
-		_gd._fntMed.put_number(s, yyReward, _bonusScore, "You got a Reword, add %d points", PURPLE_COLOUR, true);
+		_gd._fntMed.put_number(s, yyReward, _bonusScore, "You got a Reword, add %d points", PURPLE_COLOUR, false);
 		break;
 	case SU_BONUS:		//BONUS!! - You got all words
 		switch (_randomTitle)
@@ -464,7 +489,7 @@ void PlayGame::render_end(Screen* s)
 		case 2:_gd._fntBig.put_text(s, yyTitle, "AMAZING!!", PURPLE_COLOUR, true);break;
 		default:_gd._fntBig.put_text(s, yyTitle, "AWESOME!!", PURPLE_COLOUR, true);break;
 		}
-		_gd._fntMed.put_number(s, yyReward, _bonusScore, "All words, add %d points", PURPLE_COLOUR, true);
+		_gd._fntMed.put_number(s, yyReward, _bonusScore, "All words, add %d points", PURPLE_COLOUR, false);
 		break;
 	case SU_BADLUCK:	//Bad Luck! - Out of time
 		switch (_randomTitle)
@@ -496,7 +521,7 @@ void PlayGame::render_end(Screen* s)
 			_gd._fntMed.put_text(s, yyReward, "Now try another", GOLD_COLOUR, false);
 		}
 		break;
-	case SU_TIMETRIAL:	//Time trial - single count down to 0 - no timer reset
+	case SU_TIMETRIAL:	//Time trial - single count  to 0 - no timer reset
 		if (_fastest)
 		{
 			_gd._fntBig.put_text(s, yyTitle, "FASTEST YET!", BLUE_COLOUR, true);
@@ -579,16 +604,12 @@ void PlayGame::work_play(Input* input, float speedFactor)
 	//if a key is pressed and the interval has expired, process
 	//that button as if pressesd again
 
-    if (input->repeat(pp_i::UP))	button(input, pp_i::UP);
-    if (input->repeat(pp_i::DOWN))  button(input, pp_i::DOWN);
-    if (input->repeat(pp_i::LEFT))	button(input, pp_i::LEFT);
-    if (input->repeat(pp_i::RIGHT)) button(input, pp_i::RIGHT);
+    if (input->repeat(ppkey::UP))	button(input, ppkey::UP);
+    if (input->repeat(ppkey::DOWN))  button(input, ppkey::DOWN);
+    if (input->repeat(ppkey::LEFT))	button(input, ppkey::LEFT);
+    if (input->repeat(ppkey::RIGHT)) button(input, ppkey::RIGHT);
 
 	_round.work();
-	_gd._word_last_pulse.work();
-	_gd._word_totop_pulse.work();
-	_gd._word_shuffle_pulse.work();
-	_gd._word_try_pulse.work();
 
 //  audio not animated icons so don't need to call work()
 //	_gd._gamemusic_icon.work();
@@ -616,13 +637,13 @@ void PlayGame::work_pause(Input* input, float speedFactor)
 void PlayGame::work_popup(Input* input, float speedFactor)
 {
 	_pPopup->work(input, speedFactor);
-
-	//and still allow the play controls to work during popup
-//    _controlsPlay.work(input, speedFactor);
 }
 
 void PlayGame::startPopup(Input *input)
 {
+//    _controlsPlay.showGroup(false, CTRLGRP_LETTERS);
+    slideRoundButtonsOut();
+
 	_pPopup = new PlayGamePopup(_gd, foundEnoughWords());
 	if (_pPopup)
 		_pPopup->init(input);
@@ -632,20 +653,23 @@ void PlayGame::stopPopup()
 {
 	delete _pPopup;
 	_pPopup = NULL;
+//    _controlsPlay.showGroup(true, CTRLGRP_LETTERS);
+    slideRoundButtonsIn();
+
 }
 
-void PlayGame::button(Input* input, pp_i::eButtonType b)
+void PlayGame::button(Input* input, ppkey::eButtonType b)
 {
 	//first handle any global keys
 	switch (b)
 	{
-	case pp_i::L:
+	case ppkey::L:
 		_inputL = input->isPressed(b);
 		break;
-	case pp_i::R:
+	case ppkey::R:
 		_inputR = input->isPressed(b);
 		break;
-	case pp_i::SELECT:
+	case ppkey::SELECT:
 		if (input->isPressed(b) && (_state != PG_PAUSE))
 		{
 			if (_pPopup)
@@ -654,17 +678,17 @@ void PlayGame::button(Input* input, pp_i::eButtonType b)
 				startPopup(input);
 		}
 		break;
-	case pp_i::CLICK:
+	case ppkey::CLICK:
 		if (input->isPressed(b))
 		{
 			if (_inputL && _inputR)
 			{
 				_bAbort = true;
-				pp_g::pushSDL_Event(USER_EV_END_COUNTDOWN); //try to exit more gracefully, pushes end of level
+				ppg::pushSDL_Event(USER_EV_END_COUNTDOWN); //try to exit more gracefully, pushes end of level
 			}
 			else
 			{
-				pp_g::pushSDL_Event(USER_EV_NEXT_TRACK);	//try to start next music track
+				ppg::pushSDL_Event(USER_EV_NEXT_TRACK);	//try to start next music track
 			}
 		}
 		break;
@@ -687,38 +711,38 @@ void PlayGame::button(Input* input, pp_i::eButtonType b)
 
 }
 
-void PlayGame::button_play(Input* input, pp_i::eButtonType b)
+void PlayGame::button_play(Input* input, ppkey::eButtonType b)
 {
 	if (!_waiting.done()) return;	//no user input until finished waiting
 
 	//not waiting so allow button use...
 	switch (b)
 	{
-	case pp_i::LEFT:
+	case ppkey::LEFT:
 		if (input->isPressed(b)) _round.cursorPrev();
 		break;
-	case pp_i::RIGHT:
+	case ppkey::RIGHT:
 		if (input->isPressed(b)) _round.cursorNext();
 		break;
-	case pp_i::UP:
+	case ppkey::UP:
 		if (input->isPressed(b)) _round.cursorUp();
 		break;
-	case pp_i::DOWN:
+	case ppkey::DOWN:
 		if (input->isPressed(b)) _round.cursorDown(); //will only go down if letters exist
 		break;
-	case pp_i::L:
+	case ppkey::L:
 		if (input->isPressed(b)) commandWordToLast();
 		break;
-	case pp_i::R:
+	case ppkey::R:
 		if (input->isPressed(b)) commandWordToLast();
 		break;
-	case pp_i::A:
+	case ppkey::A:
 		if (input->isPressed(b))
 		{
 			commandJumbleWord();
 		}
 		break;
-	case pp_i::B:
+	case ppkey::B:
 		if (input->isPressed(b))
 		{
 			//user still in play so select curr letter
@@ -733,34 +757,34 @@ void PlayGame::button_play(Input* input, pp_i::eButtonType b)
 //			_round.cursorNext();	//dont use as it confuses player (well me anyway)
 		}
 		break;
-	case pp_i::START:
+	case ppkey::START:
 		if (input->isPressed(b)) doPauseGame();
 		break;
-	case pp_i::Y:
+	case ppkey::Y:
 		if (input->isPressed(b)) commandClearAllToTop();
 		break;
-	case pp_i::X:
+	case ppkey::X:
 		if (input->isPressed(b)) commandTryWord();
 		break;
 
 	default:break;
 	}
 }
-void PlayGame::button_wait(Input* input, pp_i::eButtonType b)
+void PlayGame::button_wait(Input* input, ppkey::eButtonType b)
 {
 	//same as play state
 	button_play(input, b);
 }
-void PlayGame::button_end(Input* input, pp_i::eButtonType b)
+void PlayGame::button_end(Input* input, ppkey::eButtonType b)
 {
 	//in end state, not waiting so allow button use...
 	switch (b)
 	{
-	case pp_i::B:
+	case ppkey::B:
 		if (input->isPressed(b))
 			doMoveOn();
 		break;
-	case pp_i::LEFT:
+	case ppkey::LEFT:
 		if (input->isPressed(b))
 		{
 			do {	//repeat jump left if finds a gap (missing 3, 4, 5 letter word)
@@ -769,7 +793,7 @@ void PlayGame::button_end(Input* input, pp_i::eButtonType b)
 			if (_yyWordHi > _gd._words.wordsOfLength(_xxWordHi)-1) _yyWordHi = _gd._words.wordsOfLength(_xxWordHi)-1;
 		}
 		break;
-	case pp_i::RIGHT:
+	case ppkey::RIGHT:
 		if (input->isPressed(b))
 		{
 			do {	//repeat jump right if finds a gap (missing 3, 4, 5 letter word)
@@ -778,21 +802,60 @@ void PlayGame::button_end(Input* input, pp_i::eButtonType b)
 			if (_yyWordHi > _gd._words.wordsOfLength(_xxWordHi)-1) _yyWordHi = _gd._words.wordsOfLength(_xxWordHi)-1;
 		}
 		break;
-	case pp_i::UP:
+	case ppkey::UP:
 		if (input->isPressed(b))
 		{
-			if (_yyWordHi-1 < 0) _yyWordHi = _gd._words.wordsOfLength(_xxWordHi)-1; else --_yyWordHi;
+		    int maxOnScreen = std::min(MAX_WORD_COL, _gd._words.wordsOfLength(_xxWordHi));
+		    if (_yyWordHi <= 0) //first box in col
+		    {
+                int yyWordOff = _boxWordOffset[_xxWordHi];
+		        if (yyWordOff > 0)
+		        {
+		            //sub one from offset and leave highligh at first box
+                    yyWordOff--;
+		        }
+		        else
+		        {
+		            //move to end - to bottom of screen col and word list
+		            yyWordOff = std::max(0, _gd._words.wordsOfLength(_xxWordHi) - maxOnScreen -1); //0 if < MAX_.. boxes
+		            _yyWordHi = maxOnScreen-1;
+		        }
+                _boxWordOffset[_xxWordHi] = yyWordOff;
+		    }
+		    else
+		    {
+		        _yyWordHi--;    //just move highlight up
+		    }
 		}
 		break;
-	case pp_i::DOWN:
+	case ppkey::DOWN:
 		if (input->isPressed(b))
 		{
-			if (_yyWordHi+1 > _gd._words.wordsOfLength(_xxWordHi)-1) _yyWordHi = 0; else ++_yyWordHi;
+		    int maxOnScreen = std::min(MAX_WORD_COL, _gd._words.wordsOfLength(_xxWordHi));
+		    if (_yyWordHi >= maxOnScreen-1) //last box in col
+		    {
+                int yyWordOff = _boxWordOffset[_xxWordHi];
+		        if (yyWordOff + maxOnScreen < _gd._words.wordsOfLength(_xxWordHi)-1)
+		        {
+		            //add one to offset and leave highligh at last box
+                    yyWordOff++;
+		        }
+		        else
+		        {
+		            //back to start - to top
+		            yyWordOff = _yyWordHi = 0;
+		        }
+                _boxWordOffset[_xxWordHi] = yyWordOff;
+		    }
+		    else
+		    {
+		        _yyWordHi++;    //just move highlight down
+		    }
 		}
 		break;
 
-	case pp_i::Y:
-	case pp_i::CLICK:
+	case ppkey::Y:
+	case ppkey::CLICK:
 //		if (!_bAbort && //make sure global L+R+Click not pressed
 		if (input->isPressed(b))
 		{
@@ -805,19 +868,19 @@ void PlayGame::button_end(Input* input, pp_i::eButtonType b)
 
 }
 
-void PlayGame::button_pause(Input* input, pp_i::eButtonType b)
+void PlayGame::button_pause(Input* input, ppkey::eButtonType b)
 {
 	switch (b)
 	{
-	case pp_i::START:
-	case pp_i::B:
+	case ppkey::START:
+	case ppkey::B:
 		if (input->isPressed(b)) doPauseGame();	//will un-pause if it's in pause mode
 		break;
 
 	default:break;
 	}
 }
-void PlayGame::button_popup(Input* input, pp_i::eButtonType b)
+void PlayGame::button_popup(Input* input, ppkey::eButtonType b)
 {
 	_pPopup->button(input, b);
 	handlePopup();
@@ -833,7 +896,7 @@ void PlayGame::handlePopup()
 		break;
 	case PlayGamePopup::POP_SKIP:
 		if (_state != PG_END)	//not already at end
-			pp_g::pushSDL_Event(USER_EV_END_COUNTDOWN);	//next level - if not got a 6, will end game
+			ppg::pushSDL_Event(USER_EV_END_COUNTDOWN);	//next level - if not got a 6, will end game
 		break;
 	case PlayGamePopup::POP_SAVE:
 		//user selected to save state (now at least a 6 letter word found)
@@ -841,7 +904,7 @@ void PlayGame::handlePopup()
 	case PlayGamePopup::POP_QUIT:
 		//back to main menu - like L+R+Click (or ESC on PC)
 		_bAbort = true;
-		pp_g::pushSDL_Event(USER_EV_END_COUNTDOWN); //try to exit more gracefully, pushes end of level
+		ppg::pushSDL_Event(USER_EV_END_COUNTDOWN); //try to exit more gracefully, pushes end of level
 		break;
 
 	default:break;	//do nothing
@@ -897,22 +960,6 @@ bool PlayGame::touch_play(const Point &pt)
 			if (!_round.cursorPrev()) _round.cursorUp();
 		}
 	}
-	else if (_gd._word_last_pulse.contains(pt))
-	{
-		commandWordToLast();
-	}
-	else if (_gd._word_totop_pulse.contains(pt))
-	{
-		commandClearAllToTop();
-	}
-	else if (_gd._word_shuffle_pulse.contains(pt))
-	{
-		commandJumbleWord();
-	}
-	else if (_gd._word_try_pulse.contains(pt))
-	{
-		commandTryWord();
-	}
     else if (_gd._gamemusic_icon.contains(pt) && Locator::GetAudio().musicEnabled())
     {
         IAudio &a = Locator::GetAudio();
@@ -926,7 +973,7 @@ bool PlayGame::touch_play(const Point &pt)
     }
 	else
 		if (!_doubleClick.done())
-		    commandTryWord();
+		    commandTryWord();       //same as click (?) button
 		else
 			_doubleClick.start(300);
 
@@ -984,25 +1031,45 @@ bool PlayGame::tap(const Point &pt)
         return _play->tap(pt);
     }
 
-    _ctrl_id = _controlsPlay.tapped(pt);
+    const int crtl_id = _controlsPlay.tapped(pt);
 
-    if (_ctrl_id == CTRLID_MENU)
+    if (crtl_id == CTRLID_MENU)
     {
         //need to push a key command instaed of starting as it needs an Input ptr
-        int key = Locator::GetInput().un_translate(pp_i::SELECT);
-        pp_g::pushSDL_EventKey(key);
+        int key = Locator::GetInput().un_translate(ppkey::SELECT);
+        ppg::pushSDL_EventKey(key);
         return true;
     }
-    else if (_ctrl_id == CTRLID_NEXT || _ctrl_id == CTRLID_EXIT)
+    else if (crtl_id == CTRLID_NEXT || crtl_id == CTRLID_EXIT)
     {
         if (PG_END == _state)
         {
-            _controlsPlay.enableControl(false, CTRLID_NEXT);
-            _controlsPlay.enableControl(false, CTRLID_EXIT);
+            _controlsPlay.showControl(false, CTRLID_NEXT);
+            _controlsPlay.showControl(false, CTRLID_EXIT);
+
+            //the round letter action buttons should now be visible
+            _controlsPlay.showGroup(true, CTRLGRP_LETTERS);
+
             doMoveOn();
             return true;
         }
     }
+	else if (crtl_id == CTRLID_LAST)
+	{
+		commandWordToLast();
+	}
+	else if (crtl_id == CTRLID_TOTOP)
+	{
+		commandClearAllToTop();
+	}
+	else if (crtl_id == CTRLID_SHUFFLE)
+	{
+		commandJumbleWord();
+	}
+	else if (crtl_id == CTRLID_TRYWORD)
+	{
+		commandTryWord();
+	}
 
     return false;
 }
@@ -1012,27 +1079,48 @@ bool PlayGame::tap(const Point &pt)
 void PlayGame::commandWordToLast()
 {
 	//start pulse anim and launch command
-	_gd._word_last_pulse.startAnim(0, -1, ImageAnim::ANI_ONCE, 20);
 	_round.setWordToLast();
 }
 //command issued by player - to place all chars in the top row
 void PlayGame::commandClearAllToTop()
 {
-	_gd._word_totop_pulse.startAnim(0, -1, ImageAnim::ANI_ONCE, 20);
 	_round.clearAllToTop();
 }
 //command issued by player - to jumble all remaining letters in the top row
 void PlayGame::commandJumbleWord()
 {
-	_gd._word_shuffle_pulse.startAnim(0, -1, ImageAnim::ANI_ONCE, 20);
 	if (_round.jumbleWord())
 		Mix_PlayChannel(-1,_gd._fxWoosh,0);	//sound only if not already moving etc
 }
 //command issued by player - to check word selected against dictionary
 void PlayGame::commandTryWord()
 {
-	_gd._word_try_pulse.startAnim(0, -1, ImageAnim::ANI_ONCE, 20);
 	tryWord();
+}
+
+//start the animation to slide the four round action buttons,
+//from off screen, to their correct place beside the letters.
+void PlayGame::slideRoundButtonsIn()
+{
+    //these four controls should always be cretaed and available
+    const int ms = 450;
+    _controlsPlay.getControlSprite(CTRLID_SHUFFLE)->startMoveTo(_posRButtonLeft, _posRButtonTop, ms);
+    _controlsPlay.getControlSprite(CTRLID_TRYWORD)->startMoveTo(_posRButtonLeft, _posRButtonBot, ms);
+    _controlsPlay.getControlSprite(CTRLID_TOTOP)->startMoveTo(_posRButtonRight, _posRButtonTop, ms);
+    _controlsPlay.getControlSprite(CTRLID_LAST)->startMoveTo(_posRButtonRight, _posRButtonBot, ms);
+}
+
+//start the animation to slide the four round action buttons,
+//beside the letters, to off screen
+void PlayGame::slideRoundButtonsOut()
+{
+    //these four controls should always be cretaed and available
+    const int ms = 450;
+	const int btnWidth = _controlsPlay.getControlSprite(CTRLID_SHUFFLE)->tileW();
+    _controlsPlay.getControlSprite(CTRLID_SHUFFLE)->startMoveTo(-btnWidth, _posRButtonTop, ms);
+    _controlsPlay.getControlSprite(CTRLID_TRYWORD)->startMoveTo(-btnWidth, _posRButtonBot, ms);
+    _controlsPlay.getControlSprite(CTRLID_TOTOP)->startMoveTo(SCREEN_WIDTH, _posRButtonTop, ms);
+    _controlsPlay.getControlSprite(CTRLID_LAST)->startMoveTo(SCREEN_WIDTH, _posRButtonBot, ms);
 }
 
 //process any events not handled by the main input function
@@ -1048,6 +1136,17 @@ void PlayGame::handleEvent(SDL_Event &sdlevent)
 			}
 		}
 		else
+		if (USER_EV_END_MOVEMENT == sdlevent.user.code)
+		{
+		    //USER_EV_END_MOVEMENT uses data1 as a simple int(as a ptr to sprite
+            //internal data may not exist after end of movement).
+            const int last = reinterpret_cast<int>(sdlevent.user.data1);
+            if (last && last == _round.getLastId())
+            {
+                //slide round buttons onto screen. (slide off again for popup or end game etc)
+                slideRoundButtonsIn();
+            }
+		}
 		if (USER_EV_END_COUNTDOWN == sdlevent.user.code)
 		{
 			if (!_bAbort && foundEnoughWords() 					//must be at least one 6 letter word found to continue
@@ -1103,10 +1202,10 @@ void PlayGame::handleEvent(SDL_Event &sdlevent)
 				}
 				_gd._score.addCurrWords(1);
 
-                _controlsPlay.enableControl(true, CTRLID_MENU);
-                _controlsPlay.enableControl(false, CTRLID_EXIT);
+                _controlsPlay.showControl(true, CTRLID_MENU);
+                _controlsPlay.showControl(false, CTRLID_EXIT);
 
-                _controlsPlay.enableControl(true, CTRLID_NEXT);
+                _controlsPlay.showControl(true, CTRLID_NEXT);
 			}
 			else
 			{
@@ -1129,11 +1228,14 @@ void PlayGame::handleEvent(SDL_Event &sdlevent)
 					showSuccess(SU_BADLUCK);
 				}
 
-                _controlsPlay.enableControl(false, CTRLID_MENU);
-                _controlsPlay.enableControl(true, CTRLID_EXIT);
+                _controlsPlay.showControl(false, CTRLID_MENU);
+                _controlsPlay.showControl(true, CTRLID_EXIT);
 
-                _controlsPlay.enableControl(false, CTRLID_NEXT);    //leave 0 countdown showing
+                _controlsPlay.showControl(false, CTRLID_NEXT);    //leave 0 countdown showing
 			}
+
+            //none of the round letter action buttons should now be visible
+            _controlsPlay.showGroup(false, CTRLGRP_LETTERS);
 		}
 		if (USER_EV_EXIT_SUB_SCREEN == sdlevent.user.code)
 		{
@@ -1159,7 +1261,7 @@ void PlayGame::doMoveOn()
 		if (_countdown==0)
 		{
 			_bAbort = true;
-			pp_g::pushSDL_Event(USER_EV_END_COUNTDOWN); //try to exit more gracefully, pushes end of level
+			ppg::pushSDL_Event(USER_EV_END_COUNTDOWN); //try to exit more gracefully, pushes end of level
 		}
 		else
 		{
@@ -1333,11 +1435,13 @@ int PlayGame::maxCountdown()
 void PlayGame::newLevel()
 {
 	stopCountdown();
-	_ctrl_id = 0;       //nothing pressed yet
 
 	int xx;
 	for (xx=0; xx<=TARGET_MAX; ++xx)
+	{
 		_wordsFound[xx].clear();
+		_boxWordOffset[xx]=0;
+	}
 
 	std::string newword;
 	//nextWord() returns false if bad dictionary entry (XXXXXX corrupted or hacked) !
@@ -1413,30 +1517,17 @@ void PlayGame::newLevel()
 	_randomTitle = g_randInt.random(4);		//0..3
 
 	//onscreen touch command icons
-	const int posLeft = 4;
-	const int posRight = SCREEN_WIDTH-_gd._word_try_pulse.tileW()-4;	//all these touch incons same size
-	const int posTop = _yScratchTop+2+((LETTERH-_gd._word_try_pulse.tileH())/2);	//all same size
-	const int posBot = _yScratchBot+2+((LETTERH-_gd._word_try_pulse.tileH())/2);
-	_gd._word_shuffle_pulse.setPos(posLeft, posTop);
-	_gd._word_try_pulse.setPos(posLeft, posBot);
-	_gd._word_totop_pulse.setPos(posRight, posTop);
-	_gd._word_last_pulse.setPos(posRight, posBot);
-	_gd._gamemusic_icon.setPos(_gamemusic_icon_x, _gamemusic_icon_y);
+	const int btnWidth = _controlsPlay.getControlSprite(CTRLID_SHUFFLE)->tileW();
+   	_posRButtonLeft = 12;
+	_posRButtonRight = SCREEN_WIDTH-btnWidth-12;	//all these touch incons same size
+	_posRButtonTop = _yScratchTop+2+((LETTERH-btnWidth)/2);	//all same size
+	_posRButtonBot = _yScratchBot+2+((LETTERH-btnWidth)/2);
+	//but always start off screen so can be slid on (slideRoundButtonsIn() etc)
+	_controlsPlay.getControlSprite(CTRLID_SHUFFLE)->setPos(-btnWidth, _posRButtonTop);
+	_controlsPlay.getControlSprite(CTRLID_TRYWORD)->setPos(-btnWidth, _posRButtonBot);
+	_controlsPlay.getControlSprite(CTRLID_TOTOP)->setPos(SCREEN_WIDTH, _posRButtonTop);
+	_controlsPlay.getControlSprite(CTRLID_LAST)->setPos(SCREEN_WIDTH, _posRButtonBot);
 
-	//don't want to show or allow touch controls if not on a touchscreen (or mouse/PC) device
-	_gd._word_shuffle_pulse.setVisible(_gd._bTouch);
-	_gd._word_shuffle_pulse.setTouchable(_gd._bTouch);
-	_gd._word_totop_pulse.setVisible(_gd._bTouch);
-	_gd._word_totop_pulse.setTouchable(_gd._bTouch);
-	_gd._word_last_pulse.setVisible(_gd._bTouch);
-	_gd._word_last_pulse.setTouchable(_gd._bTouch);
-	_gd._word_try_pulse.setVisible(_gd._bTouch);
-	_gd._word_try_pulse.setTouchable(_gd._bTouch);
-
-	_gd._word_last_pulse.setFrame(5);	//initially to last frame (button anim always goes back to last frame)
-	_gd._word_totop_pulse.setFrame(5);
-	_gd._word_shuffle_pulse.setFrame(5);
-	_gd._word_try_pulse.setFrame(5);
 	_gd._gamemusic_icon.setFrame(Locator::GetAudio().musicEnabled()?0:1);    //first frame (on) or second frame (off)
 
     calcArcadeNeededWords();    //arcade mode highlights
@@ -1465,7 +1556,7 @@ void PlayGame::calcArcadeNeededWords()
             const int nWordsOnScreen = std::min(_gd._words.wordsOfLength(xx), MAX_WORD_COL);
             nTotalLetters += nWordsOnScreen * xx;     //words * numChars
         }
-_debugTotalLetters = nTotalLetters; //for debug display
+        _debugTotalLetters = nTotalLetters; //for debug display
 
         //2. calc number of letters needed to continue (% based on difficulty)
         //for easy, need to find 20% of all words, or an all-letter word
@@ -1473,16 +1564,17 @@ _debugTotalLetters = nTotalLetters; //for debug display
         //for hard, need to find 60% of all words, or an all-letter word
         const int pc = (DIF_EASY == _gd._diffLevel)?20:(DIF_MED == _gd._diffLevel)?40:60;
         int needed = (nTotalLetters * ((float)pc/100));
-_debugNeededAll = needed; //for debug display
+        _debugNeededAll = needed; //for debug display
 
         for (xx=_longestWordLen; xx>=_shortestWordLen; --xx)
         {
             //remove letters (in words) already found
             needed -= (int)_wordsFound[xx].size() * xx;
         }
-_debugNeededNow = needed;
+        _debugNeededNow = needed;
 
-        for (xx=_longestWordLen; xx>=_shortestWordLen; --xx)
+//        for (xx=_longestWordLen; xx>=_shortestWordLen; --xx)
+        for (xx=_shortestWordLen; xx<=_longestWordLen; ++xx)
         {
             //only count nWords on screen, not overflow
             const int nWords = std::min(_gd._words.wordsOfLength(xx), MAX_WORD_COL);
@@ -1525,7 +1617,7 @@ void PlayGame::tryWord()
 	{
 		if (_longestWordLen == wordlen)
 		{
-			pp_g::pushSDL_Event(USER_EV_END_COUNTDOWN);	//pushes end of level
+			ppg::pushSDL_Event(USER_EV_END_COUNTDOWN);	//pushes end of level
 			return;
 		}
 		else wordlen = -1;	//speeder or timetrial badWord sound as < 6 letters
@@ -1539,7 +1631,7 @@ void PlayGame::tryWord()
 
 		if (foundAllWords())
 		{
-			pp_g::pushSDL_Event(USER_EV_END_COUNTDOWN); //pushes end of level
+			ppg::pushSDL_Event(USER_EV_END_COUNTDOWN); //pushes end of level
 			return;	//exit before sound, as success() plays fanfare sound
 		}
 		//it's a simple word find
@@ -1676,7 +1768,7 @@ void PlayGame::prepareBackground()
 	FontTTF &fontNumbers = _gd._fntSmall;
 	FontTTF &fontCounter = _gd._fntBig;
 	Rect r(0, 0, 0, 0);
-	int score_len(0), score0_len(0), words_len(0), words0_len(0), count0_len(0);
+	int score_len(0), score0_len(0), words_len(0), words0_len(0);
 	r = fontText.calc_text_metrics("SCORE: ");		//note gap to look better
 	score_len = r._max._x;
 	r = fontNumbers.calc_text_metrics("00000000");	//8 0's not drawn here
@@ -1685,8 +1777,6 @@ void PlayGame::prepareBackground()
 	words_len = r._max._x;
 	r = fontNumbers.calc_text_metrics("0000");	//4 0's not drawn here
 	words0_len = r._max._x;
-	r = fontCounter.calc_text_metrics("000");	//countdown timer numbers (3 0's not drawn here)
-	count0_len = r._max._x;
 
 	//now calc where we can place these and the gap between each
     //
@@ -1701,7 +1791,7 @@ void PlayGame::prepareBackground()
     //
 
     int middle_len = score_len+score0_len + words_len+words0_len;
-    int edge_pad = sb_x + (count0_len * 1.2);  //space taken up by [ MENU ] or [ 999 ]
+    int edge_pad = sb_x + _controlsPlay.getControlSprite(CTRLID_NEXT)->tileW()+3; //space taken up by [ MENU ] or [ 999 ]
 	int equal_gap = (sb_w - middle_len - (edge_pad*2)) / 3;    //space on bar len after edges removed, /3 for equal dist
 
 	int titles_y = ((sb_h - fontText.height()) / 2) + 2;	//+2 magic number - too high otherwise...?

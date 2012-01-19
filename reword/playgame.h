@@ -188,7 +188,7 @@ private:
 	int _boxOffset[TARGET_MAX+1];	//pos across screen for found word boxes
 	int _boxLength[TARGET_MAX+1];	//and pixel length of each box displayed (for touch support)
     int _boxWordNeeded[TARGET_MAX+1];   //number of required/needed words in a column (in Arcade mode)
-    int _boxStartYCursor[TARGET_MAX+1]; //offset into column word list so we can scroll down list
+    int _boxWordOffset[TARGET_MAX+1];   //offset into column word list so we can scroll up/down word list
 
     int _nWordBoxHighlightOffset;   //highlighting a word (for dictionary)
     int _nWordBoxEmptyOffset;       //column with no words
