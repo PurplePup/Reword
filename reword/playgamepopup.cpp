@@ -61,6 +61,8 @@ PlayGamePopup::PlayGamePopup(GameData &gd, bool bMaxWordFound)  : _gd(gd)
 //if init() called externally again to reset the menu...
 void PlayGamePopup::init(Input *input)
 {
+    (void)(input);
+
 	//once the class is initialised, init and running are set true
 
 	//Do not init repeat keys so we dont have to reset game repeat on return
@@ -150,6 +152,8 @@ void PlayGamePopup::render(Screen *s)
 
 void PlayGamePopup::work(Input *input, float speedFactor)
 {
+    (void)(speedFactor);
+
 	_gd._star.work();
 
 	//Do repeat keys...if a key is pressed and the interval

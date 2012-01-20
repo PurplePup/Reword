@@ -201,6 +201,8 @@ void PlayInst::updateScrollButtons()
 //event signal from imageanim indicating end of animation
 void PlayInst::ControlEvent(int event, int control_id)
 {
+    (void)(control_id);
+
     if (event == USER_EV_END_ANIMATION)
     {
         updateScrollButtons();

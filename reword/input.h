@@ -36,13 +36,13 @@ class NullInput : public IInput
 public:
     virtual void init() { std::cout << "NullInput (no control) initialised" << std::endl; }
 	virtual bool initDone() { return true; };
-    virtual ppkey::eButtonType translate(int key) { return ppkey::UP; }
-    virtual int un_translate(ppkey::eButtonType b) { return 0; }
-    virtual void down(ppkey::eButtonType b) {}
-    virtual void up(ppkey::eButtonType b) {}
-    virtual bool isPressed(ppkey::eButtonType b) const { return false; }
-    virtual bool repeat(ppkey::eButtonType b) { return false; }
-	virtual void setRepeat(ppkey::eButtonType b, Uint32 rate, Uint32 delay) {}
+    virtual ppkey::eButtonType translate(int key) { (void)(key); return ppkey::UP; }
+    virtual int un_translate(ppkey::eButtonType b) { (void)(b); return 0; }
+    virtual void down(ppkey::eButtonType b) { (void)(b); }
+    virtual void up(ppkey::eButtonType b) { (void)(b); }
+    virtual bool isPressed(ppkey::eButtonType b) const {  (void)(b); return false; }
+    virtual bool repeat(ppkey::eButtonType b) {  (void)(b); return false; }
+	virtual void setRepeat(ppkey::eButtonType b, Uint32 rate, Uint32 delay) { (void)(b); (void)(rate); (void)(delay); }
 	virtual void clearRepeat() {}
 };
 

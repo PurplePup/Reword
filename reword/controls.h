@@ -31,9 +31,9 @@ public:
     virtual void button(Input * input, ppkey::eButtonType b);
 
 	// screen touch (press)
-	virtual bool touch(const Point &pt) { assert(0); }   //do not confuse touched()
+	virtual bool touch(const Point &pt) { (void)(pt); assert(0); }   //do not confuse touched()
 	// screen touch (release)
-	virtual bool tap(const Point &pt) { assert(0); }     //do not confuse tapped()
+	virtual bool tap(const Point &pt) { (void)(pt); assert(0); }     //do not confuse tapped()
 
 	// screen touch (press) of one of the controls?
 	int touched(const Point &pt);

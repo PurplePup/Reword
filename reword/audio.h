@@ -26,25 +26,25 @@ public:
 	virtual void closedown() {}
 
 	virtual int  getVolume() { return 0; }
-	virtual void setVolume(Sint16 newvol, bool test = true) {}
+	virtual void setVolume(Sint16 newvol, bool test = true) { (void)(newvol); (void)(test); }
 	virtual void volumeUp() {}
 	virtual void volumeDown() {}
 
 	virtual bool sfxEnabled() { return false; }
-	virtual void sfxMute(bool bMute = true) {}
+	virtual void sfxMute(bool bMute = true) { (void)(bMute); }
     virtual int  getSfxVol() { return 0; }
-    virtual void setSfxVol(Sint16 newvol, bool bTest = true) {}
+    virtual void setSfxVol(Sint16 newvol, bool bTest = true) { (void)(newvol);  (void)(bTest); }
 
 	virtual bool musicEnabled() { return false; }
-	virtual void musicMute(bool bMute = true) {}
+	virtual void musicMute(bool bMute = true) { (void)(bMute); }
     virtual int  getMusicVol() { return 0; }
-    virtual void setMusicVol(Sint16 newvol, bool bTest = true) {}
+    virtual void setMusicVol(Sint16 newvol, bool bTest = true) { (void)(newvol);  (void)(bTest); }
 
 	virtual bool hasMusicTracks() { return false; }
-	virtual void setBaseTrackDir(const std::string &baseMusicDir) {}
+	virtual void setBaseTrackDir(const std::string &baseMusicDir) { (void)(baseMusicDir); }
 	virtual void startNextTrack() {}
 	virtual void startPrevTrack() {}
-	virtual void startTrack(const std::string &trackName) {}
+	virtual void startTrack(const std::string &trackName) { (void)(trackName); }
 	virtual void stopTrack() {}
 	virtual void pauseTrack() {}
 	virtual bool isPlayingMusic() { return false; }

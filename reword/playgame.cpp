@@ -63,6 +63,8 @@ static	int _countdown;				//seconds remaining
 //function called when timer reaches interval set
 Uint32 countdown_callback(Uint32 interval, void *param)
 {
+    (void)(param);
+
 	if (_countdown <= 0)
 	{
 		ppg::pushSDL_Event(USER_EV_END_COUNTDOWN); //pushEndOfLevel();
@@ -600,6 +602,7 @@ void PlayGame::work(Input* input, float speedFactor)
 
 void PlayGame::work_play(Input* input, float speedFactor)
 {
+    (void)(speedFactor);
 	//Do repeat keys...
 	//if a key is pressed and the interval has expired, process
 	//that button as if pressesd again
@@ -619,6 +622,8 @@ void PlayGame::work_play(Input* input, float speedFactor)
 }
 void PlayGame::work_wait(Input* input, float speedFactor)
 {
+    (void)(input);
+    (void)(speedFactor);
 	//wait.... a while
 	if (_waiting.done())
 	{
@@ -629,9 +634,13 @@ void PlayGame::work_wait(Input* input, float speedFactor)
 }
 void PlayGame::work_end(Input* input, float speedFactor)
 {
+    (void)(input);
+    (void)(speedFactor);
 }
 void PlayGame::work_pause(Input* input, float speedFactor)
 {
+    (void)(input);
+    (void)(speedFactor);
 	_roundPaused->work();
 }
 void PlayGame::work_popup(Input* input, float speedFactor)
@@ -641,7 +650,8 @@ void PlayGame::work_popup(Input* input, float speedFactor)
 
 void PlayGame::startPopup(Input *input)
 {
-//    _controlsPlay.showGroup(false, CTRLGRP_LETTERS);
+    (void)(input);
+
     slideRoundButtonsOut();
 
 	_pPopup = new PlayGamePopup(_gd, foundEnoughWords());
@@ -934,11 +944,15 @@ bool PlayGame::touch(const Point &pt)
 }
 bool PlayGame::touch_default(const Point &pt)
 {
+    (void)(pt);
+
 	return true;
 }
 
 bool PlayGame::touch_pause(const Point &pt)
 {
+    (void)(pt);
+
     doPauseGame();
     return true;
 }

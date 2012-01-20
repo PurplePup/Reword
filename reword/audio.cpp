@@ -56,6 +56,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 void NullAudio::setup(bool bMusic, bool bSfx)
 {
+    (void)(bMusic);
+    (void)(bSfx);
     std::cout << "NullAudio (silent) initialised" << std::endl;
 }
 

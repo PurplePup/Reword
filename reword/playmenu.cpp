@@ -101,6 +101,8 @@ void PlayMenu::stopMenuMusic()
 
 void PlayMenu::choose(MenuItem i)
 {
+    (void)(i);
+
 	return;
 }
 
@@ -151,6 +153,8 @@ void PlayMenu::render(Screen *s)
 
 void PlayMenu::work(Input *input, float speedFactor)
 {
+    (void)(speedFactor);
+
 	_title.work();
 	_gd._star.work();
 

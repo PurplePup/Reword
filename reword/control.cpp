@@ -65,6 +65,8 @@ void Control::render(Screen* s)
 // other processing
 void Control::work(Input* input, float speedFactor)
 {
+    (void)(input);
+    (void)(speedFactor);
     _pCtrl->work();
 };
 
