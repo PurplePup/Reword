@@ -1,9 +1,8 @@
 //PlayMainMenu.h
- 
+
 #ifndef _PlayMainMenu_H
 #define _PlayMainMenu_H
 
-#include "play.h"		//IPlay interface
 #include "screen.h"
 #include "input.h"
 #include "gamedata.h"	//also holds constants and stuff
@@ -18,7 +17,7 @@ public:
 	PlayMainMenu(GameData& gd) : PlayMenu(gd) {}
     virtual void init(Input *input);
     virtual void choose(MenuItem i);
-
+    virtual void render(Screen *s);
 };
 
 #endif //_PlayMainMenu_H

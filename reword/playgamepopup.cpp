@@ -192,7 +192,6 @@ void PlayGamePopup::button(Input *input, ppkey::eButtonType b)
 
 	default:break;
 	}
-
 }
 
 bool PlayGamePopup::touch(const Point &pt)
@@ -202,6 +201,12 @@ bool PlayGamePopup::touch(const Point &pt)
 	{
 		if (it->second._r.contains(pt))
 		{
+		    if (_gd._options._bSingleTapMenus)
+		    {
+				_menuoption = it->first;		//highlight the touched item
+                return true;
+		    }
+
 			if (!_doubleClick.done() && (it->first == _menuoption))
 				choose();
 			else
@@ -213,6 +218,27 @@ bool PlayGamePopup::touch(const Point &pt)
 		}
 	}
 	return false;
+}
+
+//tap (release) to action the menu item
+bool PlayGamePopup::tap(const Point &pt)
+{
+    if (_gd._options._bSingleTapMenus)
+    {
+        Uint32 item(0);
+        for (tMenuMap::iterator it = _pItems->begin(); it != _pItems->end(); ++item, ++it) {
+            if (it->second._enabled && it->second._r.contains(pt))
+            {
+                //is same control originally touched (ie not moved away to cancel)
+                if (it->first == _menuoption)
+                {
+                    choose();
+                }
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 void PlayGamePopup::choose()

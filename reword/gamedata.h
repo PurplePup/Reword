@@ -17,6 +17,24 @@
 #include "score.h"
 #include "sprite.h"
 
+//loadable game options
+struct GameOptions
+{
+    GameOptions();
+    bool load();
+    bool save();
+
+    bool        _bSound;    //if false, loads null IAudio
+    bool        _bSfx;
+    bool        _bMusic;
+
+	bool        _bSingleTapMenus;
+	bool        _bDefaultSfxOn;
+	bool        _bDefaultMusicOn;
+	std::string _defaultWordFile;   //"words/rewordlist.txt"
+	std::string _defaultMusicDir;   //"music"
+
+};
 
 //to persist global data throughout app
 class GameData
@@ -27,9 +45,6 @@ public:
 	~GameData();
 	bool isLoaded() {return _init;}
 	void setDiffLevel(eGameDiff newDiff);
-
-	//void loadOptions();
-	//void saveOptions();
 
 	void saveQuickState();
 	bool loadQuickState();
@@ -85,6 +100,8 @@ public:
 
 	//Game vars
 	///////////////////////////////
+
+    GameOptions _options;
 
 	int			_mainmenuoption;	// (0=play, 1=level, 2=hiscore etc)
 

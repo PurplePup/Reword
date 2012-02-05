@@ -82,43 +82,38 @@ void PlayHigh::init(Input *input)
 	//set arrow controls (scroll positions)
     {
     boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_scroll_up.png", 0, 5));
-    p->setFrameLast();  //unselected
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2);
     p->_sigEvent.connect(boost::bind(&PlayHigh::ControlEvent, this, _1, _2));
-    Control c(p, CTRLID_SCROLL_UP);
+    Control c(p, CTRLID_SCROLL_UP, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
     {
     boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_scroll_down.png", 0, 5));
-    p->setFrameLast();  //unselected
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2+p->tileH()+6);
     p->_sigEvent.connect(boost::bind(&PlayHigh::ControlEvent, this, _1, _2));
-    Control c(p, CTRLID_SCROLL_DOWN);
+    Control c(p, CTRLID_SCROLL_DOWN, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
     {
     boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_scroll_left.png", 0, 5));
-    p->setFrameLast();  //unselected
     p->setPos(SCREEN_WIDTH-(p->tileW()*2)-8, BG_LINE_BOT-p->tileH()-2);
     p->_sigEvent.connect(boost::bind(&PlayHigh::ControlEvent, this, _1, _2));
-    Control c(p, CTRLID_SCROLL_LEFT);
+    Control c(p, CTRLID_SCROLL_LEFT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
     {
     boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_scroll_right.png", 0, 5));
-    p->setFrameLast();  //unselected
     p->setPos(SCREEN_WIDTH-(p->tileW())-2, BG_LINE_BOT-p->tileH()-2);
     p->_sigEvent.connect(boost::bind(&PlayHigh::ControlEvent, this, _1, _2));
-    Control c(p, CTRLID_SCROLL_RIGHT);
+    Control c(p, CTRLID_SCROLL_RIGHT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
 
     //[EXIT] hi score screen buttons
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/touch_exit.png", 255, 5));
-    p->setFrameLast();  //unselected
-    p->setPos(3, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
-    Control c(p, CTRLID_EXIT);
+    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_square_exit_small.png", 255, 5));
+    p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
+    Control c(p, CTRLID_EXIT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
 

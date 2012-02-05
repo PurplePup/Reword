@@ -31,15 +31,17 @@ struct MenuItem
 		_hoverOff(BLACK_COLOUR),
 		_hoverOn(BLACK_COLOUR),
 		_enabled(false), _highlight(false) {};
-	MenuItem(int id, SDL_Color colour, std::string title, std::string comment, bool enabled=true) :
+	MenuItem(int id, SDL_Color colour, std::string title, std::string comment,
+            bool enabled=true) :
 		_id(id),
 		_hoverOff(BLACK_COLOUR), _hoverOn(colour),
 		_title(title), _comment(comment),
 		_enabled(enabled), _highlight(false) {};
-
 };
 
 typedef std::vector<MenuItem> tMenuItems;
+
+enum eMenuLayout { MENU_LAYOUT_CENTER, MENU_LAYOUT_LEFT, MENU_LAYOUT_RIGHT };
 
 class PlayMenu : public IPlay
 {
@@ -63,12 +65,14 @@ public:
 	Uint32		addItem(MenuItem i);	//returns item number
 	void		setItem(int item);	//sets the current highlighted item
 	MenuItem	getItem(int item);	//gets the ...
+	Rect        getItemWidest();
 	MenuItem	getSelected();
 	int			getNextYPos() { return _nextYpos; }
+	void        setLayout(eMenuLayout layoutType, int offset);
 
 	GameData &	_gd;			//shared data between screens (play classes)
 
-private:
+protected:
     void        recalcItemPositions();
 
 	Roundels	_title;
@@ -81,6 +85,9 @@ private:
 	int			_nextYpos;
 	Point       _saveTouchPt;   //save pt at which touch/press occurred
 	Waiting     _delayHelp;
+	eMenuLayout _layoutType;
+	int         _layoutOffset;
+    Waiting		_doubleClick;	//touch support
 };
 
 #endif //_PlayMenu_H

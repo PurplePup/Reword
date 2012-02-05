@@ -53,9 +53,10 @@ Control * Controls::getControl(int id)
     t_controls::iterator end = _controls.end();
     for ( ; it != end; ++it)
     {
-        if (it->getID() == id)
+        if (it->getControlId() == id)
             return &(*it);
     }
+	std::cerr << "Controls::getControl(" << id << ") failed to find " << std::endl;
     assert(0);
     return 0; //nullptr
 }
@@ -64,7 +65,6 @@ Sprite * Controls::getControlSprite(int id)
 {
     Control *pc = getControl(id);
     if (pc) return pc->getSprite();
-    assert(0);
     return 0; //nullptr
 }
 
@@ -107,10 +107,10 @@ int Controls::touched(const Point &pt)
     {
         if (it->touch(pt))  //changes matched control to 'selected' frame
         {
-            //return the id of the control pressed
-            id = it->getID();
+            //save id of the control pressed to pass back
+            id = it->getControlId();
+            //loop to end - so each control gets a touch() call
         }
-        else if (it->isPressed()) it->fade();
     }
     return id;
 }
@@ -125,11 +125,10 @@ int Controls::tapped(const Point &pt)
     {
         if (it->tap(pt))
         {
-            //return the id of the control
-            id = it->getID();
-            //loop to end
+            //save id of the control pressed to pass back
+            id = it->getControlId();
+            //loop to end - so each control gets a tap() call
         }
-        else if (it->isPressed()) it->fade();
     }
     return id;
 }
@@ -153,7 +152,7 @@ void Controls::showGroup(bool bShow, unsigned int groupMask)
     t_controls::iterator end = _controls.end();
     for ( ; it != end; ++it)
     {
-        if (groupMask & it->getGroup())
+        if (groupMask & it->getGroupId())
         {
             Sprite *ps = it->getSprite();
             if (ps)
@@ -175,7 +174,7 @@ void Controls::showAllControls(bool bShow /*=true*/, int exceptID /*=0*/)
     {
         Sprite *ps = it->getSprite();
         if (!ps) continue;
-        if (exceptID && it->getID() == exceptID)
+        if (exceptID && it->getControlId() == exceptID)
         {
             ps->setVisible(!bShow);
         }

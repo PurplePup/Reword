@@ -52,6 +52,8 @@ PlayMenu::PlayMenu(GameData &gd)  : _gd(gd)
 	_item = 0;
 	_nextYpos = 0;
 	_menuRect = Rect(0, BG_LINE_TOP, SCREEN_WIDTH, BG_LINE_BOT);
+	_layoutType = MENU_LAYOUT_CENTER;
+	_layoutOffset = 0;
 }
 
 void PlayMenu::init(Input *input)
@@ -99,10 +101,10 @@ void PlayMenu::stopMenuMusic()
     Locator::GetAudio().stopTrack();
 }
 
+//function to be overloaded in derived classes to process choice
 void PlayMenu::choose(MenuItem i)
 {
     (void)(i);
-
 	return;
 }
 
@@ -115,7 +117,6 @@ void PlayMenu::render(Screen *s)
 	_title.draw(s);
 
     _gd._gamemusic_icon.draw(s);
-	_gd._fntTiny.put_text_right(s, 5, 0, VERSION_STRING, BLACK_COLOUR); //display vN.N at top right
 
 	int selected = getSelected()._id;
 	int nextY = 0;
@@ -215,15 +216,41 @@ bool PlayMenu::touch(const Point &pt)
 {
     _saveTouchPt._x = _saveTouchPt._y = 0;
 	Uint32 item(0);
-	for (tMenuItems::iterator p = _itemList.begin(); p != _itemList.end(); ++item, ++p) {
-		if (p->_enabled && p->_rBox.contains(pt))
+//	for (tMenuItems::iterator p = _itemList.begin(); p != _itemList.end(); ++item, ++p) {
+//		if (p->_enabled && p->_rBox.contains(pt))
+//		{
+//		    _saveTouchPt = pt;      //so test if release pos is in same menu item
+//			_item = item;	        //highlight the touched item
+//			_delayHelp.start(500);  //wait before help line displayed
+//			return true;
+//		}
+//	}
+
+	for (tMenuItems::iterator it = _itemList.begin(); it != _itemList.end(); ++item, ++it)
+	{
+		if (it->_enabled && it->_rBox.contains(pt))
 		{
-		    _saveTouchPt = pt;      //so test if release pos is in same menu item
-			_item = item;	        //highlight the touched item
-			_delayHelp.start(500);  //wait before help line displayed
-			return true;
+            if (_gd._options._bSingleTapMenus)
+            {
+                _saveTouchPt = pt;      //so test if release pos is in same menu item
+                _item = item;	        //highlight the touched item
+                _delayHelp.start(500);  //wait before help line displayed
+                return true;
+            }
+            else
+            {
+                if (!_doubleClick.done() && (item == _item))
+                    choose(*it);
+                else
+                {
+                    _doubleClick.start(300);	//start dbl click timer
+                    _item = item;		//highlight the touched item
+                }
+                return true;
+            }
 		}
 	}
+
 
     //game music icon action on press, not tap(release)
     if (_gd._gamemusic_icon.contains(pt))
@@ -244,15 +271,21 @@ bool PlayMenu::touch(const Point &pt)
 //tap (release) to action the menu item
 bool PlayMenu::tap(const Point &pt)
 {
-	Uint32 item(0);
-	for (tMenuItems::iterator p = _itemList.begin(); p != _itemList.end(); ++item, ++p) {
-		if (p->_enabled && p->_rBox.contains(pt))
-		{
-		    if (p->_r.contains(_saveTouchPt))   //is same control originally touched (ie not move away to cancel)
-                choose(*p);
-			return true;
-		}
-	}
+    if (_gd._options._bSingleTapMenus)
+    {
+        Uint32 item(0);
+        for (tMenuItems::iterator it = _itemList.begin(); it != _itemList.end(); ++item, ++it) {
+            if (it->_enabled && it->_rBox.contains(pt))
+            {
+                if (it->_rBox.contains(_saveTouchPt))   //is same control originally touched (ie not move away to cancel)
+                {
+                    _saveTouchPt = Point();
+                    choose(*it);
+                }
+                return true;
+            }
+        }
+    }
 	return false;
 }
 
@@ -278,7 +311,18 @@ void PlayMenu::recalcItemPositions()
 	for (int i=0; i<items; i++)
     {
         const int len = _gd._fntMed.calc_text_length(_itemList[i]._title.c_str(), false);
-        const int x = (SCREEN_WIDTH-len)/2;
+        int x;
+        if (_layoutType == MENU_LAYOUT_LEFT)
+        {
+            x = _layoutOffset;
+        }
+        else if (_layoutType == MENU_LAYOUT_RIGHT)
+        {
+            x = (SCREEN_WIDTH-len) + _layoutOffset;
+        }
+        else
+            x = (SCREEN_WIDTH-len) / 2;   //CENTER
+
         _itemList[i]._r = Rect(x, y, x+len, y+_gd._fntMed.height());
         _itemList[i]._rBox = _itemList[i]._r.inset(-5);
         y += gapHeight + _gd._fntMed.height();
@@ -312,4 +356,21 @@ MenuItem PlayMenu::getSelected()
 	return _itemList[_item];
 }
 
+void PlayMenu::setLayout(eMenuLayout layoutType, int offset)
+{
+    _layoutType = layoutType;
+    _layoutOffset = offset;
+    recalcItemPositions();
+}
+
+Rect PlayMenu::getItemWidest()
+{
+    Rect r;
+	for (unsigned int i=0; i<_itemList.size(); i++)
+	{
+        if (_itemList[i]._r.width() > r.width())
+            r = _itemList[i]._r;
+	}
+    return r;
+}
 

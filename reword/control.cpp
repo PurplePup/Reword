@@ -12,7 +12,8 @@ Description:	A class to manage a single on screen control (button)
                 animated using several frames, with the first frame being the
                 disabled one and the first being the 'selected' or highlighted
                 one. Then each next frame reverts back to the default idle frame:
-                [grey][bright][light][lighter][...][idle]
+                [grey][bright][light][lighter][...][idle](repeat [bright][light][lighter][...][idle])
+                for CAM_DIS_HIT_IDLE_DOUBLE anim type.
 
 Author:			Al McLuckie (al-at-purplepup-dot-org)
 
@@ -44,11 +45,16 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "global.h"
 #include "platform.h"
 
-Control::Control(t_pControl &pCtrl, int id, unsigned int group) :
-    _pCtrl(pCtrl), _id(id), _touchID(0), _tapID(0), _bPressed(false), _group(group)
+Control::Control(t_pControl &pCtrl, int id, unsigned int group,
+                    eCtrlAnimMode type, bool bFirstMode) :
+    _pCtrl(pCtrl), _id(id), _bPressed(false), _group(group),
+    _animMode(type), _animFirst(bFirstMode)
 {
     assert (pCtrl.get() != 0);  //must construct with valid control
     assert (id != 0);           //must give it an id (pref unique)
+
+    pCtrl->setId(id);
+    setIdleFrame();
 }
 
 // init the control
@@ -75,6 +81,41 @@ void Control::button(Input* /*input*/, ppkey::eButtonType /*b*/)
 {
 };
 
+void Control::setIdleFrame()
+{
+    if (_animMode == CAM_DIS_HIT_IDLE_SINGLE //only has first block (after 0 frame 'disabled')
+        || _animMode == CAM_SIMPLE) //only has first block (no 0 frame 'disabled')
+    {
+        _pCtrl->setFrameLast();
+    }
+    else //if (_animMode == CAM_DIS_HIT_IDLE_DOUBLE)
+    {
+        if (_animFirst)
+            _pCtrl->setFrame((_pCtrl->getFrameCount()-1)/2);    //end of first block
+        else
+            _pCtrl->setFrame(_pCtrl->getFrameCount()-1);  //end of second block
+    }
+}
+
+void Control::setActiveFrame()
+{
+    if (_animMode == CAM_DIS_HIT_IDLE_SINGLE)
+    {
+        _pCtrl->setFrame(1);    //only has first block (after 0 frame 'disabled')
+    }
+    else if (_animMode == CAM_DIS_HIT_IDLE_DOUBLE)
+    {
+        if (_animFirst)
+            _pCtrl->setFrame(1);    //first block
+        else
+            _pCtrl->setFrame(((_pCtrl->getFrameCount()-1)/2)+1);  //second block
+    }
+    else    //(_animMode == CAM_SIMPLE)
+    {
+        _pCtrl->setFrame(0);
+    }
+}
+
 // screen touch (press) - highlight the control
 bool Control::touch(const Point &pt)
 {
@@ -82,11 +123,13 @@ bool Control::touch(const Point &pt)
     if (_pCtrl->isVisible() && _pCtrl->isTouchable() && _pCtrl->contains(pt))
     {
         //set 'active' highlight frame
-        _pCtrl->setFrame(1);
         _bPressed = true;
+        setActiveFrame();
 		ppg::pushSDL_Event(USER_EV_CONTROL_TOUCH, reinterpret_cast<void *>(_id), 0);
+		_saveTouchPt = pt;      //so test if release pos is in same menu item
         return true;
     }
+    if (isPressed()) fade(false);
     return false;
 }
 
@@ -96,16 +139,45 @@ bool Control::tap(const Point &pt)
     //if control has a tap ID, then send it when tapped
     if (_pCtrl->isVisible() && _pCtrl->isTouchable() && _pCtrl->contains(pt))
     {
-        fade();
-		ppg::pushSDL_Event(USER_EV_CONTROL_TAP, reinterpret_cast<void *>(_id), 0);
-        return true;
+        if (_pCtrl->contains(_saveTouchPt))  //same ctrl as when touch occurred
+        {
+            fade();
+            ppg::pushSDL_Event(USER_EV_CONTROL_TAP, reinterpret_cast<void *>(_id), 0);
+            return true;
+        }
     }
+    if (isPressed()) fade(false);
     return false;
 }
 
 //fade/unpress the control - up to caller to determine visible etc
-void Control::fade()
+void Control::fade(bool bFlip)
 {
     _bPressed = false;
-    _pCtrl->startAnim(1, _pCtrl->getMaxFrame(), ImageAnim::ANI_ONCE, 50, 0, 0, 100); //unpress
+    Uint32 frameFrom, frameTo;
+    if (_animMode == CAM_DIS_HIT_IDLE_SINGLE)
+    {
+        frameFrom = 1; frameTo = _pCtrl->getFrameCount()-1;
+    }
+    else if (_animMode == CAM_DIS_HIT_IDLE_DOUBLE)
+    {
+        if (bFlip) _animFirst = !_animFirst;   //flip it before fade()
+        if (_animFirst)
+        {
+            frameFrom = 1;
+            frameTo = (_pCtrl->getFrameCount()/2);  //end of first block
+        }
+        else
+        {
+            frameFrom = (_pCtrl->getFrameCount()/2)+1;  //first of second block
+            frameTo = _pCtrl->getFrameCount()-1;    //end of second block
+        }
+    }
+    else //(_animMode == CAM_SIMPLE)
+    {
+        frameFrom = 0; frameTo = _pCtrl->getFrameCount()-1;
+    }
+
+    _saveTouchPt = Point(); //blank
+    _pCtrl->startAnim(frameFrom, frameTo, ImageAnim::ANI_ONCE, 50, 0, 0, 100); //unpress
 }

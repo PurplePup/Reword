@@ -61,10 +61,10 @@ void PlayGameDict::init(Input *input)
 
     //set arrow (scroll positions)
     _gd._arrowUp.setPos(SCREEN_WIDTH-_gd._arrowUp.tileW(), BG_LINE_TOP+2);		//positions dont change, just made visible or not if scroll available
-    _gd._arrowUp.setFrame(_gd._arrowUp.getMaxFrame());			//last (white) frame
+    _gd._arrowUp.setFrameLast();			//last (white) frame
     _gd._arrowUp.setTouchable(true);	//always touchable even if invisible
     _gd._arrowDown.setPos(SCREEN_WIDTH-_gd._arrowDown.tileW(), BG_LINE_BOT-_gd._arrowDown.tileH()-2);
-    _gd._arrowDown.setFrame(_gd._arrowDown.getMaxFrame());
+    _gd._arrowDown.setFrameLast();
     _gd._arrowDown.setTouchable(true);
 
     //get the dictionary definition into one long string
@@ -83,10 +83,9 @@ void PlayGameDict::init(Input *input)
     _roundDict->startMoveFrom(Screen::width(), 0, 10, 50, 18, 0);
 
     //[BACK] dictionary screen buttons - only shown in dict display
-    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/touch_back.png", 255, 5));
-    p->setFrameLast();  //unselected
-    p->setPos(3, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
-    Control c(p, CTRLID_BACK);
+    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_square_back_small.png", 255, 5));
+    p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
+    Control c(p, CTRLID_BACK, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsDict.add(c);
 
 	//calc number of lines available for displaying dictionary lines

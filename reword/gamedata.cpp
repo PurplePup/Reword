@@ -46,6 +46,8 @@ GameData::GameData() : _bTouch(false),  _init(false)
 	//initialise, load everything needed...
 	bool bErr = false;
 
+    bErr |= !_options.load();
+
 	//FONTS
 	bErr |= !_fntTiny.load(RES_BASE + "fonts/FreeSansBold.ttf", FONT_TINY);
 	bErr |= !_fntClean.load(RES_BASE + "fonts/FreeSansBold.ttf", FONT_SMALL);
@@ -108,7 +110,7 @@ GameData::GameData() : _bTouch(false),  _init(false)
 	Uint32 hash = _score.load();
 
 	//LOAD WORDS - 	//pass score hash + ticks as random seed
-	bErr |= !_words.load(RES_BASE + "words/rewordlist.txt", hash + SDL_GetTicks());
+	bErr |= !_words.load(RES_BASE + _options._defaultWordFile, hash + SDL_GetTicks());
 
 	//GAME STATES
 	//start in main menu
@@ -182,5 +184,26 @@ bool GameData::loadQuickState()
 		return true;
 	}
 	return false;
+}
+
+
+GameOptions::GameOptions() :
+    _bSound(true), _bSfx(true), _bMusic(true),
+    _bSingleTapMenus(true), _bDefaultSfxOn(true), _bDefaultMusicOn(true)
+{
+    _defaultWordFile = "words/rewordlist.txt";
+    _defaultMusicDir = "music/";
+}
+
+bool GameOptions::load()
+{
+    //TODO:
+    return true;
+}
+
+bool GameOptions::save()
+{
+    //TODO:
+    return true;
 }
 

@@ -49,9 +49,9 @@ ImageAnim::ImageAnim() :
 	_frame(0), _firstFrame(0), _lastFrame(0), _nFrames(0), _frameDir(1),
 	_repeat(1), _restart(0), _inflateBy(0),
 	_visible(true), _pauseA(true), _rateA(0), _restartA(0),
-	_delayA(0), _bDelayRestart(false), _frameCustom(0)
+	_delayA(0), _bDelayRestart(false), _frameCustom(0), _id(0)
 {
-	//default _nFrames = 0 so no anim possible, until setMaxFrame called
+	//default _nFrames = 0 so no anim possible, until setFrameCount called
 }
 
 ImageAnim::ImageAnim(std::string fileName, bool bAlpha, Uint32 nFrames) :
@@ -59,12 +59,12 @@ ImageAnim::ImageAnim(std::string fileName, bool bAlpha, Uint32 nFrames) :
 	_frame(0), _firstFrame(0), _lastFrame(0), _nFrames(0), _frameDir(1),
 	_repeat(1), _restart(0), _inflateBy(0),
 	_visible(true), _pauseA(true), _rateA(0), _restartA(0),
-	_delayA(0), _bDelayRestart(false), _frameCustom(0)
+	_delayA(0), _bDelayRestart(false), _frameCustom(0), _id(0)
 {
 	//_nFrames curr set to 0 in case Image class not initialised,
 	//properly (due to bad image file etc), so now if it did init properly,
 	//set the max number of frames, as passed in to this ctor
-	if (Image::initDone()) setMaxFrame(nFrames);
+	if (Image::initDone()) setFrameCount(nFrames);
 }
 
 ImageAnim::ImageAnim(const Image &img) :
@@ -80,14 +80,19 @@ bool ImageAnim::load(std::string fileName, int iAlpha, Uint32 nFrames)	//default
 {
 	Image::load(fileName, iAlpha);
 	if (!Image::initDone()) return false;
-	setMaxFrame(nFrames);
+	setFrameCount(nFrames);
 	return true;
 }
 
-void ImageAnim::setMaxFrame(Uint32 nFrames)
+void ImageAnim::setFrameCount(Uint32 nFrames)
 {
 	setTileSize( (int)(width() / ((nFrames>0)?nFrames:1)), 0 );	//w=pixels/frames, h=default all
 	_nFrames = tileCount();
+}
+
+void ImageAnim::setFrameLast()
+{
+    _frame = (_nFrames > 0)?_nFrames-1:0;   //force to last frame (so caller not need to know nFrames)
 }
 
 void ImageAnim::clearAnimCustom()
@@ -95,6 +100,7 @@ void ImageAnim::clearAnimCustom()
     _animCustom.clear();
 }
 
+//add single frame to custom list
 bool ImageAnim::addAnimCustom(Uint32 frame)
 {
     if (frame < _nFrames)
@@ -103,6 +109,21 @@ bool ImageAnim::addAnimCustom(Uint32 frame)
         return true;
     }
     return false;
+}
+
+//add a range. use overloaded sig as default param difficult to ignore with Uint
+bool ImageAnim::addAnimCustom(Uint32 frameFrom, Uint32 frameTo)
+{
+    Uint32 i = frameFrom;
+    if (frameTo > frameFrom)
+    {
+        while (i <= frameTo) addAnimCustom(i++);
+    }
+    else
+    {
+        while (i >= frameTo) addAnimCustom(i--);
+    }
+    return true;
 }
 
 //helper fn making anim startup easier
@@ -172,7 +193,7 @@ void ImageAnim::setAnimType(eAnim anim)
 			pWorkFn = &ImageAnim::workREVERSE;	//iterate then reverse iterate (repeat)
 			break;
         case ANI_CUSTOM:
-            pWorkFn = &ImageAnim::workCUSTOM;   //custom frame list
+            pWorkFn = &ImageAnim::workCUSTOM;   //custom frame list, any order
             break;
 		default:
 			pWorkFn = &ImageAnim::workNONE;		//static, not moving
@@ -212,7 +233,7 @@ void ImageAnim::workONCE(void)
 		if (_frame >= _lastFrame)
 		{
 			pauseAnim();
-			_sigEvent(USER_EV_END_ANIMATION, 0);    //no id
+			_sigEvent(USER_EV_END_ANIMATION, _id);
 			return;
 		}
 	}
@@ -222,6 +243,7 @@ void ImageAnim::workONCE(void)
 		if (_frame <= _firstFrame)
 		{
 			pauseAnim();
+			_sigEvent(USER_EV_END_ANIMATION, _id);
 			return;
 		}
 	}
@@ -237,7 +259,8 @@ void ImageAnim::workHIDE(void)
 		{
 			pauseAnim();
 			setVisible(false);
-			return;
+			_sigEvent(USER_EV_END_ANIMATION, _id);
+            return;
 		}
 	}
 	else
@@ -247,6 +270,7 @@ void ImageAnim::workHIDE(void)
 		{
 			pauseAnim();
 			setVisible(false);
+			_sigEvent(USER_EV_END_ANIMATION, _id);
 			return;
 		}
 	}
@@ -261,6 +285,7 @@ void ImageAnim::workLOOP(void)
 		{
 			if (_repeat && _repeat-- <= 1) pauseAnim();
 			_frame = _firstFrame;
+			_sigEvent(USER_EV_END_ANIMATION, _id);
 			return;
 		}
 	}
@@ -271,6 +296,7 @@ void ImageAnim::workLOOP(void)
 		{
 			if (_repeat && _repeat-- <= 1) pauseAnim();
 			_frame = _lastFrame;
+			_sigEvent(USER_EV_END_ANIMATION, _id);
 			return;
 		}
 	}
@@ -285,6 +311,7 @@ void ImageAnim::workREVERSE(void)
 		{
 			if (_repeat && _repeat-- <= 1) { pauseAnim(); return; }
 			_frameDir = -1;
+			_sigEvent(USER_EV_END_ANIMATION, _id);
 		}
 	}
 	else
@@ -294,6 +321,7 @@ void ImageAnim::workREVERSE(void)
 		{
 			if (_repeat && _repeat-- <= 1) { pauseAnim(); return; }
 			_frameDir = 1;
+			_sigEvent(USER_EV_END_ANIMATION, _id);
 		}
 
 	}
@@ -305,7 +333,7 @@ void ImageAnim::workCUSTOM(void)
     if (_frameCustom >= (Uint32)_animCustom.size())
     {
         pauseAnim();
-		_sigEvent(USER_EV_END_ANIMATION, 0);    //no id
+		_sigEvent(USER_EV_END_ANIMATION, _id);
         return;
     }
     _frame = _animCustom[_frameCustom++];
@@ -325,7 +353,7 @@ void ImageAnim::setBounds(int inflateBy)
     assert(inflateBy >= 0 || //positive, 0 or
            (abs(inflateBy) < std::max(_tileW, _tileH)));    //less than max side if negative
 }
-//always size of the image tile in its current position with
+//always size of the image tile in its current position with inflate amount prev set
 Rect ImageAnim::bounds() const
 {
     Rect r(_x, _y, _x+_tileW, _y+_tileH);

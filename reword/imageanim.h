@@ -36,22 +36,28 @@ public:
 	void setBounds(int inflateBy);
     Rect bounds() const;
 
+    //boost signal/slot events
     typedef boost::signal<void (int, int)> EventSignal;
     EventSignal _sigEvent;
 
 	//animation
-	void setMaxFrame(Uint32 nFrames);
+	void setFrame(Uint32 frame);
+	Uint32 getFrame() const			{ return _frame; }
+
+	void setFrameCount(Uint32 nFrames);
+	Uint32 getFrameCount() const		{ return _nFrames; }
+
 	void startAnim(int firstFrame_0, int lastFrame_N, eAnim animType,
                 Uint32 rate_ms, Uint32 repeat_N = 0, Uint32 restartIn_ms = 0, Uint32 delayStart_ms = 0);
 	void setFrameRange(Uint32 firstFrame, Uint32 lastFrame);
-	void setFrame(Uint32 frame);
-	void setFrameLast()             { _frame = (_nFrames > 0)?_nFrames-1:0; }   //force to last frame (so caller not need to know nFrames)
-	Uint32 getFrame() const			{ return _frame; }
-	Uint32 getMaxFrame() const		{ return _nFrames-1; }
+	void setFrameLast();
 	void setRepeat(Uint32 r)		{ _repeat = r; }
+
     void clearAnimCustom();
     bool addAnimCustom(Uint32 frame);
+    bool addAnimCustom(Uint32 frameFrom, Uint32 frameTo);   //from->to inclusinve
 
+    void setId(int id) { _id = id; }
     void setAnimDelay(Uint32 delay, bool bRestart = false) { _delayA.start(delay); _bDelayRestart = bRestart; }   //before anim starts & each repeat?
 	void setAnimRate(Uint32 rate)	            { _waitA.start(_rateA = rate, 0); }
 	void setAnimType(eAnim anim);
@@ -108,6 +114,8 @@ private:
 
 	std::vector<Uint32> _animCustom;    //custom frame iteration
 	Uint32              _frameCustom;   //custom count
+
+	int     _id;        //id passed down from Control to pass back in signal
 };
 
 #endif //_IMAGEANIM_H

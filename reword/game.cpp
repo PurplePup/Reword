@@ -59,6 +59,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "playdiff.h"
 #include "playhigh.h"
 #include "playinst.h"
+#include "playoptions.h"
 #include "playgame.h"
 #include "singleton.h"
 
@@ -118,7 +119,7 @@ bool Game::init(const GameOptions &options)
 	assert(false==_init);	//shouldn't be called once initialised successfully
 
     Uint32 init_flags = SDL_INIT_EVERYTHING;
-    if (!options._bSfx && !options._bMusic)
+    if (!options._bSound)
     {
         std::cout << "Audio disabled" << std::endl;
         init_flags &= ~SDL_INIT_AUDIO;
@@ -134,7 +135,7 @@ bool Game::init(const GameOptions &options)
 	atexit(SDL_Quit);	//auto cleanup, just in case
 
     if ((init_flags & SDL_INIT_AUDIO) == 0)
-        Locator::InitAudio();   //NullAudioin logs window
+        Locator::InitAudio();   //NullAudio in logs window
     else
         Locator::RegisterAudio(_audio = new Audio());
     Locator::GetAudio().setup(options._bMusic, options._bSfx);
@@ -222,6 +223,8 @@ bool Game::run(void)
 
 		case ST_INST:		p = new PlayInst(*_gd);break;
 
+		case ST_OPTN:		p = new PlayOptions(*_gd);break;
+
 		default: return false;
 		}
 
@@ -229,7 +232,7 @@ bool Game::run(void)
 		delete p;
 	}
 
-	std::cout << "Exiting Reword" << std::endl;
+	std::cout << "Exiting Reword - all ok" << std::endl;
 
 	return b;
 }

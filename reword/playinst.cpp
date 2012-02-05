@@ -53,9 +53,6 @@ void PlayInst::init(Input *input)
 {
 	//once the class is initialised, init and running are set true
 
-	_page = 0;
-	nextPage();	//start at page 1
-
 	_title.setWordCenterHoriz(std::string("INFO"), _gd._letters, (BG_LINE_TOP-_gd._letters.tileH())/2, 2);
 	_title.startMoveFrom( 0, -(_gd._letters.tileH()*2), 15, 100, 0, ROUNDEL_VEL);
 	_titleW.start(3000, 1000);
@@ -71,38 +68,35 @@ void PlayInst::init(Input *input)
 	//set arrow controls (scroll positions)
     {
     boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_scroll_up.png", 0, 5));
-    p->setFrameLast();  //unselected
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2);
     p->_sigEvent.connect(boost::bind(&PlayInst::ControlEvent, this, _1, _2));
-    Control c(p, CTRLID_SCROLL_UP, CTRLGRP_SCROLL);
+    Control c(p, CTRLID_SCROLL_UP, CTRLGRP_SCROLL, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsInst.add(c);
     }
     {
     boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_scroll_down.png", 0, 5));
-    p->setFrameLast();  //unselected
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_BOT-p->tileH()-2);
     p->_sigEvent.connect(boost::bind(&PlayInst::ControlEvent, this, _1, _2));
-    Control c(p, CTRLID_SCROLL_DOWN, CTRLGRP_SCROLL);
+    Control c(p, CTRLID_SCROLL_DOWN, CTRLGRP_SCROLL, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsInst.add(c);
     }
-
-    updateScrollButtons();  //show initial state
 
     //load EXIT/NEXT buttons
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/touch_exit.png", 255, 5));
-    p->setFrameLast();  //unselected
-    p->setPos(3, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
-    Control c(p, CTRLID_EXIT);
+    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_square_exit_small.png", 255, 5));
+    p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
+    Control c(p, CTRLID_EXIT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsInst.add(c);
     }
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/touch_next.png", 255, 5));
-    p->setFrameLast();  //unselected
-    p->setPos(SCREEN_WIDTH - p->tileW() - 3, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
-    Control c(p, CTRLID_NEXT);
+    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_square_next_small.png", 255, 5));
+    p->setPos(SCREEN_WIDTH - p->tileW() - 8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
+    Control c(p, CTRLID_NEXT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsInst.add(c);
     }
+
+	_page = 0;
+	nextPage();	//start at page 1 - updates scroll buttons
 
 	//need to set the _init and _running flags
 	_init = true;
@@ -181,10 +175,6 @@ void PlayInst::work(Input *input, float speedFactor)
     if (input->repeat(ppkey::DOWN)) button(input, ppkey::DOWN);
 
     _controlsInst.work(input, speedFactor);
-
-//    //update scroll button visibility
-//    _controlsInst.showControl((_instLine > 0), CTRLID_SCROLL_UP);
-//	_controlsInst.showControl((_instLine < (int)_inst.size()-_lines), CTRLID_SCROLL_DOWN);
 }
 
 void PlayInst::updateScrollButtons()

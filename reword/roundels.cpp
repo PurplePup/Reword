@@ -111,7 +111,7 @@ void Roundels::setWord(std::string &wrd,
 
 //		pspr->createThisFromImage(letters, wrd[i]-65, 255);
 		pspr->setTileSize(letters.tileW(), letters.tileH());
-		pspr->setMaxFrame(26);
+		pspr->setFrameCount(26);
 		pspr->setFrame(wrd[i]-65);
 
 		//each letter has id of initial index (1..n), then use getLastId()

@@ -31,6 +31,7 @@ public:
     virtual void work(Input* input, float speedFactor);
     virtual void button(Input* input, ppkey::eButtonType b);
     virtual bool touch(const Point &pt);
+    virtual bool tap(const Point &pt);
 
 private:
 	void choose();
@@ -55,8 +56,8 @@ private:
 	tMenuMap	*_pItems;
 	std::auto_ptr<Image> _menubg;
 
-	bool 		_bDoYesNoMenu;		//user must select yes tpo exit game
-	Waiting		_doubleClick;	//touch support
+	bool 		_bDoYesNoMenu;		//user must select yes to exit game
+	Waiting		_doubleClick;	    //touch support
 };
 
 #endif //_PLAYGAMEPOPUP_H

@@ -108,28 +108,25 @@ void PlayGame::init(Input *input)
 
     //[MENU] shows in top left (unless [EXIT] shown)
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/touch_menu.png", 255, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_square_menu.png", 255, 5));
     p->setPos(3, 0);
-    p->setFrameLast();  //unselected
-    Control c(p, CTRLID_MENU, CTRLGRP_BUTTONS);
+    Control c(p, CTRLID_MENU, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
     {
     //[EXIT] goes in same place as [MENU] when game over
-    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/touch_exit.png", 255, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_square_exit.png", 255, 5));
     p->setPos(3, 0);
-    p->setFrameLast();  //unselected
     p->setVisible(false);  //not available until countdown finished
-    Control c(p, CTRLID_EXIT, CTRLGRP_BUTTONS);
+    Control c(p, CTRLID_EXIT, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
     {
     //[NEXT] goes over the countdown position
-    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/touch_next.png", 255, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_square_next.png", 255, 5));
     p->setPos(Screen::width() - p->tileW() - 3, 0);
-    p->setFrameLast();  //unselected
     p->setVisible(false);  //not available until countdown finished
-    Control c(p, CTRLID_NEXT, CTRLGRP_BUTTONS);
+    Control c(p, CTRLID_NEXT, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
 
     //bounding rect of [NEXT] button placed over countdown timer
@@ -142,32 +139,28 @@ void PlayGame::init(Input *input)
     //shuffle
     boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_word_shuffle.png", 0, 5));
     p->setTileSize(48, 48);
-    p->setFrameLast();  //unselected
-    Control c(p, CTRLID_SHUFFLE, CTRLGRP_LETTERS);
+    Control c(p, CTRLID_SHUFFLE, CTRLGRP_LETTERS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
     {
     //try word
     boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_word_try.png", 0, 5));
     p->setTileSize(48, 48);
-    p->setFrameLast();  //unselected
-    Control c(p, CTRLID_TRYWORD, CTRLGRP_LETTERS);
+    Control c(p, CTRLID_TRYWORD, CTRLGRP_LETTERS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
     {
     //totop
     boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_word_totop.png", 0, 5));
     p->setTileSize(48, 48);
-    p->setFrameLast();  //unselected
-    Control c(p, CTRLID_TOTOP, CTRLGRP_LETTERS);
+    Control c(p, CTRLID_TOTOP, CTRLGRP_LETTERS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
     {
     //last
     boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_word_last.png", 0, 5));
     p->setTileSize(48, 48);
-    p->setFrameLast();  //unselected
-    Control c(p, CTRLID_LAST, CTRLGRP_LETTERS);
+    Control c(p, CTRLID_LAST, CTRLGRP_LETTERS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
 
@@ -663,9 +656,8 @@ void PlayGame::stopPopup()
 {
 	delete _pPopup;
 	_pPopup = NULL;
-//    _controlsPlay.showGroup(true, CTRLGRP_LETTERS);
-    slideRoundButtonsIn();
 
+    slideRoundButtonsIn();
 }
 
 void PlayGame::button(Input* input, ppkey::eButtonType b)
@@ -1047,6 +1039,13 @@ bool PlayGame::tap(const Point &pt)
 
     const int crtl_id = _controlsPlay.tapped(pt);
 
+	if (_pPopup)
+	{
+		_pPopup->tap(pt);
+		handlePopup();
+		return true;
+	}
+
     if (crtl_id == CTRLID_MENU)
     {
         //need to push a key command instaed of starting as it needs an Input ptr
@@ -1116,7 +1115,9 @@ void PlayGame::commandTryWord()
 //from off screen, to their correct place beside the letters.
 void PlayGame::slideRoundButtonsIn()
 {
-    //these four controls should always be cretaed and available
+    if (_pPopup) return;    //not if popup visible (say before letters finish rolling in)
+
+    //these four controls should always be created and available
     const int ms = 450;
     _controlsPlay.getControlSprite(CTRLID_SHUFFLE)->startMoveTo(_posRButtonLeft, _posRButtonTop, ms);
     _controlsPlay.getControlSprite(CTRLID_TRYWORD)->startMoveTo(_posRButtonLeft, _posRButtonBot, ms);
@@ -1128,7 +1129,7 @@ void PlayGame::slideRoundButtonsIn()
 //beside the letters, to off screen
 void PlayGame::slideRoundButtonsOut()
 {
-    //these four controls should always be cretaed and available
+    //these four controls should always be created and available
     const int ms = 450;
 	const int btnWidth = _controlsPlay.getControlSprite(CTRLID_SHUFFLE)->tileW();
     _controlsPlay.getControlSprite(CTRLID_SHUFFLE)->startMoveTo(-btnWidth, _posRButtonTop, ms);

@@ -52,7 +52,8 @@ void PlayMainMenu::init(Input *input)
 	addItem(MenuItem(1, ORANGE_COLOUR, s, "How brave are you feeling?"));
 	addItem(MenuItem(2, BLUE_COLOUR, "Highscores", "Past Heroes"));
 	addItem(MenuItem(3, PURPLE_COLOUR, "Instructions", "How to play"));
-	addItem(MenuItem(4, RED_COLOUR, "Exit", "Quit game"));
+	addItem(MenuItem(4, GOLD_COLOUR, "Options", "Settings and preferences"));
+	addItem(MenuItem(5, RED_COLOUR, "Exit", "Quit game"));
 	setItem(_gd._mainmenuoption);
 	PlayMenu::init(input);
 }
@@ -65,8 +66,17 @@ void PlayMainMenu::choose(MenuItem i)
 		case 1: _gd._state = ST_DIFF; break;
 		case 2: _gd._state = ST_HIGH; break;
 		case 3: _gd._state = ST_INST; break;
-		case 4: _gd._state = ST_EXIT; break;
+		case 4: _gd._state = ST_OPTN; break;
+		case 5: _gd._state = ST_EXIT; break;
 	}
 	_running = false;
 }
 
+
+void PlayMainMenu::render(Screen *s)
+{
+    PlayMenu::render(s);
+
+    //add version no - specific to main menu screen
+	_gd._fntTiny.put_text_right(s, 5, 0, VERSION_STRING, BLACK_COLOUR); //display vN.N at top right
+}

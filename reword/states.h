@@ -27,6 +27,7 @@
                       ST_RESUME,    //resume menu shown
                       ST_HIGH,      //highscore screen
                       ST_HIGHEDIT,  //highscore editing
+                      ST_OPTN,      //Options & prefs
                       ST_EXIT };
 
     //game modes (std, timetrial etc)

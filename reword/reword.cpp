@@ -54,21 +54,6 @@ Extra Notes:	PAUSE causes a few second loss (pause mid game only in easy mode)
 				100 point bonus if a 6 letter found
 				If all words found, add (seconds remaining * a value)
 
-##TODO##		----------------------------------------------------
-				New sounds still needed
-				poss new mode, to draw found/remaining words as wrapping round
-					screen to allow more 6 letter words than the ~2800 currently
-				better graphics needed - more transparency/anti-aliasing ?
-
-				For next version:
-				- Continue modding dictionary.
-				- Add select dictionary option (for UK/US/Special etc, built with
-					 rewordlist console application)
-
-
-				locate and 'do' all ##TODO##
-				locate and remove all ##DEBUG##
-
 				-----------------------------------------------------
 
 Licence:		This program is free software; you can redistribute it and/or modify
@@ -113,19 +98,19 @@ int main(int argc, char* argv[]) // <- this must match exactly, since SDL rewrit
 			bHelp = true;
 			continue;
 		}
-		if ("-nosfx" == arg)
+		if ("-mutesfx" == arg)
 		{
 			options._bSfx = false;
 			continue;
 		}
-		if ("-nomusic" == arg)
+		if ("-mutemusic" == arg)
 		{
 			options._bMusic = false;
 			continue;
 		}
 		if ("-nosound" == arg)
 		{
-			options._bSfx = options._bMusic = false;
+			options._bSound = options._bSfx = options._bMusic = false;
 			continue;
 		}
 		//else ignore anything else for now
@@ -138,9 +123,9 @@ int main(int argc, char* argv[]) // <- this must match exactly, since SDL rewrit
 				<< "reword [params]" << std::endl
 				<< std::endl
 				<< "  Params:  " << std::endl
-				<< "  -nosound  -  disable all sound (sfx and music)" << std::endl
-				<< "  -nosfx    -  start with mute sound effects" << std::endl
-				<< "  -nomusic  -  start with mute music" << std::endl
+				<< "  -nosound   -  disable all sound (sfx and music)" << std::endl
+				<< "  -mutesfx   -  start with mute sound effects" << std::endl
+				<< "  -mutemusic -  start with mute music" << std::endl
 				<< std::endl;
 
         return 0;

@@ -9,22 +9,31 @@ class Control : IPlay
 {
 public:
     typedef boost::shared_ptr<Sprite> t_pControl;
+    //define some control frame types. Specifically CAT_DIS_HIT_IDLE_DOUBLE which allows a frame set
+    //with an on/off yes/no type of structure
+    enum eCtrlAnimMode { CAM_SIMPLE,                  //simple first to last frame format
+                         CAM_DIS_HIT_IDLE_SINGLE,     //[disabled][hit/hilight][...fade x N...][idle]
+                         CAM_DIS_HIT_IDLE_DOUBLE      //[disabled][1.hit/hilight][1...fade x N...][1.idle][2.hit/hilight][2...fade x N...][2.idle]
+                       };
 
     //Control();
-    Control(t_pControl &pCtrl, int id, unsigned int group = 0);
+    Control(t_pControl &pCtrl, int id, unsigned int group = 0,
+                eCtrlAnimMode mode = CAM_SIMPLE, bool bFirstMode = true);
     Sprite * getSprite() { return _pCtrl.get(); }
     bool isPressed() { return _bPressed; }
-    void fade();
+    void fade(bool bFlip = true);
 
-    void setID(int id) {_id = id; }
-    //void setTouchID(int id) {_touchID = id; }
-    //void setTapID(int id) {_tapID = id; }
-    void setGroup(unsigned int group) { _group = group; }
+    void setControlId(int id) {_id = id; }
+    void setGroupId(unsigned int group) { _group = group; }
 
-    int getID() const { return _id; }
-    //int getTouchID() const { return _touchID; }
-    //int getTapID() const { return _tapID; }
-    unsigned int getGroup() const { return _group; }
+    int getControlId() const { return _id; }
+    unsigned int getGroupId() const { return _group; }
+
+    //return true if double anim mode and is frst, else always true as single anim mode
+    bool isFirstMode() { return (_animMode == CAM_DIS_HIT_IDLE_DOUBLE)?_animFirst:true; }
+
+    void setIdleFrame();
+    void setActiveFrame();
 
     //init the level/screen
     virtual void init(Input * /*input*/);
@@ -41,12 +50,14 @@ public:
 	virtual bool tap(const Point &pt);
 
 protected:
-    t_pControl  _pCtrl;
-    int         _id;         //unique id of control (decided when added)
-    int         _touchID;    //id of message sent when control touched (pressed)
-    int         _tapID;      //id of message sent when control tapped (released)
-    bool        _bPressed;
-    unsigned int _group;    //bit mask group id (allows finer control)
+    t_pControl      _pCtrl;
+    int             _id;        //unique id of control (decided when added) & passed to Imageanim
+    bool            _bPressed;
+    unsigned int    _group;     //bit mask group id (allows finer control)
+	Point           _saveTouchPt;   //save pt at which touch/press occurred
+
+    eCtrlAnimMode   _animMode;  //how to automatically animate the control when pressed
+    bool            _animFirst; //only used for CAT_DIS_HIT_IDLE_DOUBLE, true if first else second
 };
 
 #endif // CONTROL_H
