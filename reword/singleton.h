@@ -17,22 +17,22 @@ public:
 //	    return *_instance;
 //	}
 	;
-	
+
     static T &getRef()			// Get a reference to the object
 //	{
 //		return *_instance;
 //	}
 	;
-	
+
     static T *getPtr()			// Get a pointer to the object
 //	{
 //		return _instance.get();
 //	}
     ;
- 
+
 protected:
     Singleton();   // constructor NOT public
- 
+
 private:
     static std::auto_ptr<T> _instance;
 };
@@ -63,14 +63,13 @@ template<class T> T *Singleton<T>::getPtr()
 }
 */
 
-#endif //_SINGLETON_H
 
 
 /*
 A Singleton should not have public constructors as in your above class.
 If this is a singleton wrapper class, then IMHO, it's not practical to
 create a singleton that requires constructor arguments.
-You're singleton should also have copy constructor and assignment
+Your singleton should also have copy constructor and assignment
 operator private or protected.
 It should also have the destructor private or protected, however some
 compilers like VC++ have problems compiling class with private or
@@ -82,52 +81,54 @@ should compile on any compliant compiler, and it also compiles on VC++
 Using this wrapper class you can make any class a singleton by either
 inheriting from the Singleton wrapper class, or by calling
 Singleton::Instance with a template type.
-
+*/
 #include <stdlib.h>
 
 template<typename T>
 class Singleton
 {
 protected:
-Singleton(){}
-~Singleton(){}
-Singleton(const Singleton&);
-Singleton& operator=(const Singleton&);
+    Singleton(){}
+    ~Singleton(){}
+    Singleton(const Singleton&);
+    Singleton& operator=(const Singleton&);
 public:
-class FriendClass
-{
-public:
-FriendClass():m_MyClass(new T()){}
-~FriendClass(){delete m_MyClass;}
-T* m_MyClass;
-};
-static T& Instance() {
-static FriendClass Instance;
-return *Instance.m_MyClass;
-}
+    class FriendClass
+    {
+    public:
+        FriendClass():m_MyClass(new T()){}
+        ~FriendClass(){delete m_MyClass;}
+        T* m_MyClass;
+    };
+    static T& Instance()
+    {
+        static FriendClass Instance;
+        return *Instance.m_MyClass;
+    }
 };
 
+/*
 class Widget {
 private:
-Widget(){}
-~Widget(){}
-Widget& operator=(const Widget&);
-Widget(const Widget&);
+    Widget(){}
+    ~Widget(){}
+    Widget& operator=(const Widget&);
+    Widget(const Widget&);
 public:
-friend class Singleton<Widget>::FriendClass;
-int m_i;
+    friend class Singleton<Widget>::FriendClass;
+    int m_i;
 };
 
 
 class foo : public Singleton<foo>{
 private:
-foo(){}
-~foo(){}
-foo& operator=(const foo&);
-foo(const foo&);
+    foo(){}
+    ~foo(){}
+    foo& operator=(const foo&);
+    foo(const foo&);
 public:
-friend class FriendClass;
-int m_i;
+    friend class FriendClass;
+    int m_i;
 };
 
 
@@ -141,3 +142,4 @@ return 0;
 }
 */
 
+#endif //_SINGLETON_H

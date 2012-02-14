@@ -147,4 +147,9 @@
 
 #endif
 
-
+//shorthand constants for resource directories
+#define RES_FONTS       (RES_BASE + std::string("fonts/"))
+#define RES_IMAGES      (RES_BASE + std::string("images/"))
+#define RES_MUSIC       (RES_BASE + std::string("music/"))
+#define RES_SOUNDS      (RES_BASE + std::string("sounds/"))
+#define RES_WORDS       (RES_BASE + std::string("words/"))

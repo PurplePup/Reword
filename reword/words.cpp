@@ -355,7 +355,7 @@ bool Words::checkCurrentWordTarget(const std::string &wordTarget)
 //get the next 6to8 letter word to use in the game
 bool Words::nextWord(std::string &retln, eGameDiff level,  eGameMode mode, bool reloadAtEnd /*=true*/)
 {
-	bool bOk = true;
+	bool bOk = false;
 	int failsafe = _vecTarget.size(); //size of the whole vector, so allow to loop once to find next
 	tWordMap::iterator mapit;
 	do
@@ -391,7 +391,7 @@ bool Words::nextWord(std::string &retln, eGameDiff level,  eGameMode mode, bool 
 			}
 		}
 		++_vecTarget_it;	//next word
-	} while (--failsafe && !bOk);
+	} while (--failsafe>0 && !bOk);
 
 	if (!bOk) _word._word = "XXXXXX";	//err in word list - too many or missing
 

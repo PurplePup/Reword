@@ -335,11 +335,12 @@ bool QuickState::quickStateSave()
  	std::ofstream outfile(_quickstatefile.c_str(), std::ios::out|std::ifstream::trunc);
 	if (outfile.is_open())
 	{
-		outfile << "words=" << _qStateSave.words << std::endl;
-		outfile << "score=" << _qStateSave.score << std::endl;
-		outfile << "diff=" << _qStateSave.diff << std::endl;
-		outfile << "mode=" << _qStateSave.mode << std::endl;
-		outfile << "seed=" << _qStateSave.seed << std::endl;
+		outfile << "wordfile=" << _qStateSave._wordfile << std::endl;
+		outfile << "words=" << _qStateSave._words << std::endl;
+		outfile << "score=" << _qStateSave._score << std::endl;
+		outfile << "diff=" << _qStateSave._diff << std::endl;
+		outfile << "mode=" << _qStateSave._mode << std::endl;
+		outfile << "seed=" << _qStateSave._seed << std::endl;
 	}
 	return true;
 }
@@ -353,16 +354,18 @@ bool QuickState::quickStateLoad()
 		while (std::getline(infile, line, '\n'))
 		{
 			pptxt::splitKeyValuePair(line, key, value);
-			if (key == "words")
-				_qStateSave.words = atoi(value.c_str());
+			if (key == "wordfile")
+				_qStateSave._wordfile = value;
+			else if (key == "words")
+				_qStateSave._words = atoi(value.c_str());
 			else if (key == "score")
-				_qStateSave.score = atoi(value.c_str());
+				_qStateSave._score = atoi(value.c_str());
 			else if (key == "diff")
-				_qStateSave.diff = atoi(value.c_str());
+				_qStateSave._diff = atoi(value.c_str());
 			else if (key == "mode")
-				_qStateSave.mode = atoi(value.c_str());
+				_qStateSave._mode = atoi(value.c_str());
 			else if (key == "seed")
-				_qStateSave.seed = atoi(value.c_str());
+				_qStateSave._seed = atoi(value.c_str());
 		}
 		return true;
 	}

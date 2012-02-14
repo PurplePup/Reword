@@ -48,7 +48,7 @@ void PlayModeMenu::init(Input *input)
 	QuickState qs;
 	bool bQSExists = qs.quickStateExists();
     if (bQSExists)
-        addItem(MenuItem(99, GREEN_COLOUR, "Resume game...", "Continue playing a quick saved game"));
+        addItem(MenuItem(99, ORANGE_COLOUR, "Resume game...", "Continue playing a quick saved game"));
 
 	addItem(MenuItem(0, GREEN_COLOUR, "Arcade", "Get enough words to continue"));
 	addItem(MenuItem(1, PURPLE_COLOUR, "Classic", "Get at least one all-letter word"));

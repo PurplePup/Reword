@@ -102,7 +102,7 @@ Game::~Game()
 void Game::splash()
 {
 	if (!_screen) return;
-	Image img(RES_BASE + "images/splash.png");	//solid black background
+	Image img(RES_IMAGES + "splash.png");	//solid black background
 	SDL_Colour c = {0x00,0x00,0x00,0};	//black
 	_screen->drawSolidRect(0, 0, Screen::width(), Screen::height(), c);
 	//center it - if needed
@@ -111,7 +111,7 @@ void Game::splash()
 //	sleep(2);	//so we can see it (POSIX)
 }
 
-bool Game::init(const GameOptions &options)
+bool Game::init(GameOptions &options)
 {
 	std::cout << "Using hardware/keyboard profile : " << DEBUG_HW_NAME << std::endl;
 
@@ -173,14 +173,15 @@ bool Game::init(const GameOptions &options)
 
 
 	//load all game data (images, fonts, etc, etc)
-	_gd = new GameData();
+	_gd = new GameData(options);
 	_gd->_current_w = _screen->width();
 	_gd->_current_h = _screen->height();
+
 
 #if defined(_USE_OGG)
 	//load mp3/ogg menu music
 	std::cout << "Loading menu.ogg music" << std::endl;
-	_gd->_musicMenu = Mix_LoadMUS(std::string(RES_BASE + "sounds/menu.ogg").c_str());
+	_gd->_musicMenu = Mix_LoadMUS(std::string(RES_SOUNDS + "menu.ogg").c_str());
 #endif
 
 #if defined(GP2X)

@@ -107,13 +107,15 @@ protected:
 };
 
 //structure to hold quick save state between levels (for restore)
-typedef struct
+typedef struct qss
 {
-	Uint32	words;	//words found so far
-	Uint32	score;	//
-	Uint32	diff;	//easy,med,hard
-	Uint32	mode;	//game type rew,speed,TT
-	Uint32	seed;	//random seed to restore the word list in same order
+    qss() : _words(0), _score(0), _diff(0), _mode(0), _seed(0) {}
+    std::string _wordfile;
+	Uint32	    _words;	//words found so far
+	Uint32	    _score;	//
+	Uint32	    _diff;	//easy,med,hard
+	Uint32	    _mode;	//game type rew,speed,TT
+	Uint32	    _seed;	//random seed to restore the word list in same order
 } tQuickStateSave;
 
 class QuickState

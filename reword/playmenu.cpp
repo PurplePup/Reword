@@ -54,6 +54,8 @@ PlayMenu::PlayMenu(GameData &gd)  : _gd(gd)
 	_menuRect = Rect(0, BG_LINE_TOP, SCREEN_WIDTH, BG_LINE_BOT);
 	_layoutType = MENU_LAYOUT_CENTER;
 	_layoutOffset = 0;
+	_font = &_gd._fntMed;
+    _fontHelp = &_gd._fntClean;
 }
 
 void PlayMenu::init(Input *input)
@@ -80,6 +82,24 @@ void PlayMenu::init(Input *input)
 	//need to set the _init and _running flags
 	_init = true;
 	_running = true;
+}
+
+void PlayMenu::setFont(eMenuFont mainFont, eMenuFont helpFont)
+{
+    switch (mainFont)
+    {
+        case MENU_FONT_SMALL: _font = &_gd._fntSmall; break;
+        case MENU_FONT_MED: _font = &_gd._fntMed; break;
+        case MENU_FONT_BIG: _font = &_gd._fntBig; break;
+        default: _font = &_gd._fntMed; break;
+    }
+    switch (helpFont)
+    {
+        case MENU_FONT_SMALL: _fontHelp = &_gd._fntSmall; break;
+        case MENU_FONT_MED: _fontHelp = &_gd._fntMed; break;
+        case MENU_FONT_BIG: _fontHelp = &_gd._fntBig; break;
+        default: _fontHelp = &_gd._fntClean; break;
+    }
 }
 
 void PlayMenu::setMenuArea(const Rect &r)
@@ -125,21 +145,21 @@ void PlayMenu::render(Screen *s)
 	{
 		if (p->_id == selected)
 		{
-            _gd._fntMed.put_text(s, p->_r.left(), p->_r.top(), p->_title.c_str(), p->_hoverOn, true);
+            _font->put_text(s, p->_r.left(), p->_r.top(), p->_title.c_str(), p->_hoverOn, true);
 			r = p->_r.addpt(Point(-30,0));
 			_gd._star.setPos(r.left(), r.top()-2);
 
 			//show comment for selected item - might be blank
             if (_delayHelp.done())
             {
-                _gd._fntClean.put_text(s,
-                        BG_LINE_BOT + (((SCREEN_HEIGHT-BG_LINE_BOT-(_gd._fntClean.height()*2))/4)),
+                _fontHelp->put_text(s,
+                        BG_LINE_BOT + (((SCREEN_HEIGHT-BG_LINE_BOT-(_fontHelp->height()*2))/4)),
                         p->_comment.c_str(), p->_hoverOn, false);
             }
 		}
 		else
 		{
-            _gd._fntMed.put_text(s, p->_r.left(), p->_r.top(), p->_title.c_str(), p->_hoverOff, false);
+            _font->put_text(s, p->_r.left(), p->_r.top(), p->_title.c_str(), p->_hoverOff, false);
 		}
         nextY = p->_r.bottom();
 	}
@@ -147,8 +167,8 @@ void PlayMenu::render(Screen *s)
 
 	_gd._star.draw(s);
 
-    int helpYpos = BG_LINE_BOT + (2*( (SCREEN_HEIGHT-BG_LINE_BOT-_gd._fntClean.height())/2.5 ));
-    _gd._fntClean.put_text(s, helpYpos, _help.c_str(), _helpColor, true);
+    int helpYpos = BG_LINE_BOT + (2*( (SCREEN_HEIGHT-BG_LINE_BOT-_fontHelp->height())/2.5 ));
+    _fontHelp->put_text(s, helpYpos, _help.c_str(), _helpColor, true);
 
 }
 
@@ -305,12 +325,12 @@ void PlayMenu::setHelp(const std::string &help, SDL_Color c)
 void PlayMenu::recalcItemPositions()
 {
     const int items = (int)_itemList.size();
-    const int freeHeight = (_menuRect.height()) - (items * _gd._fntMed.height());
+    const int freeHeight = (_menuRect.height()) - (items * _font->height());
     const int gapHeight = freeHeight / (items + 1);
     int y = _menuRect.top() + gapHeight;
 	for (int i=0; i<items; i++)
     {
-        const int len = _gd._fntMed.calc_text_length(_itemList[i]._title.c_str(), false);
+        const int len = _font->calc_text_length(_itemList[i]._title.c_str(), false);
         int x;
         if (_layoutType == MENU_LAYOUT_LEFT)
         {
@@ -323,9 +343,9 @@ void PlayMenu::recalcItemPositions()
         else
             x = (SCREEN_WIDTH-len) / 2;   //CENTER
 
-        _itemList[i]._r = Rect(x, y, x+len, y+_gd._fntMed.height());
+        _itemList[i]._r = Rect(x, y, x+len, y+_font->height());
         _itemList[i]._rBox = _itemList[i]._r.inset(-5);
-        y += gapHeight + _gd._fntMed.height();
+        y += gapHeight + _font->height();
     }
 }
 

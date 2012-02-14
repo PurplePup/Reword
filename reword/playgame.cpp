@@ -108,14 +108,14 @@ void PlayGame::init(Input *input)
 
     //[MENU] shows in top left (unless [EXIT] shown)
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_square_menu.png", 255, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_square_menu.png", 255, 5));
     p->setPos(3, 0);
     Control c(p, CTRLID_MENU, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
     {
     //[EXIT] goes in same place as [MENU] when game over
-    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_square_exit.png", 255, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_square_exit.png", 255, 5));
     p->setPos(3, 0);
     p->setVisible(false);  //not available until countdown finished
     Control c(p, CTRLID_EXIT, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_SINGLE);
@@ -123,7 +123,7 @@ void PlayGame::init(Input *input)
     }
     {
     //[NEXT] goes over the countdown position
-    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_square_next.png", 255, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_square_next.png", 255, 5));
     p->setPos(Screen::width() - p->tileW() - 3, 0);
     p->setVisible(false);  //not available until countdown finished
     Control c(p, CTRLID_NEXT, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_SINGLE);
@@ -137,36 +137,32 @@ void PlayGame::init(Input *input)
     //now the four letter/word controls... positions set in newLevel()
     {
     //shuffle
-    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_word_shuffle.png", 0, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_round_word_shuffle.png", 0, 5));
     p->setTileSize(48, 48);
     Control c(p, CTRLID_SHUFFLE, CTRLGRP_LETTERS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
     {
     //try word
-    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_word_try.png", 0, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_round_word_try.png", 0, 5));
     p->setTileSize(48, 48);
     Control c(p, CTRLID_TRYWORD, CTRLGRP_LETTERS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
     {
     //totop
-    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_word_totop.png", 0, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_round_word_totop.png", 0, 5));
     p->setTileSize(48, 48);
     Control c(p, CTRLID_TOTOP, CTRLGRP_LETTERS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
     {
     //last
-    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_word_last.png", 0, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_round_word_last.png", 0, 5));
     p->setTileSize(48, 48);
     Control c(p, CTRLID_LAST, CTRLGRP_LETTERS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
-
-	//once the class is initialised, init and running are set true
-	newGame();	//reset scores etc
-	newLevel();	//preparebackground, get next word etc
 
     _nWordBoxHighlightOffset = (_gd._boxes.tileCount()/4); //4 blocks of word boxes
     _nWordBoxEmptyOffset = ((_gd._boxes.tileCount()/4)*2); //4 blocks.. 3rd block
@@ -177,6 +173,14 @@ void PlayGame::init(Input *input)
 	input->setRepeat(ppkey::DOWN, 250, 250);
 	input->setRepeat(ppkey::LEFT, 250, 250);
 	input->setRepeat(ppkey::RIGHT, 250, 250);
+
+	//once the class is initialised, init and running are set true
+	newGame();	//reset scores etc
+	if (!newLevel())	//preparebackground, get next word etc
+    {
+        //already called exit(ST_MENU);
+        return;
+    }
 
 	//need to set the _init and _running flags
 	_init = true;
@@ -313,7 +317,10 @@ void PlayGame::render_play(Screen* s)
 		_round.draw(s);
 
 		_gd._cursor.blitTo(s, _xScratch+(_round.currentX()*(CURSORW+2)),
-						(_round.cursorIsTop()?_yScratchTop:_yScratchBot), (int)_gd._diffLevel-1);
+						(_round.cursorIsTop()?_yScratchTop:_yScratchBot),
+                        //(int)_gd._diffLevel-1     //curr diff colour
+                        _gd._words.getWordLevel()-1 //colour of word (always <= curr diff)
+                     );
 	}
 
 	//draw word boxes 1 length at a time downwards (easier)
@@ -1308,12 +1315,12 @@ void PlayGame::doDictionary()
 	{
 		//get the word currently highlighted
         _dictWord.empty();
-
+        const int yyOffset = _boxWordOffset[_xxWordHi];
 		tWordsFoundList::const_iterator it;
 		it = _wordsFound[_xxWordHi].begin();
 		for (int yy=0; yy<(int)_wordsFound[_xxWordHi].size(); ++yy)	//find the matching word in the list
 		{
-			if (_yyWordHi == yy && it != _wordsFound[_xxWordHi].end())
+			if (_yyWordHi + yyOffset == yy && it != _wordsFound[_xxWordHi].end())
 			{
 				_dictWord = (*it)._word;
 				break;
@@ -1447,7 +1454,7 @@ int PlayGame::maxCountdown()
 //#endif
 }
 
-void PlayGame::newLevel()
+bool PlayGame::newLevel()
 {
 	stopCountdown();
 
@@ -1460,8 +1467,13 @@ void PlayGame::newLevel()
 
 	std::string newword;
 	//nextWord() returns false if bad dictionary entry (XXXXXX corrupted or hacked) !
-	bool bWord = _gd._words.nextWord(newword, _gd._diffLevel, _gd._mode);	//return next word found.
-	_longestWordLen = newword.length();
+	if (!_gd._words.nextWord(newword, _gd._diffLevel, _gd._mode))	//return next word found.
+	{
+        std::cerr << "Cannot load new level word" << std::endl;
+	    exit(ST_MENU);
+	    return false;
+	}
+    _longestWordLen = newword.length();
 	_shortestWordLen = _longestWordLen-(MAX_WORD_ROW-1); //say if longest is 6, then shortest is 3 (for 3, 4, 5, 6)
 
 	//X pos of scratch area depends on length of word so calc here at each new level/word)
@@ -1508,8 +1520,7 @@ void PlayGame::newLevel()
 
 	_round.setWord(newword, _gd._letters, _xScratch+2, _yScratchTop+2, 6, true);
 	_round.setTopAndBottomYPos(_yScratchTop+2, _yScratchBot+2);
-	if (bWord)
-		_round.jumbleWord(false);		//randomize the letters
+	_round.jumbleWord(false);		//randomize the letters
 	_round.startMoveFrom(Screen::width(), 0, 15, 100, 18, 0);//animate roundels into screen pos
 
 	//paint this levels word boxes onto the background for quick blit display rather
@@ -1549,6 +1560,7 @@ void PlayGame::newLevel()
 
 	startCountdown();
 	clearEventBuffer();	//start fresh each level
+	return true;
 }
 
 //Calc how many words in each column needed to continue (in arcade mode)

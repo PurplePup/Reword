@@ -9,6 +9,7 @@
 #include "gamedata.h"	//also holds constants and stuff
 #include "roundels.h"
 #include "sprite.h"
+#include "fontttf.h"
 
 
 struct MenuItem
@@ -43,6 +44,8 @@ typedef std::vector<MenuItem> tMenuItems;
 
 enum eMenuLayout { MENU_LAYOUT_CENTER, MENU_LAYOUT_LEFT, MENU_LAYOUT_RIGHT };
 
+enum eMenuFont { MENU_FONT_DEFAULT, MENU_FONT_SMALL, MENU_FONT_MED, MENU_FONT_BIG, MENU_FONT_CLEAN };
+
 class PlayMenu : public IPlay
 {
 public:
@@ -69,6 +72,8 @@ public:
 	MenuItem	getSelected();
 	int			getNextYPos() { return _nextYpos; }
 	void        setLayout(eMenuLayout layoutType, int offset);
+	void        setFont(eMenuFont mainFont, eMenuFont helpFont);
+
 
 	GameData &	_gd;			//shared data between screens (play classes)
 
@@ -88,6 +93,7 @@ protected:
 	eMenuLayout _layoutType;
 	int         _layoutOffset;
     Waiting		_doubleClick;	//touch support
+    FontTTF     *_font, *_fontHelp;
 };
 
 #endif //_PlayMenu_H

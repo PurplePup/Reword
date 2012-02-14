@@ -83,7 +83,7 @@ void PlayGameDict::init(Input *input)
     _roundDict->startMoveFrom(Screen::width(), 0, 10, 50, 18, 0);
 
     //[BACK] dictionary screen buttons - only shown in dict display
-    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_square_back_small.png", 255, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_square_back_small.png", 255, 5));
     p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
     Control c(p, CTRLID_BACK, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsDict.add(c);

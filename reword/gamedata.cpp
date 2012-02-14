@@ -38,69 +38,76 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "gamedata.h"
 #include "platform.h"
 #include "score.h"
+#include "helpers.h"
 
 #include <iostream>
 
-GameData::GameData() : _bTouch(false),  _init(false)
+GameData::GameData(GameOptions &opt) : _options(opt), _bTouch(false),  _init(false)
 {
 	//initialise, load everything needed...
 	bool bErr = false;
 
-    bErr |= !_options.load();
-
 	//FONTS
-	bErr |= !_fntTiny.load(RES_BASE + "fonts/FreeSansBold.ttf", FONT_TINY);
-	bErr |= !_fntClean.load(RES_BASE + "fonts/FreeSansBold.ttf", FONT_SMALL);
-	bErr |= !_fntSmall.load(RES_BASE + "fonts/BD_Cartoon_Shout.ttf", FONT_SMALL);
-	bErr |= !_fntMed.load(RES_BASE + "fonts/BD_Cartoon_Shout.ttf", FONT_MEDIUM);
-	bErr |= !_fntBig.load(RES_BASE + "fonts/BD_Cartoon_Shout.ttf", FONT_BIG);
+	bErr |= !_fntTiny.load(RES_FONTS + "FreeSansBold.ttf", FONT_TINY);
+	bErr |= !_fntClean.load(RES_FONTS + "FreeSansBold.ttf", FONT_SMALL);
+	bErr |= !_fntSmall.load(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_SMALL);
+	bErr |= !_fntMed.load(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_MEDIUM);
+	bErr |= !_fntBig.load(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_BIG);
 
 	//BACKGROUNDS & IMAGES
 
-	bErr |= !_boxes.load(RES_BASE + "images/boxes.png");
+	bErr |= !_boxes.load(RES_IMAGES + "boxes.png");
 	bErr |= !_boxes.setTileSize(BOXW, BOXH, Image::TILE_VERT);	//tile 0=3, 1=4, 2=5, 3=6 letter words
 
-	bErr |= !_menubg.load(RES_BASE + "images/menubg.png");		//solid background (no alpha)
-	bErr |= !_menubg_plain.load(RES_BASE + "images/menubg_plain.png");
-	bErr |= !_menu_arcade.load(RES_BASE + "images/menu_arcade.png");
-	bErr |= !_menu_reword.load(RES_BASE + "images/menu_reword.png");
-	bErr |= !_menu_speeder.load(RES_BASE + "images/menu_speeder.png");
-	bErr |= !_menu_timetrial.load(RES_BASE + "images/menu_timetrial.png");
-	bErr |= !_scorebar.load(RES_BASE + "images/scorebar.png");
-	bErr |= !_game_arcade.load(RES_BASE + "images/game_arcade.png");
-	bErr |= !_game_reword.load(RES_BASE + "images/game_reword.png");
-	bErr |= !_game_speeder.load(RES_BASE + "images/game_speeder.png");
-	bErr |= !_game_timetrial.load(RES_BASE + "images/game_timetrial.png");
-	bErr |= !_gamemenu.load(RES_BASE + "images/popup_menu.png", 200);
-    bErr |= !_gamemusic_icon.load(RES_BASE + "images/btn_music.png", 255, 2);        //2 states on/off
-	bErr |= !_cursor.load(RES_BASE + "images/cursors.png");
+	bErr |= !_menubg.load(RES_IMAGES + "menubg.png");		//solid background (no alpha)
+	bErr |= !_menubg_plain.load(RES_IMAGES + "menubg_plain.png");
+	bErr |= !_menu_arcade.load(RES_IMAGES + "menu_arcade.png");
+	bErr |= !_menu_reword.load(RES_IMAGES + "menu_reword.png");
+	bErr |= !_menu_speeder.load(RES_IMAGES + "menu_speeder.png");
+	bErr |= !_menu_timetrial.load(RES_IMAGES + "menu_timetrial.png");
+	bErr |= !_scorebar.load(RES_IMAGES + "scorebar.png");
+	bErr |= !_game_arcade.load(RES_IMAGES + "game_arcade.png");
+	bErr |= !_game_reword.load(RES_IMAGES + "game_reword.png");
+	bErr |= !_game_speeder.load(RES_IMAGES + "game_speeder.png");
+	bErr |= !_game_timetrial.load(RES_IMAGES + "game_timetrial.png");
+	bErr |= !_gamemenu.load(RES_IMAGES + "popup_menu.png", 200);
+
+    bErr |= !_gamemusic_icon.load(RES_IMAGES + "btn_music.png", 255, 2);        //2 states on/off
+    //TODO - create resource (image) manager
+//    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_round_music.png", 255, 9));
+//    p->setPos(_xxStartCtrls, i._rBox.top());
+//    p->_sigEvent.connect(boost::bind(&PlayOptions::ControlEvent, this, _1, _2));
+//    Control c(p, CTRLID_MUSIC, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, _gd._options._bMusic);
+//    _controlsOptn.add(c);
+
+	bErr |= !_cursor.load(RES_IMAGES + "cursors.png");
 	bErr |= !_cursor.setTileSize(CURSORW,CURSORH);
-	bErr |= !_letters.load(RES_BASE + "images/roundel_letters.png", 255);
+	bErr |= !_letters.load(RES_IMAGES + "roundel_letters.png", 255);
 	bErr |= !_letters.setTileSize(LETTERW,LETTERH);
 
-	bErr |= !_scratch.load(RES_BASE + "images/scratch.png", -1, 7);
+	bErr |= !_scratch.load(RES_IMAGES + "scratch.png", -1, 7);
 
 	//SPRITES
-	bErr |= !_arrowUp.load(RES_BASE + "images/btn_round_scroll_up.png", 0, 5);
-	bErr |= !_arrowDown.load(RES_BASE + "images/btn_round_scroll_down.png", 0, 5);
-	bErr |= !_arrowLeft.load(RES_BASE + "images/btn_round_scroll_left.png", 0, 5);
-	bErr |= !_arrowRight.load(RES_BASE + "images/btn_round_scroll_right.png", 0, 5);
-	bErr |= !_star.load(RES_BASE + "images/star.png", 255, 7);
+	bErr |= !_arrowUp.load(RES_IMAGES + "btn_round_scroll_up.png", 0, 5);
+	bErr |= !_arrowDown.load(RES_IMAGES + "btn_round_scroll_down.png", 0, 5);
+	bErr |= !_arrowLeft.load(RES_IMAGES + "btn_round_scroll_left.png", 0, 5);
+	bErr |= !_arrowRight.load(RES_IMAGES + "btn_round_scroll_right.png", 0, 5);
+	bErr |= !_star.load(RES_IMAGES + "star.png", 255, 7);
 
-//	bErr |= !_moreWords.load(RES_BASE + "images/morewords.png",255, 2);	//frame 1=more_to_get, 2=more_all_got
+//	bErr |= !_moreWords.load(RES_IMAGES + "morewords.png",255, 2);	//frame 1=more_to_get, 2=more_all_got
 
 	//SOUNDS - no wrapper class so need to free on exit
-	_fxCountdown = Mix_LoadWAV(std::string(RES_BASE + "sounds/ping.wav").c_str());	//<10 seconds remaining
-	_fxBadword = Mix_LoadWAV(std::string(RES_BASE + "sounds/boing.wav").c_str());	//word not in dict
-	_fxOldword = Mix_LoadWAV(std::string(RES_BASE + "sounds/beepold.wav").c_str());	//word already picked
-	_fx6notfound = Mix_LoadWAV(std::string(RES_BASE + "sounds/honk.wav").c_str());	//not found a 6 letter word
-	_fx6found = Mix_LoadWAV(std::string(RES_BASE + "sounds/binkbink.wav").c_str());	//found a/the 6 letter word
-	_fxFound = Mix_LoadWAV(std::string(RES_BASE + "sounds/blipper.wav").c_str());	//found a non 6 letter word
-	_fxBonus = Mix_LoadWAV(std::string(RES_BASE + "sounds/fanfare.wav").c_str());	//all words done before countdown
-	_fxWoosh = Mix_LoadWAV(std::string(RES_BASE + "sounds/woosh2.wav").c_str());	//jumble letters sound
+	_fxCountdown = Mix_LoadWAV(std::string(RES_SOUNDS + "ping.wav").c_str());	//<10 seconds remaining
+	_fxBadword = Mix_LoadWAV(std::string(RES_SOUNDS + "boing.wav").c_str());	//word not in dict
+	_fxOldword = Mix_LoadWAV(std::string(RES_SOUNDS + "beepold.wav").c_str());	//word already picked
+	_fx6notfound = Mix_LoadWAV(std::string(RES_SOUNDS + "honk.wav").c_str());	//not found a 6 letter word
+	_fx6found = Mix_LoadWAV(std::string(RES_SOUNDS + "binkbink.wav").c_str());	//found a/the 6 letter word
+	_fxFound = Mix_LoadWAV(std::string(RES_SOUNDS + "blipper.wav").c_str());	//found a non 6 letter word
+	_fxBonus = Mix_LoadWAV(std::string(RES_SOUNDS + "fanfare.wav").c_str());	//all words done before countdown
+	_fxWoosh = Mix_LoadWAV(std::string(RES_SOUNDS + "woosh2.wav").c_str());	//jumble letters sound
 
 //#ifdef _USE_MIKMOD
-	_musicMenu = Mix_LoadMUS(std::string(RES_BASE + "sounds/cascade.mod").c_str());	//in sounds, not music dir
+	_musicMenu = Mix_LoadMUS(std::string(RES_SOUNDS + "cascade.mod").c_str());	//in sounds, not music dir
 	std::cerr << "Mix_LoadMUS cascade.mod result : " << Mix_GetError() << std::endl;
 //#else
 //	_musicMenu = 0;	//load later
@@ -110,14 +117,14 @@ GameData::GameData() : _bTouch(false),  _init(false)
 	Uint32 hash = _score.load();
 
 	//LOAD WORDS - 	//pass score hash + ticks as random seed
-	bErr |= !_words.load(RES_BASE + _options._defaultWordFile, hash + SDL_GetTicks());
+	bErr |= !_words.load(RES_WORDS + _options._defaultWordFile, hash + SDL_GetTicks());
 
 	//GAME STATES
 	//start in main menu
 	_state = ST_MENU;
 	_mainmenuoption = 0;	//start on [play] menu option
-	//default to medium diff
-	setDiffLevel(DIF_MED);
+	//default to saved or medium diff
+	setDiffLevel(_options._defaultDifficulty);
 	//default to "classic" game mode
 	_mode = GM_ARCADE;
 
@@ -148,14 +155,16 @@ void GameData::setDiffLevel(eGameDiff newDiff)
 	_diffColour = (_diffLevel==DIF_EASY)?GREEN_COLOUR:(_diffLevel==DIF_MED)?ORANGE_COLOUR:RED_COLOUR;
 }
 
+//write/overwrite quickstate save file
 void GameData::saveQuickState()
 {
 	tQuickStateSave	qss;
-	qss.words = _score.currWords();
-	qss.score =  _score.currScore();
-	qss.diff = (int)_diffLevel;
-	qss.mode = (int)_mode;
-	qss.seed = _score.seed();
+	qss._wordfile = _options._defaultWordFile;
+	qss._words = _score.currWords();
+	qss._score =  _score.currScore();
+	qss._diff = (int)_diffLevel;
+	qss._mode = (int)_mode;
+	qss._seed = _score.seed();
 	QuickState qs;
 	qs.setQuickState(qss);
 	qs.quickStateSave();
@@ -172,14 +181,23 @@ bool GameData::loadQuickState()
 		tQuickStateSave	qss;
 		qs.getQuickState(qss);
 
-		_score.setCurrWords(qss.words);
-		_score.setCurrScore(qss.score);
-		_diffLevel = (eGameDiff)qss.diff;
-		_mode = (eGameMode)qss.mode;
-		_score.setSeed(qss.seed);
+		_score.setCurrWords(qss._words);
+		_score.setCurrScore(qss._score);
+		_diffLevel = (eGameDiff)qss._diff;
+		_mode = (eGameMode)qss._mode;
+		_score.setSeed(qss._seed);
 
 		//load same word file as last load, same seed, next word on
-		_words.load("", qss.seed, qss.words+1);
+		if (!_words.load(RES_WORDS + qss._wordfile, qss._seed, qss._words+1))
+        {
+            std::cerr << "Fall back to default word file" << std::endl;
+            if (!_words.load(RES_WORDS + _options._defaultWordFile, SDL_GetTicks()))
+            {
+                std::cerr << "Cannot load default word file" << std::endl;
+                return false;
+            }
+        }
+
 		qs.quickStateDelete();	//remove last quick save file
 		return true;
 	}
@@ -189,21 +207,95 @@ bool GameData::loadQuickState()
 
 GameOptions::GameOptions() :
     _bSound(true), _bSfx(true), _bMusic(true),
-    _bSingleTapMenus(true), _bDefaultSfxOn(true), _bDefaultMusicOn(true)
+    _bSingleTapMenus(true), _bDefaultSfxOn(true), _bDefaultMusicOn(true),
+    _defaultDifficulty(DIF_MED),   //medium diff
+    _bDirty(false)
 {
-    _defaultWordFile = "words/rewordlist.txt";
+    _defaultWordFile = "reword_english_uk.txt"; //"words/" gets prepended
     _defaultMusicDir = "music/";
+#ifdef PANDORA
+	//pandora .pnd directory structure requires a unnamed directory for data written back to the SD card,
+	//so create a options directory in the startup/run .sh script and read/write scores files in there.
+	_optionsFile = "./options.dat";
+#else
+	_optionsFile = RES_BASE + "options.dat";
+#endif
+}
+
+GameOptions::~GameOptions()
+{
+    save();
 }
 
 bool GameOptions::load()
 {
-    //TODO:
-    return true;
+	std::string line, key, value;
+	std::ifstream infile (_optionsFile.c_str(), std::ios_base::in);
+	if (infile.is_open())
+	{
+		while (std::getline(infile, line, '\n'))
+		{
+			pptxt::splitKeyValuePair(line, key, value);
+			if (key == "singletap")
+				_bSingleTapMenus = atoi(value.c_str());
+			else if (key == "defaultsfx")
+				_bDefaultSfxOn = atoi(value.c_str());
+			else if (key == "defaultmusic")
+				_bDefaultMusicOn = atoi(value.c_str());
+			else if (key == "defaultdiff")
+			{
+			    int diff = atoi(value.c_str());
+			    if (diff > (int)DIF_UNDEFINED && diff < (int)DIF_MAX)
+                    _defaultDifficulty = (eGameDiff)diff;
+			}
+			else if (key == "defaultmusicdir")
+				_defaultMusicDir = value.c_str();
+			else if (key == "defaultwordfile")
+				_defaultWordFile = value.c_str();
+		}
+		_bDirty = false;
+		return true;
+	}
+	_bDirty = true; //force save if options file not found
+	return false;
 }
 
 bool GameOptions::save()
 {
-    //TODO:
+    if (!_bDirty) return false;
+	//save options as simple text pairs
+ 	std::ofstream outfile(_optionsFile.c_str(), std::ios::out|std::ifstream::trunc);
+	if (outfile.is_open())
+	{
+		outfile << "Reword=" << VERSION_STRING << std::endl;
+		outfile << "singletap=" << _bSingleTapMenus << std::endl;
+		outfile << "defaultsfx=" << _bDefaultSfxOn << std::endl;
+		outfile << "defaultmusic=" << _bDefaultMusicOn << std::endl;
+		outfile << "defaultdiff=" << _defaultDifficulty << std::endl;
+		outfile << "defaultmusicdir=" << _defaultMusicDir << std::endl;
+		outfile << "defaultwordfile=" << _defaultWordFile << std::endl;
+	}
+	_bDirty = false;
     return true;
 }
 
+//make sure dirty flag set
+void GameOptions::setSingleTap(bool b)
+{
+    if (_bSingleTapMenus != b) _bDirty = true;
+    _bSingleTapMenus = b;
+}
+
+//make sure dirty flag set
+void GameOptions::setDefaultSfxOn(bool b)
+{
+    if (_bDefaultSfxOn != b) _bDirty = true;
+    _bDefaultSfxOn = b;
+}
+
+//make sure dirty flag set
+void GameOptions::setDefaultMusicOn(bool b)
+{
+    if (_bDefaultMusicOn != b) _bDirty = true;
+    _bDefaultMusicOn = b;
+}

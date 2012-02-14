@@ -21,8 +21,13 @@
 struct GameOptions
 {
     GameOptions();
+    ~GameOptions();
     bool load();
     bool save();
+
+    void setSingleTap(bool b);
+    void setDefaultSfxOn(bool b);
+    void setDefaultMusicOn(bool b);
 
     bool        _bSound;    //if false, loads null IAudio
     bool        _bSfx;
@@ -31,9 +36,12 @@ struct GameOptions
 	bool        _bSingleTapMenus;
 	bool        _bDefaultSfxOn;
 	bool        _bDefaultMusicOn;
-	std::string _defaultWordFile;   //"words/rewordlist.txt"
+	std::string _defaultWordFile;   //"words/reword_english_uk.txt"
 	std::string _defaultMusicDir;   //"music"
-
+	eGameDiff   _defaultDifficulty; //0,1,or 2 (easy, med or hard)
+private:
+    bool        _bDirty;
+    std::string _optionsFile;
 };
 
 //to persist global data throughout app
@@ -41,7 +49,7 @@ class GameData
 {
 
 public:
-	GameData();
+	GameData(GameOptions &opt);
 	~GameData();
 	bool isLoaded() {return _init;}
 	void setDiffLevel(eGameDiff newDiff);
@@ -101,7 +109,7 @@ public:
 	//Game vars
 	///////////////////////////////
 
-    GameOptions _options;
+    GameOptions &_options;
 
 	int			_mainmenuoption;	// (0=play, 1=level, 2=hiscore etc)
 

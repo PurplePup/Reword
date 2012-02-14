@@ -18,7 +18,7 @@ public:
 	Game();
 	~Game();
 
-	bool 		init(const GameOptions &options);
+	bool 		init(GameOptions &options);
 	bool 		run(void);	//main game loop
 
 protected:

@@ -23,6 +23,7 @@ public:
     static void     InitInput();
     static IInput&  GetInput();
     static void     RegisterInput(IInput* input);
+
 /*
 //GAMEDATA
 public:

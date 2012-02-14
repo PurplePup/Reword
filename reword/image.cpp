@@ -277,6 +277,7 @@ SDL_Rect Image::tile(int i)
 //blit this (tile) image into another image (or screen)
 void Image::blitTo(Surface* dest, int destX, int destY, int tileNum /*= -1*/)
 {
+    //Compile warning acceptable as &this not going away during call
 	//Image class objects default to clip = 0 unless explicitly set
 	blit_surface(this->_surface, (tileNum<0)?NULL:&this->tile(tileNum),			//source
 				dest->surface(), destX, destY);									//dest
@@ -285,6 +286,7 @@ void Image::blitTo(Surface* dest, int destX, int destY, int tileNum /*= -1*/)
 //blit a (tile) image into this image
 void Image::blitFrom(Image* source, int tileNum /*= -1*/, int destX, int destY )
 {
+    //Compile warning acceptable as &source needed for surface too
 	//Image class objects default to clip = 0 unless explicitly set
 	blit_surface(source->surface(), (tileNum<0)?NULL:&source->tile(tileNum),	//source
 				this->_surface, destX, destY);									//dest

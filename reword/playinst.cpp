@@ -67,14 +67,14 @@ void PlayInst::init(Input *input)
 
 	//set arrow controls (scroll positions)
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_scroll_up.png", 0, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_round_scroll_up.png", 0, 5));
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2);
     p->_sigEvent.connect(boost::bind(&PlayInst::ControlEvent, this, _1, _2));
     Control c(p, CTRLID_SCROLL_UP, CTRLGRP_SCROLL, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsInst.add(c);
     }
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_scroll_down.png", 0, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_round_scroll_down.png", 0, 5));
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_BOT-p->tileH()-2);
     p->_sigEvent.connect(boost::bind(&PlayInst::ControlEvent, this, _1, _2));
     Control c(p, CTRLID_SCROLL_DOWN, CTRLGRP_SCROLL, Control::CAM_DIS_HIT_IDLE_SINGLE);
@@ -83,13 +83,14 @@ void PlayInst::init(Input *input)
 
     //load EXIT/NEXT buttons
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_square_exit_small.png", 255, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_square_exit_small.png", 255, 5));
     p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
+    p->_sigEvent.connect(boost::bind(&PlayInst::ControlEvent, this, _1, _2));
     Control c(p, CTRLID_EXIT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsInst.add(c);
     }
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_square_next_small.png", 255, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_square_next_small.png", 255, 5));
     p->setPos(SCREEN_WIDTH - p->tileW() - 8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
     Control c(p, CTRLID_NEXT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsInst.add(c);
@@ -191,14 +192,18 @@ void PlayInst::updateScrollButtons()
 //event signal from imageanim indicating end of animation
 void PlayInst::ControlEvent(int event, int control_id)
 {
-    (void)(control_id);
-
     if (event == USER_EV_END_ANIMATION)
     {
+        if (control_id == CTRLID_EXIT)  //exit after anim faded
+        {
+            _gd._state = ST_MENU;		//back to menu
+            _running = false;
+            return;
+        }
+
         updateScrollButtons();
     }
 }
-
 
 void PlayInst::button(Input *input, ppkey::eButtonType b)
 {
@@ -288,12 +293,6 @@ bool PlayInst::tap(const Point &pt)
         nextPage();
         return true;
     }
-    if (crtl_id == CTRLID_EXIT)
-    {
-		_gd._state = ST_MENU;		//back to menu
-		_running = false;
-        return true;
-    }
 
     return false;
 }
@@ -348,7 +347,7 @@ void PlayInst::buildPage(int page)
 			"on hardest difficulty.\n\n"
 			"1) Arcade\n"
 			"A quick game, allowing you to progress even if you can't get the "
-			"all-letter word, as long as you get enough other length words shown "
+			"all-letter word, as long as you get enough shorter length words shown "
 			"by the highlighted boxes. Longer words for quicker progress."
 			"\n\n"
 			"2) Reword (Original)\n"
@@ -369,7 +368,7 @@ void PlayInst::buildPage(int page)
 			"\n\n"
 			"General Info:\n"
 			"Press SELECT or touch Menu button in-game to access music tracks, "
-			"quick advance, save and exit options.\n"
+			"quick\nadvance, save and exit options.\n"
 			;
 			_txtColour = BLACK_COLOUR;
 			break;

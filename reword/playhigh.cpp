@@ -81,28 +81,28 @@ void PlayHigh::init(Input *input)
 
 	//set arrow controls (scroll positions)
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_scroll_up.png", 0, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_round_scroll_up.png", 0, 5));
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2);
     p->_sigEvent.connect(boost::bind(&PlayHigh::ControlEvent, this, _1, _2));
     Control c(p, CTRLID_SCROLL_UP, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_scroll_down.png", 0, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_round_scroll_down.png", 0, 5));
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2+p->tileH()+6);
     p->_sigEvent.connect(boost::bind(&PlayHigh::ControlEvent, this, _1, _2));
     Control c(p, CTRLID_SCROLL_DOWN, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_scroll_left.png", 0, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_round_scroll_left.png", 0, 5));
     p->setPos(SCREEN_WIDTH-(p->tileW()*2)-8, BG_LINE_BOT-p->tileH()-2);
     p->_sigEvent.connect(boost::bind(&PlayHigh::ControlEvent, this, _1, _2));
     Control c(p, CTRLID_SCROLL_LEFT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_round_scroll_right.png", 0, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_round_scroll_right.png", 0, 5));
     p->setPos(SCREEN_WIDTH-(p->tileW())-2, BG_LINE_BOT-p->tileH()-2);
     p->_sigEvent.connect(boost::bind(&PlayHigh::ControlEvent, this, _1, _2));
     Control c(p, CTRLID_SCROLL_RIGHT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
@@ -111,8 +111,9 @@ void PlayHigh::init(Input *input)
 
     //[EXIT] hi score screen buttons
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_BASE + "images/btn_square_exit_small.png", 255, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_square_exit_small.png", 255, 5));
     p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
+    p->_sigEvent.connect(boost::bind(&PlayHigh::ControlEvent, this, _1, _2));
     Control c(p, CTRLID_EXIT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
@@ -373,10 +374,15 @@ void PlayHigh::updateScrollButtons()
 //event signal from imageanim indicating end of animation
 void PlayHigh::ControlEvent(int event, int control_id)
 {
-    (void)(control_id);
-
     if (event == USER_EV_END_ANIMATION)
     {
+        if (control_id == CTRLID_EXIT)  //exit after anim faded
+        {
+            _gd._state = ST_MENU;		//back to menu
+            _running = false;
+            return;
+        }
+
         updateScrollButtons();
     }
 }
@@ -392,13 +398,7 @@ bool PlayHigh::tap(const Point &pt)
 {
     const int crtl_id = _controlsHigh.tapped(pt);
 
-    if (crtl_id == CTRLID_EXIT)
-    {
-        _gd._state = ST_MENU;
-        _running = false;	//exit this class running state
-        return true;
-    }
-    else if (crtl_id == CTRLID_SCROLL_UP)
+    if (crtl_id == CTRLID_SCROLL_UP)
 	{
 		moveDown();
         return true;

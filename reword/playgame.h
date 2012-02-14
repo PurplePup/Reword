@@ -103,7 +103,7 @@ protected:
 	void exit(eGameState toState);
 
 	void newGame();
-	void newLevel();
+	bool newLevel();
 	void startCountdown();
 	void stopCountdown();
 	void clearEventBuffer();

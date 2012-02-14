@@ -151,6 +151,8 @@ bool Control::tap(const Point &pt)
 }
 
 //fade/unpress the control - up to caller to determine visible etc
+//Note: bFlip option only needed for CAM_DIS_HIT_IDLE_DOUBLE control types where
+//      state is flipped on/before fade completes.
 void Control::fade(bool bFlip)
 {
     _bPressed = false;

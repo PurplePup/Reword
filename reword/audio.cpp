@@ -64,7 +64,7 @@ void NullAudio::setup(bool bMusic, bool bSfx)
 
 Audio::Audio() : _init(false), _volTest(0), _musicTrack(0), _lastTrack(0), _bPlayingTrack(false)
 {
-	_baseTrackDir = RES_BASE + "music";
+	_baseTrackDir = RES_MUSIC;
 }
 
 Audio::~Audio()
@@ -85,7 +85,7 @@ void Audio::setup(bool bMusic, bool bSfx)
 		return;	//not set _init
 	}
 
-	_volTest = Mix_LoadWAV(std::string(RES_BASE + "sounds/ping.wav").c_str()); //also used in game
+	_volTest = Mix_LoadWAV(std::string(RES_SOUNDS + "ping.wav").c_str()); //also used in game
 	setVolume((MIX_MAX_VOLUME / 2), false); //no test sound
 
 	_opt._bMusic = bMusic;
