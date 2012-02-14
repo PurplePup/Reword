@@ -20,6 +20,7 @@ build/
 bin/
 obj/
 work/
+data/
 [Dd]ebug/
 [Rr]elease/
 debug-arm
@@ -38,6 +39,4 @@ config.py
 .svn
 hiscore.dat
 .quickstate.save
-
-
-
+reword.layout
