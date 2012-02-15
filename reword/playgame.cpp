@@ -563,7 +563,7 @@ void PlayGame::render_end(Screen* s)
 void PlayGame::render_pause(Screen* s)
 {
 	const SDL_Colour c = BLACK_COLOUR;
-	s->drawSolidRect(0,0,s->width(), s->height(), c);
+	ppg::drawSolidRect(s->surface(), 0,0,s->width(), s->height(), c);
 	_roundPaused->draw(s);
     _gd._fntClean.put_text(s, (SCREEN_HEIGHT/2) + 30,
                         "10 second penalty", WHITE_COLOUR, false);
@@ -1781,7 +1781,7 @@ void PlayGame::prepareBackground()
 	//pre drawing so we dont need to do it each frame.
 	//...
 	_gamebg = std::auto_ptr<Image>(new Image(SCREEN_WIDTH, SCREEN_HEIGHT));
-	_gamebg->drawSolidRect(0, 0, Screen::width(), Screen::height(), GAMEBG_COLOUR);
+	ppg::drawSolidRect(_gamebg->surface(), 0, 0, Screen::width(), Screen::height(), GAMEBG_COLOUR);
 
 	//place score bar centered - in case screen bigger than graphic
 	int sb_x = (SCREEN_WIDTH - _gd._scorebar.width())/2;  //in case sb w < screen w

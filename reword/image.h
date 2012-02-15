@@ -42,7 +42,6 @@ public:
 
 	virtual bool load(std::string fileName, int iAlpha = -1);	//default no alpha
 	bool setTileSize(int w = 0, int h = 0, eTileDir tileDir = TILE_HORIZ);
-	SDL_Rect tile(int i);	//uses stored _tileW and _tileH
 
 	//specific blit for Image class types
 	void blitTo(Surface* dest, int destX = 0, int destY = 0, int tileNum = -1);
@@ -52,9 +51,10 @@ public:
 	int tileW() const       {return _tileW;}
 	int tileH() const       {return _tileH;}
 	int tileCount()	const   {return _tileCount;}
+	SDL_Rect tileRect(int i);	//uses stored _tileW and _tileH
 
 	//static functions available to all
-	static SDL_Rect tile(int i, int w, int h);	//[static] just return the Rect for requested tile
+	static SDL_Rect tileRect(int i, int w, int h);	//[static] just return the Rect for requested tile
 
 protected:
 	void cleanUp();

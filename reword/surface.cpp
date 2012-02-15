@@ -35,11 +35,11 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 // #include <SDL_gfxPrimitives.h>
 
-Surface::Surface() : _surface(0), _objectId(0)
+Surface::Surface() : _surface(0)
 {
 }
 
-Surface::Surface(SDL_Surface *s) : _surface(0), _objectId(0)
+Surface::Surface(SDL_Surface *s) : _surface(0)
 {
 	_surface = s;
 	s->refcount++;
@@ -112,7 +112,6 @@ void Surface::cleanUp()
 {
 	if (_surface) SDL_FreeSurface(_surface);
 	_surface = 0;
-	_r.x = _r.y = _r.w = _r.h = 0;
 }
 
 void Surface::setSurface(SDL_Surface *s)
@@ -150,83 +149,7 @@ int Surface::height(void) const
     return _surface->h;
 }
 
-//public draw functions
-/*
-//draw an outline rectangle, useful for debug
-void Surface::drawRect(const Rect& r, const SDL_Color& c)
-{
-	const Uint32 colour = SDL_MapRGB(_surface->format, c.r, c.g, c.b);
-	rectangleColor(_surface, r.left(), r.top(), r.right(), r.bottom(), colour);
-}
 
-//draw an outline rectangle, useful for debug
-void Surface::drawRect(const SDL_Rect& r, const SDL_Color& c)
-{
-	const Uint32 colour = SDL_MapRGB(_surface->format, c.r, c.g, c.b);
-	rectangleColor(_surface, r.x, r.y, r.x + r.w, r.y + r.h, colour);
-}
-
-//draw an outline rectangle, useful for debug
-void Surface::drawRect(int x, int y, int w, int h, const SDL_Color& c)
-{
-	const Uint32 colour = SDL_MapRGB(_surface->format, c.r, c.g, c.b);
-	rectangleColor(_surface, x, y, x+w, y+h, colour);
-}
-*/
-// Draw a filled/solid rectangle
-void Surface::drawSolidRect (int x, int y, int w, int h, const SDL_Color& c)
-{
-    _r.x = x;
-    _r.y = y;
-    _r.w = w;
-    _r.h = h;
-    const Uint32 colour = SDL_MapRGB(_surface->format, c.r, c.g, c.b);
-    SDL_FillRect(_surface, &_r, colour);
-}
-
-// Draw a filled/solid alpha blended (transparent) rectangle
-void Surface::drawSolidRectA(int x, int y, int w, int h, const SDL_Color& c, int iAlpha)
-{
-    _r.x = x;
-    _r.y = y;
-    _r.w = w;
-    _r.h = h;
-    const Uint32 colour = SDL_MapRGBA(_surface->format, c.r, c.g, c.b, iAlpha);
-    SDL_FillRect(_surface, &_r, colour);
-}
-
-//void Surface::putPixel (int x, int y, const Colour& c)
-void Surface::putPixel(int x, int y, Uint32 colour)
-{
-	// Put pixel of colour c at x,y
-	// If colour is NONE - no pixel is ploted
-    if (x >=0 && x < _surface->w && y >=0 && y < _surface->h) // && c != Colour::NONE)
-    {
-		unsigned short* dst = static_cast<unsigned short*>(_surface->pixels);
-		dst[y * _surface->pitch/sizeof(unsigned short) + x] = (unsigned short)colour;	//##fudge!!
-    }
-}
-
-//[static] function to blit, but not just to _screen - both source and destination surface needed
-void Surface::blit_surface(SDL_Surface* source, SDL_Rect* srcRect, SDL_Surface* dest, int destX, int destY)
-{
-	SDL_Rect destRect;	//needed local as this is static fn
-	destRect.x = destX;
-	destRect.y = destY;
-	SDL_BlitSurface( source, srcRect, dest, &destRect );
-}
-
-//leave srcRect clip param 0 (or NULL) to blit whole surface or specify srcRect clip to blit
-//only part of the source to the destination
-void Surface::blit_surface(SDL_Surface* source, SDL_Rect* srcRect, int destX, int destY)
-{
-	//set up destination rectangle
-	_r.x = destX;
-	_r.y = destY;
-    _r.w = _r.h = 0;	//height/width ignored by SDL_BlitSurface
-	//do it
-	SDL_BlitSurface( source, srcRect, _surface, &_r );
-}
 
 
 #if 0

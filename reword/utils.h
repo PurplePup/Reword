@@ -85,6 +85,18 @@ namespace ppg 	//pp game functions
 
 	void pushSDL_Event(int code, void *data1 = 0, void *data2 = 0);
     void pushSDL_EventKey(int key);
+
+   	//public draw functions
+ //   void drawRect(const Rect& r, const SDL_Color& c);
+ //   void drawRect(const SDL_Rect& r, const SDL_Color& c);
+ //   void drawRect(int x, int y, int w, int h, const SDL_Color& c);
+    void drawSolidRect(SDL_Surface* s, int x, int y, int w, int h, const SDL_Color& c);
+    void drawSolidRectA(SDL_Surface* s, int x, int y, int w, int h, const SDL_Color& c, int iAlpha);
+	void putPixel(SDL_Surface* s, int x, int y, Uint32 colour);
+
+	void blit_surface(SDL_Surface* source, SDL_Rect* srcRect, SDL_Surface* dest, int destX, int destY);
+	//void blit_surface(SDL_Surface* source, SDL_Rect* srcRect, int destX, int destY );
+
 }
 
 

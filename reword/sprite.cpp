@@ -47,7 +47,7 @@ Sprite::Sprite() :
 	ImageAnim(),
 	_xStart(0), _yStart(0), _xEnd(0), _yEnd(0),
 	_xDir(0), _yDir(0), _xVel(0), _yVel(0), _type(Sprite::SPR_NONE),
-	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true)
+	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true), _objectId(0)
 {
 }
 
@@ -55,7 +55,7 @@ Sprite::Sprite(std::string fileName, bool bAlpha, Uint32 nFrames) :
 	ImageAnim(fileName, bAlpha, nFrames),
 	_xStart(0), _yStart(0), _xEnd(0), _yEnd(0),
 	_xDir(0), _yDir(0), _xVel(0), _yVel(0), _type(Sprite::SPR_NONE),
-	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true)
+	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true), _objectId(0)
 {
 }
 
@@ -63,7 +63,7 @@ Sprite::Sprite(const Image &img) :
 	ImageAnim(img),
 	_xStart(0), _yStart(0), _xEnd(0), _yEnd(0),
 	_xDir(0), _yDir(0), _xVel(0), _yVel(0), _type(Sprite::SPR_NONE),
-	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true)
+	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true), _objectId(0)
 {
 }
 

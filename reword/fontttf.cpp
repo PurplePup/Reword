@@ -94,7 +94,7 @@ Rect FontTTF::put_text(Surface *s, int x, int y, const char *textstr, const SDL_
 		if (text != NULL)
 		{
 			if (-999 == x) x = (s->surface()->w - text->w ) / 2;
-			s->blit_surface(text, 0, x+1, y+1);
+			ppg::blit_surface(text, 0, s->surface(), x+1, y+1);
 			r._min = Point(x, y);
 			r._max = r._min.add(Point(text->w+1, text->h+1));
 			SDL_FreeSurface(text);
@@ -105,7 +105,7 @@ Rect FontTTF::put_text(Surface *s, int x, int y, const char *textstr, const SDL_
 	if (text != NULL)
 	{
 		if (-999 == x) x = (s->surface()->w - text->w ) / 2;
-		s->blit_surface(text, 0, x, y);
+		ppg::blit_surface(text, 0, s->surface(), x, y);
 		if(!bShadow){
 			r._min = Point(x, y);
 			r._max = r._min.add(Point(text->w, text->h));

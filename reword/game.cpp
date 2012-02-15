@@ -104,9 +104,9 @@ void Game::splash()
 	if (!_screen) return;
 	Image img(RES_IMAGES + "splash.png");	//solid black background
 	SDL_Colour c = {0x00,0x00,0x00,0};	//black
-	_screen->drawSolidRect(0, 0, Screen::width(), Screen::height(), c);
+	ppg::drawSolidRect(_screen->surface(), 0, 0, Screen::width(), Screen::height(), c);
 	//center it - if needed
-	_screen->blit_surface(img.surface(), 0, (Screen::width()-img.width())/2, (Screen::height()-img.height())/2);
+	ppg::blit_surface(img.surface(), 0, _screen->surface(), (Screen::width()-img.width())/2, (Screen::height()-img.height())/2);
 	_screen->update();	//flip
 //	sleep(2);	//so we can see it (POSIX)
 }

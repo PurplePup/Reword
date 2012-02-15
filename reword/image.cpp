@@ -84,7 +84,7 @@ void Image::cleanUp()
 //return a new image from a tile in this image
 Image * Image::createImageFromThis(int tileNum, int iAlpha /*=-1*/)
 {
-	SDL_Rect r = tile(tileNum, _tileW, _tileH);
+	SDL_Rect r = tileRect(tileNum, _tileW, _tileH);
 	Image *image = new Image(r.w, r.h, iAlpha);
 	image->blitFrom(this, tileNum);
 	image->setTileSize(_tileW, _tileH);
@@ -102,7 +102,7 @@ void Image::createThisFromImage(Image &image, int tileNum /*=-1*/, int iAlpha /*
 		SDL_SetAlpha(this->_surface, SDL_SRCALPHA, iAlpha);
 	else
 		//prefill with alpha colour so the final surface contains it where curr see through
-		drawSolidRect(0,0,image.tileW(),image.tileH(), ALPHA_COLOUR);
+		ppg::drawSolidRect(this->_surface, 0, 0, image.tileW(), image.tileH(), ALPHA_COLOUR);
 	if (-1 == tileNum)
 		setTileSize();
 	else
@@ -121,11 +121,11 @@ void Image::createThisFromImage(Image &image, Rect &r, int iAlpha /*=-1*/)
 		SDL_SetAlpha(this->_surface, SDL_SRCALPHA, iAlpha);
 	else
 		//prefill with alpha colour so the final surface contains it where curr see through
-		drawSolidRect(0,0,r.width(), r.height(), ALPHA_COLOUR);
+		ppg::drawSolidRect(this->_surface, 0, 0, r.width(), r.height(), ALPHA_COLOUR);
 	setTileSize(r.width(), r.height());
 
 	SDL_Rect sdlR = r.toSDL(); //{r.left(), r.top(), r.width(), r.height()};
-	blit_surface(image._surface, &sdlR, 0,0);   //into "this" newly created 'copy'
+	ppg::blit_surface(image._surface, &sdlR, this->_surface, 0, 0);   //into "this" newly created 'copy'
 }
 
 /*
@@ -249,7 +249,7 @@ bool Image::initImage(SDL_Surface *newSurface, int iAlpha /* =-1 */)
 
 //assumes a single row of tiles [0,1,2,3,4,5...]
 //static version, returns rect of exactly what is passed in
-SDL_Rect Image::tile(int i, int w, int h)
+SDL_Rect Image::tileRect(int i, int w, int h)
 {
 	SDL_Rect rect;
 	rect.x = i*w;
@@ -260,7 +260,7 @@ SDL_Rect Image::tile(int i, int w, int h)
 }
 
 //non static version that relies on setTileSize() previously called
-SDL_Rect Image::tile(int i)
+SDL_Rect Image::tileRect(int i)
 {
 	if (i < 0 || i >= _tileCount) i = 0;
 	SDL_Rect rect;
@@ -272,23 +272,25 @@ SDL_Rect Image::tile(int i)
 }
 
 
-//helper blit functions specifically for the Image class wrapping a surface
+//helper blit functions specifically for the Image class
 //
-//blit this (tile) image into another image (or screen)
+//blit this (tile) image into another Image (or screen)
 void Image::blitTo(Surface* dest, int destX, int destY, int tileNum /*= -1*/)
 {
-    //Compile warning acceptable as &this not going away during call
 	//Image class objects default to clip = 0 unless explicitly set
-	blit_surface(this->_surface, (tileNum<0)?NULL:&this->tile(tileNum),			//source
-				dest->surface(), destX, destY);									//dest
+	SDL_Rect rect = this->tileRect(tileNum);
+	ppg::blit_surface(
+        this->_surface, (tileNum<0)?NULL:&rect,			//source
+		dest->surface(), destX, destY);					//dest
 }
 
-//blit a (tile) image into this image
+//blit a (tile) image into this Image
 void Image::blitFrom(Image* source, int tileNum /*= -1*/, int destX, int destY )
 {
-    //Compile warning acceptable as &source needed for surface too
 	//Image class objects default to clip = 0 unless explicitly set
-	blit_surface(source->surface(), (tileNum<0)?NULL:&source->tile(tileNum),	//source
-				this->_surface, destX, destY);									//dest
+	SDL_Rect rect = source->tileRect(tileNum);
+	ppg::blit_surface(
+        source->surface(), (tileNum<0)?NULL:&rect,	    //source
+		this->_surface, destX, destY);					//dest
 }
 
