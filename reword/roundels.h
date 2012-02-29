@@ -7,6 +7,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <memory>
 
 #include "sprite.h"
 #include "states.h"
@@ -28,9 +29,9 @@ public:
 	Roundels();
 	~Roundels();
 	void cleanUp();
-	void setWord(std::string &wrd, Image &letters, int x /*= 0*/, int y /*= 0*/, int gap /*= 0*/, bool bHoriz /*= true*/);
-	void setWordCenterHoriz(std::string wrd, Image &letters, int y = 0, int gap =0);
-	void setWordCenterVert(std::string wrd, Image &letters, int x = 0, int gap =0);
+	void setWord(std::string &wrd, tSharedImage &letters, int x /*= 0*/, int y /*= 0*/, int gap /*= 0*/, bool bHoriz /*= true*/);
+	void setWordCenterHoriz(std::string wrd, tSharedImage &letters, int y = 0, int gap =0);
+	void setWordCenterVert(std::string wrd, tSharedImage &letters, int x = 0, int gap =0);
 	void startMoveFrom(int deltaX, int deltaY, Uint32 rate, Uint32 delay, int xVel, int yVel, Sprite::eSprite type = Sprite::SPR_NONE);
 	void setTopAndBottomYPos(int yPosTop, int yPosBot);
     int getLastId();
@@ -90,5 +91,7 @@ protected:
 	int _yScratchTop,
 		_yScratchBot;		//previously #defined SCRATCHY1 and SCRATCHY2
 };
+
+typedef std::auto_ptr<Roundels> tAutoRoundels;
 
 #endif //_ROUNDELS_H

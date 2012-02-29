@@ -86,7 +86,7 @@ void Roundels::cleanUp()
 //	accessor functions after the setWord function returns.
 //bHoriz - default true for horizontal letters, false for vertical
 void Roundels::setWord(std::string &wrd,
-					   Image &letters,
+					   tSharedImage &letters,
 					   int x, int y,
 					   int gap,
 					   bool bHoriz)
@@ -110,8 +110,8 @@ void Roundels::setWord(std::string &wrd,
 		Sprite *pspr = new Sprite(letters);
 
 //		pspr->createThisFromImage(letters, wrd[i]-65, 255);
-		pspr->setTileSize(letters.tileW(), letters.tileH());
-		pspr->setFrameCount(26);
+//		pspr->setTileSize(letters.tileW(), letters.tileH());
+//		pspr->setFrameCount(26);
 		pspr->setFrame(wrd[i]-65);
 
 		//each letter has id of initial index (1..n), then use getLastId()
@@ -127,7 +127,8 @@ void Roundels::setWord(std::string &wrd,
 
 		_top.push_back(prnd);
 
-		//build lists for _bot and _last that currently dont point to anything
+		//reuse ptr to build lists for _bot and _last
+		//that currently dont point to anything
 		prnd = (Roundel*)NULL;
 		_bot.push_back(prnd);	//set to null
 		_last.push_back(prnd);	//set to null
@@ -155,14 +156,14 @@ void Roundels::setTopAndBottomYPos(int yPosTop, int yPosBot)
 
 //center the roundels horizontally on screen (no need to specify x position)
 void Roundels::setWordCenterHoriz(std::string wrd,
-					   Image &letters,
+					   tSharedImage &letters,
 					   int y,				//no x if centered horiz
 					   int gap)
 {
 	int newX, newY;
 
 	//calc new start position of first roundel based on centered length of all roundels in the word
-	newX = ( Screen::width() - (((letters.tileW()+gap)*wrd.length())-gap) ) /2;
+	newX = ( Screen::width() - (((letters->tileW()+gap)*wrd.length())-gap) ) /2;
 	newY = y;
 
 	//pass new pos to the real setWord function
@@ -171,7 +172,7 @@ void Roundels::setWordCenterHoriz(std::string wrd,
 
 //center the roundels vertically on screen (no need to specify y position)
 void Roundels::setWordCenterVert(std::string wrd,
-					   Image &letters,
+					   tSharedImage &letters,
 					   int x,				//no y if centered vert
 					   int gap)
 {
@@ -179,7 +180,7 @@ void Roundels::setWordCenterVert(std::string wrd,
 
 	//calc new start position of first roundel based on centered length of all roundels in the word
 	newX = x;
-	newY = ( Screen::height() - (((letters.tileH()+gap)*wrd.length())-gap) ) /2;
+	newY = ( Screen::height() - (((letters->tileH()+gap)*wrd.length())-gap) ) /2;
 
 	//pass new pos to the real setWord function
 	setWord(wrd, letters, newX, newY, gap, false);

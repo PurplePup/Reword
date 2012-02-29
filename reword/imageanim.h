@@ -10,7 +10,7 @@
 #include <vector>
 #include <boost/signal.hpp>
 
-class ImageAnim : public Image
+class ImageAnim //: public Image
 {
 public:
 	enum eAnim {	ANI_NONE,		//static, not moving
@@ -24,9 +24,10 @@ public:
 
 	ImageAnim();
 	ImageAnim(std::string fileName, bool bAlpha, Uint32 nFrames);
-	ImageAnim(const Image &img);
+//	ImageAnim(const Image &img);
+    ImageAnim(tSharedImage &img);
 	virtual ~ImageAnim() {}
-	virtual bool load(std::string fileName, int iAlpha = -1, Uint32 nFrames = 0);	//default no alpha, 1 frames
+//	virtual bool load(std::string fileName, int iAlpha = -1, Uint32 nFrames = 0);	//default no alpha, 1 frames
 
 	//position
 	virtual void setPos(float x, float y)	{ _x = x; _y = y; }
@@ -64,11 +65,36 @@ public:
 	void setAnimDir(eAnimDir dir)		        { _frameDir = (dir == DIR_BACKWARD)?-1:1; }	//anim start dir (frame +/-) +1 for forward, -1 for back
 	void setAnimRestart(Uint32 r, Uint32 d=0)	{ _restartA.start(_restart = r, d); }
 	void setVisible(bool b)			            { _visible = b; }
-	void pauseAnim(bool b = true)	            { _pauseA = b; }			//stop/start animating
+	void pauseAnim(bool b = true)	            {
+	     _pauseA = b;
+	     }			//stop/start animating
 	void toggleAnim()				            { _pauseA = !_pauseA; }		//toggle pause state
 	void resetAnim()				            { _frame = _firstFrame; }	//start anim sequence at start
-	inline bool canAnim() const		            { return (_nFrames>1); }// && !_pauseA); }		//has more than 1 frame & not paused
+	inline bool canAnim() const		            {
+	     return
+	     (_nFrames>1);
+	     }// && !_pauseA); }		//has more than 1 frame & not paused
 	inline bool isVisible() const 	            { return _visible; }
+
+    //tile functions
+	int tileW() const       { return _image->tileW(); }
+	int tileH() const       { return _image->tileH(); }
+	int tileCount()	const   { return _image->tileCount(); }
+	SDL_Rect tileRect(int i) { return _image->tileRect(i); }
+//	Image * createImageFromThis(int tileNum, int iAlpha = -1);	//return a new image from a tile in this image
+//	void createThisFromImage(Image &image, int tileNum = -1, int iAlpha = -1);	//create this image using an existing image (tile)
+
+	////static functions available to all
+	//static SDL_Rect tileRect(int i, int w, int h);	//[static] just return the Rect for requested tile
+
+	void setImage(tSharedImage &img);
+	tSharedImage &getImage() { return _image; }
+
+	//specific blit for Image class types
+	SDL_Surface *surface(void) const { return _image->surface(); }
+	void blitTo(Surface* dest, int destX = 0, int destY = 0, int tileNum = -1);
+	void blitFrom(Image* source, int destX = 0, int destY = 0);
+	void blitFrom(ImageAnim* source, int tileNum = -1, int destX = 0, int destY = 0);
 
 	//main functions
 	virtual void work();	//calc new pos/frame etc
@@ -87,8 +113,15 @@ private:
 
 protected:
 
+    tSharedImage _image;    //only a shared ptr to existing resource image (so multiple valid)
+
 	//position
 	float	_x, _y;		//current screen offset/position
+
+    //tile info
+	int     _tileW, _tileH; //actual individual tile w & h withing image
+	int     _tileCount;	    //number of tiles in image (if setTileSize() used)
+    int     _tileWOffset, _tileHOffset;     //value or 0, depend on eTileDir to multiply by
 
 	//animation
 	Uint32	_frame;		//current frame

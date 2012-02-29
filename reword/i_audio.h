@@ -25,6 +25,11 @@ public:
     virtual int  getMusicVol() = 0;
     virtual void setMusicVol(Sint16 newvol, bool bTest = true) = 0;
 
+    //mute/unmute music and sfx at same time
+    virtual bool isMute() = 0;
+    virtual void mute(bool bMute = true) = 0;
+
+    virtual bool hasSound() = 0;
 	virtual void setBaseTrackDir(const std::string &baseMusicDir) = 0;
 	virtual void startNextTrack() = 0;
 	virtual void startPrevTrack() = 0;

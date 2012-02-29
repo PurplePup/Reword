@@ -99,18 +99,19 @@ int main(int argc, char* argv[]) // <- this must match exactly, since SDL rewrit
 			bHelp = true;
 			continue;
 		}
-		if ("-mutesfx" == arg)
+		if ("-mutesfx" == arg)  //start with fx off
 		{
 			options._bSfx = false;
 			continue;
 		}
-		if ("-mutemusic" == arg)
+		if ("-mutemusic" == arg)  //start with music off
 		{
 			options._bMusic = false;
 			continue;
 		}
 		if ("-nosound" == arg)
 		{
+		    //not same as mute, which just starts the game muted. This disables sound.
 			options._bSound = options._bSfx = options._bMusic = false;
 			continue;
 		}

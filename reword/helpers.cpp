@@ -31,6 +31,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 */
 ////////////////////////////////////////////////////////////////////
 
+#include "platform.h"
 
 #include <algorithm>	//for std::min and std::max (if used) amongst other things
 #include <cctype>

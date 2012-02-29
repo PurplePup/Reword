@@ -75,8 +75,10 @@ void PlayGamePopup::init(Input *input)
 
 	memset(_touchArea, 0, sizeof _touchArea );
 	memset(_touchYNArea, 0, sizeof _touchYNArea );
-	_gd._star.setPos(0,0);	//modified once menu text X pos returned from put_text()
-	_gd._star.startAnim( 0, 6, ImageAnim::ANI_LOOP, 35, 0);
+
+	_star.setImage(Resource::image("star.png"));
+	_star.setPos(0,0);	//modified once menu text X pos returned from put_text()
+	_star.startAnim( 0, 6, ImageAnim::ANI_LOOP, 35, 0);
 
 	int i(0);
 	//main (in-game) menu options
@@ -110,14 +112,15 @@ void PlayGamePopup::init(Input *input)
 void PlayGamePopup::render(Screen *s)
 {
 	//draw menu overlay
-	const int x = (s->_width - _gd._gamemenu.tileW()) / 2;
-	const int y = (s->_height - _gd._gamemenu.tileH()) / 2;
-	_menubg->blitTo(s, x, y, 0);
+	const int x = (s->_width - _menubg->width()) / 2;
+	const int y = (s->_height - _menubg->height()) / 2;
+//	_menubg->blitTo(s, x, y, 0);
+	ppg::blit_surface(_menubg->surface(), NULL, s->surface(), x, y);
 
 	//calculate best text gap
 	const int maxGap = _gd._fntSmall.height()*2; //max gap
 	int topGap = _gd._fntSmall.height();
-	const int h = _gd._gamemenu.tileH() - (_gd._fntSmall.height()*3) - 10; //10=5pix*2 border
+	const int h = _menubg->height() - (_gd._fntSmall.height()*3) - 10; //10=5pix*2 border
 	const int texth = _pItems->size() * _gd._fntSmall.height();
 	int gap = (h - texth) / (_pItems->size()-1);
 	if (gap > maxGap)
@@ -133,10 +136,10 @@ void PlayGamePopup::render(Screen *s)
 		if (it->first == _menuoption)
 		{
 			r = _gd._fntSmall.put_text(s, yy, it->second._title.c_str(), (it->second._enabled)?it->second._hoverOn:GREY_COLOUR, true);
-			r._min._x -= _gd._star.tileW()+5;
-			_gd._star.setPos(r._min._x, yy);
+			r._min._x -= _star.tileW()+5;
+			_star.setPos(r._min._x, yy);
 			//help/comment str
-			_gd._fntClean.put_text(s, (y+_gd._gamemenu.tileH())-(_gd._fntSmall.height()*2), it->second._comment.c_str(), GREY_COLOUR, true);
+			_gd._fntClean.put_text(s, (y+_menubg->height())-(_gd._fntSmall.height()*2), it->second._comment.c_str(), GREY_COLOUR, true);
 		}
 		else
 		{
@@ -147,14 +150,14 @@ void PlayGamePopup::render(Screen *s)
 		yy += gap + _gd._fntSmall.height();
 	}
 
-	_gd._star.draw(s);
+	_star.draw(s);
 }
 
 void PlayGamePopup::work(Input *input, float speedFactor)
 {
     (void)(speedFactor);
 
-	_gd._star.work();
+	_star.work();
 
 	//Do repeat keys...if a key is pressed and the interval
 	//has expired process that button as if pressesd again
@@ -306,8 +309,9 @@ void PlayGamePopup::choose()
 
 void PlayGamePopup::prepareBackground()
 {
-	_menubg = std::auto_ptr<Image>(new Image());
-	_menubg->createThisFromImage(_gd._gamemenu);	//in game popupmenu
+//	_menubg = tSharedImage(new Image());
+//	_menubg->createThisFromImage(_gd._gamemenu);	//in game popupmenu
+   	_menubg = Resource::image("popup_menu.png");
 }
 
 int PlayGamePopup::ItemFromId(int id)

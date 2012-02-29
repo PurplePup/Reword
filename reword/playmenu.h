@@ -10,6 +10,7 @@
 #include "roundels.h"
 #include "sprite.h"
 #include "fontttf.h"
+#include "controls.h"
 
 
 struct MenuItem
@@ -74,11 +75,13 @@ public:
 	void        setLayout(eMenuLayout layoutType, int offset);
 	void        setFont(eMenuFont mainFont, eMenuFont helpFont);
 
-
-	GameData &	_gd;			//shared data between screens (play classes)
-
 protected:
     void        recalcItemPositions();
+
+protected:
+	GameData &	_gd;			//shared data between screens (play classes)
+	tSharedImage _menubg;
+	ImageAnim   _star;
 
 	Roundels	_title;
 	Waiting		_titleW;		//delay between jumbling
@@ -94,6 +97,7 @@ protected:
 	int         _layoutOffset;
     Waiting		_doubleClick;	//touch support
     FontTTF     *_font, *_fontHelp;
+    Controls    _controlsMenu;
 };
 
 #endif //_PlayMenu_H

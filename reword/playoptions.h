@@ -30,7 +30,7 @@ public:
 	virtual bool tap(const Point &pt);
 
 protected:
-    void ControlEvent(int event, int control_id);
+    void ControlEvent(int event, int ctrl_id);
     void setupWordFile();
 
 private:

@@ -41,29 +41,45 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <iostream>
 
 Image::Image() :
-	Surface(), _init(false)
+	Surface(), _init(false),
+	_tileCount(0), _tileW(0), _tileH(0), _tileWOffset(0), _tileHOffset(0),
+	_tileDir(TILE_HORIZ)
 {
 	cleanUp();
 }
 
 Image::Image(unsigned int w, unsigned int h, int iAlpha /*=-1*/) :
-	Surface(), _init(false)
+	Surface(), _init(false),
+	_tileCount(0), _tileW(0), _tileH(0), _tileWOffset(0), _tileHOffset(0),
+	_tileDir(TILE_HORIZ)
 {
 	cleanUp();
 	_init = create(w, h, iAlpha);	//create surface of required size
 	setTileSize();					//ensure tile size set (at least to size of image)
 }
 
-Image::Image(std::string fileName, int iAlpha /*=-1*/) :
-	Surface(), _init(false)
+Image::Image(const std::string &fileName, int iAlpha /*=-1*/, Uint32 nTiles /*=1*/) :
+	Surface(), _init(false),
+	_tileCount(0), _tileW(0), _tileH(0), _tileWOffset(0), _tileHOffset(0),
+	_tileDir(TILE_HORIZ)
 {
+#if _DEBUG
+    _dbgName = fileName;
+#endif
+
 	cleanUp();
-	load(fileName, iAlpha);
+	load(fileName, iAlpha, nTiles);
 }
 
 Image::Image(const Image &img) :
-	Surface(img.surface()), _init(img._init)
+	Surface(img.surface()), _init(img._init),
+	_tileCount(0), _tileW(0), _tileH(0), _tileWOffset(0), _tileHOffset(0),
+	_tileDir(TILE_HORIZ)
 {
+#if _DEBUG
+    _dbgName = img._dbgName;
+#endif
+    setTileCount(img.tileCount(), img.tileDir());
 }
 
 Image::~Image()
@@ -75,43 +91,20 @@ void Image::cleanUp()
 {
 	Surface::cleanUp();	//free surface etc
 
-	_tileW = _tileH = _tileCount = _tileWOffset = _tileHOffset = 0;
 //	_clip = 0;	//use whole image (used in blit(Image*) )
 
 	_init = false;
 }
 
-//return a new image from a tile in this image
-Image * Image::createImageFromThis(int tileNum, int iAlpha /*=-1*/)
+
+//create this image from another image or part image (tile)
+void Image::cloneFrom(Image &image, int iAlpha /*=-1*/)
 {
-	SDL_Rect r = tileRect(tileNum, _tileW, _tileH);
-	Image *image = new Image(r.w, r.h, iAlpha);
-	image->blitFrom(this, tileNum);
-	image->setTileSize(_tileW, _tileH);
-	return image;
+    Rect r( 0, 0, image.width(), image.height() );
+    cloneFrom(image, r, iAlpha);
 }
 
-//create this image from another image (tile)
-void Image::createThisFromImage(Image &image, int tileNum /*=-1*/, int iAlpha /*=-1*/)
-{
-	cleanUp();
-	_init = Surface::create(image.tileW(), image.tileH(), iAlpha);
-
-	if (image.surface()->format->Amask && iAlpha!=-1)
-		//source image has alpha so set alpha in this new dest image too
-		SDL_SetAlpha(this->_surface, SDL_SRCALPHA, iAlpha);
-	else
-		//prefill with alpha colour so the final surface contains it where curr see through
-		ppg::drawSolidRect(this->_surface, 0, 0, image.tileW(), image.tileH(), ALPHA_COLOUR);
-	if (-1 == tileNum)
-		setTileSize();
-	else
-		setTileSize(image.tileW(), image.tileH());
-	blitFrom(&image, tileNum);	//into "this" newly created 'copy'
-}
-
-//create this image from another image (tile)
-void Image::createThisFromImage(Image &image, Rect &r, int iAlpha /*=-1*/)
+void Image::cloneFrom(Image &image, Rect &r, int iAlpha /*=-1*/)
 {
 	cleanUp();
 	_init = Surface::create(r.width(), r.height(), iAlpha);
@@ -122,7 +115,8 @@ void Image::createThisFromImage(Image &image, Rect &r, int iAlpha /*=-1*/)
 	else
 		//prefill with alpha colour so the final surface contains it where curr see through
 		ppg::drawSolidRect(this->_surface, 0, 0, r.width(), r.height(), ALPHA_COLOUR);
-	setTileSize(r.width(), r.height());
+
+    setTileCount(image.tileCount(), image.tileDir());
 
 	SDL_Rect sdlR = r.toSDL(); //{r.left(), r.top(), r.width(), r.height()};
 	ppg::blit_surface(image._surface, &sdlR, this->_surface, 0, 0);   //into "this" newly created 'copy'
@@ -130,7 +124,7 @@ void Image::createThisFromImage(Image &image, Rect &r, int iAlpha /*=-1*/)
 
 /*
 //create this image from another image (tile)
-bool Image::createThisFromImage(Image &image, int tileNum , int iAlpha )
+bool Image::cloneFrom(Image &image, int tileNum , int iAlpha )
 {
 	if (image.surface()->format->Amask || iAlpha != -1)
 	{
@@ -193,34 +187,7 @@ bool Image::copy(Image &image)
 
 */
 
-//set the predefined size of a tile
-//Currently tiles in images should be placed horizontally [0,1,2,3,4,5...]
-bool Image::setTileSize(int w /*= 0*/, int h /*= 0*/, eTileDir tileDir /*= TILE_HORIZ*/)
-{
-	if (!initDone()) return false; //can't set dimentions of no image
-
-	if ((h < 1) || (h > _surface->h)) h = _surface->h;	//default to height of image
-	if ((w < 1) || (w > _surface->w)) w = _surface->w;	//default to whole width of image
-
-	_tileW = w;
-	_tileH = h;
-
-    _tileWOffset = _tileHOffset = 0;
-    if (tileDir == TILE_HORIZ)
-    {
-        _tileWOffset = _tileW;
-        _tileCount = (int)_surface->w / w;  //for a sanity check in tile() fn
-    }
-    else
-    {
-        _tileHOffset = _tileH;
-        _tileCount = (int)_surface->h / h;  //for a sanity check in tile() fn
-    }
-
-	return true;
-}
-
-bool Image::load(std::string fileName, int iAlpha /* =-1 */)
+bool Image::load(const std::string &fileName, int iAlpha /* =-1 */, Uint32 nTiles /*=1*/)
 {
 	//Temporary storage for the image that's loaded
 	SDL_Surface* loadedImage = NULL;
@@ -234,63 +201,77 @@ bool Image::load(std::string fileName, int iAlpha /* =-1 */)
 		return false;
 	}
 
-	return initImage(loadedImage, iAlpha);
+	return initImage(loadedImage, iAlpha, nTiles);
 }
 
 //use the surface classes initSurface() fn to set up the image surface
-bool Image::initImage(SDL_Surface *newSurface, int iAlpha /* =-1 */)
+bool Image::initImage(SDL_Surface *newSurface, int iAlpha /* =-1 */, Uint32 nTiles /*=1*/)
 {
 	cleanUp();
 	_init = Surface::initSurface(newSurface, iAlpha);
-	setTileSize(_surface->w, _surface->h);	//default to size of image
+	setTileCount(nTiles);
 	return _init;
 }
 
-
-//assumes a single row of tiles [0,1,2,3,4,5...]
-//static version, returns rect of exactly what is passed in
-SDL_Rect Image::tileRect(int i, int w, int h)
-{
-	SDL_Rect rect;
-	rect.x = i*w;
-	rect.y = 0;
-	rect.w = w;
-	rect.h = h;
-	return rect;
-}
+////assumes a single row of tiles [0,1,2,3,4,5...]
+////static version, returns rect of exactly what is passed in
+//SDL_Rect Image::tileRect(int i, int w, int h)
+//{
+//	SDL_Rect rect;
+//	rect.x = i*w;
+//	rect.y = 0;
+//	rect.w = w;
+//	rect.h = h;
+//	return rect;
+//}
 
 //non static version that relies on setTileSize() previously called
-SDL_Rect Image::tileRect(int i)
+SDL_Rect Image::tileRect(Uint32 tile)
 {
-	if (i < 0 || i >= _tileCount) i = 0;
+	if (tile >= _tileCount) tile = 0;
 	SDL_Rect rect;
-	rect.x = i*_tileWOffset;    //w * tileW, or 0
-	rect.y = i*_tileHOffset;    //h * tileH, or 0
+	rect.x = tile*_tileWOffset;    //w * tileW, or 0
+	rect.y = tile*_tileHOffset;    //h * tileH, or 0
 	rect.w = _tileW;
 	rect.h = _tileH;
 	return rect;
 }
 
-
-//helper blit functions specifically for the Image class
-//
-//blit this (tile) image into another Image (or screen)
-void Image::blitTo(Surface* dest, int destX, int destY, int tileNum /*= -1*/)
+//try to calc tile sizes depending on number of tiles and the direction of the repeating tiles
+void Image::setTileCount(Uint32 nTiles, eTileDir tileDir /*= TILE_HORIZ*/)
 {
-	//Image class objects default to clip = 0 unless explicitly set
-	SDL_Rect rect = this->tileRect(tileNum);
-	ppg::blit_surface(
-        this->_surface, (tileNum<0)?NULL:&rect,			//source
-		dest->surface(), destX, destY);					//dest
+    if (tileDir == TILE_HORIZ)
+        setTileSize( (Uint32)(width() / ((nTiles>0)?nTiles:1)), 0, tileDir );	//w=pixels/frames, h=default full height
+    else
+        setTileSize( 0, (Uint32)(height() / ((nTiles>0)?nTiles:1)), tileDir );	//h=pixels/frames, w=default full width
 }
 
-//blit a (tile) image into this Image
-void Image::blitFrom(Image* source, int tileNum /*= -1*/, int destX, int destY )
+//set the predefined size of a tile
+//Currently tiles in images should be placed horizontally [0,1,2,3,4,5...]
+bool Image::setTileSize(Uint32 w /*= 0*/, Uint32 h /*= 0*/, eTileDir tileDir /*= TILE_HORIZ*/)
 {
-	//Image class objects default to clip = 0 unless explicitly set
-	SDL_Rect rect = source->tileRect(tileNum);
-	ppg::blit_surface(
-        source->surface(), (tileNum<0)?NULL:&rect,	    //source
-		this->_surface, destX, destY);					//dest
+	if (!initDone()) return false; //can't set dimentions of no image
+
+	if ((h < 1) || (h > height())) h = height();	//default to height of image
+	if ((w < 1) || (w > width())) w = width();	//default to whole width of image
+
+    _tileDir = tileDir;
+	_tileW = w;
+	_tileH = h;
+
+    if (tileDir == TILE_HORIZ)
+    {
+        _tileHOffset = 0;
+        _tileWOffset = _tileW;
+        _tileCount = (Uint32)width() / w;  //for a sanity check in tileRect() fn
+    }
+    else
+    {
+        _tileHOffset = _tileH;
+        _tileWOffset  = 0;
+        _tileCount = (Uint32)height() / h;  //for a sanity check in tileRect() fn
+    }
+
+	return true;
 }
 

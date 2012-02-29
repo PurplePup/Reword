@@ -53,9 +53,12 @@ void PlayInst::init(Input *input)
 {
 	//once the class is initialised, init and running are set true
 
-	_title.setWordCenterHoriz(std::string("INFO"), _gd._letters, (BG_LINE_TOP-_gd._letters.tileH())/2, 2);
-	_title.startMoveFrom( 0, -(_gd._letters.tileH()*2), 15, 100, 0, ROUNDEL_VEL);
+    tSharedImage &letters = Resource::image("roundel_letters.png");
+	_title.setWordCenterHoriz(std::string("INFO"), letters, (BG_LINE_TOP-letters.get()->height())/2, 2);
+	_title.startMoveFrom( 0, -(letters.get()->height()*2), 15, 100, 0, ROUNDEL_VEL);
 	_titleW.start(3000, 1000);
+
+    _menubg = Resource::image("menubg.png");
 
 	//set the repeat of the keys required
 	input->setRepeat(ppkey::UP, 250, 250);		//button, rate, delay
@@ -67,14 +70,14 @@ void PlayInst::init(Input *input)
 
 	//set arrow controls (scroll positions)
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_round_scroll_up.png", 0, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_up.png")));
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2);
     p->_sigEvent.connect(boost::bind(&PlayInst::ControlEvent, this, _1, _2));
     Control c(p, CTRLID_SCROLL_UP, CTRLGRP_SCROLL, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsInst.add(c);
     }
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_round_scroll_down.png", 0, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_down.png")));
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_BOT-p->tileH()-2);
     p->_sigEvent.connect(boost::bind(&PlayInst::ControlEvent, this, _1, _2));
     Control c(p, CTRLID_SCROLL_DOWN, CTRLGRP_SCROLL, Control::CAM_DIS_HIT_IDLE_SINGLE);
@@ -83,14 +86,14 @@ void PlayInst::init(Input *input)
 
     //load EXIT/NEXT buttons
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_square_exit_small.png", 255, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_exit_small.png")));
     p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
     p->_sigEvent.connect(boost::bind(&PlayInst::ControlEvent, this, _1, _2));
     Control c(p, CTRLID_EXIT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsInst.add(c);
     }
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_square_next_small.png", 255, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_next_small.png")));
     p->setPos(SCREEN_WIDTH - p->tileW() - 8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
     Control c(p, CTRLID_NEXT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsInst.add(c);
@@ -108,7 +111,9 @@ void PlayInst::render(Screen *s)
 {
 	if (!_init) return;
 
-	_gd._menubg.blitTo( s );
+	//_gd._menubg.blitTo( s );
+	//ppg::blit_surface(_gd._menubg.surface(), NULL, s->surface(), 0, 0);
+	ppg::blit_surface(_menubg->surface(), NULL, s->surface(), 0, 0);
 
 	//draw screen title
 	_title.draw(s);
@@ -190,16 +195,16 @@ void PlayInst::updateScrollButtons()
 }
 
 //event signal from imageanim indicating end of animation
-void PlayInst::ControlEvent(int event, int control_id)
+void PlayInst::ControlEvent(int event, int ctrl_id)
 {
     if (event == USER_EV_END_ANIMATION)
     {
-        if (control_id == CTRLID_EXIT)  //exit after anim faded
-        {
-            _gd._state = ST_MENU;		//back to menu
-            _running = false;
-            return;
-        }
+//        if (ctrl_id == CTRLID_EXIT)  //exit after anim faded
+//        {
+//            _gd._state = ST_MENU;		//back to menu
+//            _running = false;
+//            return;
+//        }
 
         updateScrollButtons();
     }
@@ -259,15 +264,15 @@ void PlayInst::scrollUp()
 
 bool PlayInst::touch(const Point &pt)
 {
-    const int crtl_id = _controlsInst.touched(pt);    //needed to highlight a touched control
+    const int ctrl_id = _controlsInst.touched(pt);    //needed to highlight a touched control
 
 	//check if touch scroll arrows
-	if (crtl_id == CTRLID_SCROLL_UP)
+	if (ctrl_id == CTRLID_SCROLL_UP)
 	{
 		scrollDown();
 		return true;
 	}
-	else if (crtl_id == CTRLID_SCROLL_DOWN)
+	else if (ctrl_id == CTRLID_SCROLL_DOWN)
 	{
 		scrollUp();
 		return true;
@@ -286,11 +291,17 @@ bool PlayInst::touch(const Point &pt)
 //releasing 'touch' press
 bool PlayInst::tap(const Point &pt)
 {
-    const int crtl_id = _controlsInst.tapped(pt);
+    const int ctrl_id = _controlsInst.tapped(pt);
 
-    if (crtl_id == CTRLID_NEXT)
+    if (ctrl_id == CTRLID_NEXT)
     {
         nextPage();
+        return true;
+    }
+    if (ctrl_id == CTRLID_EXIT)  //exit after anim faded
+    {
+        _gd._state = ST_MENU;		//back to menu
+        _running = false;
         return true;
     }
 

@@ -41,8 +41,9 @@ Surface::Surface() : _surface(0)
 
 Surface::Surface(SDL_Surface *s) : _surface(0)
 {
-	_surface = s;
-	s->refcount++;
+    setSurface(s);
+//	_surface = s;
+//	s->refcount++;
 }
 
 Surface::~Surface()
@@ -51,7 +52,7 @@ Surface::~Surface()
 }
 
 //create a specific size surface, used mainly by Image class
-bool Surface::create(unsigned int w, unsigned int h, int iAlpha /*=-1*/)
+bool Surface::create(Uint32 w, Uint32 h, int iAlpha /*=-1*/)
 {
 	cleanUp();	//destroy any existing surface
 	SDL_Surface *s;
@@ -119,6 +120,7 @@ void Surface::setSurface(SDL_Surface *s)
 	if (s == NULL) return;
 	cleanUp();
 	_surface = s;
+	s->refcount++;
 }
 
 // Get format
@@ -136,14 +138,14 @@ SDL_Surface * Surface::surface(void) const
 }
 
 // Get width
-int Surface::width(void) const
+Uint32 Surface::width(void) const
 {
 	if (!_surface) return 0;
     return _surface->w;
 }
 
 // Get height
-int Surface::height(void) const
+Uint32 Surface::height(void) const
 {
 	if (!_surface) return 0;
     return _surface->h;

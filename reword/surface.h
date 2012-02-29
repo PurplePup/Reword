@@ -26,12 +26,12 @@ public:
 		return *this;
 	}
 
-	bool create(unsigned int w, unsigned int h, int iAlpha = -1);	//create a surface of specific size
+	bool create(Uint32 w, Uint32 h, int iAlpha = -1);	//create a surface of specific size
 	void copy(Surface &s);
 
 	//accessors
-	int width() const;
-	int height() const;
+	Uint32 width() const;
+	Uint32 height() const;
 	SDL_Surface *surface(void) const;
 	SDL_PixelFormat* format(void) const;
 

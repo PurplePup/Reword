@@ -60,12 +60,25 @@ void PlayGameDict::init(Input *input)
 	input->setRepeat(ppkey::RIGHT, 250, 250);
 
     //set arrow (scroll positions)
-    _gd._arrowUp.setPos(SCREEN_WIDTH-_gd._arrowUp.tileW(), BG_LINE_TOP+2);		//positions dont change, just made visible or not if scroll available
-    _gd._arrowUp.setFrameLast();			//last (white) frame
-    _gd._arrowUp.setTouchable(true);	//always touchable even if invisible
-    _gd._arrowDown.setPos(SCREEN_WIDTH-_gd._arrowDown.tileW(), BG_LINE_BOT-_gd._arrowDown.tileH()-2);
-    _gd._arrowDown.setFrameLast();
-    _gd._arrowDown.setTouchable(true);
+//    _gd._arrowUp.setPos(SCREEN_WIDTH-_gd._arrowUp.tileW(), BG_LINE_TOP+2);		//positions dont change, just made visible or not if scroll available
+//    _gd._arrowUp.setFrameLast();			//last (white) frame
+//    _gd._arrowUp.setTouchable(true);	//always touchable even if invisible
+//    _gd._arrowDown.setPos(SCREEN_WIDTH-_gd._arrowDown.tileW(), BG_LINE_BOT-_gd._arrowDown.tileH()-2);
+//    _gd._arrowDown.setFrameLast();
+//    _gd._arrowDown.setTouchable(true);
+
+    {
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_up.png")));
+    p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2);
+    Control c(p, CTRLID_SCROLL_UP, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
+    _controlsDict.add(c);
+    }
+    {
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_down.png")));
+    p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2+p->tileH()+6);
+    Control c(p, CTRLID_SCROLL_DOWN, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
+    _controlsDict.add(c);
+    }
 
     //get the dictionary definition into one long string
 	std::string dictDefinition, dictDefLine;
@@ -78,12 +91,15 @@ void PlayGameDict::init(Input *input)
     pptxt::buildTextPage(dictDefinition, FONT_CLEAN_MAX, _dictDef);
 
     //prepare roundel class ready for a dictionary display
-    _roundDict= std::auto_ptr<Roundels>(new Roundels());
-    _roundDict->setWordCenterHoriz(_dictWord, _gd._letters, (BG_LINE_TOP-_gd._letters.tileH())/2, 4);
+    tSharedImage &letters = Resource::image("roundel_letters.png");
+    _roundDict= tAutoRoundels(new Roundels());
+    _roundDict->setWordCenterHoriz(_dictWord, letters, (BG_LINE_TOP-letters.get()->height())/2, 4);
     _roundDict->startMoveFrom(Screen::width(), 0, 10, 50, 18, 0);
 
+    _menubg = Resource::image("menubg.png");
+
     //[BACK] dictionary screen buttons - only shown in dict display
-    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_square_back_small.png", 255, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_back_small.png")));
     p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
     Control c(p, CTRLID_BACK, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsDict.add(c);
@@ -99,7 +115,9 @@ void PlayGameDict::init(Input *input)
 
 void PlayGameDict::render(Screen* s)
 {
-	_gd._menubg.blitTo( s );
+	//_gd._menubg.blitTo( s );
+	//ppg::blit_surface(_gd._menubg.surface(), NULL, s->surface(), 0, 0);
+	ppg::blit_surface(_menubg->surface(), NULL, s->surface(), 0, 0);
 
 	_roundDict->draw(s);
 
@@ -118,9 +136,6 @@ void PlayGameDict::render(Screen* s)
 		if (lines >= _lines) break;
 		++it;
 	}
-
-	_gd._arrowUp.draw(s);		//only if set visible (more lines than screen shows)
-	_gd._arrowDown.draw(s);		//..
 
 	int helpYpos = BG_LINE_BOT+((SCREEN_HEIGHT-BG_LINE_BOT-_gd._fntClean.height())/2);
 	_gd._fntClean.put_text(s, helpYpos, "Press Y or CLICK to continue", GREY_COLOUR, true);
@@ -141,10 +156,9 @@ void PlayGameDict::work(Input* input, float speedFactor)
 
 	_roundDict->work();
 
-	_gd._arrowUp.setVisible(_dictLine > 0);
-	_gd._arrowUp.work();
-	_gd._arrowDown.setVisible(_dictLine < (int)_dictDef.size()-_lines);
-	_gd._arrowDown.work();
+    _controlsDict.showAllControls(true);
+    _controlsDict.enableControl((_dictLine > 0), CTRLID_SCROLL_UP);
+    _controlsDict.enableControl((_dictLine < (int)_dictDef.size()-_lines), CTRLID_SCROLL_DOWN);
 
     _controlsDict.work(input, speedFactor);
 
@@ -187,24 +201,24 @@ bool PlayGameDict::touch(const Point &pt)
     _controlsDict.touched(pt);    //needed to highlight a touched control
 
 	//check if touch scroll arrows
-	if (_gd._arrowUp.contains(pt))
-	{
-		if (_gd._arrowUp.isTouchable())
-			_gd._arrowUp.startAnim(0, -1, ImageAnim::ANI_ONCE, 40);
-		scrollDictDown();
-	}
-	else if (_gd._arrowDown.contains(pt))
-	{
-		if (_gd._arrowDown.isTouchable())
-			_gd._arrowDown.startAnim(0, -1, ImageAnim::ANI_ONCE, 40);
-		scrollDictUp();
-	}
-    //tap background to exit dict screen
-	else
-		if (!_doubleClick.done())
-			ppg::pushSDL_Event(USER_EV_EXIT_SUB_SCREEN);
-		else
-			_doubleClick.start(300);
+//	if (_gd._arrowUp.contains(pt))
+//	{
+//		if (_gd._arrowUp.isTouchable())
+//			_gd._arrowUp.startAnim(0, -1, ImageAnim::ANI_ONCE, 40);
+//		scrollDictDown();
+//	}
+//	else if (_gd._arrowDown.contains(pt))
+//	{
+//		if (_gd._arrowDown.isTouchable())
+//			_gd._arrowDown.startAnim(0, -1, ImageAnim::ANI_ONCE, 40);
+//		scrollDictUp();
+//	}
+//    //tap background to exit dict screen
+//	else
+//		if (!_doubleClick.done())
+//			ppg::pushSDL_Event(USER_EV_EXIT_SUB_SCREEN);
+//		else
+//			_doubleClick.start(300);
 
     return true;
 }
@@ -219,6 +233,15 @@ bool PlayGameDict::tap(const Point &pt)
         ppg::pushSDL_Event(USER_EV_EXIT_SUB_SCREEN);
         return true;
     }
+    else if (ctrl_id == CTRLID_SCROLL_UP)
+    {
+		scrollDictUp();
+    }
+    else if (ctrl_id == CTRLID_SCROLL_DOWN)
+    {
+		scrollDictDown();
+    }
+
 
     return false;
 }

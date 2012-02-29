@@ -138,7 +138,9 @@ bool Game::init(GameOptions &options)
         Locator::InitAudio();   //NullAudio in logs window
     else
         Locator::RegisterAudio(_audio = new Audio());
-    Locator::GetAudio().setup(options._bMusic, options._bSfx);
+    IAudio &audio = Locator::GetAudio();
+    audio.setup(options._bMusic, options._bSfx);
+    audio.setBaseTrackDir(options._defaultMusicDir);
 
 	_screen  = new Screen(SCREEN_WIDTH, SCREEN_HEIGHT);
 	if (!_screen->initDone())
@@ -263,10 +265,11 @@ bool Game::play(IPlay *p)
 	//vars used here, mainly for events and fps
 	SDL_Event event;
 
+#ifndef WIN32
 	int fbdev = open("/dev/fb0", O_RDONLY);
 //	void *buffer =
         mmap(0, SCREEN_WIDTH*SCREEN_HEIGHT*2, PROT_WRITE, MAP_SHARED, fbdev, 0);
-
+#endif
 	// Initialise play/level specific stuff
 	p->init(_input);
 
@@ -460,6 +463,7 @@ bool Game::play(IPlay *p)
 #endif
 
 
+#ifndef WIN32
 		//be sure to pass argument value 0 or it will not work.
 		//Currently FBIO_WAITFORVSYNC is not defined in <linux/fb.h>,
 		//although this is in the process of modification.
@@ -469,7 +473,7 @@ bool Game::play(IPlay *p)
 		#endif
 		int arg = 0;
 		ioctl(fbdev, FBIO_WAITFORVSYNC, &arg);
-
+#endif
 
 		_screen->unlock();
 		_screen->update();

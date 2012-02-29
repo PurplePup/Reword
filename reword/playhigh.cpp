@@ -39,6 +39,9 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "global.h"
 #include "playhigh.h"
 #include "platform.h"
+#include "resource.h"
+#include "utils.h"
+
 #include <cassert>
 #include <memory>
 #include <boost/bind.hpp>
@@ -69,8 +72,9 @@ void PlayHigh::init(Input *input)
 
 	_curr = _gd._score.curr();
 
-	_title.setWordCenterHoriz(std::string("HISCORE"), _gd._letters, (BG_LINE_TOP-_gd._letters.tileH())/2, 2);
-	_title.startMoveFrom( 0, -(_gd._letters.tileH()*2), 15, 100, 0, ROUNDEL_VEL);
+    tSharedImage &letters = Resource::image("roundel_letters.png");
+	_title.setWordCenterHoriz(std::string("HISCORE"), letters, (BG_LINE_TOP-letters.get()->height())/2, 2);
+	_title.startMoveFrom( 0, -(letters.get()->height()*2), 15, 100, 0, ROUNDEL_VEL);
 	_titleW.start(3000, 1000);
 
 	//set the repeat of the keys required
@@ -81,28 +85,28 @@ void PlayHigh::init(Input *input)
 
 	//set arrow controls (scroll positions)
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_round_scroll_up.png", 0, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_up.png")));
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2);
     p->_sigEvent.connect(boost::bind(&PlayHigh::ControlEvent, this, _1, _2));
     Control c(p, CTRLID_SCROLL_UP, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_round_scroll_down.png", 0, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_down.png")));
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2+p->tileH()+6);
     p->_sigEvent.connect(boost::bind(&PlayHigh::ControlEvent, this, _1, _2));
     Control c(p, CTRLID_SCROLL_DOWN, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_round_scroll_left.png", 0, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_left.png")));
     p->setPos(SCREEN_WIDTH-(p->tileW()*2)-8, BG_LINE_BOT-p->tileH()-2);
     p->_sigEvent.connect(boost::bind(&PlayHigh::ControlEvent, this, _1, _2));
     Control c(p, CTRLID_SCROLL_LEFT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_round_scroll_right.png", 0, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_right.png")));
     p->setPos(SCREEN_WIDTH-(p->tileW())-2, BG_LINE_BOT-p->tileH()-2);
     p->_sigEvent.connect(boost::bind(&PlayHigh::ControlEvent, this, _1, _2));
     Control c(p, CTRLID_SCROLL_RIGHT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
@@ -111,7 +115,7 @@ void PlayHigh::init(Input *input)
 
     //[EXIT] hi score screen buttons
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_square_exit_small.png", 255, 5));
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_exit_small.png")));
     p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
     p->_sigEvent.connect(boost::bind(&PlayHigh::ControlEvent, this, _1, _2));
     Control c(p, CTRLID_EXIT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
@@ -154,7 +158,8 @@ void PlayHigh::render(Screen *s)
 	//
 	//
 
-	_menubg->blitTo( s );
+	//_menubg->blitTo( s );
+	ppg::blit_surface(_menubg->surface(), 0, s->surface(), 0,0);
 
 	//draw screen title roundals
 	_title.draw(s);
@@ -372,16 +377,16 @@ void PlayHigh::updateScrollButtons()
 }
 
 //event signal from imageanim indicating end of animation
-void PlayHigh::ControlEvent(int event, int control_id)
+void PlayHigh::ControlEvent(int event, int ctrl_id)
 {
     if (event == USER_EV_END_ANIMATION)
     {
-        if (control_id == CTRLID_EXIT)  //exit after anim faded
-        {
-            _gd._state = ST_MENU;		//back to menu
-            _running = false;
-            return;
-        }
+//        if (ctrl_id == CTRLID_EXIT)  //exit after anim faded
+//        {
+//            _gd._state = ST_MENU;		//back to menu
+//            _running = false;
+//            return;
+//        }
 
         updateScrollButtons();
     }
@@ -396,28 +401,34 @@ bool PlayHigh::touch(const Point &pt)
 //releasing 'touch' press
 bool PlayHigh::tap(const Point &pt)
 {
-    const int crtl_id = _controlsHigh.tapped(pt);
+    const int ctrl_id = _controlsHigh.tapped(pt);
 
-    if (crtl_id == CTRLID_SCROLL_UP)
+    if (ctrl_id == CTRLID_SCROLL_UP)
 	{
 		moveDown();
         return true;
 	}
-	else if (crtl_id == CTRLID_SCROLL_DOWN)
+	else if (ctrl_id == CTRLID_SCROLL_DOWN)
 	{
 		moveUp();
         return true;
 	}
-	else if (crtl_id == CTRLID_SCROLL_LEFT)
+	else if (ctrl_id == CTRLID_SCROLL_LEFT)
 	{
 		moveLeft();
         return true;
 	}
-	else if (crtl_id == CTRLID_SCROLL_RIGHT)
+	else if (ctrl_id == CTRLID_SCROLL_RIGHT)
 	{
 		moveRight();
         return true;
 	}
+    if (ctrl_id == CTRLID_EXIT)  //exit after anim faded
+    {
+        _gd._state = ST_MENU;		//back to menu
+        _running = false;
+        return true;
+    }
 
     return false;
 }
@@ -457,21 +468,27 @@ void PlayHigh::prepareBackground()
 	//create the background to be used for this level,
 	//pre drawing so we dont need to do it each frame.
 	//...
-	_menubg = std::auto_ptr<Image>(new Image());
-	_menubg->createThisFromImage(_gd._menubg_plain);	//copy of basic menubg without roundel
+	_menubg = tSharedImage(new Image());
+	//_menubg->cloneFrom(_gd._menubg_plain);	//copy of basic menubg without roundel
+	_menubg->cloneFrom(*Resource::image("menubg_plain.png"));	//copy of basic menubg without roundel
 
-	int x = - (_gd._menu_reword.tileW() /6);	//slightly off screen
-	int y = ((SCREEN_HEIGHT - _gd._menu_reword.tileH()) / 2) + 2;	//center (+2 for gp2x too high)
+    tSharedImage &img = Resource::image("menu_arcade.png");
+	int x = - (img->width() /6);	//slightly off screen
+	int y = ((SCREEN_HEIGHT - img->height()) / 2) + 2;	//center (+2 for gp2x too high)
 
 	switch (_mode)
 	{
-	case GM_ARCADE:		_menubg->blitFrom(&_gd._menu_arcade, -1, x, y);
+	case GM_ARCADE:		//_menubg->blitFrom(&_gd._menu_arcade, -1, x, y);
+                        ppg::blit_surface(Resource::image("menu_arcade.png")->surface(), NULL, _menubg->surface(), x, y);
 						break;
-	case GM_REWORD:		_menubg->blitFrom(&_gd._menu_reword, -1, x, y);
+	case GM_REWORD:		//_menubg->blitFrom(&_gd._menu_reword, -1, x, y);
+                        ppg::blit_surface(Resource::image("menu_reword.png")->surface(), NULL, _menubg->surface(), x, y);
 						break;
-	case GM_SPEEDER:	_menubg->blitFrom(&_gd._menu_speeder, -1, x, y);
+	case GM_SPEEDER:	//_menubg->blitFrom(&_gd._menu_speeder, -1, x, y);
+                        ppg::blit_surface(Resource::image("menu_speeder.png")->surface(), NULL, _menubg->surface(), x, y);
 						break;
-	case GM_TIMETRIAL:	_menubg->blitFrom(&_gd._menu_timetrial, -1, x, y);
+	case GM_TIMETRIAL:	//_menubg->blitFrom(&_gd._menu_timetrial, -1, x, y);
+                        ppg::blit_surface(Resource::image("menu_timetrial.png")->surface(), NULL, _menubg->surface(), x, y);
 						break;
 	default:break;
 	}

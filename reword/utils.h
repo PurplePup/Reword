@@ -97,7 +97,15 @@ namespace ppg 	//pp game functions
 	void blit_surface(SDL_Surface* source, SDL_Rect* srcRect, SDL_Surface* dest, int destX, int destY);
 	//void blit_surface(SDL_Surface* source, SDL_Rect* srcRect, int destX, int destY );
 
+    template<typename T> struct Deleter {
+        void operator()(T *p)
+        {
+            delete p;
+        }
+};
+
 }
+
 
 
 #endif //_UTILS_H

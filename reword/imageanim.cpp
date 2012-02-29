@@ -45,7 +45,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 
 ImageAnim::ImageAnim() :
-	Image(), _x(0.0), _y(0.0f),
+	//_image(),
+	_x(0.0), _y(0.0f),
 	_frame(0), _firstFrame(0), _lastFrame(0), _nFrames(0), _frameDir(1),
 	_repeat(1), _restart(0), _inflateBy(0),
 	_visible(true), _pauseA(true), _rateA(0), _restartA(0),
@@ -55,40 +56,71 @@ ImageAnim::ImageAnim() :
 }
 
 ImageAnim::ImageAnim(std::string fileName, bool bAlpha, Uint32 nFrames) :
-	Image(fileName, bAlpha), _x(0.0f), _y(0.0f),
+	//_image(fileName, bAlpha),
+	_x(0.0f), _y(0.0f),
 	_frame(0), _firstFrame(0), _lastFrame(0), _nFrames(0), _frameDir(1),
 	_repeat(1), _restart(0), _inflateBy(0),
 	_visible(true), _pauseA(true), _rateA(0), _restartA(0),
 	_delayA(0), _bDelayRestart(false), _frameCustom(0), _id(0)
 {
+	_image = tSharedImage(new Image(fileName, bAlpha));
 	//_nFrames curr set to 0 in case Image class not initialised,
 	//properly (due to bad image file etc), so now if it did init properly,
 	//set the max number of frames, as passed in to this ctor
-	if (Image::initDone()) setFrameCount(nFrames);
+	setFrameCount(nFrames);
 }
 
-ImageAnim::ImageAnim(const Image &img) :
-	Image(img), _x(0.0f), _y(0.0f),
+//ImageAnim::ImageAnim(const Image &img) :
+//	//_image(img),
+//	_x(0.0f), _y(0.0f),
+//	_frame(0), _firstFrame(0), _lastFrame(0), _nFrames(0), _frameDir(1),
+//	_repeat(1), _restart(0), _inflateBy(0),
+//	_visible(true), _pauseA(true), _rateA(0), _restartA(0),
+//	_delayA(0), _bDelayRestart(false), _frameCustom(0)
+//{
+//	_image = tSharedImage(new Image(img));
+//}
+//
+ImageAnim::ImageAnim(tSharedImage &img) :
+	_image(img),
+	_x(0.0f), _y(0.0f),
 	_frame(0), _firstFrame(0), _lastFrame(0), _nFrames(0), _frameDir(1),
 	_repeat(1), _restart(0), _inflateBy(0),
 	_visible(true), _pauseA(true), _rateA(0), _restartA(0),
 	_delayA(0), _bDelayRestart(false), _frameCustom(0)
 {
+    setFrameCount(img->tileCount());
 }
 
+/*
 bool ImageAnim::load(std::string fileName, int iAlpha, Uint32 nFrames)	//default no alpha, 1 frames
 {
-	Image::load(fileName, iAlpha);
-	if (!Image::initDone()) return false;
+	if (!_image->load(fileName, iAlpha)) return false;
 	setFrameCount(nFrames);
 	return true;
+}
+*/
+
+//Code constructing an ImageAnim without an image can call this to pass in a resource image
+//and apply all setup required before use.
+void ImageAnim::setImage(tSharedImage &img)
+{
+    if (img.get())
+    {
+        _image = img;
+        setFrameCount(img->tileCount());
+    }
 }
 
 void ImageAnim::setFrameCount(Uint32 nFrames)
 {
-	setTileSize( (int)(width() / ((nFrames>0)?nFrames:1)), 0 );	//w=pixels/frames, h=default all
-	_nFrames = tileCount();
+    if (_image->initDone())
+    {
+        _image->setTileCount(nFrames, _image->tileDir());
+        _nFrames = _image->tileCount();
+    }
 }
+
 
 void ImageAnim::setFrameLast()
 {
@@ -351,18 +383,81 @@ void ImageAnim::setBounds(int inflateBy)
 {
     _inflateBy = inflateBy;
     assert(inflateBy >= 0 || //positive, 0 or
-           (abs(inflateBy) < std::max(_tileW, _tileH)));    //less than max side if negative
+           (abs(inflateBy) < std::max(tileW(), tileH())));    //less than max side if negative
 }
 //always size of the image tile in its current position with inflate amount prev set
 Rect ImageAnim::bounds() const
 {
-    Rect r(_x, _y, _x+_tileW, _y+_tileH);
+    Rect r(_x, _y, _x+tileW(), _y+tileH());
     if (_inflateBy)
         return r.inset(_inflateBy);
     return r;
 }
 
 
+////return a new image from a tile in this image
+//Image * Image::createImageFromThis(int tileNum, int iAlpha /*=-1*/)
+//{
+//	SDL_Rect r = tileRect(tileNum, _tileW, _tileH);
+//	Image *image = new Image(r.w, r.h, iAlpha);
+//	image->blitFrom(this, tileNum);
+//	image->setTileSize(_tileW, _tileH);
+//	return image;
+//}
+
+//create this image from another image (tile)
+//void ImageAnim::createThisFromImage(Image &image, int tileNum /*=-1*/, int iAlpha /*=-1*/)
+//{
+//    _image->createThisFromImage(image, r, iAlpha);
+//
+//
+//
+//	cleanUp();
+//	_init = Surface::create(image.tileW(), image.tileH(), iAlpha);
+//
+//	if (image.surface()->format->Amask && iAlpha!=-1)
+//		//source image has alpha so set alpha in this new dest image too
+//		SDL_SetAlpha(this->_surface, SDL_SRCALPHA, iAlpha);
+//	else
+//		//prefill with alpha colour so the final surface contains it where curr see through
+//		ppg::drawSolidRect(this->_surface, 0, 0, image.tileW(), image.tileH(), ALPHA_COLOUR);
+//	if (-1 == tileNum)
+//		setTileSize();
+//	else
+//		setTileSize(image.tileW(), image.tileH());
+//	blitFrom(&image, tileNum);	//into "this" newly created 'copy'
+//}
+
+//helper blit functions specifically for the Image class
+//
+//blit this (tile) image into another Image (or screen)
+void ImageAnim::blitTo(Surface* dest, int destX, int destY, int tileNum /*= -1*/)
+{
+	//Image class objects default to clip = 0 unless explicitly set
+	SDL_Rect rect = _image->tileRect(tileNum);
+	ppg::blit_surface(
+        _image->surface(), (tileNum<0)?NULL:&rect,			//source
+		dest->surface(), destX, destY);					//dest
+}
+
+//blit a whole image into this Image
+void ImageAnim::blitFrom(Image* source, int destX, int destY )
+{
+	//Image class objects default to clip = 0 unless explicitly set
+	ppg::blit_surface(
+        source->surface(), NULL,           	    //source
+		_image->surface(), destX, destY);		//dest
+}
+
+//blit a (tile) image into this Image
+void ImageAnim::blitFrom(ImageAnim* source, int tileNum /*= -1*/, int destX, int destY )
+{
+	//Image class objects default to clip = 0 unless explicitly set
+	SDL_Rect rect = source->tileRect(tileNum);
+	ppg::blit_surface(
+        source->surface(), (tileNum<0)?NULL:&rect,	    //source
+		_image->surface(), destX, destY);					//dest
+}
 
 
 

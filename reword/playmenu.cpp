@@ -68,16 +68,25 @@ void PlayMenu::init(Input *input)
 	input->setRepeat(ppkey::UP, 150, 300);		//button, rate, delay
 	input->setRepeat(ppkey::DOWN, 150, 300);
 
-	_title.startMoveFrom( 0, -(_gd._letters.tileH()*2), 15, 100, 0, ROUNDEL_VEL);
+    tSharedImage &letters = Resource::image("roundel_letters.png");
+	_title.startMoveFrom( 0, -(letters->height()*2), 15, 100, 0, ROUNDEL_VEL);
 	_titleW.start(3000, 1000);
 
-	_gd._star.setPos(MENU_HI_X,0);//MENU_HI_Y+(_item*MENU_HI_GAP));	//modified once menu text X pos returned from put_text()
-	_gd._star.startAnim( 0, 6, ImageAnim::ANI_LOOP, 35, 0);
+    _menubg = Resource::image("menubg.png");
+
+	_star.setImage(Resource::image("star.png"));
+	_star.setPos(MENU_HI_X,0);//MENU_HI_Y+(_item*MENU_HI_GAP));	//modified once menu text X pos returned from put_text()
+	_star.startAnim( 0, 6, ImageAnim::ANI_LOOP, 35, 0);
 
     //music on/off icon
-	_gd._gamemusic_icon.setPos(5, 5);
-	_gd._gamemusic_icon.setTouchable(_gd._bTouch);
-	_gd._gamemusic_icon.setFrame(Locator::GetAudio().musicEnabled()?0:1);    //first frame (on) or second frame (off)
+    { // round music button placed in top left of scorebar
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_music.png")));
+    p->setPos(5,5);
+    IAudio &audio = Locator::GetAudio();
+    Control c(p, CTRLID_MUSIC, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, !audio.isMute());
+    _controlsMenu.add(c);
+    _controlsMenu.enableControl(audio.hasSound(), CTRLID_MUSIC);  //disable override?
+    }
 
 	//need to set the _init and _running flags
 	_init = true;
@@ -112,7 +121,7 @@ void PlayMenu::startMenuMusic()
 {
 	//play menu music - if not already playing
 	if (Locator::GetAudio().musicEnabled() && !Mix_PlayingMusic())
-		Mix_PlayMusic(_gd._musicMenu, -1);	//play 'forever'
+		Mix_PlayMusic(_gd._musicMenu, -1);	//play 'forever' - or until game starts
 
 }
 void PlayMenu::stopMenuMusic()
@@ -132,11 +141,11 @@ void PlayMenu::render(Screen *s)
 {
 	if (!_init) return;
 
-	_gd._menubg.blitTo( s );
+	//_gd._menubg.blitTo( s );
+	//ppg::blit_surface(_gd._menubg.surface(), NULL, s->surface(), 0, 0);
+	ppg::blit_surface(_menubg->surface(), NULL, s->surface(), 0, 0);
 
 	_title.draw(s);
-
-    _gd._gamemusic_icon.draw(s);
 
 	int selected = getSelected()._id;
 	int nextY = 0;
@@ -147,7 +156,7 @@ void PlayMenu::render(Screen *s)
 		{
             _font->put_text(s, p->_r.left(), p->_r.top(), p->_title.c_str(), p->_hoverOn, true);
 			r = p->_r.addpt(Point(-30,0));
-			_gd._star.setPos(r.left(), r.top()-2);
+			_star.setPos(r.left(), r.top()-2);
 
 			//show comment for selected item - might be blank
             if (_delayHelp.done())
@@ -165,7 +174,8 @@ void PlayMenu::render(Screen *s)
 	}
 	_nextYpos = nextY;	//useful for placing help text after all items drawn
 
-	_gd._star.draw(s);
+	_star.draw(s);
+    _controlsMenu.render(s);
 
     int helpYpos = BG_LINE_BOT + (2*( (SCREEN_HEIGHT-BG_LINE_BOT-_fontHelp->height())/2.5 ));
     _fontHelp->put_text(s, helpYpos, _help.c_str(), _helpColor, true);
@@ -177,7 +187,7 @@ void PlayMenu::work(Input *input, float speedFactor)
     (void)(speedFactor);
 
 	_title.work();
-	_gd._star.work();
+	_star.work();
 
 	//animate the roundel title if it's not moving and
 	//we have waited long enough since it animated last
@@ -195,6 +205,8 @@ void PlayMenu::work(Input *input, float speedFactor)
 
     if (input->repeat(ppkey::UP)) button(input, ppkey::UP);
     if (input->repeat(ppkey::DOWN))	button(input, ppkey::DOWN);
+
+    _controlsMenu.work(input, speedFactor);
 }
 
 void PlayMenu::button(Input *input, ppkey::eButtonType b)
@@ -234,17 +246,10 @@ void PlayMenu::button(Input *input, ppkey::eButtonType b)
 //touch (press) to highlight the menu item
 bool PlayMenu::touch(const Point &pt)
 {
+    const int ctrl_id = _controlsMenu.touched(pt);
+
     _saveTouchPt._x = _saveTouchPt._y = 0;
 	Uint32 item(0);
-//	for (tMenuItems::iterator p = _itemList.begin(); p != _itemList.end(); ++item, ++p) {
-//		if (p->_enabled && p->_rBox.contains(pt))
-//		{
-//		    _saveTouchPt = pt;      //so test if release pos is in same menu item
-//			_item = item;	        //highlight the touched item
-//			_delayHelp.start(500);  //wait before help line displayed
-//			return true;
-//		}
-//	}
 
 	for (tMenuItems::iterator it = _itemList.begin(); it != _itemList.end(); ++item, ++it)
 	{
@@ -270,27 +275,14 @@ bool PlayMenu::touch(const Point &pt)
             }
 		}
 	}
-
-
-    //game music icon action on press, not tap(release)
-    if (_gd._gamemusic_icon.contains(pt))
-    {
-        IAudio &a = Locator::GetAudio();
-        a.musicMute(a.musicEnabled());
-        _gd._gamemusic_icon.setFrame(a.musicEnabled()?0:1);    //first frame (on) or second frame (off)
-        if (a.musicEnabled())
-            startMenuMusic();
-        else
-            stopMenuMusic();
-        return true;
-    }
-
     return false;
 }
 
 //tap (release) to action the menu item
 bool PlayMenu::tap(const Point &pt)
 {
+    const int ctrl_id = _controlsMenu.tapped(pt);
+
     if (_gd._options._bSingleTapMenus)
     {
         Uint32 item(0);
@@ -306,12 +298,26 @@ bool PlayMenu::tap(const Point &pt)
             }
         }
     }
+
+    //game music icon action on press, not tap(release)
+    if (ctrl_id == CTRLID_MUSIC)// && Locator::GetAudio().musicEnabled())
+    {
+        IAudio &a = Locator::GetAudio();
+        if (a.isMute())
+            stopMenuMusic();
+        else
+            startMenuMusic();
+        a.mute(a.isMute());
+        return true;
+    }
+
 	return false;
 }
 
 void PlayMenu::setTitle(const std::string &title)
 {
-	_title.setWordCenterHoriz(title, _gd._letters, (BG_LINE_TOP-_gd._letters.tileH())/2, 2);
+    tSharedImage &letters = Resource::image("roundel_letters.png");
+	_title.setWordCenterHoriz(title, letters, (BG_LINE_TOP-letters->height())/2, 2);
 }
 
 void PlayMenu::setHelp(const std::string &help, SDL_Color c)

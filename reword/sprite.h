@@ -22,7 +22,8 @@ public:
 
 	Sprite();
 	Sprite(std::string fileName, bool bAlpha, Uint32 nFrames);
-	Sprite(const Image &img);
+//	Sprite(const ImageAnim &img);
+	Sprite(tSharedImage &img);
 	virtual ~Sprite() {}
 
     void setObjectId(int id) { _objectId = id; }

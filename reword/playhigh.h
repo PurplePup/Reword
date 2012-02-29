@@ -39,11 +39,11 @@ protected:
 	bool isEditing() { return _pos != -1; }
 	void setEditing(bool b) { _pos = b?0:-1; }
     void updateScrollButtons();
-    void ControlEvent(int event, int control_id);
+    void ControlEvent(int event, int ctrl_id);
 
 private:
 	GameData &	_gd;		//shared data between screens (play classes)
-	std::auto_ptr<Image> _menubg;
+	tSharedImage _menubg;
 
 	int			_pos;
 	int			_currPos;		//which of the 3 inits you are currently editing

@@ -6,7 +6,9 @@
 
 #include "audio.h"
 #include "input.h"
-#include "gamedata.h"
+#include "image.h"
+#include "resource.h"
+//#include "gamedata.h"
 
 #include <cassert>
 
@@ -24,13 +26,15 @@ public:
     static IInput&  GetInput();
     static void     RegisterInput(IInput* input);
 
+
 /*
 //GAMEDATA
 public:
     static void     InitData();
-    static IInput&  GetData();
+    static IGameData&  GetData();
     static void     Registerdata(IGameData* data);
 */
 };
+
 
 #endif // LOCATOR_H

@@ -54,13 +54,10 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #endif
 
 
-void NullAudio::setup(bool bMusic, bool bSfx)
+void NullAudio::setup(bool /*bMusic*/, bool /*bSfx*/)
 {
-    (void)(bMusic);
-    (void)(bSfx);
     std::cout << "NullAudio (silent) initialised" << std::endl;
 }
-
 
 Audio::Audio() : _init(false), _volTest(0), _musicTrack(0), _lastTrack(0), _bPlayingTrack(false)
 {
@@ -248,6 +245,19 @@ void Audio::setMusicVol(Sint16 newvol, bool bTest)
     setVolume(newvol, bTest);
 }
 
+//is mute if music AND sfx are mute
+bool Audio::isMute()
+{
+    return !_opt._bMusic && !_opt._bSfx;
+}
+
+//mute both sfx and music
+void Audio::mute(bool bMute /*= true*/)
+{
+    musicMute(bMute);
+    sfxMute(bMute);
+}
+
 void Audio::setBaseTrackDir(const std::string &baseTrackDir)
 {
 	_baseTrackDir = baseTrackDir;
@@ -306,7 +316,7 @@ void Audio::startTrack(const std::string &trackName)
 		if(_musicTrack)
 		{
 			Mix_PlayMusic(_musicTrack, 1);
-			_bPlayingTrack = Mix_PlayingMusic()?true:false;	//actualy playing?
+			_bPlayingTrack = Mix_PlayingMusic();	//actualy playing?
 		}
 		else
 			printf("Failed to start %s (%s)\n", newTrack.c_str(), Mix_GetError());

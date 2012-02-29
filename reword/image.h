@@ -5,8 +5,10 @@
 
 #include "SDL.h"
 #include "SDL_image.h"	//for IMG_ functions
-#include <string>
 #include "surface.h"
+
+#include <string>
+#include <boost/shared_ptr.hpp>
 
 const SDL_Color ALPHA_COLOUR	= {0xFF,0x00,0xFF,0};
 
@@ -17,7 +19,7 @@ public:
 
 	Image();
 	Image(unsigned int w, unsigned int h, int iAlpha = -1);
-	Image(std::string fileName, int iAlpha = -1);
+	Image(const std::string &fileName, int iAlpha = -1, Uint32 nTiles = 1);
 	Image(const Image &img);
 	virtual ~Image();
 
@@ -26,46 +28,41 @@ public:
 	    if (this != &img)      // not same object
 		{
 			*(this->_surface) = *img.surface();
-			this->_tileW = img._tileW;
-			this->_tileH = img._tileH;
-			this->_tileCount = img._tileCount;
 		}
 		return *this;
 	};
 
-	bool initDone() { return _init; }	//has Image been initialised properly
-	bool initImage(SDL_Surface *newSurface, int iAlpha = -1);
+	bool initDone() const { return _init; }	//has Image been initialised properly
+	bool initImage(SDL_Surface *newSurface, int iAlpha = -1, Uint32 nTiles = 1);
 
-	Image * createImageFromThis(int tileNum, int iAlpha = -1);	//return a new image from a tile in this image
-    void createThisFromImage(Image &image, Rect &r, int iAlpha /*=-1*/);
-	void createThisFromImage(Image &image, int tileNum = -1, int iAlpha = -1);	//create this image using an existing image (tile)
+    void cloneFrom(Image &image, int iAlpha = -1);
+    void cloneFrom(Image &image, Rect &r, int iAlpha = -1);
 
-	virtual bool load(std::string fileName, int iAlpha = -1);	//default no alpha
-	bool setTileSize(int w = 0, int h = 0, eTileDir tileDir = TILE_HORIZ);
-
-	//specific blit for Image class types
-	void blitTo(Surface* dest, int destX = 0, int destY = 0, int tileNum = -1);
-	void blitFrom(Image* source, int tileNum = -1, int destX = 0, int destY = 0);
+	virtual bool load(const std::string &fileName, int iAlpha = -1, Uint32 nTiles = 1);	//default no alpha
 
 //	SDL_Rect *clip() {return _clip;}
-	int tileW() const       {return _tileW;}
-	int tileH() const       {return _tileH;}
-	int tileCount()	const   {return _tileCount;}
-	SDL_Rect tileRect(int i);	//uses stored _tileW and _tileH
 
-	//static functions available to all
-	static SDL_Rect tileRect(int i, int w, int h);	//[static] just return the Rect for requested tile
+	SDL_Rect tileRect(Uint32 tile);	//uses stored _tileW and _tileH
+	eTileDir tileDir() const    { return _tileDir; }
+	Uint32 tileW() const        { return _tileW; }
+	Uint32 tileH() const        { return _tileH; }
+	Uint32 tileCount()	const   { return _tileCount; }
+    void setTileCount(Uint32 nTiles, eTileDir tileDir = TILE_HORIZ);
+
+#if _DEBUG
+    std::string _dbgName;
+#endif
 
 protected:
 	void cleanUp();
-
-	int     _tileW, _tileH; //actual individual tile w & h withing image
-	int     _tileCount;	    //number of tiles in image (if setTileSize() used)
-    int     _tileWOffset, _tileHOffset;     //value or 0, depend on eTileDir to multiply by
+	bool setTileSize(Uint32 w = 0, Uint32 h = 0, eTileDir tileDir = TILE_HORIZ);
 
 private:
 	bool    _init;
+	Uint32  _tileCount, _tileW, _tileH, _tileWOffset, _tileHOffset;
+    eTileDir _tileDir;
 };
 
+typedef boost::shared_ptr<Image> tSharedImage;
 
 #endif //IMAGE_H

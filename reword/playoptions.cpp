@@ -49,8 +49,6 @@ PlayOptions::PlayOptions(GameData &gd)  :
     PlayMenu(gd),
     _yyStart(0), _yyGap(0), _xxStartText(0), _xxStartCtrls(0)
 {
-//	_running = false;
-//	_init = false;
 }
 
 PlayOptions::~PlayOptions()
@@ -81,8 +79,8 @@ void PlayOptions::init(Input *input)
 	addItem(MenuItem(0, BLACK_COLOUR, "Preferred wordfile :", "Change language or dictionary file"));
 	addItem(MenuItem(1, BLACK_COLOUR, "Single touch menus :", "Single or double tap menus"));
 	addItem(MenuItem(2, BLACK_COLOUR, "Default difficulty :", "Always start on this difficulty"));
-	addItem(MenuItem(3, BLACK_COLOUR, "Default sound effects :", "Turn on/off in-game effects"));
-	addItem(MenuItem(4, BLACK_COLOUR, "Default menu Music :", "Turn on/off menu music"));
+	addItem(MenuItem(3, BLACK_COLOUR, "Sound effects :", "Turn on/off in-game effects"));
+	addItem(MenuItem(4, BLACK_COLOUR, "Menu Music :", "Turn on/off menu music"));
 	addItem(MenuItem(5, BLACK_COLOUR, "In-game music files :", "Directory where your music is stored"));
 	setItem(0);
 
@@ -92,7 +90,7 @@ void PlayOptions::init(Input *input)
     _yyWordFile = wordItem._rBox.top();
 
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_square_yes_no_small.png", 255, 9));
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_yes_no_small.png")));
     MenuItem i = getItem(1);
     p->setPos(_xxStartCtrls, i._rBox.top());
     p->_sigEvent.connect(boost::bind(&PlayOptions::ControlEvent, this, _1, _2));
@@ -100,7 +98,7 @@ void PlayOptions::init(Input *input)
     _controlsOptn.add(c);
     }
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_round_fx.png", 255, 9));
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_yes_no_small.png")));
     MenuItem i = getItem(3);
     p->setPos(_xxStartCtrls, i._rBox.top());
     p->_sigEvent.connect(boost::bind(&PlayOptions::ControlEvent, this, _1, _2));
@@ -108,7 +106,7 @@ void PlayOptions::init(Input *input)
     _controlsOptn.add(c);
     }
     {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_round_music.png", 255, 9));
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_yes_no_small.png")));
     MenuItem i = getItem(4);
     p->setPos(_xxStartCtrls, i._rBox.top());
     p->_sigEvent.connect(boost::bind(&PlayOptions::ControlEvent, this, _1, _2));
@@ -116,9 +114,8 @@ void PlayOptions::init(Input *input)
     _controlsOptn.add(c);
     }
 
-    //load EXIT/NEXT buttons
-    {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_square_exit_small.png", 255, 5));
+    {//load EXIT/NEXT buttons
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_exit_small.png")));
     p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
     p->_sigEvent.connect(boost::bind(&PlayOptions::ControlEvent, this, _1, _2));
     Control c(p, CTRLID_EXIT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
@@ -153,6 +150,7 @@ void PlayOptions::work(Input *input, float speedFactor)
 
 void PlayOptions::choose(MenuItem i)
 {
+    //make buttons flash/fade when menu items selected to show selection
 	switch (i._id) {
 		case 0: //preferred wordfile
                 _wordFileIdx++;
@@ -182,15 +180,15 @@ void PlayOptions::choose(MenuItem i)
 }
 
 //event signal from imageanim indicating end of animation
-void PlayOptions::ControlEvent(int event, int control_id)
+void PlayOptions::ControlEvent(int event, int ctrl_id)
 {
     if (event == USER_EV_END_ANIMATION)
     {
-        if (control_id == CTRLID_EXIT)
-        {
-            _gd._state = ST_MENU;		//back to menu
-            _running = false;
-        }
+//        if (ctrl_id == CTRLID_EXIT)
+//        {
+//            _gd._state = ST_MENU;		//back to menu
+//            _running = false;
+//        }
     }
 }
 
@@ -231,9 +229,9 @@ void PlayOptions::button(Input *input, ppkey::eButtonType b)
 
 bool PlayOptions::touch(const Point &pt)
 {
-    const int crtl_id = _controlsOptn.touched(pt);    //needed to highlight a touched control
-
     PlayMenu::touch(pt);
+
+    const int ctrl_id = _controlsOptn.touched(pt);    //needed to highlight a touched control
 
 	return false;
 }
@@ -241,16 +239,16 @@ bool PlayOptions::touch(const Point &pt)
 //releasing 'touch' press
 bool PlayOptions::tap(const Point &pt)
 {
-    const int crtl_id = _controlsOptn.tapped(pt);
-
     PlayMenu::tap(pt);
 
-//
-//    if (crtl_id == CTRLID_NEXT)
-//    {
-//        nextPage();
-//        return true;
-//    }
+    const int ctrl_id = _controlsOptn.tapped(pt);
+
+    if (ctrl_id == CTRLID_EXIT)
+    {
+        _gd._state = ST_MENU;		//back to menu
+        _running = false;
+        return true;
+    }
 
     return false;
 }

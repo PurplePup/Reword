@@ -54,7 +54,8 @@ private:
 	tMenuMap	_itemList;
 	tMenuMap	_itemYNList;
 	tMenuMap	*_pItems;
-	std::auto_ptr<Image> _menubg;
+	tSharedImage _menubg;
+	ImageAnim   _star;
 
 	bool 		_bDoYesNoMenu;		//user must select yes to exit game
 	Waiting		_doubleClick;	    //touch support

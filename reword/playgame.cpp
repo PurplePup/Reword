@@ -105,25 +105,35 @@ void PlayGame::init(Input *input)
     if (Locator::GetAudio().isPlayingMusic()==false)
 		Mix_FadeOutMusic(3000);
 
+	_scorebar = Resource::image("scorebar.png");
+	_cursor.setImage(Resource::image("cursors.png"));
+	_scratch.setImage(Resource::image("scratch.png"));
+	_boxes.setImage(Resource::image("boxes.png"));
 
-    //[MENU] shows in top left (unless [EXIT] shown)
-    {
-    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_square_menu.png", 255, 5));
+    { // round music button placed in top left of scorebar
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_music.png")));
+    //position set in iinit()
+//    p->_sigEvent.connect(boost::bind(&PlayOptions::ControlEvent, this, _1, _2));
+    IAudio &audio = Locator::GetAudio();
+    Control c(p, CTRLID_MUSIC, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_DOUBLE, !audio.isMute());
+    _controlsPlay.add(c);
+    _controlsPlay.enableControl(audio.hasSound(), CTRLID_MUSIC);  //disable override?
+    }
+    { //[MENU] shows in top left (unless [EXIT] shown)
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_menu.png")));
     p->setPos(3, 0);
     Control c(p, CTRLID_MENU, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
-    {
-    //[EXIT] goes in same place as [MENU] when game over
-    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_square_exit.png", 255, 5));
+    { //[EXIT] goes in same place as [MENU] when game over
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_exit.png")));
     p->setPos(3, 0);
     p->setVisible(false);  //not available until countdown finished
     Control c(p, CTRLID_EXIT, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
-    {
-    //[NEXT] goes over the countdown position
-    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_square_next.png", 255, 5));
+    { //[NEXT] goes over the countdown position
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_next.png")));
     p->setPos(Screen::width() - p->tileW() - 3, 0);
     p->setVisible(false);  //not available until countdown finished
     Control c(p, CTRLID_NEXT, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_SINGLE);
@@ -135,38 +145,34 @@ void PlayGame::init(Input *input)
     }
 
     //now the four letter/word controls... positions set in newLevel()
-    {
-    //shuffle
-    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_round_word_shuffle.png", 0, 5));
-    p->setTileSize(48, 48);
+    { //shuffle
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_word_shuffle.png")));
+//    p->setTileSize(48, 48);
     Control c(p, CTRLID_SHUFFLE, CTRLGRP_LETTERS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
-    {
-    //try word
-    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_round_word_try.png", 0, 5));
-    p->setTileSize(48, 48);
+    { //try word
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_word_try.png")));
+//    p->setTileSize(48, 48);
     Control c(p, CTRLID_TRYWORD, CTRLGRP_LETTERS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
-    {
-    //totop
-    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_round_word_totop.png", 0, 5));
-    p->setTileSize(48, 48);
+    { //totop
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_word_totop.png")));
+//    p->setTileSize(48, 48);
     Control c(p, CTRLID_TOTOP, CTRLGRP_LETTERS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
-    {
-    //last
-    boost::shared_ptr<Sprite> p(new Sprite(RES_IMAGES + "btn_round_word_last.png", 0, 5));
-    p->setTileSize(48, 48);
+    { //last
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_word_last.png")));
+//    p->setTileSize(48, 48);
     Control c(p, CTRLID_LAST, CTRLGRP_LETTERS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
 
-    _nWordBoxHighlightOffset = (_gd._boxes.tileCount()/4); //4 blocks of word boxes
-    _nWordBoxEmptyOffset = ((_gd._boxes.tileCount()/4)*2); //4 blocks.. 3rd block
-    _nWordBoxNeededOffset = ((_gd._boxes.tileCount()/4)*3); //4 blocks.. 4th block
+    _nWordBoxHighlightOffset = (_boxes.tileCount()/4); //4 blocks of word boxes
+    _nWordBoxEmptyOffset = ((_boxes.tileCount()/4)*2); //4 blocks.. 3rd block
+    _nWordBoxNeededOffset = ((_boxes.tileCount()/4)*3); //4 blocks.. 4th block
 
 	//set the repeat of the keys required
 	input->setRepeat(ppkey::UP, 250, 250);		//button, rate, delay
@@ -282,7 +288,8 @@ void PlayGame::render_play(Screen* s)
 	int xx, yy;
 
 	//draw background
-	_gamebg->blitTo(s);
+//	_gamebg->blitTo(s);
+	ppg::blit_surface(_gamebg->surface(), NULL, s->surface(), 0, 0);
 
  	//draw scores and coloured seconds countdown
 	_gd._fntSmall.put_number(s, _score0_x, _score0_y, _gd._score.currScore(), "%08d", BLACK_COLOUR);	//SCORE:
@@ -307,16 +314,16 @@ void PlayGame::render_play(Screen* s)
 		    //if no words of a certain length, place a [>], else place [N]
             int nTile(0);   //point to [>] tile
             if (xx >= nArrows && _gd._words.wordsOfLength(xx+1) > 0) nTile = xx-1;   //point to [N] tile
-			_gd._scratch.blitTo(s, _xScratch+(xx*(CURSORW+2)), _yScratchBot, nTile);
+			_scratch.blitTo(s, _xScratch+(xx*(CURSORW+2)), _yScratchBot, nTile);
 		}
 
 		//draw touch controls not in controls container
-        _gd._gamemusic_icon.draw(s);
+ //       _gamemusic_icon.draw(s);
 
 		//draw game letters
 		_round.draw(s);
 
-		_gd._cursor.blitTo(s, _xScratch+(_round.currentX()*(CURSORW+2)),
+		_cursor.blitTo(s, _xScratch+(_round.currentX()*(CURSORW+2)),
 						(_round.cursorIsTop()?_yScratchTop:_yScratchBot),
                         //(int)_gd._diffLevel-1     //curr diff colour
                         _gd._words.getWordLevel()-1 //colour of word (always <= curr diff)
@@ -382,7 +389,7 @@ void PlayGame::render_play(Screen* s)
 					}
 
                     //word for this box could be normal background or in Arcade mode, could be a highlight (green or yellow)
-                    _gd._boxes.blitTo( s, _boxOffset[xx], boxOffsetY,					//tile 0=3, 1=4, 2=5, 3=6 etc. letter words
+                    _boxes.blitTo( s, _boxOffset[xx], boxOffsetY,					//tile 0=3, 1=4, 2=5, 3=6 etc. letter words
                         (
                             ((PG_PLAY != _state && xx == _xxWordHi && yy == _yyWordHi) || bHighlightWholeColumn) ?
                                 xx+_nWordBoxHighlightOffset :  //xx+(count/4) for n box blocks in boxes.png
@@ -402,7 +409,7 @@ void PlayGame::render_play(Screen* s)
                 {
                     //no word for this box so just empty (but possibly highlight for Arcade 'to be found' box)
                     //or show in red if end of level (not in-play)
-                    _gd._boxes.blitTo( s, _boxOffset[xx], boxOffsetY,					//tile 0=3, 1=4, 2=5, 3=6 etc. letter words
+                    _boxes.blitTo( s, _boxOffset[xx], boxOffsetY,					//tile 0=3, 1=4, 2=5, 3=6 etc. letter words
                         (
                             ((PG_PLAY != _state && xx == _xxWordHi && yy == _yyWordHi) || bHighlightWholeColumn) ?
                                 xx+_nWordBoxHighlightOffset :  //xx+(count/4) for n box blocks in boxes.png
@@ -420,7 +427,7 @@ void PlayGame::render_play(Screen* s)
 		    //draw empty rect to denote no words of xx length at all
             //using sdlGfxPrimitives: rectangleRGBA(s->surface(), _boxOffset[xx], yo, _boxOffset[xx]+_boxLength[xx], yo+BOXH, 100, 100, 100, 100); //grey, faded
             if (_gd._mode <= GM_REWORD) //only ARCADE and REWORD modes have empty boxes drawn
-                _gd._boxes.blitTo( s, _boxOffset[xx], yo, xx+(_nWordBoxEmptyOffset-3));	//tile 0=3, 1=4, 2=5, 3=6 etc. letter words
+                _boxes.blitTo( s, _boxOffset[xx], yo, xx+(_nWordBoxEmptyOffset-3));	//tile 0=3, 1=4, 2=5, 3=6 etc. letter words
 		}
 	}	//for
 
@@ -458,7 +465,7 @@ void PlayGame::render_end(Screen* s)
 
 	//finished level so show success type and bonus etc
 	const int minGap = _gd._fntSmall.height();	//useful distance based on small font
-	const int yyTitle = _gd._scorebar.tileH() + minGap;
+	const int yyTitle = _scorebar->height() + minGap;
 	const int yyReward = yyTitle +_gd._fntBig.height() + minGap;
 	const int yyBonus = (_yScratchBot+CURSORH+_boxOffsetY) + (2*_gd._fntBig.height());
 	switch (_success)
@@ -973,13 +980,13 @@ bool PlayGame::touch_play(const Point &pt)
 			if (!_round.cursorPrev()) _round.cursorUp();
 		}
 	}
-    else if (_gd._gamemusic_icon.contains(pt) && Locator::GetAudio().musicEnabled())
-    {
-        IAudio &a = Locator::GetAudio();
-        a.musicMute(!a.musicEnabled());
-        _gd._gamemusic_icon.setFrame(a.musicEnabled()?0:1);    //first frame (on) or second frame (off)
-        a.pushPauseTrack();
-    }
+//    else if (_gd._gamemusic_icon.contains(pt) && Locator::GetAudio().musicEnabled())
+//    {
+//        IAudio &a = Locator::GetAudio();
+//        a.musicMute(!a.musicEnabled());
+//        _gd._gamemusic_icon.setFrame(a.musicEnabled()?0:1);    //first frame (on) or second frame (off)
+//        a.pushPauseTrack();
+//    }
     else if (_pause_rect.contains(pt))
     {
         doPauseGame();
@@ -1044,7 +1051,7 @@ bool PlayGame::tap(const Point &pt)
         return _play->tap(pt);
     }
 
-    const int crtl_id = _controlsPlay.tapped(pt);
+    const int ctrl_id = _controlsPlay.tapped(pt);
 
 	if (_pPopup)
 	{
@@ -1053,14 +1060,14 @@ bool PlayGame::tap(const Point &pt)
 		return true;
 	}
 
-    if (crtl_id == CTRLID_MENU)
+    if (ctrl_id == CTRLID_MENU)
     {
         //need to push a key command instaed of starting as it needs an Input ptr
         int key = Locator::GetInput().un_translate(ppkey::SELECT);
         ppg::pushSDL_EventKey(key);
         return true;
     }
-    else if (crtl_id == CTRLID_NEXT || crtl_id == CTRLID_EXIT)
+    else if (ctrl_id == CTRLID_NEXT || ctrl_id == CTRLID_EXIT)
     {
         if (PG_END == _state)
         {
@@ -1074,21 +1081,28 @@ bool PlayGame::tap(const Point &pt)
             return true;
         }
     }
-	else if (crtl_id == CTRLID_LAST)
+	else if (ctrl_id == CTRLID_LAST)
 	{
 		commandWordToLast();
 	}
-	else if (crtl_id == CTRLID_TOTOP)
+	else if (ctrl_id == CTRLID_TOTOP)
 	{
 		commandClearAllToTop();
 	}
-	else if (crtl_id == CTRLID_SHUFFLE)
+	else if (ctrl_id == CTRLID_SHUFFLE)
 	{
 		commandJumbleWord();
 	}
-	else if (crtl_id == CTRLID_TRYWORD)
+	else if (ctrl_id == CTRLID_TRYWORD)
 	{
 		commandTryWord();
+	}
+	else if (ctrl_id == CTRLID_MUSIC)// && Locator::GetAudio().musicEnabled())
+	{
+        IAudio &a = Locator::GetAudio();
+        a.pauseTrack();         //music
+        a.mute(a.isMute());     //sfx
+        return true;
 	}
 
     return false;
@@ -1363,9 +1377,11 @@ void PlayGame::doPauseGame()
 		statePush(PG_PAUSE);
 
 		//prepare roundel class ready for a pause
-		_roundPaused = std::auto_ptr<Roundels>(new Roundels());
-		_roundPaused->setWordCenterHoriz(std::string("PAUSED"), _gd._letters,
-										(SCREEN_HEIGHT/2)-_gd._letters.tileH(), 4);
+		tSharedImage &letters = Resource::image("roundel_letters.png");
+		_roundPaused = tAutoRoundels(new Roundels());
+		_roundPaused->setWordCenterHoriz(std::string("PAUSED"),
+                                    letters,
+									(SCREEN_HEIGHT/2)-letters.get()->height(), 4);
 		_roundPaused->startMoveFrom(Screen::width(), 0, 10, 50, 18, 0);
 
 		Mix_FadeOutChannel(-1, 1000);
@@ -1378,7 +1394,7 @@ void PlayGame::newGame()
 	//   (X pos depends on number of letters in word so calculated in newLevel()
 	//scratch letter area _yScratchTop (6 roundels on top)
 	//scratch box area _yScratchBot (6 boxes below roundels)
-	_yScratchTop = _gd._scorebar.tileH() + GAME_GAP1;
+	_yScratchTop = _scorebar->height() + GAME_GAP1;
 	_yScratchBot = _yScratchTop + CURSORH + GAME_GAP1;
 
 	_gd._score.resetCurr();
@@ -1510,7 +1526,7 @@ bool PlayGame::newLevel()
 			if (n == _longestWordLen)
 			{
 				//middle of screen as only a single N letter word column
-				_boxOffset[n] = (_gd._current_w / 2) - (_gd._boxes.tileW() / 2);
+				_boxOffset[n] = (_gd._current_w / 2) - (_boxes.tileW() / 2);
 				_boxLength[n] = xLen;
 
 				_boxOffsetY = 30;	//slightly lower as it has only 1 box
@@ -1518,7 +1534,7 @@ bool PlayGame::newLevel()
 		}
 	}
 
-	_round.setWord(newword, _gd._letters, _xScratch+2, _yScratchTop+2, 6, true);
+	_round.setWord(newword, Resource::image("roundel_letters.png"), _xScratch+2, _yScratchTop+2, 6, true);
 	_round.setTopAndBottomYPos(_yScratchTop+2, _yScratchBot+2);
 	_round.jumbleWord(false);		//randomize the letters
 	_round.startMoveFrom(Screen::width(), 0, 15, 100, 18, 0);//animate roundels into screen pos
@@ -1554,7 +1570,7 @@ bool PlayGame::newLevel()
 	_controlsPlay.getControlSprite(CTRLID_TOTOP)->setPos(SCREEN_WIDTH, _posRButtonTop);
 	_controlsPlay.getControlSprite(CTRLID_LAST)->setPos(SCREEN_WIDTH, _posRButtonBot);
 
-	_gd._gamemusic_icon.setFrame(Locator::GetAudio().musicEnabled()?0:1);    //first frame (on) or second frame (off)
+//	_gd._gamemusic_icon.setFrame(Locator::GetAudio().musicEnabled()?0:1);    //first frame (on) or second frame (off)
 
     calcArcadeNeededWords();    //arcade mode highlights
 
@@ -1780,14 +1796,15 @@ void PlayGame::prepareBackground()
 	//create the background to be used for this level,
 	//pre drawing so we dont need to do it each frame.
 	//...
-	_gamebg = std::auto_ptr<Image>(new Image(SCREEN_WIDTH, SCREEN_HEIGHT));
+	_gamebg = tSharedImage(new Image(SCREEN_WIDTH, SCREEN_HEIGHT));
 	ppg::drawSolidRect(_gamebg->surface(), 0, 0, Screen::width(), Screen::height(), GAMEBG_COLOUR);
 
 	//place score bar centered - in case screen bigger than graphic
-	int sb_x = (SCREEN_WIDTH - _gd._scorebar.width())/2;  //in case sb w < screen w
-	int sb_w = _gd._scorebar.width();
-	int sb_h = _gd._scorebar.height();
-	_gamebg->blitFrom(&_gd._scorebar, -1, sb_x, 0);
+	int sb_x = (SCREEN_WIDTH - _scorebar->width())/2;  //in case sb w < screen w
+	int sb_w = _scorebar->width();
+	int sb_h = _scorebar->height();
+	//_gamebg->blitFrom(&_gd._scorebar, sb_x, 0);
+	ppg::blit_surface(_scorebar->surface(), NULL, _gamebg->surface(), sb_x, 0);
 
 	//prerender the score and words titles
 	//find out sizes and calc reasonable positions
@@ -1835,9 +1852,14 @@ void PlayGame::prepareBackground()
 	_countdown0_x = (sb_x + sb_w) - (edge_pad / 2);
 	_countdown0_y = (sb_h - fontCounter.height()) / 2;
 
-    int gameicon_y = (sb_h - _gd._gamemusic_icon.tileH()) / 2;
-    _gamemusic_icon_x = edge_pad + (equal_gap / 5);
-    _gamemusic_icon_y = gameicon_y;
+    Control *p = _controlsPlay.getControl(CTRLID_MUSIC);
+    if (p)
+    {
+        int gameicon_y = (sb_h - p->getSprite()->tileW()) / 2;
+        _gamemusic_icon_x = edge_pad + (equal_gap / 5);
+        _gamemusic_icon_y = gameicon_y;
+        p->getSprite()->setPos(_gamemusic_icon_x, _gamemusic_icon_y);
+    }
 
 	fontText.put_text(_gamebg.get(), score_x, titles_y, "SCORE:", WHITE_COLOUR);
 	fontText.put_text(_gamebg.get(), words_x, titles_y, "WORDS:", WHITE_COLOUR);
@@ -1846,16 +1868,17 @@ void PlayGame::prepareBackground()
 	Image *pImage = 0;
 	switch (_gd._mode)
 	{
-	case GM_ARCADE:		pImage = &_gd._game_arcade;	break;
-	case GM_REWORD:		pImage = &_gd._game_reword;	break;
-	case GM_SPEEDER:	pImage = &_gd._game_speeder; break;
-	case GM_TIMETRIAL:	pImage = &_gd._game_timetrial; break;
+	case GM_ARCADE:		pImage = Resource::image("game_arcade.png").get();	break;
+	case GM_REWORD:		pImage = Resource::image("game_reword.png").get();	break;
+	case GM_SPEEDER:	pImage = Resource::image("game_speeder.png").get(); break;
+	case GM_TIMETRIAL:	pImage = Resource::image("game_timetrial.png").get(); break;
 	default:break;
 	}
 	assert(pImage);
 	int mode_x = SCREEN_WIDTH - pImage->width() + 25; 	//slightly off screen
 	int mode_y = SCREEN_HEIGHT - pImage->height() + 25;	//ditto
-	_gamebg->blitFrom(pImage, -1, mode_x, mode_y);
+//	_gamebg->blitFrom(pImage, -1, mode_x, mode_y);
+	ppg::blit_surface(pImage->surface(), NULL, _gamebg->surface(), mode_x, mode_y);
 
 	//draw difficulty level in bot right corner (before/under word boxes so if 8 6-letter words, it doesnt cover anything up)
 	_gd._fntSmall.put_text_right(_gamebg.get(), SCREEN_HEIGHT - _gd._fntSmall.height(), 0, _gd._diffName.c_str(), _gd._diffColour);

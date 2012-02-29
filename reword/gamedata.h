@@ -16,8 +16,9 @@
 #include "words.h"		//SDL.h should be declared before this
 #include "score.h"
 #include "sprite.h"
+#include "resource.h"
 
-//loadable game options
+//loadable game options and set using the options screen
 struct GameOptions
 {
     GameOptions();
@@ -29,10 +30,12 @@ struct GameOptions
     void setDefaultSfxOn(bool b);
     void setDefaultMusicOn(bool b);
 
+    //command line options, override default options
     bool        _bSound;    //if false, loads null IAudio
-    bool        _bSfx;
-    bool        _bMusic;
+    bool        _bSfx;      //false if mute fx at startup (cmd line option)
+    bool        _bMusic;    //false if mute music at startup (cmd line option)
 
+    //default options, set in the options screen
 	bool        _bSingleTapMenus;
 	bool        _bDefaultSfxOn;
 	bool        _bDefaultMusicOn;
@@ -69,30 +72,30 @@ public:
 	FontTTF _fontTiny;
 
 	//backgrounds & images
-	Image _menubg;
-	Image _menubg_plain;
-	Image _menu_arcade;
-	Image _menu_reword;
-	Image _menu_speeder;
-	Image _menu_timetrial;
-	Image _scorebar;
-	Image _game_arcade;
-	Image _game_reword;
-	Image _game_speeder;
-	Image _game_timetrial;
-	Image _cursor;
-	Image _letters;
-	Image _boxes;
-	Image _gamemenu;    //in-game popup menu
+//	Image _menubg;
+//	Image _menubg_plain;
+//	Image _menu_arcade;
+//	Image _menu_reword;
+//	Image _menu_speeder;
+//	Image _menu_timetrial;
+//	Image _scorebar;
+//	Image _game_arcade;
+//	Image _game_reword;
+//	Image _game_speeder;
+//	Image _game_timetrial;
+//	Image _gamemenu;    //in-game popup menu
 
-	ImageAnim _scratch; //multiple frames (but not animated)
-
-	Sprite _arrowUp;
-	Sprite _arrowDown;
-	Sprite _arrowLeft;
-	Sprite _arrowRight;
-	Sprite _star;
-	Sprite _gamemusic_icon;        //2 frames, not animated
+//	ImageAnim _cursor;
+//	ImageAnim _letters;
+//	ImageAnim _boxes;
+//	ImageAnim _scratch; //multiple frames (but not animated)
+//
+//	Sprite _arrowUp;
+//	Sprite _arrowDown;
+//	Sprite _arrowLeft;
+//	Sprite _arrowRight;
+//	Sprite _star;
+//	Sprite _gamemusic_icon;        //2 frames, not animated
 
 	//sound effectes etc
 	Mix_Chunk *_fxCountdown;	//countdown ping noise
@@ -110,6 +113,8 @@ public:
 	///////////////////////////////
 
     GameOptions &_options;
+
+	ResourceImg	_images;
 
 	int			_mainmenuoption;	// (0=play, 1=level, 2=hiscore etc)
 

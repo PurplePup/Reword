@@ -40,6 +40,10 @@ public:
     virtual int  getMusicVol() { return 0; }
     virtual void setMusicVol(Sint16 newvol, bool bTest = true) { (void)(newvol);  (void)(bTest); }
 
+    virtual bool isMute() { return true; }
+    virtual void mute(bool bMute = true) { (void)(bMute); }
+
+    virtual bool hasSound() { return false; }   //always, as this IS NUllAudio
 	virtual bool hasMusicTracks() { return false; }
 	virtual void setBaseTrackDir(const std::string &baseMusicDir) { (void)(baseMusicDir); }
 	virtual void startNextTrack() {}
@@ -83,7 +87,7 @@ public:
 	virtual void closedown();
 
 	virtual int  getVolume();
-	virtual void setVolume(Sint16 newvol, bool test = true);
+	virtual void setVolume(Sint16 newvol, bool bTest = true);
 	virtual void volumeUp();
 	virtual void volumeDown();
 
@@ -97,15 +101,19 @@ public:
     virtual int  getMusicVol();
     virtual void setMusicVol(Sint16 newvol, bool bTest = true);
 
+    virtual bool isMute();
+    virtual void mute(bool bMute = true);
+
+    virtual bool hasSound() { return true; }    //always as this is NOT NullAudio
+	virtual bool hasMusicTracks() { return _trackList.size() > 0; }
 	virtual void setBaseTrackDir(const std::string &baseMusicDir);
 	virtual void startNextTrack();
 	virtual void startPrevTrack();
 	virtual void startTrack(const std::string &trackName);
 	virtual void stopTrack();
 	virtual void pauseTrack();
-	virtual bool hasMusicTracks() { return _trackList.size() > 0; }
 	virtual bool isPlayingMusic() { return _bPlayingTrack; }
-	virtual bool isActuallyPlayingMusic() { return Mix_PlayingMusic()?true:false; }
+	virtual bool isActuallyPlayingMusic() { return Mix_PlayingMusic(); }
 
 	//event functions that effectively call the start/stop track functions
 	virtual void pushNextTrack();

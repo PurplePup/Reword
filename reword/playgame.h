@@ -14,9 +14,9 @@
 #include "controls.h"
 
 #include <string>
-#include <memory>
 #include <stack>
 #include <algorithm>
+#include <memory>
 
 
 //a class to wrap the play state (not the game state) so that within game state ST_GAME we
@@ -156,7 +156,11 @@ protected:
 
 private:
 	GameData &	_gd;			//shared data between screens (play classes)
-	std::auto_ptr<Image> _gamebg;
+	tSharedImage _gamebg;
+	tSharedImage _scorebar;
+	ImageAnim	_scratch;
+	ImageAnim	_boxes;
+	ImageAnim	_cursor;
 
 	//function pointers for render(), work(), button() etc
 	void (PlayGame::*pRenderFn)(Screen*);
@@ -229,8 +233,8 @@ private:
 	Rect        _pause_rect;
 
 	Roundels	_round;			//for roundel game letter sprites
-	std::auto_ptr<Roundels>	_roundPaused;	//"PAUSED" in middle of screen
-	std::auto_ptr<Roundels>	_roundDict;		//"xxxxx" word highlighted for dictionary display
+	tAutoRoundels _roundPaused;	//"PAUSED" in middle of screen
+	tAutoRoundels _roundDict;		//"xxxxx" word highlighted for dictionary display
 
 	//different modes during play that are handled by different classes
 	PlayGamePopup	*_pPopup;

@@ -79,7 +79,6 @@ void Locator::RegisterInput(IInput* input)
 }
 
 
-
 //////////////////////////////// DATA /////////////////////////////
 /*
 static IGamedata * _data = 0;

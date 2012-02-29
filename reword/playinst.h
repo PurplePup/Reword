@@ -34,11 +34,13 @@ protected:
 	void scrollUp();
 	void scrollDown();
     void updateScrollButtons();
-    void ControlEvent(int event, int control_id);
+    void ControlEvent(int event, int ctrl_id);
 
 private:
 
 	GameData &	_gd;			//shared data between screens (play classes)
+	tSharedImage _menubg;
+
 	int			_page;
 	Roundels	_title;
 	Waiting		_titleW;		//delay between jumbling

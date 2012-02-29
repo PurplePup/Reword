@@ -7,8 +7,9 @@
 #include "gamedata.h"	//also holds constants and stuff
 #include "controls.h"
 #include "roundels.h"
+#include "utils.h"
 
-#include <memory>
+//#include <memory>
 
 
 class PlayGameDict : public IPlay
@@ -38,6 +39,7 @@ private:
 
 	GameData &	_gd;			//shared data between screens (play classes)
     Controls    _controlsDict;
+	tSharedImage _menubg;
 
 	Waiting		_doubleClick;
     std::string _dictWord;
@@ -45,7 +47,7 @@ private:
 	int	_dictLine;				//offset into _dictDef (ie start at _dictDef.begin+_dictLine)
 	int _lines;					//number of lines we can display dictionary entry without scrolling
 
-	std::auto_ptr<Roundels>	_roundDict;		//"xxxxx" word highlighted for dictionary display
+	tAutoRoundels   _roundDict;		//"xxxxx" word highlighted for dictionary display
 
 };
 
