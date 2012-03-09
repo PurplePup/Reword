@@ -102,8 +102,8 @@ void PlayGame::init(Input *input)
 {
 	//fade out any menu music (but only if no game music still playing)
 	//Game music handled seperately froim in-game music (mp3 dir etc ?)
-    if (Locator::GetAudio().isPlayingMusic()==false)
-		Mix_FadeOutMusic(3000);
+    if (Locator::audio().isPlayingMusic()==false)   //no user music
+		Mix_FadeOutMusic(3000);                     //fade out any menu music
 
 	_scorebar = Resource::image("scorebar.png");
 	_cursor.setImage(Resource::image("cursors.png"));
@@ -114,7 +114,7 @@ void PlayGame::init(Input *input)
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_music.png")));
     //position set in iinit()
 //    p->_sigEvent.connect(boost::bind(&PlayOptions::ControlEvent, this, _1, _2));
-    IAudio &audio = Locator::GetAudio();
+    IAudio &audio = Locator::audio();
     Control c(p, CTRLID_MUSIC, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_DOUBLE, !audio.isMute());
     _controlsPlay.add(c);
     _controlsPlay.enableControl(audio.hasSound(), CTRLID_MUSIC);  //disable override?
@@ -228,7 +228,7 @@ void PlayGame::stateFn(eState state)
 
     case PG_DICT:   {
                     _play = new PlayGameDict(_gd, _dictWord);
-                    Input &i = static_cast<Input&>(Locator::GetInput());
+                    Input &i = static_cast<Input&>(Locator::input());
                     _play->init(&i);
                     }
                     break;
@@ -980,9 +980,9 @@ bool PlayGame::touch_play(const Point &pt)
 			if (!_round.cursorPrev()) _round.cursorUp();
 		}
 	}
-//    else if (_gd._gamemusic_icon.contains(pt) && Locator::GetAudio().musicEnabled())
+//    else if (_gd._gamemusic_icon.contains(pt) && Locator::audio().musicEnabled())
 //    {
-//        IAudio &a = Locator::GetAudio();
+//        IAudio &a = Locator::audio();
 //        a.musicMute(!a.musicEnabled());
 //        _gd._gamemusic_icon.setFrame(a.musicEnabled()?0:1);    //first frame (on) or second frame (off)
 //        a.pushPauseTrack();
@@ -1063,7 +1063,7 @@ bool PlayGame::tap(const Point &pt)
     if (ctrl_id == CTRLID_MENU)
     {
         //need to push a key command instaed of starting as it needs an Input ptr
-        int key = Locator::GetInput().un_translate(ppkey::SELECT);
+        int key = Locator::input().un_translate(ppkey::SELECT);
         ppg::pushSDL_EventKey(key);
         return true;
     }
@@ -1097,11 +1097,10 @@ bool PlayGame::tap(const Point &pt)
 	{
 		commandTryWord();
 	}
-	else if (ctrl_id == CTRLID_MUSIC)// && Locator::GetAudio().musicEnabled())
+	else if (ctrl_id == CTRLID_MUSIC)// && Locator::audio().musicEnabled())
 	{
-        IAudio &a = Locator::GetAudio();
-        a.pauseTrack();         //music
-        a.mute(a.isMute());     //sfx
+        IAudio &a = Locator::audio();
+        a.mute(!a.isMute());     //sfx and music
         return true;
 	}
 
@@ -1123,7 +1122,7 @@ void PlayGame::commandClearAllToTop()
 //command issued by player - to jumble all remaining letters in the top row
 void PlayGame::commandJumbleWord()
 {
-	if (_round.jumbleWord())
+	if (_round.jumbleWord() && Locator::audio().sfxEnabled())
 		Mix_PlayChannel(-1,_gd._fxWoosh,0);	//sound only if not already moving etc
 }
 //command issued by player - to check word selected against dictionary
@@ -1168,7 +1167,8 @@ void PlayGame::handleEvent(SDL_Event &sdlevent)
 		{
 			if ( --_countdown < 11 || _pPopup)	//added pinger when in popup to warn user that timer still going...
 			{
-				Mix_PlayChannel(-1,_gd._fxCountdown,0);
+			    if (Locator::audio().sfxEnabled())
+                    Mix_PlayChannel(-1,_gd._fxCountdown,0);
 			}
 		}
 		else
@@ -1197,7 +1197,8 @@ void PlayGame::handleEvent(SDL_Event &sdlevent)
 				if (_gd._mode <= GM_REWORD && foundAllWords())
 				{
 					//wow! all words got so bonus and go to next level
-					Mix_PlayChannel(-1,_gd._fxBonus,0);
+                    if (Locator::audio().sfxEnabled())
+                        Mix_PlayChannel(-1,_gd._fxBonus,0);
 					int bonus = SCORE_BONUS + (_countdown*SCORE_SECONDS);	//say: 100 + remaining seconds * 10
 					_gd._score.addCurrScore(bonus);
 					showSuccess(SU_BONUS, bonus);
@@ -1211,7 +1212,8 @@ void PlayGame::handleEvent(SDL_Event &sdlevent)
 					//display them in diff colour to show player what they missed
 					fillRemainingWords();
 
-					Mix_PlayChannel(-1,_gd._fx6found,0);
+                    if (Locator::audio().sfxEnabled())
+                        Mix_PlayChannel(-1,_gd._fx6found,0);
 
 					if (_gd._mode <= GM_REWORD)
 					{
@@ -1254,13 +1256,15 @@ void PlayGame::handleEvent(SDL_Event &sdlevent)
 				if (_gd._score.isHiScore(_gd._mode, _gd._diffLevel) != -1)
 				{
 					//excellent! player got on scoreboard
-					Mix_PlayChannel(-1,_gd._fx6notfound,1);	//play twice if got on hiscore
+                    if (Locator::audio().sfxEnabled())
+                        Mix_PlayChannel(-1,_gd._fx6notfound,1);	//play twice if got on hiscore
 					showSuccess(SU_GAMEOVER);
 				}
 				else
 				{
 					//oh dear, ran out of time without a high enough score
-					Mix_PlayChannel(-1,_gd._fx6notfound,2);	//play 3 times if no hiscore
+                    if (Locator::audio().sfxEnabled())
+                        Mix_PlayChannel(-1,_gd._fx6notfound,2);	//play 3 times if no hiscore
 					showSuccess(SU_BADLUCK);
 				}
 
@@ -1570,7 +1574,7 @@ bool PlayGame::newLevel()
 	_controlsPlay.getControlSprite(CTRLID_TOTOP)->setPos(SCREEN_WIDTH, _posRButtonTop);
 	_controlsPlay.getControlSprite(CTRLID_LAST)->setPos(SCREEN_WIDTH, _posRButtonBot);
 
-//	_gd._gamemusic_icon.setFrame(Locator::GetAudio().musicEnabled()?0:1);    //first frame (on) or second frame (off)
+//	_gd._gamemusic_icon.setFrame(Locator::audio().musicEnabled()?0:1);    //first frame (on) or second frame (off)
 
     calcArcadeNeededWords();    //arcade mode highlights
 
@@ -1678,13 +1682,15 @@ void PlayGame::tryWord()
 			return;	//exit before sound, as success() plays fanfare sound
 		}
 		//it's a simple word find
-		Mix_PlayChannel(-1,(_longestWordLen == wordlen)?_gd._fx6found:_gd._fxFound,0);
+	    if (Locator::audio().sfxEnabled())
+            Mix_PlayChannel(-1,(_longestWordLen == wordlen)?_gd._fx6found:_gd._fxFound,0);
 
 		calcArcadeNeededWords();
 	}
 	else	//0=already found, -1=not a 6 or in sub word list
 	{
-		Mix_PlayChannel(-1,(0 == wordlen)?_gd._fxOldword:_gd._fxBadword,0);
+	    if (Locator::audio().sfxEnabled())
+            Mix_PlayChannel(-1,(0 == wordlen)?_gd._fxOldword:_gd._fxBadword,0);
 		_round.clearAllToTop(false);	//remove bad word - dont move cursor
 	}
 }

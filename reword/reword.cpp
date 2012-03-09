@@ -99,20 +99,15 @@ int main(int argc, char* argv[]) // <- this must match exactly, since SDL rewrit
 			bHelp = true;
 			continue;
 		}
-		if ("-mutesfx" == arg)  //start with fx off
+		if ("-mute" == arg)  //start with sound (fx and music) off
 		{
-			options._bSfx = false;
-			continue;
-		}
-		if ("-mutemusic" == arg)  //start with music off
-		{
-			options._bMusic = false;
+			options._bMute = true;
 			continue;
 		}
 		if ("-nosound" == arg)
 		{
 		    //not same as mute, which just starts the game muted. This disables sound.
-			options._bSound = options._bSfx = options._bMusic = false;
+			options._bSound = false;
 			continue;
 		}
 		//else ignore anything else for now
@@ -126,8 +121,7 @@ int main(int argc, char* argv[]) // <- this must match exactly, since SDL rewrit
 				<< std::endl
 				<< "  Params:  " << std::endl
 				<< "  -nosound   -  disable all sound (sfx and music)" << std::endl
-				<< "  -mutesfx   -  start with mute sound effects" << std::endl
-				<< "  -mutemusic -  start with mute music" << std::endl
+				<< "  -mute      -  start with muted fx and music" << std::endl
 				<< std::endl;
 
         return 0;

@@ -46,22 +46,22 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 ImageAnim::ImageAnim() :
 	//_image(),
-	_x(0.0), _y(0.0f),
+	_x(0.0), _y(0.0f), _objectId(0),
 	_frame(0), _firstFrame(0), _lastFrame(0), _nFrames(0), _frameDir(1),
 	_repeat(1), _restart(0), _inflateBy(0),
 	_visible(true), _pauseA(true), _rateA(0), _restartA(0),
-	_delayA(0), _bDelayRestart(false), _frameCustom(0), _id(0)
+	_delayA(0), _bDelayRestart(false), _frameCustom(0)
 {
 	//default _nFrames = 0 so no anim possible, until setFrameCount called
 }
 
 ImageAnim::ImageAnim(std::string fileName, bool bAlpha, Uint32 nFrames) :
 	//_image(fileName, bAlpha),
-	_x(0.0f), _y(0.0f),
+	_x(0.0f), _y(0.0f), _objectId(0),
 	_frame(0), _firstFrame(0), _lastFrame(0), _nFrames(0), _frameDir(1),
 	_repeat(1), _restart(0), _inflateBy(0),
 	_visible(true), _pauseA(true), _rateA(0), _restartA(0),
-	_delayA(0), _bDelayRestart(false), _frameCustom(0), _id(0)
+	_delayA(0), _bDelayRestart(false), _frameCustom(0)
 {
 	_image = tSharedImage(new Image(fileName, bAlpha));
 	//_nFrames curr set to 0 in case Image class not initialised,
@@ -72,7 +72,7 @@ ImageAnim::ImageAnim(std::string fileName, bool bAlpha, Uint32 nFrames) :
 
 //ImageAnim::ImageAnim(const Image &img) :
 //	//_image(img),
-//	_x(0.0f), _y(0.0f),
+//	_x(0.0f), _y(0.0f), _objectId(0),
 //	_frame(0), _firstFrame(0), _lastFrame(0), _nFrames(0), _frameDir(1),
 //	_repeat(1), _restart(0), _inflateBy(0),
 //	_visible(true), _pauseA(true), _rateA(0), _restartA(0),
@@ -83,7 +83,7 @@ ImageAnim::ImageAnim(std::string fileName, bool bAlpha, Uint32 nFrames) :
 //
 ImageAnim::ImageAnim(tSharedImage &img) :
 	_image(img),
-	_x(0.0f), _y(0.0f),
+	_x(0.0f), _y(0.0f), _objectId(0),
 	_frame(0), _firstFrame(0), _lastFrame(0), _nFrames(0), _frameDir(1),
 	_repeat(1), _restart(0), _inflateBy(0),
 	_visible(true), _pauseA(true), _rateA(0), _restartA(0),
@@ -265,7 +265,7 @@ void ImageAnim::workONCE(void)
 		if (_frame >= _lastFrame)
 		{
 			pauseAnim();
-			_sigEvent(USER_EV_END_ANIMATION, _id);
+			_sigEvent(USER_EV_END_ANIMATION, _objectId);
 			return;
 		}
 	}
@@ -275,7 +275,7 @@ void ImageAnim::workONCE(void)
 		if (_frame <= _firstFrame)
 		{
 			pauseAnim();
-			_sigEvent(USER_EV_END_ANIMATION, _id);
+			_sigEvent(USER_EV_END_ANIMATION, _objectId);
 			return;
 		}
 	}
@@ -291,7 +291,7 @@ void ImageAnim::workHIDE(void)
 		{
 			pauseAnim();
 			setVisible(false);
-			_sigEvent(USER_EV_END_ANIMATION, _id);
+			_sigEvent(USER_EV_END_ANIMATION, _objectId);
             return;
 		}
 	}
@@ -302,7 +302,7 @@ void ImageAnim::workHIDE(void)
 		{
 			pauseAnim();
 			setVisible(false);
-			_sigEvent(USER_EV_END_ANIMATION, _id);
+			_sigEvent(USER_EV_END_ANIMATION, _objectId);
 			return;
 		}
 	}
@@ -317,7 +317,7 @@ void ImageAnim::workLOOP(void)
 		{
 			if (_repeat && _repeat-- <= 1) pauseAnim();
 			_frame = _firstFrame;
-			_sigEvent(USER_EV_END_ANIMATION, _id);
+			_sigEvent(USER_EV_END_ANIMATION, _objectId);
 			return;
 		}
 	}
@@ -328,7 +328,7 @@ void ImageAnim::workLOOP(void)
 		{
 			if (_repeat && _repeat-- <= 1) pauseAnim();
 			_frame = _lastFrame;
-			_sigEvent(USER_EV_END_ANIMATION, _id);
+			_sigEvent(USER_EV_END_ANIMATION, _objectId);
 			return;
 		}
 	}
@@ -343,7 +343,7 @@ void ImageAnim::workREVERSE(void)
 		{
 			if (_repeat && _repeat-- <= 1) { pauseAnim(); return; }
 			_frameDir = -1;
-			_sigEvent(USER_EV_END_ANIMATION, _id);
+			_sigEvent(USER_EV_END_ANIMATION, _objectId);
 		}
 	}
 	else
@@ -353,7 +353,7 @@ void ImageAnim::workREVERSE(void)
 		{
 			if (_repeat && _repeat-- <= 1) { pauseAnim(); return; }
 			_frameDir = 1;
-			_sigEvent(USER_EV_END_ANIMATION, _id);
+			_sigEvent(USER_EV_END_ANIMATION, _objectId);
 		}
 
 	}
@@ -365,7 +365,7 @@ void ImageAnim::workCUSTOM(void)
     if (_frameCustom >= (Uint32)_animCustom.size())
     {
         pauseAnim();
-		_sigEvent(USER_EV_END_ANIMATION, _id);
+		_sigEvent(USER_EV_END_ANIMATION, _objectId);
         return;
     }
     _frame = _animCustom[_frameCustom++];

@@ -16,23 +16,23 @@ class Locator
 {
 //AUDIO
 public:
-    static void     InitAudio();
-    static IAudio&  GetAudio();
-    static void     RegisterAudio(IAudio* audio);
+    static void     initAudio();
+    static IAudio&  audio();
+    static void     registerAudio(IAudio* audio);
 
 //INPUT
 public:
-    static void     InitInput();
-    static IInput&  GetInput();
-    static void     RegisterInput(IInput* input);
+    static void     initInput();
+    static IInput&  input();
+    static void     registerInput(IInput* input);
 
 
 /*
 //GAMEDATA
 public:
-    static void     InitData();
-    static IGameData&  GetData();
-    static void     Registerdata(IGameData* data);
+    static void     initData();
+    static IGameData&  data();
+    static void     registerdata(IGameData* data);
 */
 };
 

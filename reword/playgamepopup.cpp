@@ -85,10 +85,10 @@ void PlayGamePopup::init(Input *input)
 	_itemList.clear();
 	_itemList[i=0] = MenuItem(POP_CANCEL, GREEN_COLOUR, "Resume Game", "Continue game");
 	_itemList[++i] = MenuItem(POP_SKIP, ORANGE_COLOUR, "Next word/Level", (_hasMaxWord)?"Move on to next word/level":"You must have a Re-word first!", _hasMaxWord);
-    if (Locator::GetAudio().musicEnabled())
+    if (Locator::audio().musicEnabled())
     {
-        bool bIsPlaying = Locator::GetAudio().isPlayingMusic();	//may be playing/fading menu music so uses isPlaying... rather than isActuallyPl...
-        bool bHasMusic = Locator::GetAudio().hasMusicTracks();
+        bool bIsPlaying = Locator::audio().isPlayingMusic();	//may be playing/fading menu music so uses isPlaying... rather than isActuallyPl...
+        bool bHasMusic = Locator::audio().hasMusicTracks();
 
         _itemList[++i] = MenuItem(POP_TOGGLEMUSIC, BLUE_COLOUR, bIsPlaying?"Music Stop":"Music Start", bIsPlaying?"Stop current track":"Start a song", bHasMusic);
         _itemList[++i] = MenuItem(POP_NEXTTRACK, BLUE_COLOUR, "Next Track", "Play next song", bHasMusic);
@@ -289,17 +289,17 @@ void PlayGamePopup::choose()
 		if (pItem->_id == POP_TOGGLEMUSIC)
 		{
             if (Mix_PlayingMusic())
-                Locator::GetAudio().pushStopTrack();
+                Locator::audio().pushStopTrack();
             else
-                Locator::GetAudio().pushNextTrack();
+                Locator::audio().pushNextTrack();
 		}
 		if (pItem->_id == POP_NEXTTRACK)
 		{
-            Locator::GetAudio().pushNextTrack();
+            Locator::audio().pushNextTrack();
 		}
 		if (pItem->_id == POP_PREVTRACK)
 		{
-            Locator::GetAudio().pushPrevTrack();
+            Locator::audio().pushPrevTrack();
 		}
 
 	}

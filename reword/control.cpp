@@ -53,7 +53,7 @@ Control::Control(t_pControl &pCtrl, int id, unsigned int group,
     assert (pCtrl.get() != 0);  //must construct with valid control
     assert (id != 0);           //must give it an id (pref unique)
 
-    pCtrl->setId(id);
+    pCtrl->setObjectId(id);
     setIdleFrame();
 }
 

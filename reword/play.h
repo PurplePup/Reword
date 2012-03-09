@@ -29,6 +29,7 @@ public:
             CTRLID_SCROLL_UP, CTRLID_SCROLL_DOWN, CTRLID_SCROLL_LEFT, CTRLID_SCROLL_RIGHT,   //(<) scroll bar buttons
             CTRLID_FX, CTRLID_MUSIC,
             CTRLID_YES, CTRLID_NO, CTRLID_YES_NO,
+            CTRLID_STAR,    //menu star
             //...
             CTRLID_MAX //ALWAYS LAST ITEM
          };

@@ -26,8 +26,8 @@ public:
 	Sprite(tSharedImage &img);
 	virtual ~Sprite() {}
 
-    void setObjectId(int id) { _objectId = id; }
-    int getObjectId() { return _objectId; }
+//    void setObjectId(int id) { _objectId = id; }
+//    int getObjectId() { return _objectId; }
 
 	//start move from A to B then stop or repeat
 	void startMoveTo(int xEnd, int yEnd, Uint32 time = 100, Uint32 delay = 0);
@@ -80,7 +80,7 @@ private:
 	Waiting _waitM;		//movement delay
 	bool	_touchable;
 
-	int     _objectId; //used for identify sprites by id (for event notification etc)
+//	int     _objectId; //used for identify sprites by id (for event notification etc)
 };
 
 

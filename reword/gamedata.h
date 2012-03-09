@@ -32,8 +32,7 @@ struct GameOptions
 
     //command line options, override default options
     bool        _bSound;    //if false, loads null IAudio
-    bool        _bSfx;      //false if mute fx at startup (cmd line option)
-    bool        _bMusic;    //false if mute music at startup (cmd line option)
+    bool        _bMute;     //true if mute fx and music at startup (cmd line option)
 
     //default options, set in the options screen
 	bool        _bSingleTapMenus;

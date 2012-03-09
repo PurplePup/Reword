@@ -67,11 +67,20 @@ void PlayMainMenu::choose(MenuItem i)
 		case 2: _gd._state = ST_HIGH; break;
 		case 3: _gd._state = ST_INST; break;
 		case 4: _gd._state = ST_OPTN; break;
-		case 5: _gd._state = ST_EXIT; break;
+		case 5:
+		{
+		    exitMenu(); //start exit anim (all slide off)
+		    return;     //don't set running false just yet
+		}
 	}
 	_running = false;
 }
 
+void PlayMainMenu::chooseDone()
+{
+    _gd._state = ST_EXIT;   //and actually exit
+	_running = false;
+}
 
 void PlayMainMenu::render(Screen *s)
 {

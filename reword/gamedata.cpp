@@ -58,24 +58,9 @@ GameData::GameData(GameOptions &opt) : _options(opt), _bTouch(false),  _init(fal
 	bErr |= !_fntBig.load(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_BIG);
 
     bErr |= !Resource::image().precache("roundel_letters.png", 255, 26);
-//	bErr |= !_letters.load(RES_IMAGES + "roundel_letters.png", 255);
-//	bErr |= !_letters.setTileSize(LETTERW,LETTERH);
 
 
 	//SINGLE FRAME BACKGROUNDS & IMAGES
-//	bErr |= !_menubg.load(RES_IMAGES + "menubg.png");		//solid background (no alpha)
-//	bErr |= !_menubg_plain.load(RES_IMAGES + "menubg_plain.png");
-//	bErr |= !_menu_arcade.load(RES_IMAGES + "menu_arcade.png");
-//	bErr |= !_menu_reword.load(RES_IMAGES + "menu_reword.png");
-//	bErr |= !_menu_speeder.load(RES_IMAGES + "menu_speeder.png");
-//	bErr |= !_menu_timetrial.load(RES_IMAGES + "menu_timetrial.png");
-//	bErr |= !_scorebar.load(RES_IMAGES + "scorebar.png");
-//	bErr |= !_game_arcade.load(RES_IMAGES + "game_arcade.png");
-//	bErr |= !_game_reword.load(RES_IMAGES + "game_reword.png");
-//	bErr |= !_game_speeder.load(RES_IMAGES + "game_speeder.png");
-//	bErr |= !_game_timetrial.load(RES_IMAGES + "game_timetrial.png");
-//	bErr |= !_gamemenu.load(RES_IMAGES + "popup_menu.png", 200);
-
 	bErr |= !Resource::image().precache("menubg.png");		//solid background (no alpha)
 	bErr |= !Resource::image().precache("menubg_plain.png");
 	bErr |= !Resource::image().precache("menu_arcade.png");
@@ -91,27 +76,12 @@ GameData::GameData(GameOptions &opt) : _options(opt), _bTouch(false),  _init(fal
 
 	//IMAGE TILES (MULTIPLE TILE IMAGES)
     bErr |= !Resource::image().precache("cursors.png", -1, 3);
-//	bErr |= !_cursor.load(RES_IMAGES + "cursors.png");
-//	bErr |= !_cursor.setTileSize(CURSORW,CURSORH);
 
 	bErr |= !Resource::image().precache("boxes.png", -1, 24, Image::TILE_VERT);
-//    tSharedImage &img2 = Resource::image("boxes.png")
-//    img2->setTileSize(BOXW, BOXH, Image::TILE_VERT);	//tile 0=3, 1=4, 2=5, 3=6 letter words
-//    Resource::image("boxes.png")->setTileSize(BOXW, BOXH, Image::TILE_VERT);	//tile 0=3, 1=4, 2=5, 3=6 letter words
-//	bErr |= !_boxes.load(RES_IMAGES + "boxes.png");
-//	bErr |= !_boxes.setTileSize(BOXW, BOXH, Image::TILE_VERT);	//tile 0=3, 1=4, 2=5, 3=6 letter words
 
 	bErr |= !Resource::image().precache("scratch.png", -1, 7);
-//	bErr |= !_scratch.load(RES_IMAGES + "scratch.png", -1, 7);
 
 	//SPRITES
-//	bErr |= !_arrowUp.load(RES_IMAGES + "btn_round_scroll_up.png", 0, 5);
-//	bErr |= !_arrowDown.load(RES_IMAGES + "btn_round_scroll_down.png", 0, 5);
-//	bErr |= !_arrowLeft.load(RES_IMAGES + "btn_round_scroll_left.png", 0, 5);
-//	bErr |= !_arrowRight.load(RES_IMAGES + "btn_round_scroll_right.png", 0, 5);
-//	bErr |= !_star.load(RES_IMAGES + "star.png", 255, 7);
-//  bErr |= !_gamemusic_icon.load(RES_IMAGES + "btn_music.png", 255, 2);        //2 states on/off
-
 	bErr |= !Resource::image().precache("btn_round_scroll_up.png", 0, 5);
 	bErr |= !Resource::image().precache("btn_round_scroll_down.png", 0, 5);
 	bErr |= !Resource::image().precache("btn_round_scroll_left.png", 0, 5);
@@ -130,14 +100,10 @@ GameData::GameData(GameOptions &opt) : _options(opt), _bTouch(false),  _init(fal
     bErr |= !Resource::image().precache("btn_square_next_small.png", 0, 5);
     bErr |= !Resource::image().precache("btn_square_yes_no_small.png", 0, 9);
 
-//    bErr |= !Resource::image().precache("btn_round_fx.png", 0, 9);
     bErr |= !Resource::image().precache("btn_round_music.png", 0, 9);
 
 	bErr |= !Resource::image().precache("star.png", 255, 7);
-//    bErr |= !Resource::image().precache("btn_music.png", 255, 2);        //2 states on/off
 
-
-//	bErr |= !_moreWords.load(RES_IMAGES + "morewords.png",255, 2);	//frame 1=more_to_get, 2=more_all_got
 
 	//SOUNDS - no wrapper class so need to free on exit
 	_fxCountdown = Mix_LoadWAV(std::string(RES_SOUNDS + "ping.wav").c_str());	//<10 seconds remaining
@@ -249,7 +215,7 @@ bool GameData::loadQuickState()
 
 
 GameOptions::GameOptions() :
-    _bSound(true), _bSfx(true), _bMusic(true),
+    _bSound(true), _bMute(false),
     _bSingleTapMenus(true), _bDefaultSfxOn(true), _bDefaultMusicOn(true),
     _defaultDifficulty(DIF_MED),   //medium diff
     _bDirty(false)

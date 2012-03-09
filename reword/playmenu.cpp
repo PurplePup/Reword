@@ -42,6 +42,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "platform.h"
 #include "audio.h"
 #include "locator.h"
+#include "sprite.h"
 
 #include <string>
 
@@ -56,6 +57,7 @@ PlayMenu::PlayMenu(GameData &gd)  : _gd(gd)
 	_layoutOffset = 0;
 	_font = &_gd._fntMed;
     _fontHelp = &_gd._fntClean;
+	_bSetStarPos = true;
 }
 
 void PlayMenu::init(Input *input)
@@ -75,14 +77,15 @@ void PlayMenu::init(Input *input)
     _menubg = Resource::image("menubg.png");
 
 	_star.setImage(Resource::image("star.png"));
-	_star.setPos(MENU_HI_X,0);//MENU_HI_Y+(_item*MENU_HI_GAP));	//modified once menu text X pos returned from put_text()
+	_star.setPos(MENU_HI_X,0); //modified once menu text X pos returned from put_text()
 	_star.startAnim( 0, 6, ImageAnim::ANI_LOOP, 35, 0);
+	_star.setObjectId(CTRLID_STAR);
 
     //music on/off icon
     { // round music button placed in top left of scorebar
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_music.png")));
     p->setPos(5,5);
-    IAudio &audio = Locator::GetAudio();
+    IAudio &audio = Locator::audio();
     Control c(p, CTRLID_MUSIC, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, !audio.isMute());
     _controlsMenu.add(c);
     _controlsMenu.enableControl(audio.hasSound(), CTRLID_MUSIC);  //disable override?
@@ -120,14 +123,14 @@ void PlayMenu::setMenuArea(const Rect &r)
 void PlayMenu::startMenuMusic()
 {
 	//play menu music - if not already playing
-	if (Locator::GetAudio().musicEnabled() && !Mix_PlayingMusic())
+	if (Locator::audio().musicEnabled() && !Mix_PlayingMusic())
 		Mix_PlayMusic(_gd._musicMenu, -1);	//play 'forever' - or until game starts
 
 }
 void PlayMenu::stopMenuMusic()
 {
     //stop any menu music or personal music playing in the menu
-    Locator::GetAudio().stopTrack();
+    Locator::audio().stopTrack();
 }
 
 //function to be overloaded in derived classes to process choice
@@ -135,6 +138,14 @@ void PlayMenu::choose(MenuItem i)
 {
     (void)(i);
 	return;
+}
+
+void PlayMenu::chooseDone()
+{
+    //stub, to be overridden and used by actual menu
+    //to detect end of menu (star moving off screen)
+    //so animations can finish before moving to next
+    //state
 }
 
 void PlayMenu::render(Screen *s)
@@ -155,8 +166,12 @@ void PlayMenu::render(Screen *s)
 		if (p->_id == selected)
 		{
             _font->put_text(s, p->_r.left(), p->_r.top(), p->_title.c_str(), p->_hoverOn, true);
-			r = p->_r.addpt(Point(-30,0));
-			_star.setPos(r.left(), r.top()-2);
+            if (_bSetStarPos)
+            {
+                r = p->_r.addpt(Point(-30,0));
+                _star.setPos(r.left(), r.top()-2);
+                _bSetStarPos = false;
+            }
 
 			//show comment for selected item - might be blank
             if (_delayHelp.done())
@@ -216,6 +231,7 @@ void PlayMenu::button(Input *input, ppkey::eButtonType b)
 	case ppkey::UP:
 		if (input->isPressed(b) && _itemList.size())
 		{
+            _bSetStarPos = true;
 			if (0==_item)
 				_item=_itemList.size()-1;	//down to bottom
 			else
@@ -225,6 +241,7 @@ void PlayMenu::button(Input *input, ppkey::eButtonType b)
 	case ppkey::DOWN:
 		if (input->isPressed(b) && _itemList.size())
 		{
+            _bSetStarPos = true;
 			if (_itemList.size()-1==_item)
 				_item=0;	//back to top
 			else
@@ -246,7 +263,7 @@ void PlayMenu::button(Input *input, ppkey::eButtonType b)
 //touch (press) to highlight the menu item
 bool PlayMenu::touch(const Point &pt)
 {
-    const int ctrl_id = _controlsMenu.touched(pt);
+    /*const int ctrl_id = */ _controlsMenu.touched(pt);
 
     _saveTouchPt._x = _saveTouchPt._y = 0;
 	Uint32 item(0);
@@ -255,6 +272,7 @@ bool PlayMenu::touch(const Point &pt)
 	{
 		if (it->_enabled && it->_rBox.contains(pt))
 		{
+            _bSetStarPos = true;
             if (_gd._options._bSingleTapMenus)
             {
                 _saveTouchPt = pt;      //so test if release pos is in same menu item
@@ -300,18 +318,35 @@ bool PlayMenu::tap(const Point &pt)
     }
 
     //game music icon action on press, not tap(release)
-    if (ctrl_id == CTRLID_MUSIC)// && Locator::GetAudio().musicEnabled())
+    if (ctrl_id == CTRLID_MUSIC)// && Locator::audio().musicEnabled())
     {
-        IAudio &a = Locator::GetAudio();
+        IAudio &a = Locator::audio();
+        a.mute(!a.isMute());
         if (a.isMute())
             stopMenuMusic();
         else
             startMenuMusic();
-        a.mute(a.isMute());
         return true;
     }
 
 	return false;
+}
+
+void PlayMenu::handleEvent(SDL_Event &sdlevent)
+{
+	if (sdlevent.type == SDL_USEREVENT)
+	{
+		if (USER_EV_END_MOVEMENT == sdlevent.user.code)
+		{
+		    //USER_EV_END_MOVEMENT uses data1 as a simple int(as a ptr to sprite
+            //internal data may not exist after end of movement).
+            const int id = reinterpret_cast<int>(sdlevent.user.data1);
+            if (id == CTRLID_STAR)
+            {
+                chooseDone();   //tell super that star has gone
+            }
+		}
+	}
 }
 
 void PlayMenu::setTitle(const std::string &title)
@@ -400,3 +435,16 @@ Rect PlayMenu::getItemWidest()
     return r;
 }
 
+//cleanup anims on exit (esp main menu - exit app - screen freeze)
+//so remove animating controls etc. Just a little tidier than freeze
+void PlayMenu::exitMenu()
+{
+//    _controlsMenu.showAllControls(false);
+
+
+    const int ms = 1500;
+	const int btnWidth = _star.tileW();
+    _star.startMoveTo(-btnWidth, _star.getYPos(), ms);
+//    _star.startMoveTo(10, 100, 20, 0, 8, 0);
+
+}

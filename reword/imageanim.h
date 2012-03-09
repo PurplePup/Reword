@@ -58,7 +58,9 @@ public:
     bool addAnimCustom(Uint32 frame);
     bool addAnimCustom(Uint32 frameFrom, Uint32 frameTo);   //from->to inclusinve
 
-    void setId(int id) { _id = id; }
+    void setObjectId(int objectId) { _objectId = objectId; }
+    int getObjectId() { return _objectId; }
+
     void setAnimDelay(Uint32 delay, bool bRestart = false) { _delayA.start(delay); _bDelayRestart = bRestart; }   //before anim starts & each repeat?
 	void setAnimRate(Uint32 rate)	            { _waitA.start(_rateA = rate, 0); }
 	void setAnimType(eAnim anim);
@@ -118,6 +120,8 @@ protected:
 	//position
 	float	_x, _y;		//current screen offset/position
 
+	int     _objectId;  //id passed down from image/sprite/ctrl to pass back in signal
+
     //tile info
 	int     _tileW, _tileH; //actual individual tile w & h withing image
 	int     _tileCount;	    //number of tiles in image (if setTileSize() used)
@@ -148,7 +152,6 @@ private:
 	std::vector<Uint32> _animCustom;    //custom frame iteration
 	Uint32              _frameCustom;   //custom count
 
-	int     _id;        //id passed down from Control to pass back in signal
 };
 
 #endif //_IMAGEANIM_H

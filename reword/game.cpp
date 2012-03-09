@@ -135,12 +135,11 @@ bool Game::init(GameOptions &options)
 	atexit(SDL_Quit);	//auto cleanup, just in case
 
     if ((init_flags & SDL_INIT_AUDIO) == 0)
-        Locator::InitAudio();   //NullAudio in logs window
+        Locator::initAudio();   //NullAudio in logs window
     else
-        Locator::RegisterAudio(_audio = new Audio());
-    IAudio &audio = Locator::GetAudio();
-    audio.setup(options._bMusic, options._bSfx);
-    audio.setBaseTrackDir(options._defaultMusicDir);
+        Locator::registerAudio(_audio = new Audio());
+    IAudio &audio = Locator::audio();
+    audio.setup(options._bDefaultSfxOn, options._bDefaultMusicOn, options._defaultMusicDir, options._bMute);
 
 	_screen  = new Screen(SCREEN_WIDTH, SCREEN_HEIGHT);
 	if (!_screen->initDone())
@@ -162,7 +161,7 @@ bool Game::init(GameOptions &options)
 	}
 
 	_input = new Input();
-	Locator::RegisterInput(_input);
+	Locator::registerInput(_input);
 	_input->init();
 
 #if ((defined(GP2X) || defined(PANDORA)))
@@ -360,10 +359,10 @@ bool Game::play(IPlay *p)
 						}
 
 						if (ppkey::VOLUP == b)
-							Locator::GetAudio().volumeUp();
+							Locator::audio().volumeUp();
 						else
 							if (ppkey::VOLDOWN == b)
-								Locator::GetAudio().volumeDown();
+								Locator::audio().volumeDown();
 
 					}
 					break;
@@ -377,10 +376,10 @@ bool Game::play(IPlay *p)
 						p->button(_input, b);
 
 						if (ppkey::VOLUP == b)
-							Locator::GetAudio().volumeUp();
+							Locator::audio().volumeUp();
 						else
 							if (ppkey::VOLDOWN == b)
-								Locator::GetAudio().volumeDown();
+								Locator::audio().volumeDown();
 					}
 					break;
 
@@ -419,16 +418,16 @@ bool Game::play(IPlay *p)
 							switch (event.user.code)
 							{
 							case USER_EV_STOP_TRACK:
-								Locator::GetAudio().stopTrack();
+								Locator::audio().stopTrack();
 								break;
 							case USER_EV_NEXT_TRACK:
-								Locator::GetAudio().startNextTrack();
+								Locator::audio().startNextTrack();
 								break;
 							case USER_EV_PREV_TRACK:
-								Locator::GetAudio().startPrevTrack();
+								Locator::audio().startPrevTrack();
 								break;
                             case USER_EV_PAUSE_TRACK:
-                                Locator::GetAudio().pauseTrack();
+                                Locator::audio().pauseTrack();
                                 break;
 /*							case USER_EV_SAVE_STATE:
 								_gd->saveQuickState();
@@ -481,7 +480,7 @@ bool Game::play(IPlay *p)
 		if (bCap) fr.capFrames();
 
 //#ifdef _USE_MIKMOD
-//		Locator::GetAudio().modUpdate();
+//		Locator::audio().modUpdate();
 //#endif
 
     }	//while p->running()

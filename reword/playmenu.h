@@ -55,11 +55,13 @@ public:
 
     virtual void init(Input *input);
     virtual void choose(MenuItem i);
+    virtual void chooseDone();
     virtual void render(Screen* s);
     virtual void work(Input* input, float speedFactor);
     virtual void button(Input* input, ppkey::eButtonType b);
     virtual bool touch(const Point &pt);
     virtual bool tap(const Point &pt);
+    virtual void handleEvent(SDL_Event &sdlevent);
 
     void        startMenuMusic();
     void        stopMenuMusic();
@@ -74,6 +76,7 @@ public:
 	int			getNextYPos() { return _nextYpos; }
 	void        setLayout(eMenuLayout layoutType, int offset);
 	void        setFont(eMenuFont mainFont, eMenuFont helpFont);
+	void        exitMenu();
 
 protected:
     void        recalcItemPositions();
@@ -81,7 +84,7 @@ protected:
 protected:
 	GameData &	_gd;			//shared data between screens (play classes)
 	tSharedImage _menubg;
-	ImageAnim   _star;
+	Sprite      _star;
 
 	Roundels	_title;
 	Waiting		_titleW;		//delay between jumbling
@@ -98,6 +101,7 @@ protected:
     Waiting		_doubleClick;	//touch support
     FontTTF     *_font, *_fontHelp;
     Controls    _controlsMenu;
+    bool        _bSetStarPos;
 };
 
 #endif //_PlayMenu_H

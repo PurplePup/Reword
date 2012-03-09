@@ -47,7 +47,7 @@ Sprite::Sprite() :
 	ImageAnim(),
 	_xStart(0), _yStart(0), _xEnd(0), _yEnd(0),
 	_xDir(0), _yDir(0), _xVel(0), _yVel(0), _type(Sprite::SPR_NONE),
-	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true), _objectId(0)
+	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true)
 {
 }
 
@@ -55,7 +55,7 @@ Sprite::Sprite(std::string fileName, bool bAlpha, Uint32 nFrames) :
 	ImageAnim(fileName, bAlpha, nFrames),
 	_xStart(0), _yStart(0), _xEnd(0), _yEnd(0),
 	_xDir(0), _yDir(0), _xVel(0), _yVel(0), _type(Sprite::SPR_NONE),
-	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true), _objectId(0)
+	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true)
 {
 }
 
@@ -63,7 +63,7 @@ Sprite::Sprite(std::string fileName, bool bAlpha, Uint32 nFrames) :
 //	ImageAnim(img), //constructs underlying Image member
 //	_xStart(0), _yStart(0), _xEnd(0), _yEnd(0),
 //	_xDir(0), _yDir(0), _xVel(0), _yVel(0), _type(Sprite::SPR_NONE),
-//	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true), _objectId(0)
+//	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true)
 //{
 //}
 
@@ -71,7 +71,7 @@ Sprite::Sprite(tSharedImage &img) :
 	ImageAnim(img), //constructs underlying Image member
 	_xStart(0), _yStart(0), _xEnd(0), _yEnd(0),
 	_xDir(0), _yDir(0), _xVel(0), _yVel(0), _type(Sprite::SPR_NONE),
-	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true), _objectId(0)
+	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true)
 {
 }
 
@@ -103,14 +103,23 @@ void Sprite::startMoveTo(int xEnd, int yEnd,
 						 eSprite type /*Sprite::SPR_NONE*/)	//repeat, reverse etc
 {
 	//direction
-	//set by end x or y, or overridden by SM_ direction flags
-	if ( (SPR_LEFT & type) || (xEnd < getXPos()) )
-		_xDir = -1; else _xDir = 1;	//pos=right, neg=left
-	if ( (SPR_UP & type) || (yEnd < getYPos()) )
-		_yDir = -1; else _yDir = 1;	//pos=down, neg=up
+    //set by end x or y, or overridden by SPR_ direction flags
+    if ((SPR_LEFT & type) || (xEnd < getXPos()))
+        _xDir = -1;
+    else if ((SPR_RIGHT & type) || (xEnd > getXPos()))
+        _xDir = 1;	//pos=right, neg=left
+    else
+        _xDir = 0;
+
+    if ((SPR_UP & type) || (yEnd < getYPos()))
+        _yDir = -1;
+    else if ((SPR_DOWN & type) || (yEnd > getYPos()))
+        _yDir = 1;	//pos=down, neg=up
+    else
+        _yDir = 0;
 
 	//end position
-	//if SM_ direction flags used (ie. no end pos), then determine off
+	//if SPR_ direction flags used (ie. no end pos), then determine off
 	//screen end positions from sprite size, ie. sprite must be completely
 	//off screen then stop (or reverse if that flag is set
 	_xEnd = xEnd;
@@ -157,8 +166,8 @@ void Sprite::work()
 		_y += _yVel*_yDir;
 
 		//check if end of move reached
-		if ((_xDir != 0 && ((_xDir>0 && _x >= _xEnd) || (_xDir<0 && _x <= _xEnd))) &&
-			(_yDir != 0 && ((_yDir>0 && _y >= _yEnd) || (_yDir<0 && _y <= _yEnd))) )
+		if ((!_xDir || ((_xDir>0 && _x >= _xEnd) || (_xDir<0 && _x <= _xEnd))) &&
+			(!_yDir || ((_yDir>0 && _y >= _yEnd) || (_yDir<0 && _y <= _yEnd))) )
 		{
 			_x = _xEnd;	//make sure it stops at the exact end point given
 			_y = _yEnd;

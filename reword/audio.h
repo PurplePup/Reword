@@ -22,7 +22,7 @@
 class NullAudio : public IAudio
 {
 public:
-	virtual void setup(bool bMusic, bool bSfx);
+	virtual void setup(bool bSfx, bool bMusic, const std::string &baseTrackDir, bool bMute);
 	virtual void closedown() {}
 
 	virtual int  getVolume() { return 0; }
@@ -30,11 +30,13 @@ public:
 	virtual void volumeUp() {}
 	virtual void volumeDown() {}
 
+    virtual void setSfxEnabled(bool bOn) { (void)(bOn); }
 	virtual bool sfxEnabled() { return false; }
 	virtual void sfxMute(bool bMute = true) { (void)(bMute); }
     virtual int  getSfxVol() { return 0; }
     virtual void setSfxVol(Sint16 newvol, bool bTest = true) { (void)(newvol);  (void)(bTest); }
 
+    virtual void setMusicEnabled(bool bOn) { (void)(bOn); }
 	virtual bool musicEnabled() { return false; }
 	virtual void musicMute(bool bMute = true) { (void)(bMute); }
     virtual int  getMusicVol() { return 0; }
@@ -61,20 +63,21 @@ public:
 	virtual void pushStopTrack() {}
 };
 
-//options and settings for audio volume etc
+//options and settings for in-game working audio settings
 struct AudioOptions
 {
     AudioOptions()
-//        : _bMusic(true), _musicVol(50) _bSfx(true), _sfxVol(50)
     {
-        _bMusic = _bSfx = true;
+        _bMute = false;             //current state
+        _bMusic = _bSfx = true;     //available or not
         _musicVol = _sfxVol = 50;
     }
 
-    bool        _bMusic;
-    Sint16		_musicVol;      //music vol
-    bool        _bSfx;
-    Sint16		_sfxVol;        //sfx vol
+    bool        _bMute;           //mute all on/off
+    bool        _bMusic;          //music on/off
+    Sint16		_musicVol;        //music vol (0==muted)
+    bool        _bSfx;            //sfx on/off
+    Sint16		_sfxVol;          //sfx vol (0==muted)
 };
 
 //Standard audio implementation
@@ -83,7 +86,7 @@ class Audio : public IAudio
 public:
 	Audio();
 	~Audio();
-	virtual void setup(bool bMusic, bool bSfx);
+	virtual void setup(bool bSfx, bool bMusic, const std::string &baseTrackDir, bool bMute);
 	virtual void closedown();
 
 	virtual int  getVolume();
@@ -91,11 +94,13 @@ public:
 	virtual void volumeUp();
 	virtual void volumeDown();
 
+    virtual void setSfxEnabled(bool bOn) { _opt._bSfx = bOn; }
 	virtual bool sfxEnabled();
 	virtual void sfxMute(bool bMute = true);
     virtual int  getSfxVol();
     virtual void setSfxVol(Sint16 newvol, bool bTest = true);
 
+    virtual void setMusicEnabled(bool bOn) { _opt._bMusic = bOn; }
 	virtual bool musicEnabled();
 	virtual void musicMute(bool bMute = true);
     virtual int  getMusicVol();
@@ -149,6 +154,8 @@ protected:
 	bool		_bPlayingTrack;		//set true if start playing
 
     AudioOptions _opt;
+    Sint16		_sfxVolSave, _musicVolSave;  //vol prev to mute
+
 };
 
 #endif //_AUDIO_H

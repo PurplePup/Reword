@@ -188,13 +188,15 @@ void Controls::showAllControls(bool bShow /*=true*/, int exceptID /*=0*/)
 //show 'disabled' frame (0) or default active frame (last)
 bool Controls::enableControl(bool bEnable, int id)
 {
-    Sprite *ps = getControlSprite(id);
-    if (ps)
+    Control *pc = getControl(id);
+    if (pc)
     {
+        Sprite *ps = pc->getSprite();
+        if (!ps) return false;  //fail!
         if (bEnable)
         {
             ps->setTouchable(true);
-            ps->setFrameLast();
+            pc->setIdleFrame();
         }
         else
         {

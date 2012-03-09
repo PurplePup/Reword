@@ -38,16 +38,16 @@ Licence:		This program is free software; you can redistribute it and/or modify
 static IAudio * _audio = 0;
 static NullAudio _nullaudio;
 
-void Locator::InitAudio()
+void Locator::initAudio()
 {
     _audio = &_nullaudio;
 }
-IAudio& Locator::GetAudio()
+IAudio& Locator::audio()
 {
     assert(_audio != NULL);
     return *_audio;
 }
-void Locator::RegisterAudio(IAudio* audio)
+void Locator::registerAudio(IAudio* audio)
 {
     if (audio == NULL)
         _audio = &_nullaudio;   // revert to null service
@@ -61,16 +61,16 @@ void Locator::RegisterAudio(IAudio* audio)
 static IInput * _input = 0;
 static NullInput _nullinput;
 
-void Locator::InitInput()
+void Locator::initInput()
 {
     _input = &_nullinput;
 }
-IInput& Locator::GetInput()
+IInput& Locator::input()
 {
     assert(_input != NULL);
     return *_input;
 }
-void Locator::RegisterInput(IInput* input)
+void Locator::registerInput(IInput* input)
 {
     if (input == NULL)
         _input = &_nullinput;   // revert to null service

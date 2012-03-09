@@ -81,7 +81,7 @@ void PlayOptions::init(Input *input)
 	addItem(MenuItem(2, BLACK_COLOUR, "Default difficulty :", "Always start on this difficulty"));
 	addItem(MenuItem(3, BLACK_COLOUR, "Sound effects :", "Turn on/off in-game effects"));
 	addItem(MenuItem(4, BLACK_COLOUR, "Menu Music :", "Turn on/off menu music"));
-	addItem(MenuItem(5, BLACK_COLOUR, "In-game music files :", "Directory where your music is stored"));
+//	addItem(MenuItem(5, BLACK_COLOUR, "In-game music files :", "Directory where your music is stored"));
 	setItem(0);
 
     _xxStartCtrls = getItemWidest().right() + 20;
@@ -102,7 +102,7 @@ void PlayOptions::init(Input *input)
     MenuItem i = getItem(3);
     p->setPos(_xxStartCtrls, i._rBox.top());
     p->_sigEvent.connect(boost::bind(&PlayOptions::ControlEvent, this, _1, _2));
-    Control c(p, CTRLID_FX, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, _gd._options._bSfx);
+    Control c(p, CTRLID_FX, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, _gd._options._bDefaultSfxOn);
     _controlsOptn.add(c);
     }
     {
@@ -110,7 +110,7 @@ void PlayOptions::init(Input *input)
     MenuItem i = getItem(4);
     p->setPos(_xxStartCtrls, i._rBox.top());
     p->_sigEvent.connect(boost::bind(&PlayOptions::ControlEvent, this, _1, _2));
-    Control c(p, CTRLID_MUSIC, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, _gd._options._bMusic);
+    Control c(p, CTRLID_MUSIC, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, _gd._options._bDefaultMusicOn);
     _controlsOptn.add(c);
     }
 
@@ -166,12 +166,20 @@ void PlayOptions::choose(MenuItem i)
                 break;
 		case 3: { //sound fx
                     Control *p = _controlsOptn.getControl(CTRLID_FX);
-                    if (p) p->fade();  //manually switch yes/no
+                    if (p)
+                    {
+                        p->fade();  //manually switch yes/no
+                        Locator::audio().setSfxEnabled(p->isFirstMode());
+                    }
                 }
                 break;
 		case 4: { //music
                     Control *p = _controlsOptn.getControl(CTRLID_MUSIC);
-                    if (p) p->fade();  //manually switch yes/no
+                    if (p)
+                    {
+                        p->fade();  //manually switch yes/no
+                        Locator::audio().setMusicEnabled(p->isFirstMode());
+                    }
                 }
                 break;
 		case 5: //music dir
