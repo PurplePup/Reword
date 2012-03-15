@@ -374,7 +374,7 @@ void PlayHigh::updateScrollButtons()
 {
     if (isEditing())
     {
-        _controlsHigh.showAllControls(false);
+        _controlsHigh.showAllControls(false, CTRLID_MUSIC); //show only music
         return;
     }
 
@@ -441,11 +441,7 @@ bool PlayHigh::tap(const Point &pt)
     //game music icon action on press, not tap(release)
     if (ctrl_id == CTRLID_MUSIC)// && Locator::audio().musicEnabled())
     {
-        IAudio &a = Locator::audio();
-        if (a.isMute())
-            ppg::pushSDL_Event(USER_EV_UNMUTE);
-        else
-            ppg::pushSDL_Event(USER_EV_MUTE);
+	    Locator::audio().toggleMute(true);
         return true;
     }
 

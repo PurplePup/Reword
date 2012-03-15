@@ -40,8 +40,6 @@ const int COUNTDOWN_TIMETRIAL	= 120;
 #define USER_EV_START_MENU_MUSIC    4
 
 #define USER_EV_SAVE_STATE			7
-#define USER_EV_MUTE                8
-#define USER_EV_UNMUTE              9
 
 //others
 #define USER_EV_EXIT_SUB_SCREEN     10

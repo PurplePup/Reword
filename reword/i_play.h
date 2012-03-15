@@ -3,8 +3,8 @@
 //based on code by  Dave Parker drparker@freenet.co.uk
 
 
-#ifndef _PLAY_H
-#define _PLAY_H
+#ifndef _I_PLAY_H
+#define _I_PLAY_H
 
 #include "SDL.h"
 
@@ -16,7 +16,7 @@
 // input handling already in place.
 // e.g	playMenu - to operate the menu
 //		playGame - to play the actual game level
-//		playHiScore - to load, edit and save high scores
+//		playHigh - to load, edit and save high scores
 //		etc
 class IPlay
 {
@@ -78,5 +78,5 @@ public:
 };
 
 
-#endif //_PLAY_H
+#endif //_I_PLAY_H
 

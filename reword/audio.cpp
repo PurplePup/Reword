@@ -285,8 +285,8 @@ void Audio::musicMute(bool bMute)
     {
         setMusicVol(_musicVolSave, false);
         Mix_ResumeMusic();
-        if (!Mix_PlayingMusic())    //not resumed (nothing was paused)
-            ppg::pushSDL_Event(USER_EV_START_MENU_MUSIC);   //start the menu music
+//        if (!Mix_PlayingMusic())    //not resumed (nothing was paused)
+//            ppg::pushSDL_Event(USER_EV_START_MENU_MUSIC);   //start the menu music
     }
 }
 
@@ -316,6 +316,17 @@ void Audio::mute(bool bMute /*= true*/)
     musicMute(bMute);   //in case musicEnabled() used instead of isMute()
     sfxMute(bMute);   //in case sfxEnabled() used instead of isMute()
 }
+
+bool Audio::toggleMute(bool bIsMenu /*= false*/)
+{
+    mute(!isMute());    //toggle
+
+    if (bIsMenu)
+        ppg::pushSDL_Event(USER_EV_START_MENU_MUSIC);   //start the menu music
+
+    return !isMute();   //return prev state
+}
+
 
 //global callback function for Mix_HookMusicFinished()
 void AudioTrackDone()

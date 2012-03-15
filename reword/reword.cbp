@@ -65,6 +65,7 @@
 		<Unit filename="helpers.h" />
 		<Unit filename="i_audio.h" />
 		<Unit filename="i_input.h" />
+		<Unit filename="i_play.h" />
 		<Unit filename="image.cpp" />
 		<Unit filename="image.h" />
 		<Unit filename="imageanim.cpp" />
@@ -75,7 +76,6 @@
 		<Unit filename="locator.h" />
 		<Unit filename="platform.h" />
 		<Unit filename="play.cpp" />
-		<Unit filename="play.h" />
 		<Unit filename="playdiff.cpp" />
 		<Unit filename="playdiff.h" />
 		<Unit filename="playgame.cpp" />

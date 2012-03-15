@@ -63,8 +63,6 @@ public:
     virtual bool tap(const Point &pt);
     virtual void handleEvent(SDL_Event &sdlevent);
 
-    void        startMenuMusic();
-    void        stopMenuMusic();
 	void		setTitle(const std::string &title);
 	void		setHelp(const std::string &help, SDL_Color c);
 	void        setMenuArea(const Rect &r);

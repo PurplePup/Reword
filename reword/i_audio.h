@@ -30,6 +30,7 @@ public:
     //mute/unmute music and sfx at same time
     virtual bool isMute() = 0;
     virtual void mute(bool bMute = true) = 0;
+    virtual bool toggleMute(bool bIsMenu = false) = 0;
 
     virtual bool hasSound() = 0;
 	virtual void setBaseTrackDir(const std::string &baseMusicDir) = 0;

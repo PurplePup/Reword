@@ -417,12 +417,6 @@ bool Game::play(IPlay *p)
 						{
 							switch (event.user.code)
 							{
-                            case USER_EV_MUTE:
-                                Locator::audio().mute(true);
-                                break;
-                            case USER_EV_UNMUTE:
-                                Locator::audio().mute(false);  //in case muted
-                                break;
                             case USER_EV_START_NEXT_TRACK:
                                 Locator::audio().startNextTrack();
                                 break;

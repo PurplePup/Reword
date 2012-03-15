@@ -44,6 +44,7 @@ public:
 
     virtual bool isMute() { return true; }
     virtual void mute(bool bMute = true) { (void)(bMute); }
+    virtual bool toggleMute(bool bIsMenu = false) { (void)(bIsMenu); return true; }
 
     virtual bool hasSound() { return false; }   //always, as this IS NUllAudio
 	virtual bool hasMusicTracks() { return false; }
@@ -102,6 +103,7 @@ public:
 
     virtual bool isMute();
     virtual void mute(bool bMute = true);
+    virtual bool toggleMute(bool bIsMenu = false);
 
     virtual bool hasSound() { return true; }    //always as this is NOT NullAudio
 	virtual bool hasMusicTracks() { return _trackList.size() > 0; }

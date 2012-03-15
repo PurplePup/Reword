@@ -120,20 +120,6 @@ void PlayMenu::setMenuArea(const Rect &r)
     recalcItemPositions();
 }
 
-void PlayMenu::startMenuMusic()
-{
-	//play menu music - if not already playing
-//	if (Locator::audio().musicEnabled() && !Mix_PlayingMusic())
-//		Mix_PlayMusic(_gd._musicMenu, -1);	//play 'forever' - or until game starts
-    ppg::pushSDL_Event(USER_EV_UNMUTE);
-}
-void PlayMenu::stopMenuMusic()
-{
-    //stop any menu music or personal music playing in the menu
-//    Locator::audio().stopTrack();
-    ppg::pushSDL_Event(USER_EV_MUTE);
-}
-
 //function to be overloaded in derived classes to process choice
 void PlayMenu::choose(MenuItem i)
 {
@@ -321,11 +307,7 @@ bool PlayMenu::tap(const Point &pt)
     //game music icon action on press, not tap(release)
     if (ctrl_id == CTRLID_MUSIC)// && Locator::audio().musicEnabled())
     {
-        IAudio &a = Locator::audio();
-        if (a.isMute())
-            startMenuMusic();
-        else
-            stopMenuMusic();
+	    Locator::audio().toggleMute(true);
         return true;
     }
 
