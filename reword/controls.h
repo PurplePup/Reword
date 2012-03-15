@@ -1,7 +1,7 @@
 #ifndef CONTROLS_H
 #define CONTROLS_H
 
-#include "play.h"
+#include "i_play.h"
 #include "control.h"
 #include <vector>
 

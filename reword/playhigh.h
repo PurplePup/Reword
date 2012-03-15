@@ -3,7 +3,7 @@
 #ifndef _PLAYHIGH_H
 #define _PLAYHIGH_H
 
-#include "play.h"		//IPlay interface
+#include "i_play.h"		//IPlay interface
 #include "screen.h"
 #include "input.h"
 #include "gamedata.h"	//also holds constants and stuff

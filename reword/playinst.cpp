@@ -84,6 +84,15 @@ void PlayInst::init(Input *input)
     _controlsInst.add(c);
     }
 
+    //music on/off icon
+    { // round music button placed in top left of scorebar
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_music.png")));
+    p->setPos(5,5);
+    IAudio &audio = Locator::audio();
+    Control c(p, CTRLID_MUSIC, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, !audio.isMute());
+    _controlsInst.add(c);
+    _controlsInst.enableControl(audio.hasSound(), CTRLID_MUSIC);  //disable override?
+    }
     //load EXIT/NEXT buttons
     {
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_exit_small.png")));
@@ -302,6 +311,16 @@ bool PlayInst::tap(const Point &pt)
     {
         _gd._state = ST_MENU;		//back to menu
         _running = false;
+        return true;
+    }
+    //game music icon action on press, not tap(release)
+    if (ctrl_id == CTRLID_MUSIC)// && Locator::audio().musicEnabled())
+    {
+        IAudio &a = Locator::audio();
+        if (a.isMute())
+            ppg::pushSDL_Event(USER_EV_UNMUTE);
+        else
+            ppg::pushSDL_Event(USER_EV_MUTE);
         return true;
     }
 

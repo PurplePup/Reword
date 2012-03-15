@@ -8,7 +8,7 @@
 #include "screen.h"
 #include "audio.h"
 #include "error.h"
-#include "play.h"	//IPlay interface decl
+#include "i_play.h"	//IPlay interface decl
 #include "gamedata.h"
 
 

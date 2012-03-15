@@ -1,7 +1,7 @@
 #ifndef PLAYGAMEDICT_H
 #define PLAYGAMEDICT_H
 
-#include "play.h"
+#include "i_play.h"
 #include "screen.h"
 #include "input.h"
 #include "gamedata.h"	//also holds constants and stuff

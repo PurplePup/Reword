@@ -64,7 +64,7 @@ void PlayMenu::init(Input *input)
 {
 	//once the class is initialised, init and running are set true
 
-    startMenuMusic();
+    ppg::pushSDL_Event(USER_EV_START_MENU_MUSIC);
 
 	//set the repeat of the keys required
 	input->setRepeat(ppkey::UP, 150, 300);		//button, rate, delay
@@ -123,14 +123,15 @@ void PlayMenu::setMenuArea(const Rect &r)
 void PlayMenu::startMenuMusic()
 {
 	//play menu music - if not already playing
-	if (Locator::audio().musicEnabled() && !Mix_PlayingMusic())
-		Mix_PlayMusic(_gd._musicMenu, -1);	//play 'forever' - or until game starts
-
+//	if (Locator::audio().musicEnabled() && !Mix_PlayingMusic())
+//		Mix_PlayMusic(_gd._musicMenu, -1);	//play 'forever' - or until game starts
+    ppg::pushSDL_Event(USER_EV_UNMUTE);
 }
 void PlayMenu::stopMenuMusic()
 {
     //stop any menu music or personal music playing in the menu
-    Locator::audio().stopTrack();
+//    Locator::audio().stopTrack();
+    ppg::pushSDL_Event(USER_EV_MUTE);
 }
 
 //function to be overloaded in derived classes to process choice
@@ -321,11 +322,10 @@ bool PlayMenu::tap(const Point &pt)
     if (ctrl_id == CTRLID_MUSIC)// && Locator::audio().musicEnabled())
     {
         IAudio &a = Locator::audio();
-        a.mute(!a.isMute());
         if (a.isMute())
-            stopMenuMusic();
-        else
             startMenuMusic();
+        else
+            stopMenuMusic();
         return true;
     }
 

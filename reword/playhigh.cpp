@@ -59,8 +59,7 @@ void PlayHigh::init(Input *input)
 
 	//play menu music - if not already playing - as we could come
 	//here from the end of the game rather than from the menu
-	if (!Mix_PlayingMusic())
-		Mix_PlayMusic(_gd._musicMenu, -1);	//play 'forever'
+    ppg::pushSDL_Event(USER_EV_START_MENU_MUSIC);
 
 	//set up local difficulty settings
 	setDifficulty(_gd._diffLevel);
@@ -111,6 +110,16 @@ void PlayHigh::init(Input *input)
     p->_sigEvent.connect(boost::bind(&PlayHigh::ControlEvent, this, _1, _2));
     Control c(p, CTRLID_SCROLL_RIGHT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
+    }
+
+    //music on/off icon
+    { // round music button placed in top left of scorebar
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_music.png")));
+    p->setPos(5,5);
+    IAudio &audio = Locator::audio();
+    Control c(p, CTRLID_MUSIC, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, !audio.isMute());
+    _controlsHigh.add(c);
+    _controlsHigh.enableControl(audio.hasSound(), CTRLID_MUSIC);  //disable override?
     }
 
     //[EXIT] hi score screen buttons
@@ -427,6 +436,16 @@ bool PlayHigh::tap(const Point &pt)
     {
         _gd._state = ST_MENU;		//back to menu
         _running = false;
+        return true;
+    }
+    //game music icon action on press, not tap(release)
+    if (ctrl_id == CTRLID_MUSIC)// && Locator::audio().musicEnabled())
+    {
+        IAudio &a = Locator::audio();
+        if (a.isMute())
+            ppg::pushSDL_Event(USER_EV_UNMUTE);
+        else
+            ppg::pushSDL_Event(USER_EV_MUTE);
         return true;
     }
 

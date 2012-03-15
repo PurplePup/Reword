@@ -41,12 +41,6 @@ public:
 	virtual bool hasMusicTracks() = 0;
 	virtual bool isPlayingMusic() = 0;
 	virtual bool isActuallyPlayingMusic() = 0;
-
-	//event functions that effectively call the start/stop track functions
-	virtual void pushNextTrack() = 0;
-	virtual void pushPrevTrack() = 0;
-	virtual void pushPauseTrack() = 0;	//toggle
-	virtual void pushStopTrack() = 0;
 };
 
 #endif // I_AUDIO_H_INCLUDED

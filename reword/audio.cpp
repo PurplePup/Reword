@@ -234,18 +234,15 @@ void Audio::volumeDown()
         setVolume(_opt._sfxVol-=8);
 }
 
-int  Audio::getSfxVol()
-{
-    return _opt._sfxVol;
-}
-
 bool Audio::sfxEnabled()
 {
+    std::cout << "sfxEnabled() = " << (_opt._bSfx && _opt._sfxVol > 0) << std::endl;
     return (_opt._bSfx && _opt._sfxVol > 0);
 }
 
 void Audio::sfxMute(bool bMute)
 {
+    std::cout << "sfxMute() = " << (bool)bMute << std::endl;
     if (bMute)  //turn mute on
     {
         _sfxVolSave = getSfxVol();
@@ -257,35 +254,45 @@ void Audio::sfxMute(bool bMute)
     }
 }
 
+int  Audio::getSfxVol()
+{
+    return _opt._sfxVol;
+}
+
 void Audio::setSfxVol(Sint16 newvol, bool bTest)
 {
     //TODO - set individual sfx vol
     setVolume(newvol, bTest);
 }
 
-int  Audio::getMusicVol()
-{
-    return _opt._musicVol;
-}
-
 bool Audio::musicEnabled()
 {
+    std::cout << "musicEnabled() = " << (_opt._bMusic && _opt._musicVol > 0) << std::endl;
     return (_opt._bMusic && _opt._musicVol > 0);
 }
 
 void Audio::musicMute(bool bMute)
 {
+    std::cout << "musicMute() = " << (bool)bMute << std::endl;
     if (bMute)  //turn mute on
     {
         _musicVolSave = getMusicVol();
         setMusicVol(0, false);
-        if (!Mix_Paused(-1)) Mix_PauseMusic();
+        if (Mix_PlayingMusic() && !Mix_Paused(-1))
+            Mix_PauseMusic();
     }
     else    //unmute
     {
         setMusicVol(_musicVolSave, false);
-        if (Mix_Paused(-1)) Mix_ResumeMusic();
+        Mix_ResumeMusic();
+        if (!Mix_PlayingMusic())    //not resumed (nothing was paused)
+            ppg::pushSDL_Event(USER_EV_START_MENU_MUSIC);   //start the menu music
     }
+}
+
+int  Audio::getMusicVol()
+{
+    return _opt._musicVol;
 }
 
 void Audio::setMusicVol(Sint16 newvol, bool bTest)
@@ -297,12 +304,14 @@ void Audio::setMusicVol(Sint16 newvol, bool bTest)
 //mute both sfx and music. Seperate mute flag, overrides.
 bool Audio::isMute()
 {
+    std::cout << "isMute() = " << (bool)_opt._bMute << std::endl;
     return _opt._bMute;
 }
 
 //mute both sfx and music at same time
 void Audio::mute(bool bMute /*= true*/)
 {
+    std::cout << "mute() = " << (bool)bMute << std::endl;
     _opt._bMute = bMute;
     musicMute(bMute);   //in case musicEnabled() used instead of isMute()
     sfxMute(bMute);   //in case sfxEnabled() used instead of isMute()
@@ -313,32 +322,12 @@ void AudioTrackDone()
 {
 	//Music has finished playing - for whatever reason
 	//NOTE: NEVER call SDL_Mixer functions, nor SDL_LockAudio, from a callback function
-    Locator::audio().pushNextTrack();
-}
-
-void Audio::pushNextTrack()
-{
-    if (_opt._bMusic)
-        ppg::pushSDL_Event(USER_EV_NEXT_TRACK);
-}
-void Audio::pushPrevTrack()
-{
-    if (_opt._bMusic)
-        ppg::pushSDL_Event(USER_EV_PREV_TRACK);
-}
-void Audio::pushPauseTrack()
-{
-    if (_opt._bMusic)
-        ppg::pushSDL_Event(USER_EV_PAUSE_TRACK);
-}
-void Audio::pushStopTrack()
-{
-    if (_opt._bMusic)
-        ppg::pushSDL_Event(USER_EV_STOP_TRACK);
+    ppg::pushSDL_Event(USER_EV_START_NEXT_TRACK);
 }
 
 void Audio::stopTrack()
 {
+    std::cout << "stopTrack()" << std::endl;
 	_bPlayingTrack = false;
 	Mix_HaltMusic();	//fires AudioTrackDone()
 }
@@ -355,6 +344,7 @@ void Audio::startPrevTrack()
 
 void Audio::startTrack(const std::string &trackName)
 {
+    std::cout << "startTrack()" << std::endl;
 	stopTrack();	//stop any existing music
 
 	if (!_opt._bMute && _opt._bMusic && trackName.length() > 0)
@@ -368,7 +358,7 @@ void Audio::startTrack(const std::string &trackName)
 			_bPlayingTrack = Mix_PlayingMusic();	//actualy playing?
 		}
 		else
-			printf("Failed to start %s (%s)\n", newTrack.c_str(), Mix_GetError());
+			printf("Failed to start track %s (%s)\n", newTrack.c_str(), Mix_GetError());
 
 		Mix_HookMusicFinished(AudioTrackDone);	//reiterate callback
 	}
@@ -380,6 +370,7 @@ void Audio::startTrack(const std::string &trackName)
 
 void Audio::pauseTrack()
 {
+    std::cout << "pauseTrack()" << std::endl;
     if (!_opt._bMusic) return;
 
     if (Mix_Paused(-1))

@@ -2,7 +2,7 @@
 #define CONTROL_H
 
 #include "sprite.h"
-#include "play.h"
+#include "i_play.h"
 #include <boost/shared_ptr.hpp>
 
 class Control : IPlay

@@ -704,7 +704,7 @@ void PlayGame::button(Input* input, ppkey::eButtonType b)
 			}
 			else
 			{
-				ppg::pushSDL_Event(USER_EV_NEXT_TRACK);	//try to start next music track
+			    Locator::audio().startNextTrack();	//try to start next music track
 			}
 		}
 		break;
@@ -1100,7 +1100,10 @@ bool PlayGame::tap(const Point &pt)
 	else if (ctrl_id == CTRLID_MUSIC)// && Locator::audio().musicEnabled())
 	{
         IAudio &a = Locator::audio();
-        a.mute(!a.isMute());     //sfx and music
+        if (a.isMute())
+            ppg::pushSDL_Event(USER_EV_UNMUTE);
+        else
+            ppg::pushSDL_Event(USER_EV_MUTE);
         return true;
 	}
 

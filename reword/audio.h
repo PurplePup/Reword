@@ -55,12 +55,6 @@ public:
 	virtual void pauseTrack() {}
 	virtual bool isPlayingMusic() { return false; }
 	virtual bool isActuallyPlayingMusic() { return false; }
-
-	//event functions that effectively call the start/stop track functions
-	virtual void pushNextTrack() {}
-	virtual void pushPrevTrack() {}
-	virtual void pushPauseTrack() {}
-	virtual void pushStopTrack() {}
 };
 
 //options and settings for in-game working audio settings
@@ -119,12 +113,6 @@ public:
 	virtual void pauseTrack();
 	virtual bool isPlayingMusic() { return _bPlayingTrack; }
 	virtual bool isActuallyPlayingMusic() { return Mix_PlayingMusic(); }
-
-	//event functions that effectively call the start/stop track functions
-	virtual void pushNextTrack();
-	virtual void pushPrevTrack();
-	virtual void pushPauseTrack();	//toggle
-	virtual void pushStopTrack();
 
 protected:
 	void loadTracks(const std::string &baseDir);

@@ -289,17 +289,17 @@ void PlayGamePopup::choose()
 		if (pItem->_id == POP_TOGGLEMUSIC)
 		{
             if (Mix_PlayingMusic())
-                Locator::audio().pushStopTrack();
+                Locator::audio().stopTrack();
             else
-                Locator::audio().pushNextTrack();
+                Locator::audio().startNextTrack();
 		}
 		if (pItem->_id == POP_NEXTTRACK)
 		{
-            Locator::audio().pushNextTrack();
+            Locator::audio().startNextTrack();
 		}
 		if (pItem->_id == POP_PREVTRACK)
 		{
-            Locator::audio().pushPrevTrack();
+            Locator::audio().startPrevTrack();
 		}
 
 	}

@@ -412,22 +412,24 @@ bool Game::play(IPlay *p)
 
 					default:
 						//ok, here we handle all *our* events, user defined or pass on
-						//any others in case it's handled elsewhere (ie, in game)
+						//any others in case it's handled elsewhere (ie, in game level)
 						if (event.type == SDL_USEREVENT)
 						{
 							switch (event.user.code)
 							{
-							case USER_EV_STOP_TRACK:
-								Locator::audio().stopTrack();
-								break;
-							case USER_EV_NEXT_TRACK:
-								Locator::audio().startNextTrack();
-								break;
-							case USER_EV_PREV_TRACK:
-								Locator::audio().startPrevTrack();
-								break;
-                            case USER_EV_PAUSE_TRACK:
-                                Locator::audio().pauseTrack();
+                            case USER_EV_MUTE:
+                                Locator::audio().mute(true);
+                                break;
+                            case USER_EV_UNMUTE:
+                                Locator::audio().mute(false);  //in case muted
+                                break;
+                            case USER_EV_START_NEXT_TRACK:
+                                Locator::audio().startNextTrack();
+                                break;
+                            case USER_EV_START_MENU_MUSIC:
+                                //play music if not already playing or is mute
+                                if (!Locator::audio().isMute() && !Locator::audio().isActuallyPlayingMusic())
+                                    Mix_PlayMusic(_gd->_musicMenu, -1);	//play 'forever' - or until game starts
                                 break;
 /*							case USER_EV_SAVE_STATE:
 								_gd->saveQuickState();
