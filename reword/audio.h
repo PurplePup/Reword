@@ -33,18 +33,20 @@ public:
     virtual void setSfxEnabled(bool bOn) { (void)(bOn); }
 	virtual bool sfxEnabled() { return false; }
 	virtual void sfxMute(bool bMute = true) { (void)(bMute); }
+    virtual bool toggleSfx() { return false; }
     virtual int  getSfxVol() { return 0; }
     virtual void setSfxVol(Sint16 newvol, bool bTest = true) { (void)(newvol);  (void)(bTest); }
 
     virtual void setMusicEnabled(bool bOn) { (void)(bOn); }
 	virtual bool musicEnabled() { return false; }
 	virtual void musicMute(bool bMute = true) { (void)(bMute); }
+    virtual bool toggleMusic(bool bIsMenu = false) { (void)(bIsMenu); return false; }
     virtual int  getMusicVol() { return 0; }
     virtual void setMusicVol(Sint16 newvol, bool bTest = true) { (void)(newvol);  (void)(bTest); }
 
     virtual bool isMute() { return true; }
-    virtual void mute(bool bMute = true) { (void)(bMute); }
-    virtual bool toggleMute(bool bIsMenu = false) { (void)(bIsMenu); return true; }
+    virtual void muteAll(bool bMute = true) { (void)(bMute); }
+    virtual bool toggleMuteAll(bool bIsMenu = false) { (void)(bIsMenu); return true; }
 
     virtual bool hasSound() { return false; }   //always, as this IS NUllAudio
 	virtual bool hasMusicTracks() { return false; }
@@ -63,12 +65,10 @@ struct AudioOptions
 {
     AudioOptions()
     {
-        _bMute = false;             //current state
-        _bMusic = _bSfx = true;     //available or not
+        _bMusic = _bSfx = true;     //available/mute or not
         _musicVol = _sfxVol = 50;
     }
 
-    bool        _bMute;           //mute all on/off
     bool        _bMusic;          //music on/off
     Sint16		_musicVol;        //music vol (0==muted)
     bool        _bSfx;            //sfx on/off
@@ -92,18 +92,20 @@ public:
     virtual void setSfxEnabled(bool bOn) { _opt._bSfx = bOn; }
 	virtual bool sfxEnabled();
 	virtual void sfxMute(bool bMute = true);
+    virtual bool toggleSfx();
     virtual int  getSfxVol();
     virtual void setSfxVol(Sint16 newvol, bool bTest = true);
 
     virtual void setMusicEnabled(bool bOn) { _opt._bMusic = bOn; }
 	virtual bool musicEnabled();
 	virtual void musicMute(bool bMute = true);
+    virtual bool toggleMusic(bool bIsMenu = false);
     virtual int  getMusicVol();
     virtual void setMusicVol(Sint16 newvol, bool bTest = true);
 
     virtual bool isMute();
-    virtual void mute(bool bMute = true);
-    virtual bool toggleMute(bool bIsMenu = false);
+    virtual void muteAll(bool bMute = true);
+    virtual bool toggleMuteAll(bool bIsMenu = false);
 
     virtual bool hasSound() { return true; }    //always as this is NOT NullAudio
 	virtual bool hasMusicTracks() { return _trackList.size() > 0; }

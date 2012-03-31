@@ -421,8 +421,8 @@ bool Game::play(IPlay *p)
                                 Locator::audio().startNextTrack();
                                 break;
                             case USER_EV_START_MENU_MUSIC:
-                                //play music if not already playing or is mute
-                                if (!Locator::audio().isMute() && !Locator::audio().isActuallyPlayingMusic())
+                                //play menu music if enabled and not already playing
+                                if (Locator::audio().musicEnabled() && !Locator::audio().isActuallyPlayingMusic())
                                     Mix_PlayMusic(_gd->_musicMenu, -1);	//play 'forever' - or until game starts
                                 break;
 /*							case USER_EV_SAVE_STATE:

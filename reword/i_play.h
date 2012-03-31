@@ -27,8 +27,9 @@ public:
             CTRLID_MENU, CTRLID_NEXT, CTRLID_BACK, CTRLID_EXIT, //[Next] square buttons
             CTRLID_SHUFFLE, CTRLID_TRYWORD, CTRLID_TOTOP, CTRLID_LAST,   //(?) round buttons etc
             CTRLID_SCROLL_UP, CTRLID_SCROLL_DOWN, CTRLID_SCROLL_LEFT, CTRLID_SCROLL_RIGHT,   //(<) scroll bar buttons
-            CTRLID_FX, CTRLID_MUSIC,
+            CTRLID_SFX, CTRLID_MUSIC,
             CTRLID_YES, CTRLID_NO, CTRLID_YES_NO,
+            CTRLID_DIFF,    //difficulty E/M/H button
             CTRLID_STAR,    //menu star
             //...
             CTRLID_MAX //ALWAYS LAST ITEM

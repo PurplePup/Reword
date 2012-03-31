@@ -13,12 +13,13 @@ public:
     //with an on/off yes/no type of structure
     enum eCtrlAnimMode { CAM_SIMPLE,                  //simple first to last frame format
                          CAM_DIS_HIT_IDLE_SINGLE,     //[disabled][hit/hilight][...fade x N...][idle]
-                         CAM_DIS_HIT_IDLE_DOUBLE      //[disabled][1.hit/hilight][1...fade x N...][1.idle][2.hit/hilight][2...fade x N...][2.idle]
+                         CAM_DIS_HIT_IDLE_DOUBLE,      //[disabled][1.hit/hilight][1...fade x N...][1.idle][2.hit/hilight][2...fade x N...][2.idle]
+                         CAM_DIS_HIT_IDLE_TRIPPLE     //[disabled][1.hit/hilight][1...fade x N...][1.idle][2.hit/hilight][2...fade x N...][2.idle][...3rd
                        };
 
     //Control();
     Control(t_pControl &pCtrl, int id, unsigned int group = 0,
-                eCtrlAnimMode mode = CAM_SIMPLE, bool bFirstMode = true);
+                eCtrlAnimMode mode = CAM_SIMPLE, unsigned int state = 1);
     Sprite * getSprite() { return _pCtrl.get(); }
     bool isPressed() { return _bPressed; }
     void fade(bool bFlip = true);
@@ -30,7 +31,11 @@ public:
     unsigned int getGroupId() const { return _group; }
 
     //return true if double anim mode and is frst, else always true as single anim mode
-    bool isFirstMode() { return (_animMode == CAM_DIS_HIT_IDLE_DOUBLE)?_animFirst:true; }
+    bool isFirstState() const { return (_animMode == CAM_SIMPLE)?true:(_currState==1); }
+    bool isSecondState() const { return (_animMode == CAM_SIMPLE)?false:(_currState==2); }
+    bool isThirdState() const { return (_animMode == CAM_SIMPLE)?false:(_currState==3); }
+    unsigned int currState() const { return _currState; }
+    unsigned int states() const { return (unsigned int)_animMode; } //numeric version of mode
 
     void setIdleFrame();
     void setActiveFrame();
@@ -57,7 +62,8 @@ protected:
 	Point           _saveTouchPt;   //save pt at which touch/press occurred
 
     eCtrlAnimMode   _animMode;  //how to automatically animate the control when pressed
-    bool            _animFirst; //only used for CAT_DIS_HIT_IDLE_DOUBLE, true if first else second
+//    bool            _animFirst; //only used for CAT_DIS_HIT_IDLE_DOUBLE, true if first else second
+    unsigned int    _currState;     //0=disabled, 1=first button, 2=second etc
 };
 
 #endif // CONTROL_H

@@ -89,7 +89,7 @@ void PlayInst::init(Input *input)
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_music.png")));
     p->setPos(5,5);
     IAudio &audio = Locator::audio();
-    Control c(p, CTRLID_MUSIC, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, !audio.isMute());
+    Control c(p, CTRLID_MUSIC, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, audio.musicEnabled()?1:2);
     _controlsInst.add(c);
     _controlsInst.enableControl(audio.hasSound(), CTRLID_MUSIC);  //disable override?
     }
@@ -132,24 +132,24 @@ void PlayInst::render(Screen *s)
 	if (_page == 1)
 	{
 		_gd._fntMed.put_text(s, yyStart, "About", BLUE_COLOUR, true);
-		_gd._fntClean.put_text(s, helpYpos, "Press B for controls, Y to exit", GREY_COLOUR, true);
+		_gd._fntClean.put_text(s, helpYpos, "Press NEXT (B) for controls, or EXIT (Y)", GREY_COLOUR, true);
 	}
 
 	if (_page == 2)
 	{
 		_gd._fntMed.put_text(s, yyStart, "Controls", BLUE_COLOUR, true);
-		_gd._fntClean.put_text(s, helpYpos, "Press B for rules, Y to exit", GREY_COLOUR, true);
+		_gd._fntClean.put_text(s, helpYpos, "Press NEXT (B) for rules, or EXIT (Y)", GREY_COLOUR, true);
 	}
 
 	if (_page == 3)
 	{
 		_gd._fntMed.put_text(s, yyStart, "How to play", BLUE_COLOUR, true);
-		_gd._fntClean.put_text(s, helpYpos, "Press B for scoring, Y to exit", GREY_COLOUR, true);
+		_gd._fntClean.put_text(s, helpYpos, "Press NEXT (B) for scoring, or EXIT (Y)", GREY_COLOUR, true);
 	}
 	else if (_page == 4)
 	{
 		_gd._fntMed.put_text(s, yyStart, "Scoring", BLUE_COLOUR, true);
-		_gd._fntClean.put_text(s, helpYpos, "Press B or Y to exit", GREY_COLOUR, true);
+		_gd._fntClean.put_text(s, helpYpos, "Press EXIT (B or Y)", GREY_COLOUR, true);
 	}
 
 	//draw the text here... use same code as drawing dictionary...
@@ -206,6 +206,8 @@ void PlayInst::updateScrollButtons()
 //event signal from imageanim indicating end of animation
 void PlayInst::ControlEvent(int event, int ctrl_id)
 {
+    (void)(ctrl_id);    //unused
+
     if (event == USER_EV_END_ANIMATION)
     {
 //        if (ctrl_id == CTRLID_EXIT)  //exit after anim faded
@@ -316,7 +318,7 @@ bool PlayInst::tap(const Point &pt)
     //game music icon action on press, not tap(release)
     if (ctrl_id == CTRLID_MUSIC)// && Locator::audio().musicEnabled())
     {
-	    Locator::audio().toggleMute(true);
+	    Locator::audio().toggleMusic(true);
         return true;
     }
 
@@ -346,8 +348,6 @@ void PlayInst::buildPage(int page)
             "Tap a menu option to select, or tap and hold to display "
             "helpful messages. Slide away while holding to cancel "
             "the selection.\n"
-            "Press buttons on screen where given, or anywhere else for "
-            "the default action."
             "\n\n"
 			"Controls during play:\n\n"
 			"B  -  select a letter\n"
@@ -393,7 +393,7 @@ void PlayInst::buildPage(int page)
 			"found. You must move on as quickly as possible for a good score!"
 			"\n\n"
 			"General Info:\n"
-			"Press SELECT or touch Menu button in-game to access music tracks, "
+			"Press 'Select' or touch MENU button in-game to access music tracks, "
 			"quick\nadvance, save and exit options.\n"
 			;
 			_txtColour = BLACK_COLOUR;

@@ -117,7 +117,7 @@ void PlayHigh::init(Input *input)
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_music.png")));
     p->setPos(5,5);
     IAudio &audio = Locator::audio();
-    Control c(p, CTRLID_MUSIC, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, !audio.isMute());
+    Control c(p, CTRLID_MUSIC, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, audio.musicEnabled()?1:2);
     _controlsHigh.add(c);
     _controlsHigh.enableControl(audio.hasSound(), CTRLID_MUSIC);  //disable override?
     }
@@ -388,6 +388,8 @@ void PlayHigh::updateScrollButtons()
 //event signal from imageanim indicating end of animation
 void PlayHigh::ControlEvent(int event, int ctrl_id)
 {
+    (void)(ctrl_id);    //unused
+
     if (event == USER_EV_END_ANIMATION)
     {
 //        if (ctrl_id == CTRLID_EXIT)  //exit after anim faded
@@ -441,7 +443,7 @@ bool PlayHigh::tap(const Point &pt)
     //game music icon action on press, not tap(release)
     if (ctrl_id == CTRLID_MUSIC)// && Locator::audio().musicEnabled())
     {
-	    Locator::audio().toggleMute(true);
+	    Locator::audio().toggleMusic(true);
         return true;
     }
 

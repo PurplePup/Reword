@@ -41,7 +41,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 void PlayModeMenu::init(Input *input)
 {
 	setTitle("MODE");
-	setHelp("Press B to select option", GREY_COLOUR);
+	setHelp("Press (B) to select option", GREY_COLOUR);
 
 	//it doesnt really matter what the id (first param) number is, but if we keep
 	//0,1,2 as actual games and 99 for the optional resume, 255 for exit

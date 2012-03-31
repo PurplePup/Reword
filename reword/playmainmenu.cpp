@@ -45,7 +45,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 void PlayMainMenu::init(Input *input)
 {
 	setTitle("REWORD");
-	setHelp("Press B to select option", GREY_COLOUR);
+	setHelp("Press (B) to select option", GREY_COLOUR);
 	addItem(MenuItem(0, GREEN_COLOUR, "Play", "Go for it"));
 	std::string s = "Difficulty ";
 	s += (_gd._diffLevel==DIF_EASY)?"(easy)":(_gd._diffLevel==DIF_MED)?"(med)":"(hard)";

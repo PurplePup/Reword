@@ -58,13 +58,16 @@ PlayOptions::~PlayOptions()
     //save changed settings...
 
     p = _controlsOptn.getControl(CTRLID_YES_NO);
-    if (p) _gd._options.setSingleTap(p->isFirstMode());  //first = yes
+    if (p) _gd._options.setSingleTap(p->isFirstState());  //first = yes
 
-    p = _controlsOptn.getControl(CTRLID_FX);
-    if (p) _gd._options.setDefaultSfxOn(p->isFirstMode());  //first = on
+    p = _controlsOptn.getControl(CTRLID_DIFF);
+    if (p) _gd._options.setDefaultDiff((eGameDiff)p->currState());  //first = easy(0) med(1) hard(2)
+
+    p = _controlsOptn.getControl(CTRLID_SFX);
+    if (p) _gd._options.setDefaultSfxOn(p->isFirstState());  //first = yes (on)
 
     p = _controlsOptn.getControl(CTRLID_MUSIC);
-    if (p) _gd._options.setDefaultMusicOn(p->isFirstMode());  //first = on
+    if (p) _gd._options.setDefaultMusicOn(p->isFirstState());  //first = yes (on)
 
     _gd._options.save();
 }
@@ -72,15 +75,15 @@ PlayOptions::~PlayOptions()
 void PlayOptions::init(Input *input)
 {
 	setTitle("OPTIONS");
-	setHelp("Press B to select option", GREY_COLOUR);
+	setHelp("Press (B) to select option", GREY_COLOUR);
 
     setFont( MENU_FONT_SMALL, MENU_FONT_CLEAN );
 	setLayout(MENU_LAYOUT_LEFT, SCREEN_WIDTH/8);
 	addItem(MenuItem(0, BLACK_COLOUR, "Preferred wordfile :", "Change language or dictionary file"));
 	addItem(MenuItem(1, BLACK_COLOUR, "Single touch menus :", "Single or double tap menus"));
-	addItem(MenuItem(2, BLACK_COLOUR, "Default difficulty :", "Always start on this difficulty"));
-	addItem(MenuItem(3, BLACK_COLOUR, "Sound effects :", "Turn on/off in-game effects"));
-	addItem(MenuItem(4, BLACK_COLOUR, "Menu Music :", "Turn on/off menu music"));
+	addItem(MenuItem(2, BLACK_COLOUR, "Default difficulty :", "Use this difficulty at startup"));
+	addItem(MenuItem(3, BLACK_COLOUR, "Sound effects :", "Turn on/off in-game effects at startup"));
+	addItem(MenuItem(4, BLACK_COLOUR, "Menu Music :", "Turn on/off menu music at startup"));
 //	addItem(MenuItem(5, BLACK_COLOUR, "In-game music files :", "Directory where your music is stored"));
 	setItem(0);
 
@@ -94,7 +97,15 @@ void PlayOptions::init(Input *input)
     MenuItem i = getItem(1);
     p->setPos(_xxStartCtrls, i._rBox.top());
     p->_sigEvent.connect(boost::bind(&PlayOptions::ControlEvent, this, _1, _2));
-    Control c(p, CTRLID_YES_NO, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, _gd._options._bSingleTapMenus);
+    Control c(p, CTRLID_YES_NO, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, _gd._options._bSingleTapMenus?1:2);
+    _controlsOptn.add(c);
+    }
+    {
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_diff.png")));
+    MenuItem i = getItem(2);
+    p->setPos(_xxStartCtrls, i._rBox.top());
+    p->_sigEvent.connect(boost::bind(&PlayOptions::ControlEvent, this, _1, _2));
+    Control c(p, CTRLID_DIFF, 0, Control::CAM_DIS_HIT_IDLE_TRIPPLE, (unsigned int)_gd._options._defaultDifficulty);
     _controlsOptn.add(c);
     }
     {
@@ -102,7 +113,7 @@ void PlayOptions::init(Input *input)
     MenuItem i = getItem(3);
     p->setPos(_xxStartCtrls, i._rBox.top());
     p->_sigEvent.connect(boost::bind(&PlayOptions::ControlEvent, this, _1, _2));
-    Control c(p, CTRLID_FX, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, _gd._options._bDefaultSfxOn);
+    Control c(p, CTRLID_SFX, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, _gd._options._bDefaultSfxOn?1:2);
     _controlsOptn.add(c);
     }
     {
@@ -110,7 +121,7 @@ void PlayOptions::init(Input *input)
     MenuItem i = getItem(4);
     p->setPos(_xxStartCtrls, i._rBox.top());
     p->_sigEvent.connect(boost::bind(&PlayOptions::ControlEvent, this, _1, _2));
-    Control c(p, CTRLID_MUSIC, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, _gd._options._bDefaultMusicOn);
+    Control c(p, CTRLID_MUSIC, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, _gd._options._bDefaultMusicOn?1:2);
     _controlsOptn.add(c);
     }
 
@@ -162,14 +173,17 @@ void PlayOptions::choose(MenuItem i)
                     if (p) p->fade();  //manually switch yes/no
                 }
                 break;
-		case 2: //default diff
+		case 2: { //default diff
+                    Control *p = _controlsOptn.getControl(CTRLID_DIFF);
+                    if (p) p->fade();  //manually switch easy/med/hard
+                }
                 break;
 		case 3: { //sound fx
-                    Control *p = _controlsOptn.getControl(CTRLID_FX);
+                    Control *p = _controlsOptn.getControl(CTRLID_SFX);
                     if (p)
                     {
                         p->fade();  //manually switch yes/no
-                        Locator::audio().setSfxEnabled(p->isFirstMode());
+                        Locator::audio().setSfxEnabled(p->isFirstState());
                     }
                 }
                 break;
@@ -178,7 +192,7 @@ void PlayOptions::choose(MenuItem i)
                     if (p)
                     {
                         p->fade();  //manually switch yes/no
-                        Locator::audio().setMusicEnabled(p->isFirstMode());
+                        Locator::audio().setMusicEnabled(p->isFirstState());
                     }
                 }
                 break;
@@ -190,6 +204,8 @@ void PlayOptions::choose(MenuItem i)
 //event signal from imageanim indicating end of animation
 void PlayOptions::ControlEvent(int event, int ctrl_id)
 {
+    (void)(ctrl_id);    //unused
+
     if (event == USER_EV_END_ANIMATION)
     {
 //        if (ctrl_id == CTRLID_EXIT)
@@ -239,7 +255,8 @@ bool PlayOptions::touch(const Point &pt)
 {
     PlayMenu::touch(pt);
 
-    const int ctrl_id = _controlsOptn.touched(pt);    //needed to highlight a touched control
+    //needed to highlight a touched control (ctrl_id return val not used here)
+    _controlsOptn.touched(pt);
 
 	return false;
 }

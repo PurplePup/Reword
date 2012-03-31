@@ -159,10 +159,10 @@ unsigned int g_rndSeed  = 1234;
 #ifdef WIN32
 ptrdiff_t wrandom (ptrdiff_t i) { return rand_s(&g_rndSeed)%i;}
 #else
-ptrdiff_t wrandom (ptrdiff_t i) { return rand_r(&g_rndSeed)%i;}
+std::ptrdiff_t wrandom (std::ptrdiff_t i) { return rand_r(&g_rndSeed)%i;}
 #endif
 // pointer object to it:
-ptrdiff_t (*pwrandom)(ptrdiff_t) = wrandom;
+std::ptrdiff_t (*pwrandom)(std::ptrdiff_t) = wrandom;
 
 
 //call with default param (blank wordFile string) to reload previous file

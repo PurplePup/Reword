@@ -29,6 +29,7 @@ struct GameOptions
     void setSingleTap(bool b);
     void setDefaultSfxOn(bool b);
     void setDefaultMusicOn(bool b);
+    void setDefaultDiff(eGameDiff e);
 
     //command line options, override default options
     bool        _bSound;    //if false, loads null IAudio

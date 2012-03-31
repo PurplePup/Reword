@@ -99,8 +99,10 @@ GameData::GameData(GameOptions &opt) : _options(opt), _bTouch(false),  _init(fal
     bErr |= !Resource::image().precache("btn_square_exit_small.png", 0, 5);
     bErr |= !Resource::image().precache("btn_square_next_small.png", 0, 5);
     bErr |= !Resource::image().precache("btn_square_yes_no_small.png", 0, 9);
+    bErr |= !Resource::image().precache("btn_square_diff.png", 0, 13);
 
     bErr |= !Resource::image().precache("btn_round_music.png", 0, 9);
+    bErr |= !Resource::image().precache("btn_round_fx.png", 0, 9);
 
 	bErr |= !Resource::image().precache("star.png", 255, 7);
 
@@ -293,6 +295,13 @@ void GameOptions::setSingleTap(bool b)
 {
     if (_bSingleTapMenus != b) _bDirty = true;
     _bSingleTapMenus = b;
+}
+
+//make sure dirty flag set
+void GameOptions::setDefaultDiff(eGameDiff e)
+{
+    if (_defaultDifficulty != e) _bDirty = true;
+    _defaultDifficulty = e;
 }
 
 //make sure dirty flag set

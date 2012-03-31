@@ -18,19 +18,21 @@ public:
     virtual void setSfxEnabled(bool bOn) = 0;
 	virtual bool sfxEnabled() = 0;
 	virtual void sfxMute(bool bMute = true) = 0;
+    virtual bool toggleSfx() = 0;
     virtual int  getSfxVol() = 0;
     virtual void setSfxVol(Sint16 newvol, bool bTest = true) = 0;
 
     virtual void setMusicEnabled(bool bOn) = 0;
 	virtual bool musicEnabled() = 0;
 	virtual void musicMute(bool bMute = true) = 0;
+    virtual bool toggleMusic(bool bIsMenu = false) = 0;
     virtual int  getMusicVol() = 0;
     virtual void setMusicVol(Sint16 newvol, bool bTest = true) = 0;
 
     //mute/unmute music and sfx at same time
     virtual bool isMute() = 0;
-    virtual void mute(bool bMute = true) = 0;
-    virtual bool toggleMute(bool bIsMenu = false) = 0;
+    virtual void muteAll(bool bMute = true) = 0;
+    virtual bool toggleMuteAll(bool bIsMenu = false) = 0;
 
     virtual bool hasSound() = 0;
 	virtual void setBaseTrackDir(const std::string &baseMusicDir) = 0;

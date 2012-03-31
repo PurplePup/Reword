@@ -130,7 +130,7 @@ TiXmlElement* Words2::xdxfNextWord(TiXmlElement* ar, std::string &word, std::str
 			{
 				++_countXdxfWords;
 				word = tmpElement->GetText();	//get the <k>WORD</k>
-				pp_s::makeUpper(word);			//force to UPPER case (def tests against it, below)
+				pptxt::makeUpper(word);			//force to UPPER case (def tests against it, below)
 			}
 			//else ignore; dont care about <b> or <c> etc
 		}
@@ -146,7 +146,7 @@ TiXmlElement* Words2::xdxfNextWord(TiXmlElement* ar, std::string &word, std::str
 			//as it's already shown so try and remove it.
 			std::string::size_type pos = def.find_first_of(" ");
 			std::string prefix = def.substr(0,pos);	//may contain other chars, if so those words will stay
-			pp_s::makeUpper(prefix);
+			pptxt::makeUpper(prefix);
 			if (word == prefix)
 				def = def.substr(pos);
 
@@ -188,8 +188,8 @@ bool Words2::xdxfBuildDict(const std::string& dictFile, bool bUpdateDef)
 			if ((ar = xdxfNextWord(ar, word, def)))
 			{
 				_stats._total++;
-				pp_s::makeAlpha(word);			//strip any non a-z chars
-				pp_s::makeUpper(word);			//force to UPPER case
+				pptxt::makeAlpha(word);			//strip any non a-z chars
+				pptxt::makeUpper(word);			//force to UPPER case
 
 				if (rejectWord(word))
 				{

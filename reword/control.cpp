@@ -10,7 +10,7 @@ Description:	A class to manage a single on screen control (button)
                 and an id that uniquely identifies the control.
                 This is specific to the style of buttons I'm using which are
                 animated using several frames, with the first frame being the
-                disabled one and the first being the 'selected' or highlighted
+                disabled one and the first being the 'selected' or highlighted/active
                 one. Then each next frame reverts back to the default idle frame:
                 [grey][bright][light][lighter][...][idle](repeat [bright][light][lighter][...][idle])
                 for CAM_DIS_HIT_IDLE_DOUBLE anim type.
@@ -46,12 +46,15 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "platform.h"
 
 Control::Control(t_pControl &pCtrl, int id, unsigned int group,
-                    eCtrlAnimMode type, bool bFirstMode) :
+                    eCtrlAnimMode type, unsigned int state) :
     _pCtrl(pCtrl), _id(id), _bPressed(false), _group(group),
-    _animMode(type), _animFirst(bFirstMode)
+    _animMode(type), _currState(state)
 {
     assert (pCtrl.get() != 0);  //must construct with valid control
     assert (id != 0);           //must give it an id (pref unique)
+
+    //check currState is valid
+    if (_currState > states()) _currState = states();
 
     pCtrl->setObjectId(id);
     setIdleFrame();
@@ -81,6 +84,9 @@ void Control::button(Input* /*input*/, ppkey::eButtonType /*b*/)
 {
 };
 
+// Set to idle frame (last in state frames) for curr state
+// [disabled][active][fade][fade][idle][active][fade][fade][idle]...[etc]
+//           [state1..................][state2..................][
 void Control::setIdleFrame()
 {
     if (_animMode == CAM_DIS_HIT_IDLE_SINGLE //only has first block (after 0 frame 'disabled')
@@ -88,31 +94,34 @@ void Control::setIdleFrame()
     {
         _pCtrl->setFrameLast();
     }
-    else //if (_animMode == CAM_DIS_HIT_IDLE_DOUBLE)
+    else //if (_animMode == CAM_DIS_HIT_IDLE_DOUBLE) or tripple...
     {
-        if (_animFirst)
-            _pCtrl->setFrame((_pCtrl->getFrameCount()-1)/2);    //end of first block
-        else
-            _pCtrl->setFrame(_pCtrl->getFrameCount()-1);  //end of second block
+        const unsigned int nFramesPerState = (_pCtrl->getFrameCount()-1)/states();
+        _pCtrl->setFrame(_currState * nFramesPerState);    //end frame of first or second or third etc
     }
 }
 
+// Set to active frame (first in state frames) for curr state
+// [disabled][active][fade][fade][idle][active][fade][fade][idle]...[etc]
+//           [state1..................][state2..................][
 void Control::setActiveFrame()
 {
-    if (_animMode == CAM_DIS_HIT_IDLE_SINGLE)
+    if (_animMode == CAM_SIMPLE)
+    {
+        _pCtrl->setFrame(0);
+    }
+    else if (_animMode == CAM_DIS_HIT_IDLE_SINGLE)
     {
         _pCtrl->setFrame(1);    //only has first block (after 0 frame 'disabled')
     }
-    else if (_animMode == CAM_DIS_HIT_IDLE_DOUBLE)
+    else //if (_animMode >= CAM_DIS_HIT_IDLE_DOUBLE)
     {
-        if (_animFirst)
-            _pCtrl->setFrame(1);    //first block
-        else
-            _pCtrl->setFrame(((_pCtrl->getFrameCount()-1)/2)+1);  //second block
-    }
-    else    //(_animMode == CAM_SIMPLE)
-    {
-        _pCtrl->setFrame(0);
+//        if (_animFirst)
+//            _pCtrl->setFrame(1);    //first block
+//        else
+//            _pCtrl->setFrame(((_pCtrl->getFrameCount()-1)/2)+1);  //second block
+        const unsigned int nFramesPerState = (_pCtrl->getFrameCount()-1)/states();
+       _pCtrl->setFrame((nFramesPerState*(_currState-1))+1); //first frame in Nth block
     }
 }
 
@@ -157,27 +166,32 @@ void Control::fade(bool bFlip)
 {
     _bPressed = false;
     Uint32 frameFrom, frameTo;
-    if (_animMode == CAM_DIS_HIT_IDLE_SINGLE)
+    if (_animMode == CAM_SIMPLE)
+    {
+        frameFrom = 0; frameTo = _pCtrl->getFrameCount()-1;
+    }
+    else if (_animMode == CAM_DIS_HIT_IDLE_SINGLE)
     {
         frameFrom = 1; frameTo = _pCtrl->getFrameCount()-1;
     }
-    else if (_animMode == CAM_DIS_HIT_IDLE_DOUBLE)
+    else //if (_animMode == CAM_DIS_HIT_IDLE_DOUBLE)
     {
-        if (bFlip) _animFirst = !_animFirst;   //flip it before fade()
-        if (_animFirst)
-        {
-            frameFrom = 1;
-            frameTo = (_pCtrl->getFrameCount()/2);  //end of first block
-        }
-        else
-        {
-            frameFrom = (_pCtrl->getFrameCount()/2)+1;  //first of second block
-            frameTo = _pCtrl->getFrameCount()-1;    //end of second block
-        }
-    }
-    else //(_animMode == CAM_SIMPLE)
-    {
-        frameFrom = 0; frameTo = _pCtrl->getFrameCount()-1;
+//        if (bFlip) _animFirst = !_animFirst;   //flip it before fade()
+//        if (_animFirst)
+//        {
+//            frameFrom = 1;
+//            frameTo = (_pCtrl->getFrameCount()/2);  //end of first block
+//        }
+//        else
+//        {
+//            frameFrom = (_pCtrl->getFrameCount()/2)+1;  //first of second block
+//            frameTo = _pCtrl->getFrameCount()-1;    //end of second block
+//        }
+
+        if (bFlip && ++_currState > states()) _currState = 1;
+        const unsigned int nFramesPerState = (_pCtrl->getFrameCount()-1)/states();
+        frameFrom = (nFramesPerState*(_currState-1))+1; //first frame in Nth block
+        frameTo = (_currState * nFramesPerState);    //end frame of Nth block
     }
 
     _saveTouchPt = Point(); //blank

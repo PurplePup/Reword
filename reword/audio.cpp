@@ -80,7 +80,8 @@ void Audio::setBaseTrackDir(const std::string &baseTrackDir)
 	_baseTrackDir = baseTrackDir;
 }
 
-
+//pass in default options for music and sfx from options screen, and any mute option from
+//command line, which overrides music and sfx options.
 void Audio::setup(bool bSfx, bool bMusic, const std::string &baseTrackDir, bool bMute)
 {
 	if (_init) return;
@@ -94,12 +95,14 @@ void Audio::setup(bool bSfx, bool bMusic, const std::string &baseTrackDir, bool 
 		return;	//not set _init
 	}
 
-	_opt._bMute = bMute;    //initial state
-	_opt._bMusic = bMusic;  //music on or off
-	_opt._bSfx = bSfx;      //sfx on or off
+	_opt._bMusic = bMusic && !bMute;  //music on or off
+	_opt._bSfx = bSfx && !bMute;      //sfx on or off
 
 	_volTest = Mix_LoadWAV(std::string(RES_SOUNDS + "ping.wav").c_str()); //also used in game
 	setVolume((MIX_MAX_VOLUME / 2), false); //no test sound
+
+    musicMute(!bMusic);
+    sfxMute(!bSfx);
 
 //#ifdef _USE_MIKMOD
 //    if (_gd->_options._bMusic)
@@ -205,7 +208,7 @@ void Audio::setVolume(Sint16 newvol, bool bTest)
 	if (newvol > 0) _sfxVolSave = _musicVolSave = newvol;
 
 	//play a test beep/sound at the new volume so player can tell
-	if (bTest) Mix_PlayChannel(-1,_volTest,0);
+	if (bTest && !isMute()) Mix_PlayChannel(-1,_volTest,0);
 }
 
 /*
@@ -224,25 +227,24 @@ void Audio::playMusic(int channel, Mix_Chunk *chuk, int loops)
 
 void Audio::volumeUp()
 {
-    if (!_opt._bMute)
+    if (!isMute())
         setVolume(_opt._sfxVol+=8);
 }
 
 void Audio::volumeDown()
 {
-    if (!_opt._bMute)
+    if (!isMute())
         setVolume(_opt._sfxVol-=8);
 }
 
 bool Audio::sfxEnabled()
 {
-    std::cout << "sfxEnabled() = " << (_opt._bSfx && _opt._sfxVol > 0) << std::endl;
+    //std::cout << "sfxEnabled() = " << (_opt._bSfx && _opt._sfxVol > 0) << std::endl;
     return (_opt._bSfx && _opt._sfxVol > 0);
 }
 
 void Audio::sfxMute(bool bMute)
 {
-    std::cout << "sfxMute() = " << (bool)bMute << std::endl;
     if (bMute)  //turn mute on
     {
         _sfxVolSave = getSfxVol();
@@ -252,6 +254,14 @@ void Audio::sfxMute(bool bMute)
     {
         setSfxVol(_sfxVolSave, false);
     }
+    _opt._bSfx = !bMute;
+ }
+
+bool Audio::toggleSfx()
+{
+    bool bIsMute = _opt._sfxVol == 0;
+    sfxMute(!bIsMute);
+    return bIsMute;   //return prev state
 }
 
 int  Audio::getSfxVol()
@@ -273,7 +283,6 @@ bool Audio::musicEnabled()
 
 void Audio::musicMute(bool bMute)
 {
-    std::cout << "musicMute() = " << (bool)bMute << std::endl;
     if (bMute)  //turn mute on
     {
         _musicVolSave = getMusicVol();
@@ -285,9 +294,17 @@ void Audio::musicMute(bool bMute)
     {
         setMusicVol(_musicVolSave, false);
         Mix_ResumeMusic();
-//        if (!Mix_PlayingMusic())    //not resumed (nothing was paused)
-//            ppg::pushSDL_Event(USER_EV_START_MENU_MUSIC);   //start the menu music
     }
+    _opt._bMusic = !bMute;
+}
+
+bool Audio::toggleMusic(bool bIsMenu)
+{
+    bool bIsMute = !musicEnabled();
+    musicMute(!bIsMute);
+    if (bIsMenu)
+        ppg::pushSDL_Event(USER_EV_START_MENU_MUSIC);   //start the menu music
+    return bIsMute;   //return prev state
 }
 
 int  Audio::getMusicVol()
@@ -304,29 +321,25 @@ void Audio::setMusicVol(Sint16 newvol, bool bTest)
 //mute both sfx and music. Seperate mute flag, overrides.
 bool Audio::isMute()
 {
-    std::cout << "isMute() = " << (bool)_opt._bMute << std::endl;
-    return _opt._bMute;
+    return musicEnabled() && sfxEnabled();
 }
 
 //mute both sfx and music at same time
-void Audio::mute(bool bMute /*= true*/)
+void Audio::muteAll(bool bMute /*= true*/)
 {
-    std::cout << "mute() = " << (bool)bMute << std::endl;
-    _opt._bMute = bMute;
     musicMute(bMute);   //in case musicEnabled() used instead of isMute()
     sfxMute(bMute);   //in case sfxEnabled() used instead of isMute()
 }
 
-bool Audio::toggleMute(bool bIsMenu /*= false*/)
+bool Audio::toggleMuteAll(bool bIsMenu /*= false*/)
 {
-    mute(!isMute());    //toggle
+    muteAll(!isMute());    //toggle
 
     if (bIsMenu)
         ppg::pushSDL_Event(USER_EV_START_MENU_MUSIC);   //start the menu music
 
     return !isMute();   //return prev state
 }
-
 
 //global callback function for Mix_HookMusicFinished()
 void AudioTrackDone()
@@ -358,7 +371,7 @@ void Audio::startTrack(const std::string &trackName)
     std::cout << "startTrack()" << std::endl;
 	stopTrack();	//stop any existing music
 
-	if (!_opt._bMute && _opt._bMusic && trackName.length() > 0)
+	if (_opt._bMusic && trackName.length() > 0)
 	{
 		printf("Play: %s\n", trackName.c_str());
 		std::string newTrack = _baseTrackDir + "/" + trackName;

@@ -112,12 +112,17 @@ void PlayGame::init(Input *input)
 
     { // round music button placed in top left of scorebar
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_music.png")));
-    //position set in iinit()
-//    p->_sigEvent.connect(boost::bind(&PlayOptions::ControlEvent, this, _1, _2));
     IAudio &audio = Locator::audio();
-    Control c(p, CTRLID_MUSIC, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_DOUBLE, !audio.isMute());
+    Control c(p, CTRLID_MUSIC, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_DOUBLE, audio.musicEnabled()?1:2);
     _controlsPlay.add(c);
     _controlsPlay.enableControl(audio.hasSound(), CTRLID_MUSIC);  //disable override?
+    }
+    { // round fx button placed in top left of scorebar
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_fx.png")));
+    IAudio &audio = Locator::audio();
+    Control c(p, CTRLID_SFX, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_DOUBLE, audio.sfxEnabled()?1:2);
+    _controlsPlay.add(c);
+    _controlsPlay.enableControl(audio.hasSound(), CTRLID_SFX);  //disable override?
     }
     { //[MENU] shows in top left (unless [EXIT] shown)
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_menu.png")));
@@ -563,7 +568,7 @@ void PlayGame::render_end(Screen* s)
         //put comment just above found words in boxes
 		const int yo = (_yScratchBot+CURSORH+_boxOffsetY) - _gd._fntClean.height() - (_gd._fntClean.height()/2);
 		_gd._fntClean.put_text(s,
-			yo,	(_tmpDefMore) ? "Y for more detail, or B to continue" : "Press B to continue", GREY_COLOUR, false);
+			yo,	(_tmpDefMore) ? "Click word (Y) for detail, or NEXT (B) to continue" : "Press NEXT (B) to continue", GREY_COLOUR, false);
 	}
 }
 
@@ -1097,9 +1102,14 @@ bool PlayGame::tap(const Point &pt)
 	{
 		commandTryWord();
 	}
-	else if (ctrl_id == CTRLID_MUSIC)// && Locator::audio().musicEnabled())
+	else if (ctrl_id == CTRLID_MUSIC)
 	{
-	    Locator::audio().toggleMute();
+	    Locator::audio().toggleMusic();
+        return true;
+	}
+	else if (ctrl_id == CTRLID_SFX)
+	{
+	    Locator::audio().toggleSfx();
         return true;
 	}
 
@@ -1830,9 +1840,9 @@ void PlayGame::prepareBackground()
 	//now calc where we can place these and the gap between each
     //
     // |-------------------------------------------------------------------------------------|
-    // |                                                                       /------------\|
-    // |   [  MENU  ]            SCORE:00000000           WORDS:0000           |    999     ||
-    // |                                                                       \------------/|
+    // |                                                                       /-----------\ |
+    // |   [  MENU  ]  () ()       SCORE:00000000         WORDS:0000           |    999    | |
+    // |                                                                       \-----------/ |
     // |-------------------------------------------------------------------------------------|
     //  <  edge_pad ><equal_gap>               <equal_gap>          <equal_gap><  edge_pad  >
     //                           ^score_x                 ^words_x
@@ -1841,12 +1851,35 @@ void PlayGame::prepareBackground()
 
     int middle_len = score_len+score0_len + words_len+words0_len;
     int edge_pad = sb_x + _controlsPlay.getControlSprite(CTRLID_NEXT)->tileW()+3; //space taken up by [ MENU ] or [ 999 ]
-	int equal_gap = (sb_w - middle_len - (edge_pad*2)) / 3;    //space on bar len after edges removed, /3 for equal dist
+
+    int sound_gap(0);   //space between (mus) (fx)
+    int sound_w(0), gamemusic_icon_x(0), gamefx_icon_x(0);
+    Control *p = _controlsPlay.getControl(CTRLID_MUSIC);
+    if (p)
+    {
+        sound_w = p->getSprite()->tileW();
+        sound_gap = sound_w / 2.5;
+
+        int soundIcon_y = (sb_h - p->getSprite()->tileH()) / 2;
+        gamemusic_icon_x = edge_pad + sound_gap;
+        p->getSprite()->setPos(gamemusic_icon_x, soundIcon_y);
+
+        //must have done music to do fx
+        gamefx_icon_x = gamemusic_icon_x + sound_w + sound_gap;
+        p = _controlsPlay.getControl(CTRLID_SFX);
+        if (p)
+            p->getSprite()->setPos(gamefx_icon_x, soundIcon_y);
+
+        sound_w = (gamefx_icon_x + sound_w) - gamemusic_icon_x;
+    }
+    int sound_right = sb_x + edge_pad + sound_w;    //right edge of sound icons () ()
+
+	int equal_gap = (sb_w - middle_len - (edge_pad*2) - sound_w) / 3;    //space on bar len after edges removed, /3 for equal dist
 
 	int titles_y = ((sb_h - fontText.height()) / 2) + 2;	//+2 magic number - too high otherwise...?
 	int numbers_y = ((sb_h - fontNumbers.height()) / 2) + 2;	//+2 magic number - too high otherwise...?
 
-	int score_x = sb_x+edge_pad+equal_gap;          //x pos for "SCORE:"
+	int score_x = sound_right + equal_gap;          //x pos for "SCORE:"
 	_score0_x = score_x+score_len;                  //x pos for score "00000000"
 	_score0_y = numbers_y;
 
@@ -1856,15 +1889,6 @@ void PlayGame::prepareBackground()
 
 	_countdown0_x = (sb_x + sb_w) - (edge_pad / 2);
 	_countdown0_y = (sb_h - fontCounter.height()) / 2;
-
-    Control *p = _controlsPlay.getControl(CTRLID_MUSIC);
-    if (p)
-    {
-        int gameicon_y = (sb_h - p->getSprite()->tileW()) / 2;
-        _gamemusic_icon_x = edge_pad + (equal_gap / 5);
-        _gamemusic_icon_y = gameicon_y;
-        p->getSprite()->setPos(_gamemusic_icon_x, _gamemusic_icon_y);
-    }
 
 	fontText.put_text(_gamebg.get(), score_x, titles_y, "SCORE:", WHITE_COLOUR);
 	fontText.put_text(_gamebg.get(), words_x, titles_y, "WORDS:", WHITE_COLOUR);

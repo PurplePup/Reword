@@ -86,7 +86,7 @@ void PlayMenu::init(Input *input)
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_music.png")));
     p->setPos(5,5);
     IAudio &audio = Locator::audio();
-    Control c(p, CTRLID_MUSIC, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, !audio.isMute());
+    Control c(p, CTRLID_MUSIC, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, audio.musicEnabled()?1:2);
     _controlsMenu.add(c);
     _controlsMenu.enableControl(audio.hasSound(), CTRLID_MUSIC);  //disable override?
     }
@@ -307,7 +307,7 @@ bool PlayMenu::tap(const Point &pt)
     //game music icon action on press, not tap(release)
     if (ctrl_id == CTRLID_MUSIC)// && Locator::audio().musicEnabled())
     {
-	    Locator::audio().toggleMute(true);
+	    Locator::audio().toggleMusic(true);
         return true;
     }
 
@@ -424,7 +424,7 @@ void PlayMenu::exitMenu()
 //    _controlsMenu.showAllControls(false);
 
 
-    const int ms = 1500;
+    const int ms = 1200;
 	const int btnWidth = _star.tileW();
     _star.startMoveTo(-btnWidth, _star.getYPos(), ms);
 //    _star.startMoveTo(10, 100, 20, 0, 8, 0);
