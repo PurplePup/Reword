@@ -38,8 +38,9 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "playinst.h"
 #include "helpers.h"
 #include "platform.h"
+#include "signal.h"
+
 #include <sstream>
-#include <boost/bind.hpp>
 
 enum { CTRLGRP_SCROLL = 1,CTRLGRP_BUTTONS = 2 };
 
@@ -72,14 +73,14 @@ void PlayInst::init(Input *input)
     {
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_up.png")));
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2);
-    p->_sigEvent.connect(boost::bind(&PlayInst::ControlEvent, this, _1, _2));
+    p->_sigEvent.Connect(this, &PlayInst::ControlEvent);
     Control c(p, CTRLID_SCROLL_UP, CTRLGRP_SCROLL, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsInst.add(c);
     }
     {
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_down.png")));
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_BOT-p->tileH()-2);
-    p->_sigEvent.connect(boost::bind(&PlayInst::ControlEvent, this, _1, _2));
+    p->_sigEvent.Connect(this, &PlayInst::ControlEvent);
     Control c(p, CTRLID_SCROLL_DOWN, CTRLGRP_SCROLL, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsInst.add(c);
     }
@@ -97,7 +98,7 @@ void PlayInst::init(Input *input)
     {
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_exit_small.png")));
     p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
-    p->_sigEvent.connect(boost::bind(&PlayInst::ControlEvent, this, _1, _2));
+    p->_sigEvent.Connect(this, &PlayInst::ControlEvent);
     Control c(p, CTRLID_EXIT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsInst.add(c);
     }

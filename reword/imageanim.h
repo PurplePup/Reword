@@ -5,10 +5,10 @@
 
 #include "image.h"
 #include "waiting.h"
+#include "signal.h"
 
 #include <string>
 #include <vector>
-#include <boost/signal.hpp>
 
 class ImageAnim //: public Image
 {
@@ -38,7 +38,8 @@ public:
     Rect bounds() const;
 
     //boost signal/slot events
-    typedef boost::signal<void (int, int)> EventSignal;
+    //typedef boost::signal<void (int, int)> EventSignal;
+    typedef Gallant::Signal2<int, int> EventSignal;
     EventSignal _sigEvent;
 
 	//animation

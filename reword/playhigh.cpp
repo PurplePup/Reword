@@ -41,11 +41,10 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "platform.h"
 #include "resource.h"
 #include "utils.h"
+#include "signal.h"
 
 #include <cassert>
 #include <memory>
-#include <boost/bind.hpp>
-
 
 PlayHigh::PlayHigh(GameData &gd)  : _gd(gd)
 {
@@ -86,28 +85,28 @@ void PlayHigh::init(Input *input)
     {
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_up.png")));
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2);
-    p->_sigEvent.connect(boost::bind(&PlayHigh::ControlEvent, this, _1, _2));
+    p->_sigEvent.Connect(this, &PlayHigh::ControlEvent);
     Control c(p, CTRLID_SCROLL_UP, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
     {
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_down.png")));
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2+p->tileH()+6);
-    p->_sigEvent.connect(boost::bind(&PlayHigh::ControlEvent, this, _1, _2));
+    p->_sigEvent.Connect(this, &PlayHigh::ControlEvent);
     Control c(p, CTRLID_SCROLL_DOWN, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
     {
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_left.png")));
     p->setPos(SCREEN_WIDTH-(p->tileW()*2)-8, BG_LINE_BOT-p->tileH()-2);
-    p->_sigEvent.connect(boost::bind(&PlayHigh::ControlEvent, this, _1, _2));
+    p->_sigEvent.Connect(this, &PlayHigh::ControlEvent);
     Control c(p, CTRLID_SCROLL_LEFT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
     {
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_right.png")));
     p->setPos(SCREEN_WIDTH-(p->tileW())-2, BG_LINE_BOT-p->tileH()-2);
-    p->_sigEvent.connect(boost::bind(&PlayHigh::ControlEvent, this, _1, _2));
+    p->_sigEvent.Connect(this, &PlayHigh::ControlEvent);
     Control c(p, CTRLID_SCROLL_RIGHT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
@@ -126,7 +125,7 @@ void PlayHigh::init(Input *input)
     {
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_exit_small.png")));
     p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
-    p->_sigEvent.connect(boost::bind(&PlayHigh::ControlEvent, this, _1, _2));
+    p->_sigEvent.Connect(this, &PlayHigh::ControlEvent);
     Control c(p, CTRLID_EXIT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }

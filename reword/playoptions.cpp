@@ -40,8 +40,9 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "helpers.h"
 #include "platform.h"
 #include "sprite.h"
+#include "signal.h"
+
 #include <sstream>
-#include <boost/bind.hpp>
 #include <boost/filesystem.hpp>
 
 
@@ -96,7 +97,7 @@ void PlayOptions::init(Input *input)
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_yes_no_small.png")));
     MenuItem i = getItem(1);
     p->setPos(_xxStartCtrls, i._rBox.top());
-    p->_sigEvent.connect(boost::bind(&PlayOptions::ControlEvent, this, _1, _2));
+    p->_sigEvent.Connect(this, &PlayOptions::ControlEvent);
     Control c(p, CTRLID_YES_NO, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, _gd._options._bSingleTapMenus?1:2);
     _controlsOptn.add(c);
     }
@@ -104,7 +105,7 @@ void PlayOptions::init(Input *input)
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_diff.png")));
     MenuItem i = getItem(2);
     p->setPos(_xxStartCtrls, i._rBox.top());
-    p->_sigEvent.connect(boost::bind(&PlayOptions::ControlEvent, this, _1, _2));
+    p->_sigEvent.Connect(this, &PlayOptions::ControlEvent);
     Control c(p, CTRLID_DIFF, 0, Control::CAM_DIS_HIT_IDLE_TRIPPLE, (unsigned int)_gd._options._defaultDifficulty);
     _controlsOptn.add(c);
     }
@@ -112,7 +113,7 @@ void PlayOptions::init(Input *input)
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_yes_no_small.png")));
     MenuItem i = getItem(3);
     p->setPos(_xxStartCtrls, i._rBox.top());
-    p->_sigEvent.connect(boost::bind(&PlayOptions::ControlEvent, this, _1, _2));
+    p->_sigEvent.Connect(this, &PlayOptions::ControlEvent);
     Control c(p, CTRLID_SFX, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, _gd._options._bDefaultSfxOn?1:2);
     _controlsOptn.add(c);
     }
@@ -120,7 +121,7 @@ void PlayOptions::init(Input *input)
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_yes_no_small.png")));
     MenuItem i = getItem(4);
     p->setPos(_xxStartCtrls, i._rBox.top());
-    p->_sigEvent.connect(boost::bind(&PlayOptions::ControlEvent, this, _1, _2));
+    p->_sigEvent.Connect(this, &PlayOptions::ControlEvent);
     Control c(p, CTRLID_MUSIC, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, _gd._options._bDefaultMusicOn?1:2);
     _controlsOptn.add(c);
     }
@@ -128,7 +129,7 @@ void PlayOptions::init(Input *input)
     {//load EXIT/NEXT buttons
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_exit_small.png")));
     p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
-    p->_sigEvent.connect(boost::bind(&PlayOptions::ControlEvent, this, _1, _2));
+    p->_sigEvent.Connect(this, &PlayOptions::ControlEvent);
     Control c(p, CTRLID_EXIT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsOptn.add(c);
     }
