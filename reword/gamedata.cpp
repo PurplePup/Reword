@@ -86,6 +86,8 @@ GameData::GameData(GameOptions &opt) : _options(opt), _bTouch(false),  _init(fal
 	bErr |= !Resource::image().precache("btn_round_scroll_down.png", 0, 5);
 	bErr |= !Resource::image().precache("btn_round_scroll_left.png", 0, 5);
 	bErr |= !Resource::image().precache("btn_round_scroll_right.png", 0, 5);
+	bErr |= !Resource::image().precache("btn_round_scroll_up_small.png", 0, 5);
+	bErr |= !Resource::image().precache("btn_round_scroll_down_small.png", 0, 5);
 
 	bErr |= !Resource::image().precache("btn_round_word_shuffle.png", 0, 5);
 	bErr |= !Resource::image().precache("btn_round_word_try.png", 0, 5);

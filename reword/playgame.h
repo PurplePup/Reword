@@ -154,6 +154,10 @@ protected:
     void slideRoundButtonsIn();
     void slideRoundButtonsOut();
 
+    void button_end_up();
+    void button_end_down();
+    void state_end_setup_scrollers();
+
 private:
 	GameData &	_gd;			//shared data between screens (play classes)
 	tSharedImage _gamebg;

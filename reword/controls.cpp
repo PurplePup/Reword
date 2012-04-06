@@ -197,6 +197,7 @@ bool Controls::enableControl(bool bEnable, int id)
         {
             ps->setTouchable(true);
             pc->setIdleFrame();
+            ps->setVisible(true);   //must be visible if enabled
         }
         else
         {

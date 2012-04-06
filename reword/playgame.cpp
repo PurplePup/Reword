@@ -124,6 +124,16 @@ void PlayGame::init(Input *input)
     _controlsPlay.add(c);
     _controlsPlay.enableControl(audio.hasSound(), CTRLID_SFX);  //disable override?
     }
+    { // round up/down buttons
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_up_small.png")));
+    Control c(p, CTRLID_SCROLL_UP, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_SINGLE);
+    _controlsPlay.add(c);
+    }
+    { // round up/down buttons
+    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_down_small.png")));
+    Control c(p, CTRLID_SCROLL_DOWN, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_SINGLE);
+    _controlsPlay.add(c);
+    }
     { //[MENU] shows in top left (unless [EXIT] shown)
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_menu.png")));
     p->setPos(3, 0);
@@ -210,6 +220,9 @@ void PlayGame::exit(eGameState toState)
 //do not call directly. Use statePush() & statePop()
 void PlayGame::stateFn(eState state)
 {
+    //these state changes could be done better as actual classes (as PG_DICT) is now done
+    //but as most are small states, they haven't been converted to their own classes yet.
+
     if (_play)
     {
         delete _play;
@@ -225,13 +238,16 @@ void PlayGame::stateFn(eState state)
 					pButtonFn = &PlayGame::button_wait;
 					pTouchFn = &PlayGame::touch_default;
 					break;	//same renderer as current
+
 	case PG_END:	pRenderFn = &PlayGame::render_end;
 					pWorkFn = &PlayGame::work_end;
 					pButtonFn = &PlayGame::button_end;
 					pTouchFn = &PlayGame::touch_end;
+                    //some setup required
+					state_end_setup_scrollers();
 					break;
 
-    case PG_DICT:   {
+    case PG_DICT:   {//new play class overrides currently mapped state functions - see render() etc
                     _play = new PlayGameDict(_gd, _dictWord);
                     Input &i = static_cast<Input&>(Locator::input());
                     _play->init(&i);
@@ -278,7 +294,7 @@ void PlayGame::render(Screen* s)
     }
 
 	//depending on state, call the function pointer of the
-	//correctly mapped render function
+	//currently mapped render function
 	(*this.*pRenderFn)(s);
 
 	//render popup menu on top of curr screen
@@ -567,8 +583,11 @@ void PlayGame::render_end(Screen* s)
 	{
         //put comment just above found words in boxes
 		const int yo = (_yScratchBot+CURSORH+_boxOffsetY) - _gd._fntClean.height() - (_gd._fntClean.height()/2);
-		_gd._fntClean.put_text(s,
-			yo,	(_tmpDefMore) ? "Click word (Y) for detail, or NEXT (B) to continue" : "Press NEXT (B) to continue", GREY_COLOUR, false);
+		_gd._fntClean.put_text(s, yo,
+            (_success == SU_GAMEOVER) ?
+                ((_tmpDefMore) ? "Click word (Y) for detail, or EXIT (B) to continue" : "Press EXIT (B) to continue") :
+                ((_tmpDefMore) ? "Click word (Y) for detail, or NEXT (B) to continue" : "Press NEXT (B) to continue"),
+            GREY_COLOUR, false);
 	}
 }
 
@@ -628,8 +647,6 @@ void PlayGame::work_play(Input* input, float speedFactor)
 
 //  audio not animated icons so don't need to call work()
 //	_gd._gamemusic_icon.work();
-
-//    _controlsPlay.work(input, speedFactor);
 
 }
 void PlayGame::work_wait(Input* input, float speedFactor)
@@ -793,7 +810,7 @@ void PlayGame::button_play(Input* input, ppkey::eButtonType b)
 }
 void PlayGame::button_wait(Input* input, ppkey::eButtonType b)
 {
-	//same as play state
+	//currently same as play state
 	button_play(input, b);
 }
 void PlayGame::button_end(Input* input, ppkey::eButtonType b)
@@ -826,52 +843,54 @@ void PlayGame::button_end(Input* input, ppkey::eButtonType b)
 	case ppkey::UP:
 		if (input->isPressed(b))
 		{
-		    int maxOnScreen = std::min(MAX_WORD_COL, _gd._words.wordsOfLength(_xxWordHi));
-		    if (_yyWordHi <= 0) //first box in col
-		    {
-                int yyWordOff = _boxWordOffset[_xxWordHi];
-		        if (yyWordOff > 0)
-		        {
-		            //sub one from offset and leave highligh at first box
-                    yyWordOff--;
-		        }
-		        else
-		        {
-		            //move to end - to bottom of screen col and word list
-		            yyWordOff = std::max(0, _gd._words.wordsOfLength(_xxWordHi) - maxOnScreen -1); //0 if < MAX_.. boxes
-		            _yyWordHi = maxOnScreen-1;
-		        }
-                _boxWordOffset[_xxWordHi] = yyWordOff;
-		    }
-		    else
-		    {
-		        _yyWordHi--;    //just move highlight up
-		    }
+		    button_end_up();
+//		    int maxOnScreen = std::min(MAX_WORD_COL, _gd._words.wordsOfLength(_xxWordHi));
+//		    if (_yyWordHi <= 0) //first box in col
+//		    {
+//                int yyWordOff = _boxWordOffset[_xxWordHi];
+//		        if (yyWordOff > 0)
+//		        {
+//		            //sub one from offset and leave highligh at first box
+//                    yyWordOff--;
+//		        }
+//		        else
+//		        {
+//		            //move to end - to bottom of screen col and word list
+//		            yyWordOff = std::max(0, _gd._words.wordsOfLength(_xxWordHi) - maxOnScreen -1); //0 if < MAX_.. boxes
+//		            _yyWordHi = maxOnScreen-1;
+//		        }
+//                _boxWordOffset[_xxWordHi] = yyWordOff;
+//		    }
+//		    else
+//		    {
+//		        _yyWordHi--;    //just move highlight up
+//		    }
 		}
 		break;
 	case ppkey::DOWN:
 		if (input->isPressed(b))
 		{
-		    int maxOnScreen = std::min(MAX_WORD_COL, _gd._words.wordsOfLength(_xxWordHi));
-		    if (_yyWordHi >= maxOnScreen-1) //last box in col
-		    {
-                int yyWordOff = _boxWordOffset[_xxWordHi];
-		        if (yyWordOff + maxOnScreen < _gd._words.wordsOfLength(_xxWordHi)-1)
-		        {
-		            //add one to offset and leave highligh at last box
-                    yyWordOff++;
-		        }
-		        else
-		        {
-		            //back to start - to top
-		            yyWordOff = _yyWordHi = 0;
-		        }
-                _boxWordOffset[_xxWordHi] = yyWordOff;
-		    }
-		    else
-		    {
-		        _yyWordHi++;    //just move highlight down
-		    }
+		    button_end_down();
+//		    int maxOnScreen = std::min(MAX_WORD_COL, _gd._words.wordsOfLength(_xxWordHi));
+//		    if (_yyWordHi >= maxOnScreen-1) //last box in col
+//		    {
+//                int yyWordOff = _boxWordOffset[_xxWordHi];
+//		        if (yyWordOff + maxOnScreen < _gd._words.wordsOfLength(_xxWordHi)-1)
+//		        {
+//		            //add one to offset and leave highlight at last box
+//                    yyWordOff++;
+//		        }
+//		        else
+//		        {
+//		            //back to start - to top
+//		            yyWordOff = _yyWordHi = 0;
+//		        }
+//                _boxWordOffset[_xxWordHi] = yyWordOff;
+//		    }
+//		    else
+//		    {
+//		        _yyWordHi++;    //just move highlight down
+//		    }
 		}
 		break;
 
@@ -887,6 +906,86 @@ void PlayGame::button_end(Input* input, ppkey::eButtonType b)
 	default:break;
 	}
 
+	state_end_setup_scrollers();
+}
+
+//user pressed up button or the up scroll control
+void PlayGame::button_end_up()
+{
+    int maxOnScreen = std::min(MAX_WORD_COL, _gd._words.wordsOfLength(_xxWordHi));
+    if (_yyWordHi <= 0) //first box in col
+    {
+        int yyWordOff = _boxWordOffset[_xxWordHi];
+        if (yyWordOff > 0)
+        {
+            //sub one from offset and leave highligh at first box
+            yyWordOff--;
+        }
+        else
+        {
+            //move to end - to bottom of screen col and word list
+            yyWordOff = std::max(0, _gd._words.wordsOfLength(_xxWordHi) - maxOnScreen -1); //0 if < MAX_.. boxes
+            _yyWordHi = maxOnScreen-1;
+        }
+        _boxWordOffset[_xxWordHi] = yyWordOff;
+    }
+    else
+    {
+        _yyWordHi--;    //just move highlight up
+    }
+}
+
+//user pressed down button or the down scroll control
+void PlayGame::button_end_down()
+{
+    int maxOnScreen = std::min(MAX_WORD_COL, _gd._words.wordsOfLength(_xxWordHi));
+    if (_yyWordHi >= maxOnScreen-1) //last box in col
+    {
+        int yyWordOff = _boxWordOffset[_xxWordHi];
+        if (yyWordOff + maxOnScreen < _gd._words.wordsOfLength(_xxWordHi)-1)
+        {
+            //add one to offset and leave highlight at last box
+            yyWordOff++;
+        }
+        else
+        {
+            //back to start - to top
+            yyWordOff = _yyWordHi = 0;
+        }
+        _boxWordOffset[_xxWordHi] = yyWordOff;
+    }
+    else
+    {
+        _yyWordHi++;    //just move highlight down
+    }
+}
+
+void PlayGame::state_end_setup_scrollers()
+{
+    if (_gd._words.wordsOfLength(_xxWordHi)-1 > MAX_WORD_COL)
+    {
+        const int yo = _yScratchBot + CURSORH + _boxOffsetY;	//start y offset
+        Control *p = _controlsPlay.getControl(CTRLID_SCROLL_UP);
+        if (p)
+        {
+            Sprite *s = p->getSprite();
+            s->setPos(_boxOffset[_xxWordHi] - (1.5*s->tileW()), yo);
+            _controlsPlay.enableControl(true, CTRLID_SCROLL_UP);
+        }
+        p = _controlsPlay.getControl(CTRLID_SCROLL_DOWN);
+        if (p)
+        {
+		    const int yo2 = yo+((MAX_WORD_COL-1)*(BOXH + BOXHGAP));  //same as in touch_end()
+            Sprite *s = p->getSprite();
+            s->setPos(_boxOffset[_xxWordHi] - (1.5*s->tileW()), yo2);
+            _controlsPlay.enableControl(true, CTRLID_SCROLL_DOWN);
+        }
+    }
+    else
+    {
+        _controlsPlay.showControl(false, CTRLID_SCROLL_UP);
+        _controlsPlay.showControl(false, CTRLID_SCROLL_DOWN);
+    }
 }
 
 void PlayGame::button_pause(Input* input, ppkey::eButtonType b)
@@ -1033,6 +1132,8 @@ bool PlayGame::touch_end(const Point &pt)
 						_xxWordHi = xx;
 						_yyWordHi = yy;
 					}
+
+                    state_end_setup_scrollers();
 					return true;
 				}
 			}
@@ -1110,6 +1211,16 @@ bool PlayGame::tap(const Point &pt)
 	else if (ctrl_id == CTRLID_SFX)
 	{
 	    Locator::audio().toggleSfx();
+        return true;
+	}
+	else if (ctrl_id == CTRLID_SCROLL_UP)
+	{
+	    button_end_up();
+        return true;
+	}
+	else if (ctrl_id == CTRLID_SCROLL_DOWN)
+	{
+	    button_end_down();
         return true;
 	}
 
@@ -1840,13 +1951,13 @@ void PlayGame::prepareBackground()
 	//now calc where we can place these and the gap between each
     //
     // |-------------------------------------------------------------------------------------|
-    // |                                                                       /-----------\ |
-    // |   [  MENU  ]  () ()       SCORE:00000000         WORDS:0000           |    999    | |
-    // |                                                                       \-----------/ |
+    // |   /--------\                                                          /-----------\ |
+    // |   |  MENU  |  () ()       SCORE:00000000         WORDS:0000           |    999    | |
+    // |   \--------/                                                          \-----------/ |
     // |-------------------------------------------------------------------------------------|
-    //  <  edge_pad ><equal_gap>               <equal_gap>          <equal_gap><  edge_pad  >
-    //                           ^score_x                 ^words_x
-    //       ^_menu_icon_x             ^_score0_x               ^_words0_x           ^_countdown0_x
+    //  <  edge_pad >< equal_gap >             <equal_gap>          <equal_gap><  edge_pad  >
+    //                             ^score_x               ^words_x
+    //        ^_menu_icon_x             ^_score0_x              ^_words0_x           ^_countdown0_x
     //
 
     int middle_len = score_len+score0_len + words_len+words0_len;
