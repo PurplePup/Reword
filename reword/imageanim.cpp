@@ -11,8 +11,6 @@ Description:	A class to handle image animation and/or movement
 				allowing simple control of items sliding in or out of the screen
 				with minimum fuss and programming.
 
-				Surface->Image->ImageAnim
-
 Author:			Al McLuckie (al-at-purplepup-dot-org)
 
 Date:			06 April 2007
@@ -70,17 +68,6 @@ ImageAnim::ImageAnim(std::string fileName, bool bAlpha, Uint32 nFrames) :
 	setFrameCount(nFrames);
 }
 
-//ImageAnim::ImageAnim(const Image &img) :
-//	//_image(img),
-//	_x(0.0f), _y(0.0f), _objectId(0),
-//	_frame(0), _firstFrame(0), _lastFrame(0), _nFrames(0), _frameDir(1),
-//	_repeat(1), _restart(0), _inflateBy(0),
-//	_visible(true), _pauseA(true), _rateA(0), _restartA(0),
-//	_delayA(0), _bDelayRestart(false), _frameCustom(0)
-//{
-//	_image = tSharedImage(new Image(img));
-//}
-//
 ImageAnim::ImageAnim(tSharedImage &img) :
 	_image(img),
 	_x(0.0f), _y(0.0f), _objectId(0),
@@ -92,14 +79,42 @@ ImageAnim::ImageAnim(tSharedImage &img) :
     setFrameCount(img->tileCount());
 }
 
-/*
-bool ImageAnim::load(std::string fileName, int iAlpha, Uint32 nFrames)	//default no alpha, 1 frames
+ImageAnim& ImageAnim::operator=(const ImageAnim &ia)
 {
-	if (!_image->load(fileName, iAlpha)) return false;
-	setFrameCount(nFrames);
-	return true;
-}
-*/
+    // Check for self-assignment
+    if (this != &ia)      // not same object
+    {
+        this->_image = ia._image; //tSharedImage(new Image(ia._image));
+
+        this->_x = ia._x;
+        this->_y = ia._y;
+        this->_objectId = ia._objectId;
+        this->_tileW = ia._tileW;
+        this->_tileH = ia._tileH;
+        this->_tileCount = ia._tileCount;
+        this->_tileWOffset = ia._tileWOffset;
+        this->_tileHOffset = ia._tileHOffset;
+        this->_frame = ia._frame;
+        this->_firstFrame = ia._firstFrame;
+        this->_lastFrame = ia._lastFrame;
+        this->_nFrames = ia._nFrames;
+        this->_frameDir = ia._frameDir;
+        this->_animType = ia._animType;
+        this->_repeat = ia._repeat;
+        this->_restart = ia._restart;
+        this->_inflateBy = ia._inflateBy;
+        this->_visible = ia._visible;
+        this->_pauseA = ia._pauseA;
+        this->_rateA = ia._rateA;
+        this->_waitA = ia._waitA;
+        this->_restartA = ia._restartA;
+        this->_delayA = ia._delayA;
+        this->_bDelayRestart = ia._bDelayRestart;
+        this->_animCustom = ia._animCustom;
+        this->_frameCustom = ia._frameCustom;
+    }
+    return *this;
+};
 
 //Code constructing an ImageAnim without an image can call this to pass in a resource image
 //and apply all setup required before use.
@@ -265,7 +280,7 @@ void ImageAnim::workONCE(void)
 		if (_frame >= _lastFrame)
 		{
 			pauseAnim();
-			_sigEvent(USER_EV_END_ANIMATION, _objectId);
+			_sigEvent2(USER_EV_END_ANIMATION, _objectId);
 			return;
 		}
 	}
@@ -275,7 +290,7 @@ void ImageAnim::workONCE(void)
 		if (_frame <= _firstFrame)
 		{
 			pauseAnim();
-			_sigEvent(USER_EV_END_ANIMATION, _objectId);
+			_sigEvent2(USER_EV_END_ANIMATION, _objectId);
 			return;
 		}
 	}
@@ -291,7 +306,7 @@ void ImageAnim::workHIDE(void)
 		{
 			pauseAnim();
 			setVisible(false);
-			_sigEvent(USER_EV_END_ANIMATION, _objectId);
+			_sigEvent2(USER_EV_END_ANIMATION, _objectId);
             return;
 		}
 	}
@@ -302,7 +317,7 @@ void ImageAnim::workHIDE(void)
 		{
 			pauseAnim();
 			setVisible(false);
-			_sigEvent(USER_EV_END_ANIMATION, _objectId);
+			_sigEvent2(USER_EV_END_ANIMATION, _objectId);
 			return;
 		}
 	}
@@ -317,7 +332,7 @@ void ImageAnim::workLOOP(void)
 		{
 			if (_repeat && _repeat-- <= 1) pauseAnim();
 			_frame = _firstFrame;
-			_sigEvent(USER_EV_END_ANIMATION, _objectId);
+			_sigEvent2(USER_EV_END_ANIMATION, _objectId);
 			return;
 		}
 	}
@@ -328,7 +343,7 @@ void ImageAnim::workLOOP(void)
 		{
 			if (_repeat && _repeat-- <= 1) pauseAnim();
 			_frame = _lastFrame;
-			_sigEvent(USER_EV_END_ANIMATION, _objectId);
+			_sigEvent2(USER_EV_END_ANIMATION, _objectId);
 			return;
 		}
 	}
@@ -343,7 +358,7 @@ void ImageAnim::workREVERSE(void)
 		{
 			if (_repeat && _repeat-- <= 1) { pauseAnim(); return; }
 			_frameDir = -1;
-			_sigEvent(USER_EV_END_ANIMATION, _objectId);
+			_sigEvent2(USER_EV_END_ANIMATION, _objectId);
 		}
 	}
 	else
@@ -353,7 +368,7 @@ void ImageAnim::workREVERSE(void)
 		{
 			if (_repeat && _repeat-- <= 1) { pauseAnim(); return; }
 			_frameDir = 1;
-			_sigEvent(USER_EV_END_ANIMATION, _objectId);
+			_sigEvent2(USER_EV_END_ANIMATION, _objectId);
 		}
 
 	}
@@ -365,7 +380,7 @@ void ImageAnim::workCUSTOM(void)
     if (_frameCustom >= (Uint32)_animCustom.size())
     {
         pauseAnim();
-		_sigEvent(USER_EV_END_ANIMATION, _objectId);
+		_sigEvent2(USER_EV_END_ANIMATION, _objectId);
         return;
     }
     _frame = _animCustom[_frameCustom++];

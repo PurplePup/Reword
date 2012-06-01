@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-class ImageAnim //: public Image
+class ImageAnim
 {
 public:
 	enum eAnim {	ANI_NONE,		//static, not moving
@@ -24,10 +24,10 @@ public:
 
 	ImageAnim();
 	ImageAnim(std::string fileName, bool bAlpha, Uint32 nFrames);
-//	ImageAnim(const Image &img);
     ImageAnim(tSharedImage &img);
 	virtual ~ImageAnim() {}
-//	virtual bool load(std::string fileName, int iAlpha = -1, Uint32 nFrames = 0);	//default no alpha, 1 frames
+
+	ImageAnim& operator=(const ImageAnim &ia);
 
 	//position
 	virtual void setPos(float x, float y)	{ _x = x; _y = y; }
@@ -39,8 +39,10 @@ public:
 
     //boost signal/slot events
     //typedef boost::signal<void (int, int)> EventSignal;
-    typedef Gallant::Signal2<int, int> EventSignal;
-    EventSignal _sigEvent;
+
+    //inline sig/slot code
+    typedef Gallant::Signal2<int, int> EventSignal2;
+    EventSignal2 _sigEvent2;
 
 	//animation
 	void setFrame(Uint32 frame);

@@ -21,7 +21,7 @@ const int SCORE_FASTEST = 2;	//each time a speeder or TT word is got faster than
 //Make sure it's always the same packing
 //This is not portable over different endian systems but will at least
 //play nicer on most. If I need to be truly cross platform with the score
-//file, it needs to have its own serializer or be text (XML?)
+//file, it needs to have its own serializer or be text (XML/JSON/INI etc?)
 #pragma pack(push, 1)
 
 typedef struct

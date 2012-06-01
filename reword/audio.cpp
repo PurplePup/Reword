@@ -46,6 +46,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <iostream>
 
 #ifndef WIN32
 #include <sys/ioctl.h>
@@ -277,7 +278,7 @@ void Audio::setSfxVol(Sint16 newvol, bool bTest)
 
 bool Audio::musicEnabled()
 {
-    std::cout << "musicEnabled() = " << (_opt._bMusic && _opt._musicVol > 0) << std::endl;
+    //std::cout << "musicEnabled() = " << (_opt._bMusic && _opt._musicVol > 0) << std::endl;
     return (_opt._bMusic && _opt._musicVol > 0);
 }
 
@@ -351,7 +352,7 @@ void AudioTrackDone()
 
 void Audio::stopTrack()
 {
-    std::cout << "stopTrack()" << std::endl;
+    //std::cout << "stopTrack()" << std::endl;
 	_bPlayingTrack = false;
 	Mix_HaltMusic();	//fires AudioTrackDone()
 }
@@ -368,7 +369,7 @@ void Audio::startPrevTrack()
 
 void Audio::startTrack(const std::string &trackName)
 {
-    std::cout << "startTrack()" << std::endl;
+    //std::cout << "startTrack()" << std::endl;
 	stopTrack();	//stop any existing music
 
 	if (_opt._bMusic && trackName.length() > 0)
@@ -394,7 +395,7 @@ void Audio::startTrack(const std::string &trackName)
 
 void Audio::pauseTrack()
 {
-    std::cout << "pauseTrack()" << std::endl;
+    //std::cout << "pauseTrack()" << std::endl;
     if (!_opt._bMusic) return;
 
     if (Mix_Paused(-1))
@@ -422,10 +423,8 @@ std::string Audio::getPrevTrack()
 void Audio::loadTracks(const std::string &baseDir)
 {
 #ifndef WIN32
-	DIR           *d;
 	struct dirent *dir;
-
-	d = opendir(baseDir.c_str());
+	DIR *d = opendir(baseDir.c_str());
 	if (d)
 	{
 		while ((dir = readdir(d)) != NULL)
@@ -445,6 +444,39 @@ void Audio::loadTracks(const std::string &baseDir)
 #else
 	//TODO - load tracks on MS box
 #endif
+}
+
+//add a sound effect to the resource list and check required position is correct
+int Audio::addSfx(const std::string &filename, unsigned int reqPos)
+{
+    Mix_Chunk *pMix = Mix_LoadWAV(std::string(RES_SOUNDS + filename).c_str());
+    if (!pMix) return -1;
+
+    _sfxList.push_back(pMix);
+    const bool bOk= (_sfxList.size() == reqPos+1);
+
+#if _DEBUG
+std::cout << "count of sounds " << _sfxList.size() << " - added " << filename << (bOk?" ok":" failed") << std::endl;
+#endif
+
+    return bOk?reqPos:-1;
+}
+
+//fast lookup and play using sound index
+void Audio::playSfx(unsigned int iSnd, unsigned int count)
+{
+    if (iSnd < _sfxList.size() && sfxEnabled())
+        Mix_PlayChannel(-1, _sfxList[iSnd], count);
+}
+
+//slower lookup using original name of sound file
+void Audio::playSfx(const std::string &sound, unsigned int count)
+{
+    (void)(sound);
+    (void)(count);
+    //********NOT IMPLEMENTED YET********
+//    if (sfxEnabled())
+//        Mix_PlayChannel(-1, _volTest, 0);
 }
 
 #ifdef _USE_MIKMOD

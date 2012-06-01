@@ -192,7 +192,8 @@ void Score::save(std::string scorefile)
 void Score::setCurrInits(std::string inits)
 {
 	//only use first 3 chars and make sure 4th is NULL
-
+    if (inits.empty())
+        inits = "AAA";
 	memcpy(&_curr.inits, inits.c_str(), 3);
 	_curr.inits[3] = '\0';
 

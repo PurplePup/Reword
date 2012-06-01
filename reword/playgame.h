@@ -186,6 +186,7 @@ private:
 
 	bool _inputL, _inputR;		//if L+R(+CLICK) pressed
 	bool _bAbort;				//if user presses L+R+CLICK
+	bool _bSaveExit;            //save and exit level, not just abort exit
 
 	int _xxWordHi, _yyWordHi;	//highlight position of word to display description of
 
@@ -238,7 +239,6 @@ private:
 
 	Roundels	_round;			//for roundel game letter sprites
 	tAutoRoundels _roundPaused;	//"PAUSED" in middle of screen
-	tAutoRoundels _roundDict;		//"xxxxx" word highlighted for dictionary display
 
 	//different modes during play that are handled by different classes
 	PlayGamePopup	*_pPopup;

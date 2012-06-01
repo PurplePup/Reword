@@ -81,19 +81,19 @@ void Locator::registerInput(IInput* input)
 
 //////////////////////////////// DATA /////////////////////////////
 /*
-static IGamedata * _data = 0;
-static NullGamedata _nulldata;
+static GameData * _data = 0;
+static GameData _nulldata;
 
-void Locator::InitData()
+void Locator::initData()
 {
     _data = &_nulldata;
 }
-IInput& Locator::GetData()
+Gamedata& Locator::data()
 {
     assert(_data != NULL);
     return *_data;
 }
-void Locator::Registerdata(IGameData* data)
+void Locator::registerData(GameData* data)
 {
     if (data == NULL)
         _data = &_nulldata;   // revert to null service

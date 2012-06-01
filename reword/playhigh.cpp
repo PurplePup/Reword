@@ -68,12 +68,35 @@ void PlayHigh::init(Input *input)
 	//set pos to -1 if not editing a high score, ie -1=editing high score
 	_pos = (ST_HIGHEDIT==_gd._state)?_gd._score.isHiScore(_mode, _diff):-1;
 
+
+
+
+//##DEBUG
+_pos = 1; //editing
+
+
+
+
+
+
+
+	_gd._score.setCurrInits(_gd._prev_inits);
 	_curr = _gd._score.curr();
+
 
     tSharedImage &letters = Resource::image("roundel_letters.png");
 	_title.setWordCenterHoriz(std::string("HISCORE"), letters, (BG_LINE_TOP-letters.get()->height())/2, 2);
 	_title.startMoveFrom( 0, -(letters.get()->height()*2), 15, 100, 0, ROUNDEL_VEL);
 	_titleW.start(3000, 1000);
+
+    tSharedImage &lettersKbd = Resource::image("roundel_letters_kbd.png");
+    int xkbd = (Screen::width() - ((lettersKbd->tileW()+8)*10)) / 2; //center top row of kbd on screen
+	_kbd.setKbdLetters(lettersKbd, xkbd, 100, 6);
+    int xinits = (Screen::width() - ((lettersKbd->tileW()+8)*3)) / 2; //center inits row
+    _kbd.setBottomPos(xinits, 250);
+    _kbd.setBottomMax(3);
+    _kbd.setBottomCopy(true);   //leaves top word in tact (copy not move tile)
+//    kbd._sigEvent2.Connect(this, &PlayHigh::ControlEvent);
 
 	//set the repeat of the keys required
 	input->setRepeat(ppkey::UP, 100, 300);		//button, rate, delay
@@ -85,28 +108,28 @@ void PlayHigh::init(Input *input)
     {
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_up.png")));
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2);
-    p->_sigEvent.Connect(this, &PlayHigh::ControlEvent);
+    p->_sigEvent2.Connect(this, &PlayHigh::ControlEvent);
     Control c(p, CTRLID_SCROLL_UP, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
     {
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_down.png")));
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2+p->tileH()+6);
-    p->_sigEvent.Connect(this, &PlayHigh::ControlEvent);
+    p->_sigEvent2.Connect(this, &PlayHigh::ControlEvent);
     Control c(p, CTRLID_SCROLL_DOWN, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
     {
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_left.png")));
     p->setPos(SCREEN_WIDTH-(p->tileW()*2)-8, BG_LINE_BOT-p->tileH()-2);
-    p->_sigEvent.Connect(this, &PlayHigh::ControlEvent);
+    p->_sigEvent2.Connect(this, &PlayHigh::ControlEvent);
     Control c(p, CTRLID_SCROLL_LEFT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
     {
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_right.png")));
     p->setPos(SCREEN_WIDTH-(p->tileW())-2, BG_LINE_BOT-p->tileH()-2);
-    p->_sigEvent.Connect(this, &PlayHigh::ControlEvent);
+    p->_sigEvent2.Connect(this, &PlayHigh::ControlEvent);
     Control c(p, CTRLID_SCROLL_RIGHT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
@@ -125,7 +148,7 @@ void PlayHigh::init(Input *input)
     {
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_exit_small.png")));
     p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
-    p->_sigEvent.Connect(this, &PlayHigh::ControlEvent);
+    p->_sigEvent2.Connect(this, &PlayHigh::ControlEvent);
     Control c(p, CTRLID_EXIT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
@@ -170,7 +193,7 @@ void PlayHigh::render(Screen *s)
 	ppg::blit_surface(_menubg->surface(), 0, s->surface(), 0,0);
 
 	//draw screen title roundals
-	_title.draw(s);
+	_title.render(s);
 
 	char sLetter[2] = {0x00, 0x00};	//null terminated 'char' string to hold editable letters
 
@@ -203,6 +226,8 @@ void PlayHigh::render(Screen *s)
 		xx = _xxStart;
 		if (yyLine == _pos)	//if it's -1 (not editing) then this wont display
 		{
+		    _kbd.render(s);
+
 			//draw current score in the gap for player to enter inits
 			sLetter[0] = _curr.inits[0];
 			_gd._fntClean.put_text(s, xx, yy, sLetter, (0==_currPos)?BLACK_COLOUR:_diffColour);
@@ -239,16 +264,16 @@ void PlayHigh::render(Screen *s)
 
 	int helpYpos = BG_LINE_BOT+((SCREEN_HEIGHT-BG_LINE_BOT-_gd._fntClean.height())/2);
 	if (!isEditing())
-		_gd._fntClean.put_text(s, helpYpos, "Up/down:mode, left/right:difficulty, B to exit", GREY_COLOUR, true);
+		_gd._fntClean.put_text(s, helpYpos, "Up/down:mode, left/right:difficulty, or EXIT (B)", GREY_COLOUR, true);
 	else
-		_gd._fntClean.put_text(s, helpYpos, "Enter initials then B to save", GREY_COLOUR, true);
+		_gd._fntClean.put_text(s, helpYpos, "Enter initials then B to save, or EXIT", GREY_COLOUR, true);
 
 	_controlsHigh.render(s);
 }
 
 void PlayHigh::work(Input *input, float speedFactor)
 {
-	_title.work();
+	_title.work(input, speedFactor);
 
 	//animate the roundel title if it's not moving and
 	//we have waited long enough since it animated last
@@ -270,6 +295,12 @@ void PlayHigh::work(Input *input, float speedFactor)
     if (input->repeat(ppkey::RIGHT)) button(input, ppkey::RIGHT);
 
     _controlsHigh.work(input, speedFactor);
+
+    if (isEditing())
+    {
+        _kbd.work();
+    }
+
 }
 
 void PlayHigh::button(Input *input, ppkey::eButtonType b)
@@ -296,20 +327,36 @@ void PlayHigh::button(Input *input, ppkey::eButtonType b)
 	case ppkey::B:
 		if (input->isPressed(b))
 		{
-			if (isEditing() && _currPos < 2)
-			{
-				_currPos++;	//treat as button right unless on 3rd char
-				break;
-			}
-			if (isEditing())	//is editing and position must be 2 (3rd char)
-			{
-				//so player has pressed B on last char to save to entered inits
-				_gd._score.insert(_mode, _diff, _pos, _curr);
-				_gd._score.save();	//save now so player can switch off or return to menu if wishes
+//			if (isEditing() && _currPos < 2)
+//			{
+//				_currPos++;	//treat as button right unless on 3rd char
+//				break;
+//			}
+//			if (isEditing())	//is editing and position must be 2 (3rd char)
+//			{
+//				//so player has pressed B on last char to save to entered inits
+//				_gd._score.insert(_mode, _diff, _pos, _curr);
+//				_gd._score.save();	//save now so player can switch off or return to menu if wishes
+//                _gd._prev_inits = _curr.inits;
+//
+//				setEditing(false);		//set to not-editing
+//				break;
+//			}
 
-				setEditing(false);		//set to not-editing
-				break;
-			}
+            if (isEditing())
+            {
+                //user still in play so select curr letter
+                if (_kbd.cursorIsTop())
+                    _kbd.moveLetterDown();
+                else
+                {
+                    _kbd.moveLetterUp();
+                    //if no letters left on bottom row, go back to top
+                    if (!_kbd.cursorPrev()) _kbd.cursorUp();
+                }
+            }
+
+
 			//else pos is -1 (not editing) so follow on to exit...
 		}
 		//follow on to exit to ST_MENU ...
@@ -332,7 +379,8 @@ void PlayHigh::moveUp()
 	//move from C to B to A
 	if (isEditing())
 	{
-		if (_curr.inits[_currPos] > ' ') --_curr.inits[_currPos];
+		//if (_curr.inits[_currPos] > ' ') --_curr.inits[_currPos];
+		_kbd.cursorUp();
 	}
 	else
 		setMode((eGameMode)--_mode);
@@ -343,7 +391,8 @@ void PlayHigh::moveDown()
 	//move from A to B to C
 	if (isEditing())
 	{
-		if (_curr.inits[_currPos] < 'Z') ++_curr.inits[_currPos];
+		//if (_curr.inits[_currPos] < 'Z') ++_curr.inits[_currPos];
+		_kbd.cursorDown();
 	}
 	else
 		setMode((eGameMode)++_mode);
@@ -353,7 +402,8 @@ void PlayHigh::moveLeft()
 {
 	if (isEditing())
 	{
-		if (_currPos > 0) _currPos--;
+		//if (_currPos > 0) _currPos--;
+		_kbd.cursorPrev();
 	}
 	else
 		setDifficulty((eGameDiff)(_diff-1));
@@ -363,7 +413,8 @@ void PlayHigh::moveRight()
 {
 	if (isEditing())
 	{
-		if (_currPos < 2) _currPos++;
+		//if (_currPos < 2) _currPos++;
+		_kbd.cursorNext();
 	}
 	else
 		setDifficulty((eGameDiff)(_diff+1));
@@ -374,6 +425,7 @@ void PlayHigh::updateScrollButtons()
     if (isEditing())
     {
         _controlsHigh.showAllControls(false, CTRLID_MUSIC); //show only music
+        _controlsHigh.showControl(true, CTRLID_EXIT);       //and exit button (even in edit mode)
         return;
     }
 
@@ -399,12 +451,28 @@ void PlayHigh::ControlEvent(int event, int ctrl_id)
 //        }
 
         updateScrollButtons();
+        return;
     }
 }
 
 bool PlayHigh::touch(const Point &pt)
 {
     _controlsHigh.touched(pt);    //needed to highlight a touched control
+
+   	if (_kbd.cursorAt(pt))
+	{
+		if (_kbd.cursorIsTop())
+        {
+			_kbd.moveLetterDown();
+			_kbd.cursorDown();
+        }
+		else
+		{
+			_kbd.moveLetterUp();
+			if (!_kbd.cursorPrev()) _kbd.cursorUp();
+		}
+	}
+
     return true;
 }
 
@@ -509,4 +577,88 @@ void PlayHigh::prepareBackground()
 	default:break;
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// just a subclass to display and handle a bunch of roundels as a keyboard lyout for hiscore inits
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void RoundelsKbd::setKbdLetters(tSharedImage &letters, int x, int y, int gap)
+{
+
+
+    Roundels::setWord("QWERTYUIOPASDFGHJKLZXCVBNM", letters, x, y, gap, true);
+
+    //now reset the letter positions - 3 rows
+
+	tRoundVect::iterator it = _top.begin();
+	int tile(0), column(0);
+	for (; it != _top.end(); ++it, ++tile)
+	{
+        if (*it)
+        {
+            const int xPos = x + (column*((*it)->_spr->tileW()+gap));
+            (*it)->_spr->setPos(xPos, y);
+        }
+        column++;
+        if (tile == 9 || tile == 18)
+        {
+            x += ((*it)->_spr->tileW() / 2);    //move each/next row in a bit
+            y += (*it)->_spr->tileH()+gap;      //move down with a gap
+            column = 0;
+        }
+	}
+
+
+}
+
+//void RoundelsKbd::draw(Surface *s)
+//{
+//    //draw kbd letters in 3 rows
+//
+//	tRoundVect::iterator it = _top.begin();
+//    int i = 0;
+//	for (; i >= 9 || it != _top.end(); ++it) if (*it) (*it)->_spr->draw(s);
+//
+//	for (; i >= 18 || it != _top.end(); ++it) if (*it) (*it)->_spr->draw(s);
+//
+//	for (; it != _top.end(); ++it) if (*it) (*it)->_spr->draw(s);
+//
+//    //and any bottom letters selected
+//	for (it = _bot.begin(); it != _bot.end(); ++it) if (*it) (*it)->_spr->draw(s);
+//
+//}
+
+void RoundelsKbd::work()
+{
+   	tRoundVect::iterator it;
+	bool bMoving = false;
+	for (it = _top.begin(); it != _top.end(); ++it)
+	{
+		if (*it) 	//letter exists in this top position
+		{
+			(*it)->_spr->work();
+			bMoving |= (*it)->_spr->isMoving();
+		}
+	}
+
+	for (it = _bot.begin(); it != _bot.end(); ++it)
+	{
+		if (*it) 	//letter exists in this bottom position
+		{
+			(*it)->_spr->work();
+			bMoving |= (*it)->_spr->isMoving();
+		}
+	}
+
+	_bMoving = bMoving;	//if any are moving, something/someone might need to know
+}
+
+
+
+
+
+
+
+
+
 

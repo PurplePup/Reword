@@ -38,5 +38,28 @@ private:
 	tSprMap::iterator _itend;	//not thread safe
 };
 
+//class to add a sprite animation, play it then delete it
+//to allow one off effect animations to be run
+class OneShot
+{
+public:
+    typedef std::vector<Sprite *> tSpriteList;
+
+    OneShot();
+    ~OneShot();
+
+    void        add(Sprite* spr);
+	void		work(void);
+	void		draw(Screen* s);
+    void        event(int, int);
+
+protected:
+
+    tSpriteList         _list;
+    std::vector<int>    _unused;
+};
+
+
+
 #endif //_SPRITEMGR_H
 

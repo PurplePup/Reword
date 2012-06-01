@@ -13,6 +13,22 @@
 #include "controls.h"
 #include <memory>
 
+
+class RoundelsKbd : public Roundels
+{
+public:
+    //add split draw, over 3 lines for kbd layout and
+    //bottom 3 letters selected should use the new roundels
+    //setBottomMax function
+
+    void setKbdLetters(tSharedImage &letters, int x, int y, int gap);
+
+//	void draw(Surface *s);
+	void work();
+
+};
+
+
 class PlayHigh : public IPlay
 {
 public:
@@ -66,6 +82,8 @@ private:
 	std::string	_description;	//"mode : difficulty"
 
 	Roundels	_title;
+	RoundelsKbd _kbd;           //3 kbd rows q-p, a-l, z-m
+
 	Waiting		_titleW;		//delay between jumbling
 	Waiting		_doubleClick;	//touch support
 

@@ -16,7 +16,7 @@
 class PlayGamePopup : public IPlay
 {
 public:
-	PlayGamePopup(GameData& gd, bool bMaxWordFound);
+	PlayGamePopup(GameData& gd, bool bIsInGame, bool bMaxWordFound);
 	virtual ~PlayGamePopup() {}
 
 	enum eOptions { POP_CANCEL, POP_SKIP, POP_TOGGLEMUSIC, POP_NEXTTRACK, POP_PREVTRACK, POP_SAVE, POP_QUIT, POP_MAXVAL };
@@ -43,6 +43,7 @@ private:
 	int			_menuoption;	//highlight position
 	bool		_bSelected;
 	int			_selectedId;
+	bool        _bIsInGame;
 	bool 		_hasMaxWord;			//must have a 6 letter word before some menu items available
 	Rect 		_touchArea[POP_MAXVAL];
 	Rect		_touchYNArea[POP_YN_MAXVAL];

@@ -49,11 +49,12 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <cassert>
 
 
-PlayGamePopup::PlayGamePopup(GameData &gd, bool bMaxWordFound)  : _gd(gd)
+PlayGamePopup::PlayGamePopup(GameData &gd, bool bIsInGame, bool bMaxWordFound)  : _gd(gd)
 {
 	_pItems = 0;
 	_running = false;
 	_init = false;
+	_bIsInGame = bIsInGame;
 	_hasMaxWord = bMaxWordFound; //(6 == maxwordlen);
 }
 
@@ -84,7 +85,8 @@ void PlayGamePopup::init(Input *input)
 	//main (in-game) menu options
 	_itemList.clear();
 	_itemList[i=0] = MenuItem(POP_CANCEL, GREEN_COLOUR, "Resume Game", "Continue game");
-	_itemList[++i] = MenuItem(POP_SKIP, ORANGE_COLOUR, "Next word/Level", (_hasMaxWord)?"Move on to next word/level":"You must have a Re-word first!", _hasMaxWord);
+	if (_bIsInGame)
+        _itemList[++i] = MenuItem(POP_SKIP, ORANGE_COLOUR, "Next word/Level", (_hasMaxWord)?"Move on to next word/level":"You must have a Re-word first!", _hasMaxWord);
     if (Locator::audio().musicEnabled())
     {
         bool bIsPlaying = Locator::audio().isPlayingMusic();	//may be playing/fading menu music so uses isPlaying... rather than isActuallyPl...
@@ -265,6 +267,9 @@ void PlayGamePopup::choose()
         {
 			_pItems = &_itemList;		//point back to first menu, then
 			_menuoption = ItemFromId(POP_QUIT);	//YES selected, so exit
+            _bSelected = true;
+            _selectedId = POP_QUIT;
+            return;
         }
 	}
 	else
@@ -274,7 +279,6 @@ void PlayGamePopup::choose()
 			return;
 		if (pItem->_id == POP_SAVE)	//for later RESUME
 		{
-			_gd.saveQuickState();
 			_menuoption = ItemFromId(POP_QUIT);	//auto (force) exit
 		}
 		//if on exit option, go to yes/no options and wait for yes or no
@@ -301,7 +305,6 @@ void PlayGamePopup::choose()
 		{
             Locator::audio().startPrevTrack();
 		}
-
 	}
 	_bSelected = true;
 	_selectedId = pItem->_id;

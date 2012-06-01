@@ -11,29 +11,35 @@
 
 #include "sprite.h"
 #include "states.h"
+#include "i_play.h"
 
-class Roundels
+class Roundel
 {
 public:
+    Roundel() : _letter(0), _pos(0), _spr(0) {}
+    ~Roundel() { delete _spr; }
 
-	class Roundel
-	{
-	public:
-		Roundel() : _letter(0), _pos(0), _spr(0) {}
-		~Roundel() { delete _spr; }
-		char		_letter;
-		int			_pos;
-		Sprite *	_spr;
-	};
+    Roundel& operator=(const Roundel &r);
+
+    char		_letter;
+    int			_pos;
+    Sprite *	_spr;
+};
+
+class Roundels : IPlay
+{
+public:
 
 	Roundels();
 	~Roundels();
 	void cleanUp();
-	void setWord(std::string &wrd, tSharedImage &letters, int x /*= 0*/, int y /*= 0*/, int gap /*= 0*/, bool bHoriz /*= true*/);
-	void setWordCenterHoriz(std::string wrd, tSharedImage &letters, int y = 0, int gap =0);
-	void setWordCenterVert(std::string wrd, tSharedImage &letters, int x = 0, int gap =0);
+	void setWord(const std::string &wrd, tSharedImage &letters, int x = 0, int y = 0, int gap = 0, bool bHoriz = true);
+	void setWordCenterHoriz(const std::string &wrd, tSharedImage &letters, int y = 0, int gap =0);
+	void setWordCenterVert(const std::string &wrd, tSharedImage &letters, int x = 0, int gap =0);
 	void startMoveFrom(int deltaX, int deltaY, Uint32 rate, Uint32 delay, int xVel, int yVel, Sprite::eSprite type = Sprite::SPR_NONE);
-	void setTopAndBottomYPos(int yPosTop, int yPosBot);
+	void setBottomPos(int xPosBot, int yPosBot);
+	void setBottomMax(int iMax);
+	void setBottomCopy(bool bCopyBot = true) { _bCopyBot = bCopyBot; }
     int getLastId();
 
 	bool isInOrder();
@@ -47,7 +53,7 @@ public:
 	bool cursorNext();
 	void cursorUp();
 	void cursorDown();
-	bool cursorAt(Point p);	// return false if p isn't in a valid roundel
+	int cursorAt(Point p);	// return 0 if p isn't in a valid roundel else roundel No+1
 
 	std::string getBottomWord();
 	int getBottomWordLength() { return _botLength; }
@@ -55,15 +61,28 @@ public:
 	void clearAllToTop(bool bResetCursor = true);
 	void setWordToLast();
 
-	void draw(Surface *s);
-	void work();
 	bool isMoving() {return _bMoving;}
 
 	bool cursorIsTop() const { return _bCursorTop; }
 	int  currentX() const { return _cx; }
 
-	int getX() const { return _x; }	//screen x pos of first roundel
-	int getY() const { return _y; }	//screen y ...
+	int getX() const { return _xScratchTop; }	//screen x pos of first roundel
+	int getY() const { return _yScratchTop; }	//screen y ...
+
+    //init the level/screen
+    virtual void init(Input * /*input*/);
+    // drawing operation
+    virtual void render(Screen* s);
+    // other processing
+    virtual void work(Input* input, float speedFactor);
+    // notification of button/input state change
+    virtual void button(Input* /*input*/, ppkey::eButtonType /*b*/);
+
+	// screen touch (press)
+	virtual bool touch(const Point &pt);
+	// screen touch (release)
+	virtual bool tap(const Point &pt);
+
 
 protected:
 
@@ -78,18 +97,22 @@ protected:
 	tRoundVect	_bot;
 	tRoundVect	_last;			//letters of last word (only uses copies of pointers)
 
-	int		_x, _y, _gap;		//screen position of first (top) roundel, saved from setWord
+	std::string	_word;			//original word used to set roundels
+
+    //positioning...
+	int     _xScratchTop, _yScratchTop,
+            _xScratchBot, _yScratchBot;		//previously #defined SCRATCHY1 and SCRATCHY2
+	int		_gap;       		//gap betwen letters on screen
 	bool	_bHoriz;
 	bool	_bMoving;			//indicates if all sprites have stopped moving or not
 
-	std::string	_word;			//original word used to set roundels
+	int     _cx;				//cursor (highlight) x and y pos
+	int     _botLength;         //current count of actual letters in bottom row
+	int     _botLengthMax;
+	bool    _bCursorTop;		//cursor curr on top row or bottom row?
+    bool    _bCopyBot;          //copy to bottom rather than move (used in hiscore etc)
 
-	int _cx;					//cursor (highlight) x and y pos
-	int _botLength;             //current count of actual letters in bottom row
-	bool _bCursorTop;			//cursor curr on top row or bottom row?
-
-	int _yScratchTop,
-		_yScratchBot;		//previously #defined SCRATCHY1 and SCRATCHY2
+    int     _lastTouch;         //last roundel touched (before tap/release)
 };
 
 typedef std::auto_ptr<Roundels> tAutoRoundels;

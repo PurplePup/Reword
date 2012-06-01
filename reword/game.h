@@ -10,7 +10,7 @@
 #include "error.h"
 #include "i_play.h"	//IPlay interface decl
 #include "gamedata.h"
-
+#include "resource.h"
 
 class Game : public Error
 {
@@ -23,6 +23,7 @@ public:
 
 protected:
 	void		splash();
+    bool        loadResources();
 	bool		play(IPlay *p);
 
 private:
@@ -32,7 +33,7 @@ private:
 	Input		*_input;
 	IAudio		*_audio;
 	GameData	*_gd;
-
+    ResourceImg	_images;
 };
 
 #endif //GAME_H

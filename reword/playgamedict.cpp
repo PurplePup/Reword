@@ -119,7 +119,7 @@ void PlayGameDict::render(Screen* s)
 	//ppg::blit_surface(_gd._menubg.surface(), NULL, s->surface(), 0, 0);
 	ppg::blit_surface(_menubg->surface(), NULL, s->surface(), 0, 0);
 
-	_roundDict->draw(s);
+	_roundDict->render(s);
 
 	_gd._fntClean.put_text(s, BG_LINE_TOP, "Definition:", GREY_COLOUR, true);
 
@@ -154,11 +154,11 @@ void PlayGameDict::work(Input* input, float speedFactor)
     if (input->repeat(ppkey::LEFT))	button(input, ppkey::LEFT);
     if (input->repeat(ppkey::RIGHT)) button(input, ppkey::RIGHT);
 
-	_roundDict->work();
+	_roundDict->work(input, speedFactor);
 
     _controlsDict.showAllControls(true);
-    _controlsDict.enableControl((_dictLine > 0), CTRLID_SCROLL_UP);
-    _controlsDict.enableControl((_dictLine < (int)_dictDef.size()-_lines), CTRLID_SCROLL_DOWN);
+    _controlsDict.showControl((_dictLine > 0), CTRLID_SCROLL_UP);
+    _controlsDict.showControl((_dictLine < (int)_dictDef.size()-_lines), CTRLID_SCROLL_DOWN);
 
     _controlsDict.work(input, speedFactor);
 

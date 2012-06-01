@@ -22,9 +22,10 @@ public:
 
 	Sprite();
 	Sprite(std::string fileName, bool bAlpha, Uint32 nFrames);
-//	Sprite(const ImageAnim &img);
 	Sprite(tSharedImage &img);
 	virtual ~Sprite() {}
+
+	Sprite& operator=(const Sprite &s);
 
 //    void setObjectId(int id) { _objectId = id; }
 //    int getObjectId() { return _objectId; }
@@ -56,6 +57,8 @@ public:
 	virtual void work();	//update movement, and call parent anim update
 	virtual bool contains(const Point &pt) const;
 
+    void addObserver(void(*fn)(int, int)) { _observer = fn; }
+
 protected:
 
 	int		_xStart;	//save start x pos
@@ -80,7 +83,7 @@ private:
 	Waiting _waitM;		//movement delay
 	bool	_touchable;
 
-//	int     _objectId; //used for identify sprites by id (for event notification etc)
+	void (*_observer)(int, int); //fire an event to this fn on end anim etc
 };
 
 

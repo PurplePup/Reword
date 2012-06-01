@@ -76,7 +76,8 @@ Uint32 countdown_callback(Uint32 interval, void *param)
 	return(interval);
 }
 
-PlayGame::PlayGame(GameData& gd) : _gd(gd), _pPopup(NULL), _play(NULL)
+PlayGame::PlayGame(GameData& gd) :
+    _gd(gd), _pPopup(NULL), _play(NULL)
 {
 #ifdef _DEBUG
 	_dbg_display = false;
@@ -86,6 +87,7 @@ PlayGame::PlayGame(GameData& gd) : _gd(gd), _pPopup(NULL), _play(NULL)
 	_running = false;	//not init yet
 	_init = false;		//ditto
 	_bAbort = false;	//until L+R+CLICK which exits game to hiscore if needed or to menu
+	_bSaveExit = false; //if user saves and exit for later restart
 	_tmpDefMore = false;
 
 	statePush(PG_PLAY);		//also sets default to PG_PLAY
@@ -98,6 +100,33 @@ PlayGame::~PlayGame()
     delete _play;
 }
 
+
+/*
+#include <boost/signal.hpp>
+    //boost signal/slot events
+    typedef boost::signal<void (int, int)> EventSignal;
+    EventSignal _sigEvent;
+
+_sigEvent(USER_EV_END_ANIMATION, _objectId);
+
+
+#include <boost/bind.hpp>
+//    p->_sigEvent.connect(boost::bind(&PlayOptions::ControlEvent, this, _1, _2));
+//event signal from imageanim indicating end of animation
+void PlayOptions::ControlEvent(int event, int ctrl_id)
+{
+    if (event == USER_EV_END_ANIMATION)
+    {
+//        if (ctrl_id == CTRLID_EXIT)
+//        {
+//            _gd._state = ST_MENU;		//back to menu
+//            _running = false;
+//        }
+    }
+}
+
+*/
+
 void PlayGame::init(Input *input)
 {
 	//fade out any menu music (but only if no game music still playing)
@@ -109,6 +138,7 @@ void PlayGame::init(Input *input)
 	_cursor.setImage(Resource::image("cursors.png"));
 	_scratch.setImage(Resource::image("scratch.png"));
 	_boxes.setImage(Resource::image("boxes.png"));
+
 
     { // round music button placed in top left of scorebar
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_music.png")));
@@ -124,12 +154,12 @@ void PlayGame::init(Input *input)
     _controlsPlay.add(c);
     _controlsPlay.enableControl(audio.hasSound(), CTRLID_SFX);  //disable override?
     }
-    { // round up/down buttons
+    { // round up/down buttons used next to word boxes at end level
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_up_small.png")));
     Control c(p, CTRLID_SCROLL_UP, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
-    { // round up/down buttons
+    { // round up/down buttons used next to word boxes at end level
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_down_small.png")));
     Control c(p, CTRLID_SCROLL_DOWN, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
@@ -162,25 +192,21 @@ void PlayGame::init(Input *input)
     //now the four letter/word controls... positions set in newLevel()
     { //shuffle
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_word_shuffle.png")));
-//    p->setTileSize(48, 48);
     Control c(p, CTRLID_SHUFFLE, CTRLGRP_LETTERS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
     { //try word
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_word_try.png")));
-//    p->setTileSize(48, 48);
     Control c(p, CTRLID_TRYWORD, CTRLGRP_LETTERS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
     { //totop
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_word_totop.png")));
-//    p->setTileSize(48, 48);
     Control c(p, CTRLID_TOTOP, CTRLGRP_LETTERS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
     { //last
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_word_last.png")));
-//    p->setTileSize(48, 48);
     Control c(p, CTRLID_LAST, CTRLGRP_LETTERS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
@@ -214,6 +240,7 @@ void PlayGame::exit(eGameState toState)
 	stopCountdown();
 	clearEventBuffer();
 	_gd._state = toState;	//ST_MENU, ST_PLAY etc
+	std::cout << "state: exit = " << toState << std::endl;
 	_running = false;
 }
 
@@ -289,6 +316,7 @@ void PlayGame::render(Screen* s)
 {
     if (_play)
     {
+        //dictionary screen etc
         _play->render(s);
         return;
     }
@@ -341,8 +369,8 @@ void PlayGame::render_play(Screen* s)
 		//draw touch controls not in controls container
  //       _gamemusic_icon.draw(s);
 
-		//draw game letters
-		_round.draw(s);
+		//draw game letters - top and bottom
+		_round.render(s);
 
 		_cursor.blitTo(s, _xScratch+(_round.currentX()*(CURSORW+2)),
 						(_round.cursorIsTop()?_yScratchTop:_yScratchBot),
@@ -536,8 +564,8 @@ void PlayGame::render_end(Screen* s)
 		if (_fastest)
 		{
 			_gd._fntBig.put_text(s, yyTitle, "FASTEST YET!", GOLD_COLOUR, true);
-			_gd._fntMed.put_number(s, yyReward, _fastest, "You got it in %d seconds!", GOLD_COLOUR, false);
-			_gd._fntMed.put_number(s, yyBonus, (maxCountdown()-_fastest)*SCORE_FASTEST, "Bonus: %d !", GOLD_COLOUR, false);
+			_gd._fntMed.put_number(s, yyReward, _fastest, "You got it in %d seconds!", GREEN_COLOUR, false);
+			_gd._fntMed.put_number(s, yyBonus, (maxCountdown()-_fastest)*SCORE_FASTEST, "Bonus: %d !", GREEN_COLOUR, false);
 		}
 		else
 		{
@@ -548,15 +576,15 @@ void PlayGame::render_end(Screen* s)
 			case 2:_gd._fntBig.put_text(s, yyTitle, "GOOD!", GOLD_COLOUR, true);break;
 			default:_gd._fntBig.put_text(s, yyTitle, "WELL DONE!", GOLD_COLOUR, true);break;
 			}
-			_gd._fntMed.put_text(s, yyReward, "Now try another", GOLD_COLOUR, false);
+			_gd._fntMed.put_text(s, yyReward, "Now try another", GREEN_COLOUR, false);
 		}
 		break;
 	case SU_TIMETRIAL:	//Time trial - single count  to 0 - no timer reset
 		if (_fastest)
 		{
 			_gd._fntBig.put_text(s, yyTitle, "FASTEST YET!", BLUE_COLOUR, true);
-			_gd._fntMed.put_number(s, yyReward, _fastest, "You got it in %d seconds!", BLUE_COLOUR, false);
-			_gd._fntMed.put_number(s, yyBonus, (maxCountdown()-_fastest)*SCORE_FASTEST, "Bonus: %d !", BLUE_COLOUR, false);
+			_gd._fntMed.put_number(s, yyReward, _fastest, "You got it in %d seconds!", GREEN_COLOUR, false);
+			_gd._fntMed.put_number(s, yyBonus, (maxCountdown()-_fastest)*SCORE_FASTEST, "Bonus: %d !", GREEN_COLOUR, false);
 		}
 		else
 		{
@@ -567,14 +595,21 @@ void PlayGame::render_end(Screen* s)
 			case 2:_gd._fntBig.put_text(s, yyTitle, "GREAT!", BLUE_COLOUR, true);break;
 			default:_gd._fntBig.put_text(s, yyTitle, "WELL DONE!", BLUE_COLOUR, true);break;
 			}
-			_gd._fntMed.put_text(s, yyReward, "get another one...", BLUE_COLOUR, false);
+			_gd._fntMed.put_text(s, yyReward, "get another one...", GREEN_COLOUR, false);
 		}
 		break;
+    case SU_SAVEEXIT:
+		_gd._fntBig.put_text(s, yyTitle, "Game Saved", GREEN_COLOUR, true);
+		_gd._fntSmall.put_text(s, yyReward, "Continue this game later!", BLUE_COLOUR, false);
+		break;
 
-	default:
 	case SU_GAMEOVER:	//Game Over - You're a high scorer!
+	default:
 		_gd._fntBig.put_text(s, yyTitle, "Game Over", RED_COLOUR, true);
-		_gd._fntMed.put_text(s, yyReward, "But you're a high scorer!", RED_COLOUR, false);
+        if (_gd._score.isHiScore(_gd._mode, _gd._diffLevel) != -1)
+            _gd._fntMed.put_text(s, yyReward, "But you're a high scorer!", GREEN_COLOUR, false);
+        else
+            _gd._fntMed.put_text(s, yyReward, "Better luck next time", BLUE_COLOUR, false);
 		break;
 	}
 
@@ -584,7 +619,7 @@ void PlayGame::render_end(Screen* s)
         //put comment just above found words in boxes
 		const int yo = (_yScratchBot+CURSORH+_boxOffsetY) - _gd._fntClean.height() - (_gd._fntClean.height()/2);
 		_gd._fntClean.put_text(s, yo,
-            (_success == SU_GAMEOVER) ?
+            (_success == SU_GAMEOVER || _success == SU_SAVEEXIT) ?
                 ((_tmpDefMore) ? "Click word (Y) for detail, or EXIT (B) to continue" : "Press EXIT (B) to continue") :
                 ((_tmpDefMore) ? "Click word (Y) for detail, or NEXT (B) to continue" : "Press NEXT (B) to continue"),
             GREY_COLOUR, false);
@@ -595,7 +630,7 @@ void PlayGame::render_pause(Screen* s)
 {
 	const SDL_Colour c = BLACK_COLOUR;
 	ppg::drawSolidRect(s->surface(), 0,0,s->width(), s->height(), c);
-	_roundPaused->draw(s);
+	_roundPaused->render(s);
     _gd._fntClean.put_text(s, (SCREEN_HEIGHT/2) + 30,
                         "10 second penalty", WHITE_COLOUR, false);
 	return;
@@ -615,6 +650,7 @@ void PlayGame::work(Input* input, float speedFactor)
 {
     if (_play)
     {
+        //dictionary screen etc
         _play->work(input, speedFactor);
         return;
     }
@@ -643,7 +679,7 @@ void PlayGame::work_play(Input* input, float speedFactor)
     if (input->repeat(ppkey::LEFT))	button(input, ppkey::LEFT);
     if (input->repeat(ppkey::RIGHT)) button(input, ppkey::RIGHT);
 
-	_round.work();
+	_round.work(input, speedFactor);
 
 //  audio not animated icons so don't need to call work()
 //	_gd._gamemusic_icon.work();
@@ -670,7 +706,7 @@ void PlayGame::work_pause(Input* input, float speedFactor)
 {
     (void)(input);
     (void)(speedFactor);
-	_roundPaused->work();
+	_roundPaused->work(input, speedFactor);
 }
 void PlayGame::work_popup(Input* input, float speedFactor)
 {
@@ -683,7 +719,7 @@ void PlayGame::startPopup(Input *input)
 
     slideRoundButtonsOut();
 
-	_pPopup = new PlayGamePopup(_gd, foundEnoughWords());
+	_pPopup = new PlayGamePopup(_gd, _state!=PG_END, foundEnoughWords());
 	if (_pPopup)
 		_pPopup->init(input);
 }
@@ -719,7 +755,7 @@ void PlayGame::button(Input* input, ppkey::eButtonType b)
 	case ppkey::CLICK:
 		if (input->isPressed(b))
 		{
-			if (_inputL && _inputR)
+			if (_inputL && _inputR) //GP2X type exit
 			{
 				_bAbort = true;
 				ppg::pushSDL_Event(USER_EV_END_COUNTDOWN); //try to exit more gracefully, pushes end of level
@@ -736,6 +772,7 @@ void PlayGame::button(Input* input, ppkey::eButtonType b)
 
     if (_play)
     {
+        //dictionary screen etc
         _play->button(input, b);
         return;
     }
@@ -844,53 +881,12 @@ void PlayGame::button_end(Input* input, ppkey::eButtonType b)
 		if (input->isPressed(b))
 		{
 		    button_end_up();
-//		    int maxOnScreen = std::min(MAX_WORD_COL, _gd._words.wordsOfLength(_xxWordHi));
-//		    if (_yyWordHi <= 0) //first box in col
-//		    {
-//                int yyWordOff = _boxWordOffset[_xxWordHi];
-//		        if (yyWordOff > 0)
-//		        {
-//		            //sub one from offset and leave highligh at first box
-//                    yyWordOff--;
-//		        }
-//		        else
-//		        {
-//		            //move to end - to bottom of screen col and word list
-//		            yyWordOff = std::max(0, _gd._words.wordsOfLength(_xxWordHi) - maxOnScreen -1); //0 if < MAX_.. boxes
-//		            _yyWordHi = maxOnScreen-1;
-//		        }
-//                _boxWordOffset[_xxWordHi] = yyWordOff;
-//		    }
-//		    else
-//		    {
-//		        _yyWordHi--;    //just move highlight up
-//		    }
 		}
 		break;
 	case ppkey::DOWN:
 		if (input->isPressed(b))
 		{
 		    button_end_down();
-//		    int maxOnScreen = std::min(MAX_WORD_COL, _gd._words.wordsOfLength(_xxWordHi));
-//		    if (_yyWordHi >= maxOnScreen-1) //last box in col
-//		    {
-//                int yyWordOff = _boxWordOffset[_xxWordHi];
-//		        if (yyWordOff + maxOnScreen < _gd._words.wordsOfLength(_xxWordHi)-1)
-//		        {
-//		            //add one to offset and leave highlight at last box
-//                    yyWordOff++;
-//		        }
-//		        else
-//		        {
-//		            //back to start - to top
-//		            yyWordOff = _yyWordHi = 0;
-//		        }
-//                _boxWordOffset[_xxWordHi] = yyWordOff;
-//		    }
-//		    else
-//		    {
-//		        _yyWordHi++;    //just move highlight down
-//		    }
 		}
 		break;
 
@@ -962,7 +958,7 @@ void PlayGame::button_end_down()
 
 void PlayGame::state_end_setup_scrollers()
 {
-    if (_gd._words.wordsOfLength(_xxWordHi)-1 > MAX_WORD_COL)
+    if (_state == PG_END && _gd._words.wordsOfLength(_xxWordHi)-1 > MAX_WORD_COL)
     {
         const int yo = _yScratchBot + CURSORH + _boxOffsetY;	//start y offset
         Control *p = _controlsPlay.getControl(CTRLID_SCROLL_UP);
@@ -1021,6 +1017,7 @@ void PlayGame::handlePopup()
 	case PlayGamePopup::POP_SAVE:
 		//user selected to save state (now at least a 6 letter word found)
 		//and allow resume game later, so follow on to POP_QUIT
+		_bSaveExit = true;
 	case PlayGamePopup::POP_QUIT:
 		//back to main menu - like L+R+Click (or ESC on PC)
 		_bAbort = true;
@@ -1035,9 +1032,9 @@ void PlayGame::handlePopup()
 
 bool PlayGame::touch(const Point &pt)
 {
-
     if (_play)
     {
+        //dictionary screen etc
         return _play->touch(pt);
     }
 
@@ -1071,19 +1068,13 @@ bool PlayGame::touch_play(const Point &pt)
 {
     _controlsPlay.touched(pt);    //needed to highlight a touched control
 
-	if (_round.cursorAt(pt))
-	{
-		if (_round.cursorIsTop())
-        {
-			_round.moveLetterDown();
-			_round.cursorDown();
-        }
-		else
-		{
-			_round.moveLetterUp();
-			if (!_round.cursorPrev()) _round.cursorUp();
-		}
-	}
+    if (_round.touch(pt))
+        return true;
+
+    if (_pause_rect.contains(pt))
+    {
+        doPauseGame();
+    }
 //    else if (_gd._gamemusic_icon.contains(pt) && Locator::audio().musicEnabled())
 //    {
 //        IAudio &a = Locator::audio();
@@ -1091,10 +1082,6 @@ bool PlayGame::touch_play(const Point &pt)
 //        _gd._gamemusic_icon.setFrame(a.musicEnabled()?0:1);    //first frame (on) or second frame (off)
 //        a.pushPauseTrack();
 //    }
-    else if (_pause_rect.contains(pt))
-    {
-        doPauseGame();
-    }
 	else
 		if (!_doubleClick.done())
 		    commandTryWord();       //same as click (?) button
@@ -1159,13 +1146,13 @@ bool PlayGame::tap(const Point &pt)
 
     const int ctrl_id = _controlsPlay.tapped(pt);
 
-	if (_pPopup)
-	{
-		_pPopup->tap(pt);
-		handlePopup();
-		return true;
-	}
+    _round.tap(pt);
 
+    //NOTE: tests must be done in order for when popup is running
+    /////////////////////////////////////////////////////////////
+
+    //must check buttons available during popup, otherwise they animate but
+    //but don't update their state when pressed.
     if (ctrl_id == CTRLID_MENU)
     {
         //need to push a key command instaed of starting as it needs an Input ptr
@@ -1173,7 +1160,27 @@ bool PlayGame::tap(const Point &pt)
         ppg::pushSDL_EventKey(key);
         return true;
     }
-    else if (ctrl_id == CTRLID_NEXT || ctrl_id == CTRLID_EXIT)
+	else if (ctrl_id == CTRLID_MUSIC)
+	{
+	    Locator::audio().toggleMusic();
+        return true;
+	}
+	else if (ctrl_id == CTRLID_SFX)
+	{
+	    Locator::audio().toggleSfx();
+        return true;
+	}
+
+    //if popup running, handle those (after menu & sound buttons above)
+	if (_pPopup)
+	{
+		_pPopup->tap(pt);
+		handlePopup();
+		return true;
+	}
+
+    //handle remaining buttons when not running popup
+    if (ctrl_id == CTRLID_NEXT || ctrl_id == CTRLID_EXIT)
     {
         if (PG_END == _state)
         {
@@ -1202,16 +1209,6 @@ bool PlayGame::tap(const Point &pt)
 	else if (ctrl_id == CTRLID_TRYWORD)
 	{
 		commandTryWord();
-	}
-	else if (ctrl_id == CTRLID_MUSIC)
-	{
-	    Locator::audio().toggleMusic();
-        return true;
-	}
-	else if (ctrl_id == CTRLID_SFX)
-	{
-	    Locator::audio().toggleSfx();
-        return true;
 	}
 	else if (ctrl_id == CTRLID_SCROLL_UP)
 	{
@@ -1242,8 +1239,8 @@ void PlayGame::commandClearAllToTop()
 //command issued by player - to jumble all remaining letters in the top row
 void PlayGame::commandJumbleWord()
 {
-	if (_round.jumbleWord() && Locator::audio().sfxEnabled())
-		Mix_PlayChannel(-1,_gd._fxWoosh,0);	//sound only if not already moving etc
+	if (_round.jumbleWord())
+        Locator::audio().playSfx(AUDIO_SFX_JUMBLE);
 }
 //command issued by player - to check word selected against dictionary
 void PlayGame::commandTryWord()
@@ -1263,6 +1260,11 @@ void PlayGame::slideRoundButtonsIn()
     _controlsPlay.getControlSprite(CTRLID_TRYWORD)->startMoveTo(_posRButtonLeft, _posRButtonBot, ms);
     _controlsPlay.getControlSprite(CTRLID_TOTOP)->startMoveTo(_posRButtonRight, _posRButtonTop, ms);
     _controlsPlay.getControlSprite(CTRLID_LAST)->startMoveTo(_posRButtonRight, _posRButtonBot, ms);
+
+    //enable menu and sound buttons
+//    _controlsPlay.enableControl(true, CTRLID_MENU);
+//    _controlsPlay.enableControl(true, CTRLID_SFX);
+//    _controlsPlay.enableControl(true, CTRLID_MUSIC);
 }
 
 //start the animation to slide the four round action buttons,
@@ -1276,6 +1278,11 @@ void PlayGame::slideRoundButtonsOut()
     _controlsPlay.getControlSprite(CTRLID_TRYWORD)->startMoveTo(-btnWidth, _posRButtonBot, ms);
     _controlsPlay.getControlSprite(CTRLID_TOTOP)->startMoveTo(SCREEN_WIDTH, _posRButtonTop, ms);
     _controlsPlay.getControlSprite(CTRLID_LAST)->startMoveTo(SCREEN_WIDTH, _posRButtonBot, ms);
+
+    //disable menu and sound buttons
+//    _controlsPlay.enableControl(false, CTRLID_MENU);
+//    _controlsPlay.enableControl(false, CTRLID_SFX);
+//    _controlsPlay.enableControl(false, CTRLID_MUSIC);
 }
 
 //process any events not handled by the main input function
@@ -1287,15 +1294,14 @@ void PlayGame::handleEvent(SDL_Event &sdlevent)
 		{
 			if ( --_countdown < 11 || _pPopup)	//added pinger when in popup to warn user that timer still going...
 			{
-			    if (Locator::audio().sfxEnabled())
-                    Mix_PlayChannel(-1,_gd._fxCountdown,0);
+                Locator::audio().playSfx(AUDIO_SFX_PING);
 			}
 		}
 		else
 		if (USER_EV_END_MOVEMENT == sdlevent.user.code)
 		{
-		    //USER_EV_END_MOVEMENT uses data1 as a simple int(as a ptr to sprite
-            //internal data may not exist after end of movement).
+		    //USER_EV_END_MOVEMENT uses data1 as a simple int (as using a ptr to
+            //sprite internal data may not exist after end of movement).
             const int last = reinterpret_cast<int>(sdlevent.user.data1);
             if (last && last == _round.getLastId())
             {
@@ -1303,6 +1309,7 @@ void PlayGame::handleEvent(SDL_Event &sdlevent)
                 slideRoundButtonsIn();
             }
 		}
+		else
 		if (USER_EV_END_COUNTDOWN == sdlevent.user.code)
 		{
 			if (!_bAbort && foundEnoughWords() 					//must be at least one 6 letter word found to continue
@@ -1317,9 +1324,8 @@ void PlayGame::handleEvent(SDL_Event &sdlevent)
 				if (_gd._mode <= GM_REWORD && foundAllWords())
 				{
 					//wow! all words got so bonus and go to next level
-                    if (Locator::audio().sfxEnabled())
-                        Mix_PlayChannel(-1,_gd._fxBonus,0);
-					int bonus = SCORE_BONUS + (_countdown*SCORE_SECONDS);	//say: 100 + remaining seconds * 10
+                    Locator::audio().playSfx(AUDIO_SFX_ALLFOUND);
+					const int bonus = SCORE_BONUS + (_countdown*SCORE_SECONDS);	//say: 100 + remaining seconds * 10
 					_gd._score.addCurrScore(bonus);
 					showSuccess(SU_BONUS, bonus);
 				}
@@ -1332,13 +1338,12 @@ void PlayGame::handleEvent(SDL_Event &sdlevent)
 					//display them in diff colour to show player what they missed
 					fillRemainingWords();
 
-                    if (Locator::audio().sfxEnabled())
-                        Mix_PlayChannel(-1,_gd._fx6found,0);
+                    Locator::audio().playSfx(AUDIO_SFX_FOUND6);
 
 					if (_gd._mode <= GM_REWORD)
 					{
 					    //if arcade, set arcade bonus unless got a all-letter word, give reword bonus
-					    int bonus = (_maxwordlen==_longestWordLen)?SCORE_BONUS:SCORE_ARCADE;
+					    const int bonus = (_maxwordlen==_longestWordLen)?SCORE_BONUS:SCORE_ARCADE;
 						_gd._score.addCurrScore(bonus);
 						showSuccess((_maxwordlen==_longestWordLen)?SU_GOT6:SU_ARCADE, bonus);
 					}
@@ -1358,8 +1363,6 @@ void PlayGame::handleEvent(SDL_Event &sdlevent)
 						}
 					}
 				}
-				_gd._score.addCurrWords(1);
-
                 _controlsPlay.showControl(true, CTRLID_MENU);
                 _controlsPlay.showControl(false, CTRLID_EXIT);
 
@@ -1367,24 +1370,35 @@ void PlayGame::handleEvent(SDL_Event &sdlevent)
 			}
 			else
 			{
-				//oh dear, ran out of time (or player forced exit)
+				//oh dear, ran out of time (or player forced exit, or save&exit)
 
 				//fill rest of found words with words to be found and
 				//display them in diff colour to show player what they missed
 				fillRemainingWords();
 
-				if (_gd._score.isHiScore(_gd._mode, _gd._diffLevel) != -1)
+				if (_bAbort || _bSaveExit)
+				{
+				    if (_bSaveExit)
+				    {
+                        Locator::audio().playSfx(AUDIO_SFX_FOUND6);
+                        showSuccess(SU_SAVEEXIT);
+				    }
+                    else
+                    {
+                        Locator::audio().playSfx(AUDIO_SFX_NOT6,2);	//play 3 times if no hiscore
+                        showSuccess(SU_GAMEOVER);
+                    }
+				}
+				else if (_gd._score.isHiScore(_gd._mode, _gd._diffLevel) != -1)
 				{
 					//excellent! player got on scoreboard
-                    if (Locator::audio().sfxEnabled())
-                        Mix_PlayChannel(-1,_gd._fx6notfound,1);	//play twice if got on hiscore
+                    Locator::audio().playSfx(AUDIO_SFX_NOT6,1);	//play twice if got on hiscore
 					showSuccess(SU_GAMEOVER);
 				}
 				else
 				{
 					//oh dear, ran out of time without a high enough score
-                    if (Locator::audio().sfxEnabled())
-                        Mix_PlayChannel(-1,_gd._fx6notfound,2);	//play 3 times if no hiscore
+                    Locator::audio().playSfx(AUDIO_SFX_NOT6,2);	//play 3 times if no hiscore
 					showSuccess(SU_BADLUCK);
 				}
 
@@ -1397,6 +1411,7 @@ void PlayGame::handleEvent(SDL_Event &sdlevent)
             //none of the round letter action buttons should now be visible
             _controlsPlay.showGroup(false, CTRLGRP_LETTERS);
 		}
+		else
 		if (USER_EV_EXIT_SUB_SCREEN == sdlevent.user.code)
 		{
 		    //pop latest game state change (e.g PlayGameDict or PlayGamePause)
@@ -1425,17 +1440,24 @@ void PlayGame::doMoveOn()
 		}
 		else
 		{
-			statePop(); 				//out of PG_END state
+			statePop(); 			//out of PG_END state
 			newLevel();
 		}
 		break;
 	case SU_BADLUCK:				//Bad Luck! - Out of time
 		exit(ST_MENU);
 		break;
+	case SU_SAVEEXIT:
+        _gd.saveQuickState();       //save before back to menu
+        exit(ST_MENU);
+        break;
 
 	default:
 	case SU_GAMEOVER:				//Game Over - You're a high scorer!
-		exit(ST_HIGHEDIT);
+        if (_gd._score.isHiScore(_gd._mode, _gd._diffLevel) != -1)
+            exit(ST_HIGHEDIT);
+        else
+            exit(ST_MENU);
 		break;
 	}
 }
@@ -1659,7 +1681,7 @@ bool PlayGame::newLevel()
 	}
 
 	_round.setWord(newword, Resource::image("roundel_letters.png"), _xScratch+2, _yScratchTop+2, 6, true);
-	_round.setTopAndBottomYPos(_yScratchTop+2, _yScratchBot+2);
+	_round.setBottomPos(_xScratch+2, _yScratchBot+2);
 	_round.jumbleWord(false);		//randomize the letters
 	_round.startMoveFrom(Screen::width(), 0, 15, 100, 18, 0);//animate roundels into screen pos
 
@@ -1697,6 +1719,8 @@ bool PlayGame::newLevel()
 //	_gd._gamemusic_icon.setFrame(Locator::audio().musicEnabled()?0:1);    //first frame (on) or second frame (off)
 
     calcArcadeNeededWords();    //arcade mode highlights
+
+    state_end_setup_scrollers();    //removes any scroll buttons used in end game state
 
 	startCountdown();
 	clearEventBuffer();	//start fresh each level
@@ -1790,9 +1814,15 @@ void PlayGame::tryWord()
 		else wordlen = -1;	//speeder or timetrial badWord sound as < 6 letters
 	}
 
-	//must be GM_ARCADE or GM_REWORD or bad word
+ 	//must be GM_ARCADE or GM_REWORD or bad word
 	if (wordlen >= _shortestWordLen && wordlen <= _longestWordLen)	//is 3,4,5, or 6 (or whatever)
 	{
+	    if ( _gd._words.wordsOfLength(_longestWordLen) == 1)
+	    {
+	        //found first reword for this level so add 1 to word count
+			_gd._score.addCurrWords(1);
+	    }
+
 		_gd._score.addCurrScore( (_longestWordLen == wordlen)?SCORE_WORD6:SCORE_WORD );	//more for a 6 letter word
 		_round.clearAllToTop(true);	//remove hit word
 
@@ -1802,15 +1832,13 @@ void PlayGame::tryWord()
 			return;	//exit before sound, as success() plays fanfare sound
 		}
 		//it's a simple word find
-	    if (Locator::audio().sfxEnabled())
-            Mix_PlayChannel(-1,(_longestWordLen == wordlen)?_gd._fx6found:_gd._fxFound,0);
+        Locator::audio().playSfx((_longestWordLen == wordlen)?AUDIO_SFX_FOUND6:AUDIO_SFX_FOUNDNON6);
 
 		calcArcadeNeededWords();
 	}
 	else	//0=already found, -1=not a 6 or in sub word list
 	{
-	    if (Locator::audio().sfxEnabled())
-            Mix_PlayChannel(-1,(0 == wordlen)?_gd._fxOldword:_gd._fxBadword,0);
+        Locator::audio().playSfx((0 == wordlen)?AUDIO_SFX_ALREADYDONE:AUDIO_SFX_NOTINDICT);
 		_round.clearAllToTop(false);	//remove bad word - dont move cursor
 	}
 }

@@ -122,3 +122,46 @@ void SpriteMgr::draw(Screen* screen)
 }
 
 
+
+OneShot::OneShot()
+{
+
+}
+
+OneShot::~OneShot()
+{
+}
+
+void OneShot::event(int, int)
+{
+}
+
+void event2(int, int)
+{
+}
+
+void OneShot::add(Sprite* spr)
+{
+    if (_unused.size())
+    {
+        int i = _unused.back();
+        _unused.erase(_unused.end()-1);
+        _list[i] = spr;
+    }
+    else
+        _list.push_back(spr);
+
+    spr->addObserver(&event2);
+}
+
+void OneShot::work(void)
+{
+}
+
+void OneShot::draw(Screen* s)
+{
+}
+
+
+
+

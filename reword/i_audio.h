@@ -44,6 +44,10 @@ public:
 	virtual bool hasMusicTracks() = 0;
 	virtual bool isPlayingMusic() = 0;
 	virtual bool isActuallyPlayingMusic() = 0;
+
+    virtual int addSfx(const std::string &, unsigned int) = 0;
+	virtual void playSfx(unsigned int, unsigned int = 0) = 0;
+	virtual void playSfx(const std::string &, unsigned int = 0) = 0;
 };
 
 #endif // I_AUDIO_H_INCLUDED

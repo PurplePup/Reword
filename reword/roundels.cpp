@@ -49,8 +49,26 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <algorithm>
 #include <iostream>
 
-Roundels::Roundels() : _x(0), _y(0),
-					_yScratchTop(28), _yScratchBot(73) //legacy GP2X positions
+
+//single Roundel copy
+Roundel& Roundel::operator=(const Roundel &r)
+{
+    // Check for self-assignment
+    if (this != &r)      // not same object
+    {
+        this->_letter = r._letter;
+        this->_pos = r._pos;
+        this->_spr = new Sprite(*r._spr);
+    }
+    return *this;
+}
+
+//now Roundels
+
+Roundels::Roundels() :
+    _xScratchTop(0), _yScratchTop(28), //legacy GP2X y positions
+    _xScratchBot(0), _yScratchBot(73),
+    _bCopyBot(false)
 {
 }
 
@@ -59,19 +77,104 @@ Roundels::~Roundels()
 	cleanUp();
 }
 
+//init the level/screen
+void Roundels::init(Input * /*input*/)
+{
+    cleanUp();
+}
+
+// drawing operation
+void Roundels::render(Screen* s)
+{
+	tRoundVect::iterator it;
+	for (it = _top.begin(); it != _top.end(); ++it)
+        if (*it)
+            (*it)->_spr->draw(s);
+
+	for (it = _bot.begin(); it != _bot.end(); ++it)
+        if (*it)
+            (*it)->_spr->draw(s);
+}
+
+// other processing
+void Roundels::work(Input* input, float speedFactor)
+{
+    (void)(input);
+    (void)(speedFactor);
+
+	tRoundVect::iterator it;
+	bool bMoving = false;
+	for (it = _top.begin(); it != _top.end(); ++it)
+	{
+		if (*it) 	//letter exists in this top position
+		{
+			(*it)->_spr->work();
+			bMoving |= (*it)->_spr->isMoving();
+		}
+	}
+
+	for (it = _bot.begin(); it != _bot.end(); ++it)
+	{
+		if (*it) 	//letter exists in this bottom position
+		{
+			(*it)->_spr->work();
+			bMoving |= (*it)->_spr->isMoving();
+		}
+	}
+
+	_bMoving = bMoving;	//if any are moving, something/someone might need to know
+}
+
+// notification of button/input state change
+void Roundels::button(Input* /*input*/, ppkey::eButtonType /*b*/)
+{
+}
+
+// screen touch (press)
+bool Roundels::touch(const Point &pt)
+{
+    _lastTouch = cursorAt(pt);
+    return _lastTouch != 0;
+}
+
+// screen touch (release)
+bool Roundels::tap(const Point &pt)
+{
+    if (_lastTouch && (cursorAt(pt) == _lastTouch))
+    {
+        if (cursorIsTop())
+        {
+            Locator::audio().playSfx(AUDIO_SFX_ROUNDEL);
+            moveLetterDown();
+            cursorDown();
+        }
+        else
+        {
+            Locator::audio().playSfx(AUDIO_SFX_ROUNDEL);
+            moveLetterUp();
+            if (!cursorPrev()) cursorUp();
+        }
+        _lastTouch = 0;
+        return true;
+    }
+    return false;
+}
+
 void Roundels::cleanUp()
 {
 	tRoundVect::iterator it;
 	for (it = _top.begin(); it != _top.end(); ++it) if (*it) delete *it;
 	_top.clear();
 
-	for (it = _bot.begin(); it != _bot.end(); ++it) if (*it) delete *it;
+    if (!_bCopyBot)
+        for (it = _bot.begin(); it != _bot.end(); ++it) if (*it) delete *it;
 	_bot.clear();
-	_botLength = 0;
+
+	_botLength = _botLengthMax = 0;
 
 	_last.clear();	//only uses a copy of _top or _bot pointers so doesnt delete
 
-	_x = _y = 0;
+	_xScratchTop = _yScratchTop = _xScratchBot = _yScratchBot = 0;
 	_bMoving = false;
 }
 
@@ -85,7 +188,7 @@ void Roundels::cleanUp()
 //	other more advanced positioning must be done manually using the
 //	accessor functions after the setWord function returns.
 //bHoriz - default true for horizontal letters, false for vertical
-void Roundels::setWord(std::string &wrd,
+void Roundels::setWord(const std::string &wrd,
 					   tSharedImage &letters,
 					   int x, int y,
 					   int gap,
@@ -98,10 +201,11 @@ void Roundels::setWord(std::string &wrd,
 	_cx = 0; //left
 	_bCursorTop = true;	//top
 
-	_x = x;
-	_y = y;
+	_xScratchTop = x;
+	_yScratchTop = y;
 	_gap = gap;
 	_bHoriz = bHoriz;
+	_botLengthMax = _word.length();
 
 	for(int i = 0; i < (int)wrd.length(); ++i)
 	{
@@ -109,9 +213,6 @@ void Roundels::setWord(std::string &wrd,
 		Roundel *prnd = new Roundel();
 		Sprite *pspr = new Sprite(letters);
 
-//		pspr->createThisFromImage(letters, wrd[i]-65, 255);
-//		pspr->setTileSize(letters.tileW(), letters.tileH());
-//		pspr->setFrameCount(26);
 		pspr->setFrame(wrd[i]-65);
 
 		//each letter has id of initial index (1..n), then use getLastId()
@@ -148,39 +249,42 @@ int Roundels::getLastId()
     return 0;
 }
 
-void Roundels::setTopAndBottomYPos(int yPosTop, int yPosBot)
+void Roundels::setBottomPos(int xPosBot, int yPosBot)
 {
-	_yScratchTop = yPosTop;
+	_xScratchBot = xPosBot;
 	_yScratchBot = yPosBot;
 }
 
+void Roundels::setBottomMax(int iMax)
+{
+    if (iMax > (int)_word.length())
+        iMax = _word.length();
+    _botLengthMax = iMax;
+}
+
 //center the roundels horizontally on screen (no need to specify x position)
-void Roundels::setWordCenterHoriz(std::string wrd,
+void Roundels::setWordCenterHoriz(const std::string &wrd,
 					   tSharedImage &letters,
 					   int y,				//no x if centered horiz
 					   int gap)
 {
-	int newX, newY;
-
 	//calc new start position of first roundel based on centered length of all roundels in the word
-	newX = ( Screen::width() - (((letters->tileW()+gap)*wrd.length())-gap) ) /2;
-	newY = y;
+	const int newX = ( Screen::width() - (((letters->tileW()+gap)*wrd.length())-gap) ) /2;
+	const int newY = y;
 
 	//pass new pos to the real setWord function
 	setWord(wrd, letters, newX, newY, gap, true);
 }
 
 //center the roundels vertically on screen (no need to specify y position)
-void Roundels::setWordCenterVert(std::string wrd,
+void Roundels::setWordCenterVert(const std::string &wrd,
 					   tSharedImage &letters,
 					   int x,				//no y if centered vert
 					   int gap)
 {
-	int newX, newY;
-
 	//calc new start position of first roundel based on centered length of all roundels in the word
-	newX = x;
-	newY = ( Screen::height() - (((letters->tileH()+gap)*wrd.length())-gap) ) /2;
+	const int newX = x;
+	const int newY = ( Screen::height() - (((letters->tileH()+gap)*wrd.length())-gap) ) /2;
 
 	//pass new pos to the real setWord function
 	setWord(wrd, letters, newX, newY, gap, false);
@@ -210,41 +314,8 @@ void Roundels::startMoveFrom(int deltaX, int deltaY,
 	}
 }
 
-//for all the sprites in the list of letters, do work
-void Roundels::work()
-{
-	tRoundVect::iterator it;
-	bool bMoving = false;
-	for (it = _top.begin(); it != _top.end(); ++it)
-	{
-		if (*it) 	//letter exists in this top position
-		{
-			(*it)->_spr->work();
-			bMoving |= (*it)->_spr->isMoving();
-		}
-	}
 
-	for (it = _bot.begin(); it != _bot.end(); ++it)
-	{
-		if (*it) 	//letter exists in this bottom position
-		{
-			(*it)->_spr->work();
-			bMoving |= (*it)->_spr->isMoving();
-		}
-	}
-
-	_bMoving = bMoving;	//if any are moving, something/someone might need to know
-}
-
-//for all the sprites in the list of letters, do rendering
-void Roundels::draw(Surface *s)
-{
-	tRoundVect::iterator it;
-	for (it = _top.begin(); it != _top.end(); ++it) if (*it) (*it)->_spr->draw(s);
-	for (it = _bot.begin(); it != _bot.end(); ++it) if (*it) (*it)->_spr->draw(s);
-}
-
-//determine if the word (in _top) is in the correct order, ie. matches the target 6 letter _word
+//determine if the word (in _top) is in the correct order, ie. matches the target N letter _word
 bool Roundels::isInOrder()
 {
 	int n = 0;
@@ -377,11 +448,11 @@ void Roundels::recalcXYPosition(Roundel *r)
 }
 int Roundels::calcXPos(Roundel *r)
 {
-	return _x+(r->_pos*((_bHoriz)?(r->_spr->tileW()+_gap):0));
+	return _xScratchTop+(r->_pos*((_bHoriz)?(r->_spr->tileW()+_gap):0));
 }
 int Roundels::calcYPos(Roundel *r)
 {
-	return _y+(r->_pos*((!_bHoriz)?(r->_spr->tileH()+_gap):0));
+	return _yScratchTop+(r->_pos*((!_bHoriz)?(r->_spr->tileH()+_gap):0));
 }
 
 //move the selected letter (_cx) to the first
@@ -390,6 +461,15 @@ void Roundels::moveLetterUp()
 {
 	//if letter already moved up or is moving so wait (as can cause undefined behaviour)
 	if (isMoving() || !_bot[_cx]) return;
+
+    if (_bCopyBot)
+    {
+        //need to remove from bottom, but leave top alone
+        delete _bot[_cx];
+        _bot[_cx] = 0;
+        _botLength--;
+        return;
+    }
 
 	int xx;
 	for (xx=0; xx < (int)_word.length(); ++xx)
@@ -403,8 +483,8 @@ void Roundels::moveLetterUp()
 			_top[xx]->_pos = xx;
 			_bot[_cx] = 0;
 
-			int endX = _x+(xx*(_top[xx]->_spr->tileW()+_gap));
-			int endY = _yScratchTop;	//SCRATCHY1+2;
+			int endX = _xScratchTop+(xx*(_top[xx]->_spr->tileW()+_gap));
+			int endY = _yScratchTop;
 
 			float velX, velY;
 			Uint32 rate = _top[xx]->_spr->calcXYRate(200, oldX, oldY, endX, endY, velX, velY);
@@ -422,6 +502,7 @@ void Roundels::moveLetterDown()
 {
 	//if letter already moved down or is moving so wait (as can cause undefined behaviour)
 	if (isMoving() || !_top[_cx]) return;
+    if (_botLength >= _botLengthMax) return;    //can't move any more
 
 	int xx;
 	for (xx=0; xx < (int)_word.length(); ++xx)
@@ -431,16 +512,26 @@ void Roundels::moveLetterDown()
 			int oldX = (int)(_top[_cx]->_spr->getXPos());
 			int oldY = (int)(_top[_cx]->_spr->getYPos());
 
-			_bot[xx] = _top[_cx];
-			_bot[xx]->_pos = xx;
-			_top[_cx] = 0;
+            if (_bCopyBot)
+            {
+                //duplicate (copy) sprite
+                Roundel *r = new Roundel();
+                *r = *(_top[_cx]);
+                _bot[xx] = r;
+            }
+            else
+            {
+                _bot[xx] = _top[_cx];
+                _bot[xx]->_pos = xx;
+                _top[_cx] = 0;
+			}
 
-			int endX = _x+(xx*(_bot[xx]->_spr->tileW()+_gap));
-			int endY = _yScratchBot; //SCRATCHY2+2;
+            int endX = _xScratchBot+(xx*(_bot[xx]->_spr->tileW()+_gap));
+            int endY = _yScratchBot;
 
-			float velX, velY;
-			Uint32 rate = _bot[xx]->_spr->calcXYRate(400, oldX, oldY, endX, endY, velX, velY);
-			_bot[xx]->_spr->startMoveTo(endX, endY, rate, 0, velX, velY);
+            float velX, velY;
+            Uint32 rate = _bot[xx]->_spr->calcXYRate(400, oldX, oldY, endX, endY, velX, velY);
+            _bot[xx]->_spr->startMoveTo(endX, endY, rate, 0, velX, velY);
 
             _botLength++;
 			return;
@@ -537,7 +628,7 @@ void Roundels::cursorDown()
 	cursorLast();
 }
 
-bool Roundels::cursorAt(Point pt)
+int Roundels::cursorAt(Point pt)
 {
 	int i;
 	for (i = 0; i < (signed) _top.size(); i++)
@@ -546,7 +637,7 @@ bool Roundels::cursorAt(Point pt)
 		{
 			_bCursorTop = true;
 			_cx = i;
-			return true;
+			return i+1;
 		}
 	}
 	for(i = _bot.size()-1; i>=0; i--)
@@ -557,12 +648,12 @@ bool Roundels::cursorAt(Point pt)
 			{
 				_bCursorTop = false;
 				_cx = i;
-				return true;
+				return i+1;
 			}
 			break; // only the last letter on the bottom is clickable
 		}
 	}
-	return false;
+	return 0;
 }
 
 //move the letters currently on the bottom row back

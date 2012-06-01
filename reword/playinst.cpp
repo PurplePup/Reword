@@ -73,14 +73,14 @@ void PlayInst::init(Input *input)
     {
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_up.png")));
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2);
-    p->_sigEvent.Connect(this, &PlayInst::ControlEvent);
+    p->_sigEvent2.Connect(this, &PlayInst::ControlEvent);
     Control c(p, CTRLID_SCROLL_UP, CTRLGRP_SCROLL, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsInst.add(c);
     }
     {
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_down.png")));
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_BOT-p->tileH()-2);
-    p->_sigEvent.Connect(this, &PlayInst::ControlEvent);
+    p->_sigEvent2.Connect(this, &PlayInst::ControlEvent);
     Control c(p, CTRLID_SCROLL_DOWN, CTRLGRP_SCROLL, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsInst.add(c);
     }
@@ -98,7 +98,7 @@ void PlayInst::init(Input *input)
     {
     boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_exit_small.png")));
     p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
-    p->_sigEvent.Connect(this, &PlayInst::ControlEvent);
+    p->_sigEvent2.Connect(this, &PlayInst::ControlEvent);
     Control c(p, CTRLID_EXIT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsInst.add(c);
     }
@@ -126,7 +126,7 @@ void PlayInst::render(Screen *s)
 	ppg::blit_surface(_menubg->surface(), NULL, s->surface(), 0, 0);
 
 	//draw screen title
-	_title.draw(s);
+	_title.render(s);
 
 	int yyStart = BG_LINE_TOP + 5;	//gap below roundels to put title
 	int helpYpos = BG_LINE_BOT+((SCREEN_HEIGHT-BG_LINE_BOT-_gd._fntClean.height())/2);
@@ -175,7 +175,7 @@ void PlayInst::render(Screen *s)
 
 void PlayInst::work(Input *input, float speedFactor)
 {
-	_title.work();
+	_title.work(input, speedFactor);
 
 	//animate the roundel title if it's not moving and
 	//we have waited long enough since it animated last

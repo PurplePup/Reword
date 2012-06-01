@@ -242,10 +242,11 @@ bool Words::load(const std::string &wordFile, unsigned int rndSeed, unsigned int
 		if (rndSeed) g_rndSeed = rndSeed; //srand(rndSeed);
 		std::random_shuffle(_vecTarget.begin(), _vecTarget.end(), pwrandom);
 
-		//output the start of the sorted list to check order
-/*		std::cout << "DEBUG: rnd seed = " << rndSeed << std::endl;
+/*		//output the start of the sorted list to check order
+		std::cout << "DEBUG: rnd seed = " << rndSeed << std::endl;
 		std::cout << "List first 20..." << std::endl;
-		std::copy(_vecTarget.begin(), _vecTarget.begin()+20, std::ostream_iterator<std::string>(std::cout, "\n"));	//list first 20*/
+		std::copy(_vecTarget.begin(), _vecTarget.begin()+20, std::ostream_iterator<std::string>(std::cout, "\n"));	//list first 20
+*/
 //#endif
 		//set the 6word iterator to start (or a specific position)
 		if (startAtWord >=  (unsigned int)_vecTarget.size())

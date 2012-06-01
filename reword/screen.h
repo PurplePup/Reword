@@ -28,7 +28,7 @@
 #include "error.h"
 #include "surface.h"
 
-class Screen :public Error, public Surface
+class Screen : public Error, public Surface
 {
 public:
     // Construct 16 bit colour screen of given size

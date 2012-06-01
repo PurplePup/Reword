@@ -16,7 +16,6 @@
 #include "words.h"		//SDL.h should be declared before this
 #include "score.h"
 #include "sprite.h"
-#include "resource.h"
 
 //loadable game options and set using the options screen
 struct GameOptions
@@ -54,14 +53,16 @@ class GameData
 public:
 	GameData(GameOptions &opt);
 	~GameData();
+	void init();
+
 	bool isLoaded() {return _init;}
 	void setDiffLevel(eGameDiff newDiff);
 
 	void saveQuickState();
 	bool loadQuickState();
 
-	//Resources
-	//////////////////////////////
+	//Resources - not in resource handler
+	/////////////////////////////////////
 
 	//fonts
 	FontTTF _fntTiny;
@@ -70,32 +71,6 @@ public:
 	FontTTF _fntBig;
 	FontTTF _fntClean;
 	FontTTF _fontTiny;
-
-	//backgrounds & images
-//	Image _menubg;
-//	Image _menubg_plain;
-//	Image _menu_arcade;
-//	Image _menu_reword;
-//	Image _menu_speeder;
-//	Image _menu_timetrial;
-//	Image _scorebar;
-//	Image _game_arcade;
-//	Image _game_reword;
-//	Image _game_speeder;
-//	Image _game_timetrial;
-//	Image _gamemenu;    //in-game popup menu
-
-//	ImageAnim _cursor;
-//	ImageAnim _letters;
-//	ImageAnim _boxes;
-//	ImageAnim _scratch; //multiple frames (but not animated)
-//
-//	Sprite _arrowUp;
-//	Sprite _arrowDown;
-//	Sprite _arrowLeft;
-//	Sprite _arrowRight;
-//	Sprite _star;
-//	Sprite _gamemusic_icon;        //2 frames, not animated
 
 	//sound effectes etc
 	Mix_Chunk *_fxCountdown;	//countdown ping noise
@@ -106,6 +81,8 @@ public:
 	Mix_Chunk *_fxFound;		//non 6 letter word found
 	Mix_Chunk *_fxBonus;		//all words found in time
 	Mix_Chunk *_fxWoosh;		//jumble letters sound
+	Mix_Chunk *_fxRoundel;		//roundel press
+	Mix_Chunk *_fxControl;		//control press
 
 	Mix_Music *_musicMenu;		//menu music, fades in game
 
@@ -113,8 +90,6 @@ public:
 	///////////////////////////////
 
     GameOptions &_options;
-
-	ResourceImg	_images;
 
 	int			_mainmenuoption;	// (0=play, 1=level, 2=hiscore etc)
 
@@ -136,6 +111,7 @@ public:
 	int			_current_w;			//used to store screen width
 
 	bool 		_bTouch;			//true if touchscreen/mouse detected
+    std::string _prev_inits;        //for scoreboard
 
 private:
 	bool		_init;

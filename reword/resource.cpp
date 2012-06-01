@@ -5,8 +5,8 @@ File:			resource.cpp
 
 Class impl:		Resource
 
-Description:	A image cache to hold and provide images for sprites and static image
-                objects
+Description:	A image/resource cache to hold and provide images for sprites and
+                static image objects etc
 
 Author:			Al McLuckie (al-at-purplepup-dot-org)
 

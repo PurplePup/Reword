@@ -10,6 +10,7 @@
 #include <string>
 #include <deque>
 #include <memory>
+#include <vector>
 
 #ifdef _USE_MIKMOD
 #include <mikmod.h>
@@ -58,6 +59,10 @@ public:
 	virtual void pauseTrack() {}
 	virtual bool isPlayingMusic() { return false; }
 	virtual bool isActuallyPlayingMusic() { return false; }
+
+    virtual int addSfx(const std::string &, unsigned int) { return -1; }
+	virtual void playSfx(unsigned int, unsigned int = 0) {}
+	virtual void playSfx(const std::string &, unsigned int = 0) {}
 };
 
 //options and settings for in-game working audio settings
@@ -118,6 +123,10 @@ public:
 	virtual bool isPlayingMusic() { return _bPlayingTrack; }
 	virtual bool isActuallyPlayingMusic() { return Mix_PlayingMusic(); }
 
+    virtual int addSfx(const std::string &filename, unsigned int reqPos);
+	virtual void playSfx(unsigned int iSnd, unsigned int count = 0);
+	virtual void playSfx(const std::string &sound, unsigned int count = 0);
+
 protected:
 	void loadTracks(const std::string &baseDir);
 	std::string getNextTrack();
@@ -135,19 +144,23 @@ protected:
 #endif
 
 protected:
-	bool		_init;
-	Mix_Chunk	*_volTest;
+	bool		            _init;
+	Mix_Chunk	            *_volTest;
 
 	//music track vars
-	Mix_Music 	*_musicTrack;
-	int			_lastTrack;
-	std::string _baseTrackDir;
+	Mix_Music 	            *_musicTrack;
+	int			            _lastTrack;
+	std::string             _baseTrackDir;
 	std::deque<std::string> _trackList;
-	bool		_bPlayingTrack;		//set true if start playing
+	bool		            _bPlayingTrack;		//set true if start playing
 
-    AudioOptions _opt;
-    Sint16		_sfxVolSave, _musicVolSave;  //vol prev to mute
+    AudioOptions            _opt;
+    Sint16		            _sfxVolSave, _musicVolSave;  //vol prev to mute
 
+    //sound effects list
+    // maybe store the filename too for simpler but slower lookup
+    // so would need to have vect of struct { string, Mix_Chunk };
+    std::vector<Mix_Chunk *> _sfxList;
 };
 
 #endif //_AUDIO_H

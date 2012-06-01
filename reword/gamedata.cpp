@@ -44,11 +44,13 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 GameData::GameData(GameOptions &opt) : _options(opt), _bTouch(false),  _init(false)
 {
+    init();
+}
+
+void GameData::init()
+{
 	//initialise, load everything needed...
 	bool bErr = false;
-
-	Resource::initImage();
-	Resource::registerImage(&_images);
 
 	//FONTS
 	bErr |= !_fntTiny.load(RES_FONTS + "FreeSansBold.ttf", FONT_TINY);
@@ -56,57 +58,6 @@ GameData::GameData(GameOptions &opt) : _options(opt), _bTouch(false),  _init(fal
 	bErr |= !_fntSmall.load(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_SMALL);
 	bErr |= !_fntMed.load(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_MEDIUM);
 	bErr |= !_fntBig.load(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_BIG);
-
-    bErr |= !Resource::image().precache("roundel_letters.png", 255, 26);
-
-
-	//SINGLE FRAME BACKGROUNDS & IMAGES
-	bErr |= !Resource::image().precache("menubg.png");		//solid background (no alpha)
-	bErr |= !Resource::image().precache("menubg_plain.png");
-	bErr |= !Resource::image().precache("menu_arcade.png");
-	bErr |= !Resource::image().precache("menu_reword.png");
-	bErr |= !Resource::image().precache("menu_speeder.png");
-	bErr |= !Resource::image().precache("menu_timetrial.png");
-	bErr |= !Resource::image().precache("scorebar.png");
-	bErr |= !Resource::image().precache("game_arcade.png");
-	bErr |= !Resource::image().precache("game_reword.png");
-	bErr |= !Resource::image().precache("game_speeder.png");
-	bErr |= !Resource::image().precache("game_timetrial.png");
-	bErr |= !Resource::image().precache("popup_menu.png", 255);
-
-	//IMAGE TILES (MULTIPLE TILE IMAGES)
-    bErr |= !Resource::image().precache("cursors.png", -1, 3);
-
-	bErr |= !Resource::image().precache("boxes.png", -1, 24, Image::TILE_VERT);
-
-	bErr |= !Resource::image().precache("scratch.png", -1, 7);
-
-	//SPRITES
-	bErr |= !Resource::image().precache("btn_round_scroll_up.png", 0, 5);
-	bErr |= !Resource::image().precache("btn_round_scroll_down.png", 0, 5);
-	bErr |= !Resource::image().precache("btn_round_scroll_left.png", 0, 5);
-	bErr |= !Resource::image().precache("btn_round_scroll_right.png", 0, 5);
-	bErr |= !Resource::image().precache("btn_round_scroll_up_small.png", 0, 5);
-	bErr |= !Resource::image().precache("btn_round_scroll_down_small.png", 0, 5);
-
-	bErr |= !Resource::image().precache("btn_round_word_shuffle.png", 0, 5);
-	bErr |= !Resource::image().precache("btn_round_word_try.png", 0, 5);
-	bErr |= !Resource::image().precache("btn_round_word_totop.png", 0, 5);
-	bErr |= !Resource::image().precache("btn_round_word_last.png", 0, 5);
-
-    bErr |= !Resource::image().precache("btn_square_menu.png", 0, 5);
-    bErr |= !Resource::image().precache("btn_square_exit.png", 0, 5);
-    bErr |= !Resource::image().precache("btn_square_next.png", 0, 5);
-    bErr |= !Resource::image().precache("btn_square_back_small.png", 0, 5);
-    bErr |= !Resource::image().precache("btn_square_exit_small.png", 0, 5);
-    bErr |= !Resource::image().precache("btn_square_next_small.png", 0, 5);
-    bErr |= !Resource::image().precache("btn_square_yes_no_small.png", 0, 9);
-    bErr |= !Resource::image().precache("btn_square_diff.png", 0, 13);
-
-    bErr |= !Resource::image().precache("btn_round_music.png", 0, 9);
-    bErr |= !Resource::image().precache("btn_round_fx.png", 0, 9);
-
-	bErr |= !Resource::image().precache("star.png", 255, 7);
 
 
 	//SOUNDS - no wrapper class so need to free on exit
@@ -118,6 +69,8 @@ GameData::GameData(GameOptions &opt) : _options(opt), _bTouch(false),  _init(fal
 	_fxFound = Mix_LoadWAV(std::string(RES_SOUNDS + "blipper.wav").c_str());	//found a non 6 letter word
 	_fxBonus = Mix_LoadWAV(std::string(RES_SOUNDS + "fanfare.wav").c_str());	//all words done before countdown
 	_fxWoosh = Mix_LoadWAV(std::string(RES_SOUNDS + "woosh2.wav").c_str());		//jumble letters sound
+	_fxRoundel = Mix_LoadWAV(std::string(RES_SOUNDS + "blipper.wav").c_str());	//roundel press
+	_fxControl = Mix_LoadWAV(std::string(RES_SOUNDS + "blipper.wav").c_str());	//control press
 
 //#ifdef _USE_MIKMOD
 	_musicMenu = Mix_LoadMUS(std::string(RES_SOUNDS + "cascade.mod").c_str());	//in sounds, not music dir

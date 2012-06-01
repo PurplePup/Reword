@@ -153,3 +153,35 @@
 #define RES_MUSIC       (RES_BASE + std::string("music/"))
 #define RES_SOUNDS      (RES_BASE + std::string("sounds/"))
 #define RES_WORDS       (RES_BASE + std::string("words/"))
+
+
+//some resources
+#define AUDIO_SFX_PING          0
+#define AUDIO_SFX_PING_NAME     "ping.wav"
+#define AUDIO_SFX_NOTINDICT     1
+#define AUDIO_SFX_NOTINDICT_NAME "boing.wav"
+#define AUDIO_SFX_ALREADYDONE     2
+#define AUDIO_SFX_ALREADYDONE_NAME "beepold.wav"
+#define AUDIO_SFX_NOT6          3
+#define AUDIO_SFX_NOT6_NAME     "honk.wav"
+#define AUDIO_SFX_FOUND6         4
+#define AUDIO_SFX_FOUND6_NAME "binkbink.wav"
+#define AUDIO_SFX_FOUNDNON6         5
+#define AUDIO_SFX_FOUNDNON6_NAME "blipper.wav"
+#define AUDIO_SFX_ALLFOUND         6
+#define AUDIO_SFX_ALLFOUND_NAME "fanfare.wav"
+#define AUDIO_SFX_JUMBLE         7
+#define AUDIO_SFX_JUMBLE_NAME "woosh2.wav"
+#define AUDIO_SFX_ROUNDEL         8
+#define AUDIO_SFX_ROUNDEL_NAME "blipper.wav"
+#define AUDIO_SFX_CONTROL         9
+#define AUDIO_SFX_CONTROL_NAME "blipper.wav"
+
+
+
+
+
+
+
+
+

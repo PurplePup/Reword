@@ -26,13 +26,12 @@ public:
     static IInput&  input();
     static void     registerInput(IInput* input);
 
-
 /*
 //GAMEDATA
 public:
     static void     initData();
-    static IGameData&  data();
-    static void     registerdata(IGameData* data);
+    static GameData&  data();
+    static void     registerData(GameData* data);
 */
 };
 

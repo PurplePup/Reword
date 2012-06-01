@@ -111,6 +111,78 @@ void Game::splash()
 //	sleep(2);	//so we can see it (POSIX)
 }
 
+bool Game::loadResources()
+{
+    bool bErr = false;
+
+    //register the actual concrete data member holding the resources
+	Resource::registerImage(&_images);
+
+    bErr |= !Resource::image().precache("roundel_letters.png", 255, 26);
+    bErr |= !Resource::image().precache("roundel_letters_kbd.png", 255, 26);
+
+	//SINGLE FRAME BACKGROUNDS & IMAGES
+	bErr |= !Resource::image().precache("menubg.png");		//solid background (no alpha)
+	bErr |= !Resource::image().precache("menubg_plain.png");
+	bErr |= !Resource::image().precache("menu_arcade.png");
+	bErr |= !Resource::image().precache("menu_reword.png");
+	bErr |= !Resource::image().precache("menu_speeder.png");
+	bErr |= !Resource::image().precache("menu_timetrial.png");
+	bErr |= !Resource::image().precache("scorebar.png");
+	bErr |= !Resource::image().precache("game_arcade.png");
+	bErr |= !Resource::image().precache("game_reword.png");
+	bErr |= !Resource::image().precache("game_speeder.png");
+	bErr |= !Resource::image().precache("game_timetrial.png");
+	bErr |= !Resource::image().precache("popup_menu.png", 255);
+
+	//IMAGE TILES (MULTIPLE TILE IMAGES)
+    bErr |= !Resource::image().precache("cursors.png", -1, 3);
+	bErr |= !Resource::image().precache("boxes.png", -1, 24, Image::TILE_VERT);
+	bErr |= !Resource::image().precache("scratch.png", -1, 7);
+
+	//SPRITES
+	bErr |= !Resource::image().precache("btn_round_scroll_up.png", 0, 5);
+	bErr |= !Resource::image().precache("btn_round_scroll_down.png", 0, 5);
+	bErr |= !Resource::image().precache("btn_round_scroll_left.png", 0, 5);
+	bErr |= !Resource::image().precache("btn_round_scroll_right.png", 0, 5);
+	bErr |= !Resource::image().precache("btn_round_scroll_up_small.png", 0, 5);
+	bErr |= !Resource::image().precache("btn_round_scroll_down_small.png", 0, 5);
+
+	bErr |= !Resource::image().precache("btn_round_word_shuffle.png", 0, 5);
+	bErr |= !Resource::image().precache("btn_round_word_try.png", 0, 5);
+	bErr |= !Resource::image().precache("btn_round_word_totop.png", 0, 5);
+	bErr |= !Resource::image().precache("btn_round_word_last.png", 0, 5);
+
+    bErr |= !Resource::image().precache("btn_square_menu.png", 0, 5);
+    bErr |= !Resource::image().precache("btn_square_exit.png", 0, 5);
+    bErr |= !Resource::image().precache("btn_square_next.png", 0, 5);
+    bErr |= !Resource::image().precache("btn_square_back_small.png", 0, 5);
+    bErr |= !Resource::image().precache("btn_square_exit_small.png", 0, 5);
+    bErr |= !Resource::image().precache("btn_square_next_small.png", 0, 5);
+    bErr |= !Resource::image().precache("btn_square_yes_no_small.png", 0, 9);
+    bErr |= !Resource::image().precache("btn_square_diff.png", 0, 13);
+
+    bErr |= !Resource::image().precache("btn_round_music.png", 0, 9);
+    bErr |= !Resource::image().precache("btn_round_fx.png", 0, 9);
+
+	bErr |= !Resource::image().precache("star.png", 255, 7);
+
+
+    //sound resources
+    bErr |= Locator::audio().addSfx("ping.wav", AUDIO_SFX_PING) == -1;
+    bErr |= Locator::audio().addSfx("boing.wav", AUDIO_SFX_NOTINDICT) == -1;
+    bErr |= Locator::audio().addSfx("beepold.wav", AUDIO_SFX_ALREADYDONE) == -1;
+    bErr |= Locator::audio().addSfx("honk.wav", AUDIO_SFX_NOT6) == -1;
+    bErr |= Locator::audio().addSfx("binkbink.wav", AUDIO_SFX_FOUND6) == -1;
+    bErr |= Locator::audio().addSfx("blipper.wav", AUDIO_SFX_FOUNDNON6) == -1;
+    bErr |= Locator::audio().addSfx("fanfare.wav", AUDIO_SFX_ALLFOUND) == -1;
+    bErr |= Locator::audio().addSfx("woosh2.wav", AUDIO_SFX_JUMBLE) == -1;
+    bErr |= Locator::audio().addSfx("blipper.wav", AUDIO_SFX_ROUNDEL) == -1;
+    bErr |= Locator::audio().addSfx("blipper.wav", AUDIO_SFX_CONTROL) == -1;
+
+    return !bErr;   //true = success
+}
+
 bool Game::init(GameOptions &options)
 {
 	std::cout << "Using hardware/keyboard profile : " << DEBUG_HW_NAME << std::endl;
@@ -172,12 +244,12 @@ bool Game::init(GameOptions &options)
 	std::cout << "Using window, Caption REWORD" << std::endl;
 #endif
 
-
 	//load all game data (images, fonts, etc, etc)
 	_gd = new GameData(options);
 	_gd->_current_w = _screen->width();
 	_gd->_current_h = _screen->height();
 
+//    Locator::registerData(_gd);
 
 #if defined(_USE_OGG)
 	//load mp3/ogg menu music
@@ -194,6 +266,13 @@ bool Game::init(GameOptions &options)
 	std::cout << "Using standard touchscreen device" << std::endl;
 	_gd->_bTouch = true;	//Windows, Pandora etc, uses mouse
 #endif
+
+    //finally load image and sound resources
+	if ( !loadResources() )
+	{
+		setLastError("Unable to load resources");
+		return false;
+	}
 
 	return (_init = (_gd && _gd->isLoaded()));
 }

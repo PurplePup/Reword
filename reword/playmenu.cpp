@@ -143,7 +143,7 @@ void PlayMenu::render(Screen *s)
 	//ppg::blit_surface(_gd._menubg.surface(), NULL, s->surface(), 0, 0);
 	ppg::blit_surface(_menubg->surface(), NULL, s->surface(), 0, 0);
 
-	_title.draw(s);
+	_title.render(s);
 
 	int selected = getSelected()._id;
 	int nextY = 0;
@@ -188,7 +188,7 @@ void PlayMenu::work(Input *input, float speedFactor)
 {
     (void)(speedFactor);
 
-	_title.work();
+	_title.work(input, speedFactor);
 	_star.work();
 
 	//animate the roundel title if it's not moving and

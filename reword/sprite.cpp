@@ -47,7 +47,8 @@ Sprite::Sprite() :
 	ImageAnim(),
 	_xStart(0), _yStart(0), _xEnd(0), _yEnd(0),
 	_xDir(0), _yDir(0), _xVel(0), _yVel(0), _type(Sprite::SPR_NONE),
-	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true)
+	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true),
+	_observer(NULL)
 {
 }
 
@@ -55,25 +56,46 @@ Sprite::Sprite(std::string fileName, bool bAlpha, Uint32 nFrames) :
 	ImageAnim(fileName, bAlpha, nFrames),
 	_xStart(0), _yStart(0), _xEnd(0), _yEnd(0),
 	_xDir(0), _yDir(0), _xVel(0), _yVel(0), _type(Sprite::SPR_NONE),
-	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true)
+	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true),
+	_observer(NULL)
 {
 }
-
-//Sprite::Sprite(const ImageAnim &img) :
-//	ImageAnim(img), //constructs underlying Image member
-//	_xStart(0), _yStart(0), _xEnd(0), _yEnd(0),
-//	_xDir(0), _yDir(0), _xVel(0), _yVel(0), _type(Sprite::SPR_NONE),
-//	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true)
-//{
-//}
 
 Sprite::Sprite(tSharedImage &img) :
 	ImageAnim(img), //constructs underlying Image member
 	_xStart(0), _yStart(0), _xEnd(0), _yEnd(0),
 	_xDir(0), _yDir(0), _xVel(0), _yVel(0), _type(Sprite::SPR_NONE),
-	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true)
+	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true),
+	_observer(NULL)
 {
 }
+
+Sprite& Sprite::operator=(const Sprite &s)
+{
+    // Check for self-assignment
+    if (this != &s)      // not same object
+    {
+        this->ImageAnim::operator=(s);
+
+        this->_xStart = s._xStart;
+        this->_yStart = s._yStart;
+        this->_xEnd= s._xEnd;
+        this->_yEnd = s._yEnd;
+        this->_xDir = s._xDir;
+        this->_yDir = s._yDir;
+        this->_xVel = s._xVel;
+        this->_yVel = s._yVel;
+        this->_type = s._type;
+        this->_points = s._points;
+        //	tPoints::const_iterator	_pointit;
+        this->_pauseM = s._pauseM;
+        this->_loopM = s._loopM;
+        this->_rateM = s._rateM;
+        this->_waitM = s._waitM;
+        this->_touchable = s._touchable;
+    }
+    return *this;
+};
 
 void Sprite::setPos(float x, float y)
 {
@@ -173,7 +195,7 @@ void Sprite::work()
 			_y = _yEnd;
 			pauseMove();
 
-			ppg::pushSDL_Event(USER_EV_END_MOVEMENT, reinterpret_cast<void *>(_objectId), 0);
+            ppg::pushSDL_Event(USER_EV_END_MOVEMENT, reinterpret_cast<void *>(_objectId), 0);
 		}
 
 /*
