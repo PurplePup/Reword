@@ -13,12 +13,13 @@
 class ImageAnim
 {
 public:
-	enum eAnim {	ANI_NONE,		//static, not moving
-					ANI_ONCE,		//iterate then stop
-					ANI_HIDE,		//hide/stop when end point reached
-					ANI_LOOP,		//loop forever, restarting frame 1 when last frame done
-					ANI_REVERSE,	//reverse movement when end/start point reached
-					ANI_CUSTOM      //set a custom frame sequence
+	enum eAnim {	ANI_NONE,		    //static, not moving
+                    ANI_ONCEDEL,        //iterate once then delete
+					ANI_ONCEPAUSE,		//iterate then stop/pause
+					ANI_ONCEHIDE,		//hide/stop when end point reached
+					ANI_LOOP,		    //loop forever, restarting frame 1 when last frame done
+					ANI_REVERSE,	    //reverse movement when end/start point reached
+					ANI_CUSTOM          //set a custom frame sequence
 				};
     enum eAnimDir { DIR_FORWARD, DIR_BACKWARD };
 
@@ -66,7 +67,7 @@ public:
 
     void setAnimDelay(Uint32 delay, bool bRestart = false) { _delayA.start(delay); _bDelayRestart = bRestart; }   //before anim starts & each repeat?
 	void setAnimRate(Uint32 rate)	            { _waitA.start(_rateA = rate, 0); }
-	void setAnimType(eAnim anim);
+	void setAnimType(eAnim animType);
 	void setAnimDir(eAnimDir dir)		        { _frameDir = (dir == DIR_BACKWARD)?-1:1; }	//anim start dir (frame +/-) +1 for forward, -1 for back
 	void setAnimRestart(Uint32 r, Uint32 d=0)	{ _restartA.start(_restart = r, d); }
 	void setVisible(bool b)			            { _visible = b; }
@@ -111,7 +112,6 @@ private:
 
 	void workNONE(void);
 	void workONCE(void);
-	void workHIDE(void);
 	void workLOOP(void);
 	void workREVERSE(void);
 	void workCUSTOM(void);

@@ -8,9 +8,11 @@
 #include "input.h"
 #include "image.h"
 #include "resource.h"
-//#include "gamedata.h"
+#include "gamedata.h"
 
 #include <cassert>
+
+//class GameData;
 
 class Locator
 {
@@ -26,13 +28,13 @@ public:
     static IInput&  input();
     static void     registerInput(IInput* input);
 
-/*
+
 //GAMEDATA
 public:
     static void     initData();
     static GameData&  data();
     static void     registerData(GameData* data);
-*/
+
 };
 
 

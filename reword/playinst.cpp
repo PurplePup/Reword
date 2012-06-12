@@ -375,7 +375,7 @@ void PlayInst::buildPage(int page)
 			"1) Arcade\n"
 			"A quick game, allowing you to progress even if you can't get the "
 			"all-letter word, as long as you get enough shorter length words shown "
-			"by the highlighted boxes. Longer words for quicker progress."
+			"by the decreasing highlighted boxes. Get longer words for quicker progress."
 			"\n\n"
 			"2) Reword (Original)\n"
 			"Make as many words from the letters given, aiming to use all letters. "

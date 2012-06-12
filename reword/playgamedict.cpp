@@ -200,21 +200,7 @@ bool PlayGameDict::touch(const Point &pt)
 {
     _controlsDict.touched(pt);    //needed to highlight a touched control
 
-	//check if touch scroll arrows
-//	if (_gd._arrowUp.contains(pt))
-//	{
-//		if (_gd._arrowUp.isTouchable())
-//			_gd._arrowUp.startAnim(0, -1, ImageAnim::ANI_ONCE, 40);
-//		scrollDictDown();
-//	}
-//	else if (_gd._arrowDown.contains(pt))
-//	{
-//		if (_gd._arrowDown.isTouchable())
-//			_gd._arrowDown.startAnim(0, -1, ImageAnim::ANI_ONCE, 40);
-//		scrollDictUp();
-//	}
 //    //tap background to exit dict screen
-//	else
 //		if (!_doubleClick.done())
 //			ppg::pushSDL_Event(USER_EV_EXIT_SUB_SCREEN);
 //		else

@@ -221,17 +221,16 @@ void ImageAnim::setFrame(Uint32 frame)
 	_frame = (frame < _nFrames)?frame:0;	//must be valid frame num
 }
 
-void ImageAnim::setAnimType(eAnim anim)
+void ImageAnim::setAnimType(eAnim animType)
 {
 	//set up the work function pointer depending on the type
-
-	switch (anim)
+    _animType = animType;
+	switch (animType)
 	{
-		case ANI_ONCE:	//
-			pWorkFn = &ImageAnim::workONCE;		//iterate once then pause
-			break;
-		case ANI_HIDE:
-			pWorkFn = &ImageAnim::workHIDE;		//iterate once then hide
+	    case ANI_ONCEDEL:
+		case ANI_ONCEPAUSE:
+		case ANI_ONCEHIDE:
+			pWorkFn = &ImageAnim::workONCE;		//iterate once then del/pause/hide
 			break;
 		case ANI_LOOP:
 			pWorkFn = &ImageAnim::workLOOP;		//iterate & repeat
@@ -243,7 +242,7 @@ void ImageAnim::setAnimType(eAnim anim)
             pWorkFn = &ImageAnim::workCUSTOM;   //custom frame list, any order
             break;
 		default:
-			pWorkFn = &ImageAnim::workNONE;		//static, not moving
+			pWorkFn = &ImageAnim::workNONE;		//static, not moving/animating
 			break;
 	}
 }
@@ -280,7 +279,8 @@ void ImageAnim::workONCE(void)
 		if (_frame >= _lastFrame)
 		{
 			pauseAnim();
-			_sigEvent2(USER_EV_END_ANIMATION, _objectId);
+			if (_animType == ANI_ONCEHIDE) setVisible(false);
+			_sigEvent2((_animType == ANI_ONCEDEL)?USER_EV_END_DELETE:USER_EV_END_ANIMATION, _objectId);
 			return;
 		}
 	}
@@ -290,34 +290,8 @@ void ImageAnim::workONCE(void)
 		if (_frame <= _firstFrame)
 		{
 			pauseAnim();
-			_sigEvent2(USER_EV_END_ANIMATION, _objectId);
-			return;
-		}
-	}
-	_frame += _frameDir;
-
-}
-void ImageAnim::workHIDE(void)
-{
-	if (_frameDir > 0)
-	{
-		//adding to get next frame
-		if (_frame >= _lastFrame)
-		{
-			pauseAnim();
-			setVisible(false);
-			_sigEvent2(USER_EV_END_ANIMATION, _objectId);
-            return;
-		}
-	}
-	else
-	{
-		//subtracting to get prev frame
-		if (_frame <= _firstFrame)
-		{
-			pauseAnim();
-			setVisible(false);
-			_sigEvent2(USER_EV_END_ANIMATION, _objectId);
+			if (_animType == ANI_ONCEHIDE) setVisible(false);
+			_sigEvent2((_animType == ANI_ONCEDEL)?USER_EV_END_DELETE:USER_EV_END_ANIMATION, _objectId);
 			return;
 		}
 	}

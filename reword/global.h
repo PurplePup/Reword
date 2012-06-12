@@ -32,21 +32,23 @@ const int COUNTDOWN_TIMETRIAL	= 120;
 
 //User defined SDL_Event codes - caught in game.cpp loop
 //user event timer code
-#define USER_EV_END_COUNTDOWN		1
+#define USER_EV_END_COUNTDOWN		    1
 //to sound the countdown ping
-#define USER_EV_PING_COUNTDOWN		2
+#define USER_EV_PING_COUNTDOWN		    2
 //Next/prev/pause music track events
-#define USER_EV_START_NEXT_TRACK    3
-#define USER_EV_START_MENU_MUSIC    4
+#define USER_EV_START_NEXT_TRACK        3
+#define USER_EV_START_MENU_MUSIC        4
 
-#define USER_EV_SAVE_STATE			7
+#define USER_EV_SAVE_STATE			    7
 
 //others
-#define USER_EV_EXIT_SUB_SCREEN     10
-#define USER_EV_END_ANIMATION       11
-#define USER_EV_END_MOVEMENT        12
-#define USER_EV_CONTROL_TOUCH       13
-#define USER_EV_CONTROL_TAP         14
+#define USER_EV_EXIT_SUB_SCREEN         10
+#define USER_EV_END_ANIMATION           11
+#define USER_EV_END_MOVEMENT            12
+#define USER_EV_END_MOVEMENT_ROUNDEL    13
+#define USER_EV_END_DELETE              14
+#define USER_EV_CONTROL_TOUCH           15
+#define USER_EV_CONTROL_TAP             16
 
 #endif //_GAME_GLOBAL_H_
 

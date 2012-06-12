@@ -33,6 +33,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include "locator.h"
 
+#include "gamedata.h"
+
 //////////////////////////////// AUDIO /////////////////////////////
 
 static IAudio * _audio = 0;
@@ -80,7 +82,7 @@ void Locator::registerInput(IInput* input)
 
 
 //////////////////////////////// DATA /////////////////////////////
-/*
+
 static GameData * _data = 0;
 static GameData _nulldata;
 
@@ -88,7 +90,7 @@ void Locator::initData()
 {
     _data = &_nulldata;
 }
-Gamedata& Locator::data()
+GameData& Locator::data()
 {
     assert(_data != NULL);
     return *_data;
@@ -100,4 +102,4 @@ void Locator::registerData(GameData* data)
     else
         _data = data;
 }
-*/
+

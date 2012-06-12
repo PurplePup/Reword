@@ -6,11 +6,12 @@
 #include "i_play.h"		//IPlay interface
 #include "screen.h"
 #include "input.h"
-#include "gamedata.h"	//also holds constants and stuff
 #include "states.h"
 #include "roundels.h"
 #include "image.h"
 #include "controls.h"
+#include "gamedata.h"	//also holds constants and stuff
+
 #include <memory>
 
 
@@ -24,7 +25,7 @@ public:
     void setKbdLetters(tSharedImage &letters, int x, int y, int gap);
 
 //	void draw(Surface *s);
-	void work();
+//	void work();
 
 };
 
@@ -39,6 +40,7 @@ public:
     virtual void render(Screen* s);
     virtual void work(Input* input, float speedFactor);
     virtual void button(Input* input, ppkey::eButtonType b);
+    virtual void handleEvent(SDL_Event &sdlevent);
 
 	virtual bool touch(const Point &pt);
 	virtual bool tap(const Point &pt);
@@ -52,8 +54,8 @@ protected:
 	void moveDown();
 	void moveLeft();
 	void moveRight();
-	bool isEditing() { return _pos != -1; }
-	void setEditing(bool b) { _pos = b?0:-1; }
+	bool isEditing() { return _bEditing; }
+	void setEditing(bool b) { _bEditing = b; }
     void updateScrollButtons();
     void ControlEvent(int event, int ctrl_id);
 
@@ -61,8 +63,11 @@ private:
 	GameData &	_gd;		//shared data between screens (play classes)
 	tSharedImage _menubg;
 
-	int			_pos;
-	int			_currPos;		//which of the 3 inits you are currently editing
+	int			_pos;           //new position in score table
+	bool        _bEditing;      //user entering inits
+
+//	int			_currPos;		//which of the 3 inits you are currently editing
+
 	int			_yyGap;			//gap between hiscore lines
 	int			_xxGap;			//gap between hiscore items on line
 	int 		_xxStart;       //offset to start items at
@@ -82,12 +87,15 @@ private:
 	std::string	_description;	//"mode : difficulty"
 
 	Roundels	_title;
-	RoundelsKbd _kbd;           //3 kbd rows q-p, a-l, z-m
+
+	RoundelsKbd _kbd;           //3 rows displayed as kbd q-p, a-l, z-m
+	int         _kbdTileW, _kbdTileH;
 
 	Waiting		_titleW;		//delay between jumbling
 	Waiting		_doubleClick;	//touch support
 
     Controls    _controlsHigh;
+
 };
 
 #endif //_PLAYHIGH_H

@@ -62,7 +62,7 @@ void ResourceImg::setAlpha(int iAlpha)
 
 //precache/load an image with a specific alpha value. Returns false if image not found
 //DO NOT use filepath, just file name as path gets added in get()
-bool ResourceImg::precache(const std::string & imageFile, int iAlpha /*=-1*/,
+bool ResourceImg::add(const std::string & imageFile, int iAlpha /*=-1*/,
                            Uint32 nTiles /* =1 */, Image::eTileDir tileDir /*= TILE_HORIZ*/)
 {
     int oldAlpha = _alpha;
@@ -93,7 +93,7 @@ tSharedImage &ResourceImg::get(const std::string & imageFile)
         it = _cache.insert(it, std::make_pair(imageFile, image));
 
 #if _DEBUG
-std::cout << "count of images " << _cache.size() << " - added " << image->_dbgName << std::endl;
+std::cout << "# of images " << _cache.size() << " - added " << image->_dbgName << std::endl;
 #endif
     }
     return it->second;

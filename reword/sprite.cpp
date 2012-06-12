@@ -47,8 +47,7 @@ Sprite::Sprite() :
 	ImageAnim(),
 	_xStart(0), _yStart(0), _xEnd(0), _yEnd(0),
 	_xDir(0), _yDir(0), _xVel(0), _yVel(0), _type(Sprite::SPR_NONE),
-	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true),
-	_observer(NULL)
+	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true)
 {
 }
 
@@ -56,8 +55,7 @@ Sprite::Sprite(std::string fileName, bool bAlpha, Uint32 nFrames) :
 	ImageAnim(fileName, bAlpha, nFrames),
 	_xStart(0), _yStart(0), _xEnd(0), _yEnd(0),
 	_xDir(0), _yDir(0), _xVel(0), _yVel(0), _type(Sprite::SPR_NONE),
-	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true),
-	_observer(NULL)
+	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true)
 {
 }
 
@@ -65,8 +63,7 @@ Sprite::Sprite(tSharedImage &img) :
 	ImageAnim(img), //constructs underlying Image member
 	_xStart(0), _yStart(0), _xEnd(0), _yEnd(0),
 	_xDir(0), _yDir(0), _xVel(0), _yVel(0), _type(Sprite::SPR_NONE),
-	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true),
-	_observer(NULL)
+	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true)
 {
 }
 
@@ -195,6 +192,9 @@ void Sprite::work()
 			_y = _yEnd;
 			pauseMove();
 
+            //some use sig/slot
+            _sigEvent2(USER_EV_END_MOVEMENT, _objectId);
+            //others use SDL event  notification
             ppg::pushSDL_Event(USER_EV_END_MOVEMENT, reinterpret_cast<void *>(_objectId), 0);
 		}
 

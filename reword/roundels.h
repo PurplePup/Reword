@@ -1,6 +1,5 @@
 //roundels.h
 
-
 #ifndef _ROUNDELS_H
 #define _ROUNDELS_H
 
@@ -41,12 +40,19 @@ public:
 	void setBottomMax(int iMax);
 	void setBottomCopy(bool bCopyBot = true) { _bCopyBot = bCopyBot; }
     int getLastId();
+    int getCurrSelId();
+    Point getCurrSelPt();
+
+    void setPressEffect(const std::string &resource);
+
+    void setRoundelsId(int rid) { _rid = rid; }
+    int getRoundelsId() { return _rid; }
 
 	bool isInOrder();
 	bool jumbleWord(bool bAnimate = true);
 	bool unJumbleWord(bool bAnimate = true);
-	void moveLetterUp();
-	void moveLetterDown();
+	bool moveLetterUp(bool bEffect = true);
+	bool moveLetterDown(bool bEffect = true);
 	bool cursorFirst();
 	bool cursorLast();
 	bool cursorPrev();
@@ -89,15 +95,21 @@ protected:
 	void recalcXYPosition(Roundel *r);
 	int calcXPos(Roundel *r);
 	int calcYPos(Roundel *r);
+    void slotEvent(int event, int id);
 
 	typedef std::vector<Roundel*>	tRoundVect;
 	typedef std::vector<int>		tLastVect;
 
 	tRoundVect	_top;
 	tRoundVect	_bot;
-	tRoundVect	_last;			//letters of last word (only uses copies of pointers)
+	tRoundVect	_last;			//letters of last word tried (only uses copies of pointers)
 
 	std::string	_word;			//original word used to set roundels
+
+    typedef boost::shared_ptr<Sprite> t_pSprite;
+    t_pSprite   _pressEffect;
+    std::string _pressResource;
+    int         _pressEffW, _pressEffH;
 
     //positioning...
 	int     _xScratchTop, _yScratchTop,
@@ -112,7 +124,12 @@ protected:
 	bool    _bCursorTop;		//cursor curr on top row or bottom row?
     bool    _bCopyBot;          //copy to bottom rather than move (used in hiscore etc)
 
-    int     _lastTouch;         //last roundel touched (before tap/release)
+    int     _currSelId;         //last roundel touched (before tap/release)
+    Point   _currSelPt;
+
+    int     _lastIdCountdown;   //countdown to last roundel to stop moving
+    int     _lastId;            //lat sprite object id for easy notification of end movement etc
+    int     _rid;               //unique id for this roundels class implementation
 };
 
 typedef std::auto_ptr<Roundels> tAutoRoundels;

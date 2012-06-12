@@ -4,7 +4,7 @@
 #define _SPRITE_H
 
 #include "imageanim.h"
-#include "utils.h"
+
 #include <deque>
 
 
@@ -26,9 +26,6 @@ public:
 	virtual ~Sprite() {}
 
 	Sprite& operator=(const Sprite &s);
-
-//    void setObjectId(int id) { _objectId = id; }
-//    int getObjectId() { return _objectId; }
 
 	//start move from A to B then stop or repeat
 	void startMoveTo(int xEnd, int yEnd, Uint32 time = 100, Uint32 delay = 0);
@@ -57,8 +54,6 @@ public:
 	virtual void work();	//update movement, and call parent anim update
 	virtual bool contains(const Point &pt) const;
 
-    void addObserver(void(*fn)(int, int)) { _observer = fn; }
-
 protected:
 
 	int		_xStart;	//save start x pos
@@ -82,10 +77,7 @@ private:
 	Uint32	_rateM;		//rate of auto movement change
 	Waiting _waitM;		//movement delay
 	bool	_touchable;
-
-	void (*_observer)(int, int); //fire an event to this fn on end anim etc
 };
-
 
 #endif //_SPRITE_H
 

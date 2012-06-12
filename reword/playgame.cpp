@@ -229,6 +229,8 @@ void PlayGame::init(Input *input)
         return;
     }
 
+    _round.setPressEffect("roundel_letters_ping.png");
+
 	//need to set the _init and _running flags
 	_init = true;
 	_running = true;
@@ -822,7 +824,9 @@ void PlayGame::button_play(Input* input, ppkey::eButtonType b)
 		{
 			//user still in play so select curr letter
 			if (_round.cursorIsTop())
+			{
 	  	 		_round.moveLetterDown();
+			}
 			else
 			{
 	    		_round.moveLetterUp();
@@ -1298,12 +1302,12 @@ void PlayGame::handleEvent(SDL_Event &sdlevent)
 			}
 		}
 		else
-		if (USER_EV_END_MOVEMENT == sdlevent.user.code)
+		if (USER_EV_END_MOVEMENT_ROUNDEL == sdlevent.user.code)
 		{
-		    //USER_EV_END_MOVEMENT uses data1 as a simple int (as using a ptr to
-            //sprite internal data may not exist after end of movement).
-            const int last = reinterpret_cast<int>(sdlevent.user.data1);
-            if (last && last == _round.getLastId())
+		    //Event uses data1 as a simple int (as using a ptr to
+            //sprite internal data may not exist after end of movement),
+            //data2 is the roundel class id so we know which one if more than one animanting
+            if (reinterpret_cast<int>(sdlevent.user.data2) == _round.getRoundelsId())
             {
                 //slide round buttons onto screen. (slide off again for popup or end game etc)
                 slideRoundButtonsIn();
@@ -1751,9 +1755,9 @@ void PlayGame::calcArcadeNeededWords()
 
         //2. calc number of letters needed to continue (% based on difficulty)
         //for easy, need to find 20% of all words, or an all-letter word
-        //for med, need to find 40% of all words, or an all-letter word
-        //for hard, need to find 60% of all words, or an all-letter word
-        const int pc = (DIF_EASY == _gd._diffLevel)?20:(DIF_MED == _gd._diffLevel)?40:60;
+        //for med, need to find 30% of all words, or an all-letter word
+        //for hard, need to find 40% of all words, or an all-letter word
+        const int pc = (DIF_EASY == _gd._diffLevel)?20:(DIF_MED == _gd._diffLevel)?30:40;
         int needed = (nTotalLetters * ((float)pc/100));
         _debugNeededAll = needed; //for debug display
 

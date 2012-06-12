@@ -118,54 +118,57 @@ bool Game::loadResources()
     //register the actual concrete data member holding the resources
 	Resource::registerImage(&_images);
 
-    bErr |= !Resource::image().precache("roundel_letters.png", 255, 26);
-    bErr |= !Resource::image().precache("roundel_letters_kbd.png", 255, 26);
+    bErr |= !Resource::image().add("roundel_letters.png", 255, 26);
+    bErr |= !Resource::image().add("roundel_kbd_letters.png", 255, 26);
 
 	//SINGLE FRAME BACKGROUNDS & IMAGES
-	bErr |= !Resource::image().precache("menubg.png");		//solid background (no alpha)
-	bErr |= !Resource::image().precache("menubg_plain.png");
-	bErr |= !Resource::image().precache("menu_arcade.png");
-	bErr |= !Resource::image().precache("menu_reword.png");
-	bErr |= !Resource::image().precache("menu_speeder.png");
-	bErr |= !Resource::image().precache("menu_timetrial.png");
-	bErr |= !Resource::image().precache("scorebar.png");
-	bErr |= !Resource::image().precache("game_arcade.png");
-	bErr |= !Resource::image().precache("game_reword.png");
-	bErr |= !Resource::image().precache("game_speeder.png");
-	bErr |= !Resource::image().precache("game_timetrial.png");
-	bErr |= !Resource::image().precache("popup_menu.png", 255);
+	bErr |= !Resource::image().add("menubg.png");		//solid background (no alpha)
+	bErr |= !Resource::image().add("menubg_plain.png");
+	bErr |= !Resource::image().add("menu_arcade.png");
+	bErr |= !Resource::image().add("menu_reword.png");
+	bErr |= !Resource::image().add("menu_speeder.png");
+	bErr |= !Resource::image().add("menu_timetrial.png");
+	bErr |= !Resource::image().add("scorebar.png");
+	bErr |= !Resource::image().add("game_arcade.png");
+	bErr |= !Resource::image().add("game_reword.png");
+	bErr |= !Resource::image().add("game_speeder.png");
+	bErr |= !Resource::image().add("game_timetrial.png");
+	bErr |= !Resource::image().add("popup_menu.png", 255);
 
 	//IMAGE TILES (MULTIPLE TILE IMAGES)
-    bErr |= !Resource::image().precache("cursors.png", -1, 3);
-	bErr |= !Resource::image().precache("boxes.png", -1, 24, Image::TILE_VERT);
-	bErr |= !Resource::image().precache("scratch.png", -1, 7);
+    bErr |= !Resource::image().add("cursors.png", -1, 3);
+    bErr |= !Resource::image().add("roundel_letters_ping.png", 255, 6);
+    bErr |= !Resource::image().add("roundel_kbd_ping.png", 255, 6);
 
-	//SPRITES
-	bErr |= !Resource::image().precache("btn_round_scroll_up.png", 0, 5);
-	bErr |= !Resource::image().precache("btn_round_scroll_down.png", 0, 5);
-	bErr |= !Resource::image().precache("btn_round_scroll_left.png", 0, 5);
-	bErr |= !Resource::image().precache("btn_round_scroll_right.png", 0, 5);
-	bErr |= !Resource::image().precache("btn_round_scroll_up_small.png", 0, 5);
-	bErr |= !Resource::image().precache("btn_round_scroll_down_small.png", 0, 5);
+	bErr |= !Resource::image().add("boxes.png", -1, 24, Image::TILE_VERT);
+	bErr |= !Resource::image().add("scratch.png", -1, 7);
 
-	bErr |= !Resource::image().precache("btn_round_word_shuffle.png", 0, 5);
-	bErr |= !Resource::image().precache("btn_round_word_try.png", 0, 5);
-	bErr |= !Resource::image().precache("btn_round_word_totop.png", 0, 5);
-	bErr |= !Resource::image().precache("btn_round_word_last.png", 0, 5);
+    //BUTTONS
+	bErr |= !Resource::image().add("btn_round_scroll_up.png", 0, 5);
+	bErr |= !Resource::image().add("btn_round_scroll_down.png", 0, 5);
+	bErr |= !Resource::image().add("btn_round_scroll_left.png", 0, 5);
+	bErr |= !Resource::image().add("btn_round_scroll_right.png", 0, 5);
+	bErr |= !Resource::image().add("btn_round_scroll_up_small.png", 0, 5);
+	bErr |= !Resource::image().add("btn_round_scroll_down_small.png", 0, 5);
 
-    bErr |= !Resource::image().precache("btn_square_menu.png", 0, 5);
-    bErr |= !Resource::image().precache("btn_square_exit.png", 0, 5);
-    bErr |= !Resource::image().precache("btn_square_next.png", 0, 5);
-    bErr |= !Resource::image().precache("btn_square_back_small.png", 0, 5);
-    bErr |= !Resource::image().precache("btn_square_exit_small.png", 0, 5);
-    bErr |= !Resource::image().precache("btn_square_next_small.png", 0, 5);
-    bErr |= !Resource::image().precache("btn_square_yes_no_small.png", 0, 9);
-    bErr |= !Resource::image().precache("btn_square_diff.png", 0, 13);
+	bErr |= !Resource::image().add("btn_round_word_shuffle.png", 0, 5);
+	bErr |= !Resource::image().add("btn_round_word_try.png", 0, 5);
+	bErr |= !Resource::image().add("btn_round_word_totop.png", 0, 5);
+	bErr |= !Resource::image().add("btn_round_word_last.png", 0, 5);
 
-    bErr |= !Resource::image().precache("btn_round_music.png", 0, 9);
-    bErr |= !Resource::image().precache("btn_round_fx.png", 0, 9);
+    bErr |= !Resource::image().add("btn_square_menu.png", 0, 5);
+    bErr |= !Resource::image().add("btn_square_exit.png", 0, 5);
+    bErr |= !Resource::image().add("btn_square_next.png", 0, 5);
+    bErr |= !Resource::image().add("btn_square_back_small.png", 0, 5);
+    bErr |= !Resource::image().add("btn_square_exit_small.png", 0, 5);
+    bErr |= !Resource::image().add("btn_square_next_small.png", 0, 5);
+    bErr |= !Resource::image().add("btn_square_yes_no_small.png", 0, 9);
+    bErr |= !Resource::image().add("btn_square_diff.png", 0, 13);
 
-	bErr |= !Resource::image().precache("star.png", 255, 7);
+    bErr |= !Resource::image().add("btn_round_music.png", 0, 9);
+    bErr |= !Resource::image().add("btn_round_fx.png", 0, 9);
+
+	bErr |= !Resource::image().add("star.png", 255, 7);
 
 
     //sound resources
@@ -245,11 +248,12 @@ bool Game::init(GameOptions &options)
 #endif
 
 	//load all game data (images, fonts, etc, etc)
-	_gd = new GameData(options);
+	_gd = new GameData();
+	_gd->setOptions(options);
 	_gd->_current_w = _screen->width();
 	_gd->_current_h = _screen->height();
-
-//    Locator::registerData(_gd);
+	_gd->init(); //load other resources
+    Locator::registerData(_gd);
 
 #if defined(_USE_OGG)
 	//load mp3/ogg menu music
@@ -374,6 +378,8 @@ bool Game::play(IPlay *p)
 			// Do work/think stuff
 			//_gd->_fact = fr.speedFactor();
 			p->work(_input, fr.speedFactor());
+
+			_gd->_effects.work();
 
 			// Handle SDL events
 			while (SDL_PollEvent(&event))
@@ -532,6 +538,9 @@ bool Game::play(IPlay *p)
 */
 		_screen->lock();
 		p->render(_screen);	//screen render
+
+        _gd->_effects.draw(_screen);
+
 #ifdef _DEBUG	//overlay the framerate and any other debug info required
 		_gd->_fntSmall.put_number(_screen,0,60,fr.fps(),"%d", BLACK_COLOUR);
 #endif

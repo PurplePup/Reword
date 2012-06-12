@@ -15,7 +15,7 @@ public:
 
     void setAlpha(int iAlpha);
 
-    bool precache(const std::string & imageFile, int iAlpha =-1,
+    bool add(const std::string & imageFile, int iAlpha =-1,
                     Uint32 nTiles =1, Image::eTileDir tileDir = Image::TILE_HORIZ);
     tSharedImage &get(const std::string & imageFile);
 

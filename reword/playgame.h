@@ -8,7 +8,6 @@
 #include "input.h"
 #include "gamedata.h"	//also holds constants and stuff
 #include "waiting.h"
-#include "spritemgr.h"
 #include "roundels.h"
 #include "playgamepopup.h"
 #include "controls.h"
@@ -92,6 +91,8 @@ public:
 
 //	static 	void pushSDL_Event(int code, void *data1 = NULL, void *data2 = NULL);
 
+	virtual void handleEvent(SDL_Event &sdlevent);
+
 protected:
 
 	//state funcion pointer handling
@@ -99,7 +100,6 @@ protected:
 	void statePush(eState state);
 	eState statePop();
 
-	void handleEvent(SDL_Event &sdlevent);
 	void exit(eGameState toState);
 
 	void newGame();
@@ -225,8 +225,6 @@ private:
 
 	eState		_state;			//local states for this screen
 	StateInPlay<eState> _states;
-
- // SpriteMgr   _sprites;
 
 	eSuccess	_success;		//used in drawGame()
 	int			_bonusScore;

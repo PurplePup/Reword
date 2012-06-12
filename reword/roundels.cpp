@@ -12,6 +12,7 @@ Description:	A class to manage a list of roundels (letter sprites) to animate an
 				matching against the word(s) being searched for. The class manages top and
 				bottom rows of letters but only the top row is used for simple letter
 				animation. The bottom is only used in-game for the selected letters.
+				Now also used for kbd selection in hiscore table entry.
 
 Author:			Al McLuckie (al-at-purplepup-dot-org)
 
@@ -44,7 +45,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "global.h"
 #include "roundels.h"
 #include "screen.h"
-#include "gamedata.h"
+#include "locator.h"
 
 #include <algorithm>
 #include <iostream>
@@ -81,6 +82,17 @@ Roundels::~Roundels()
 void Roundels::init(Input * /*input*/)
 {
     cleanUp();
+}
+
+void Roundels::setPressEffect(const std::string &resource)
+{
+    //create a cursor anim here to auto remove on completion
+    _pressResource = resource;
+//    _pressEffect = t_pSprite(new Sprite(Resource::image(resource)));
+    _pressEffW = Resource::image(resource)->tileW();
+    _pressEffH = Resource::image(resource)->tileH();
+//    _pressEffW = _pressEffect->tileW();
+//    _pressEffH = _pressEffect->tileH();
 }
 
 // drawing operation
@@ -133,28 +145,44 @@ void Roundels::button(Input* /*input*/, ppkey::eButtonType /*b*/)
 // screen touch (press)
 bool Roundels::touch(const Point &pt)
 {
-    _lastTouch = cursorAt(pt);
-    return _lastTouch != 0;
+    _currSelId = cursorAt(pt);
+
+    if (_currSelId)
+    {
+        if (cursorIsTop())
+            _currSelPt = Point((int)_top[_currSelId-1]->_spr->getXPos(), (int)_top[_currSelId-1]->_spr->getYPos());
+        else
+            _currSelPt = Point((int)_bot[_currSelId-1]->_spr->getXPos(), (int)_bot[_currSelId-1]->_spr->getYPos());
+    }
+    else
+        _currSelPt = Point();
+
+    return _currSelId != 0;
 }
 
 // screen touch (release)
 bool Roundels::tap(const Point &pt)
 {
-    if (_lastTouch && (cursorAt(pt) == _lastTouch))
+    if (_currSelId && (cursorAt(pt) == _currSelId))
     {
         if (cursorIsTop())
         {
-            Locator::audio().playSfx(AUDIO_SFX_ROUNDEL);
-            moveLetterDown();
-            cursorDown();
+            if (moveLetterDown())
+            {
+                Locator::audio().playSfx(AUDIO_SFX_ROUNDEL);
+                cursorDown();
+            }
         }
         else
         {
-            Locator::audio().playSfx(AUDIO_SFX_ROUNDEL);
-            moveLetterUp();
-            if (!cursorPrev()) cursorUp();
+            if (moveLetterUp())
+            {
+                Locator::audio().playSfx(AUDIO_SFX_ROUNDEL);
+                if (!cursorPrev())
+                    cursorUp();
+            }
         }
-        _lastTouch = 0;
+        _currSelId = 0;
         return true;
     }
     return false;
@@ -176,10 +204,15 @@ void Roundels::cleanUp()
 
 	_xScratchTop = _yScratchTop = _xScratchBot = _yScratchBot = 0;
 	_bMoving = false;
+	_currSelId=0;
+	_currSelPt=Point();
+    _lastIdCountdown = 0;
+	_lastId = 0;
+	_rid = 0;
 }
 
-//pass in the string to be turned into a roundel list nd set the final positions of the letters
-//based on the x, y and gap values
+//pass in the string to be turned into a roundel list and set the final
+//positions of the letters based on the x, y and gap values
 //wrd - the string to be converted to roundels,
 //letters - the letters image to use as the source,
 //x, y - the start x and y pos (if not 0,0)
@@ -213,11 +246,14 @@ void Roundels::setWord(const std::string &wrd,
 		Roundel *prnd = new Roundel();
 		Sprite *pspr = new Sprite(letters);
 
+        //connect each sprite roundel to the event function slot
+        pspr->_sigEvent2.Connect(this, &Roundels::slotEvent);
+
 		pspr->setFrame(wrd[i]-65);
 
 		//each letter has id of initial index (1..n), then use getLastId()
 		//to determine the current last letter id.
-        pspr->setObjectId(i+1);
+        pspr->setObjectId((_lastId = i+1));
 
 		prnd->_letter = wrd[i];	//wrd[i] - 65 == 0=a, 1=b
 		prnd->_pos = i;			//letter position in string
@@ -236,18 +272,44 @@ void Roundels::setWord(const std::string &wrd,
 	}
 }
 
+//Event signal from imageanim indicating an individual sprite has
+//finished animation or movement etc.
+//Pass an event back (as SDL event) for higher 'IPlay' classes to detect.
+void Roundels::slotEvent(int event, int id)
+{
+    if (event == USER_EV_END_MOVEMENT)
+    {
+        //indicate a single roundel has stopped moving
+        ppg::pushSDL_Event(USER_EV_END_MOVEMENT,
+                           reinterpret_cast<void *>(id),        //roundel sprite/item id
+                           reinterpret_cast<void *>(_rid));     //this class instance id
+
+        //if it's the last one to stop moving, send this message too
+        if (--_lastIdCountdown== 0)
+            ppg::pushSDL_Event(USER_EV_END_MOVEMENT_ROUNDEL,
+                               reinterpret_cast<void *>(id),        //roundel sprite/item id
+                               reinterpret_cast<void *>(_rid));     //this class instance id
+    }
+}
+
+//return the id of the last roundel in the word (note: pre jumble)
 int Roundels::getLastId()
 {
-	tRoundVect::reverse_iterator it;
-	for (it = _top.rbegin(); it != _top.rend(); ++it)
-	{
-		if (*it)
-		{
-		    return (*it)->_spr->getObjectId();
-		}
-	}
-    return 0;
+    return _lastId;
 }
+
+//get the id of the currently selected/highlighted roundel
+int Roundels::getCurrSelId()
+{
+    return _currSelId;
+}
+
+//return the position of the currently selected/highlighted roundel
+Point Roundels::getCurrSelPt()
+{
+    return _currSelPt;
+}
+
 
 void Roundels::setBottomPos(int xPosBot, int yPosBot)
 {
@@ -298,6 +360,8 @@ void Roundels::startMoveFrom(int deltaX, int deltaY,
 							 int xVel, int yVel,
 							 Sprite::eSprite type /*= Sprite::SPR_NONE*/)
 {
+    _lastIdCountdown = (int)_word.length(); //reset to number of roundels
+
 	int oldX, oldY;
 	int i = 0;
 	tRoundVect::iterator it;
@@ -341,10 +405,10 @@ bool Roundels::jumbleWord(bool bAnimate /*=true*/)
 	Roundel *rtmp;
 
 	//count letters in top array
-	int n = 0;
+	int nTop = 0;
 	tRoundVect::iterator it;
-	for (it = _top.begin(); it != _top.end(); ++it) if ((*it)) n++;
-	if (n < 3) return false;	//dont bother jumbling, not enough letters
+	for (it = _top.begin(); it != _top.end(); ++it) if ((*it)) nTop++;
+	if (nTop < 3) return false;	//dont bother jumbling, not enough letters
 
 	int loops = 6;	//failsafe to exit after 5 retries,in case XXXXXX or other silly found
 	do
@@ -372,6 +436,8 @@ bool Roundels::jumbleWord(bool bAnimate /*=true*/)
 		}
 		if (!isInOrder()) break;	//not spelling original word so ok, exit loop
 	} while (loops--);	//check loops THEN decrement (as 'loops' can be set to 0 to exit)
+
+    _lastIdCountdown = nTop; //reset to number of roundels in top row to jumble
 
 	//recalc screen positions now letter positions have been jumbled
 	for (it = _top.begin(); it != _top.end(); ++it)
@@ -401,10 +467,10 @@ bool Roundels::unJumbleWord(bool bAnimate /*=true*/)
 	Roundel *rtmp;
 
 	//count letters in top array
-	int n = 0;
+	int nTop = 0;
 	tRoundVect::iterator it;
-	for (it = _top.begin(); it != _top.end(); ++it) if ((*it)) n++;
-	if (n < 3) return false;	//dont bother jumbling, not enough letters
+	for (it = _top.begin(); it != _top.end(); ++it) if ((*it)) nTop++;
+	if (nTop < 3) return false;	//dont bother jumbling, not enough letters
 
 	for (xx=0; xx<(int)_word.length(); ++xx)
 	{
@@ -425,6 +491,8 @@ bool Roundels::unJumbleWord(bool bAnimate /*=true*/)
 			}
 		}
 	}
+
+    _lastIdCountdown = nTop; //reset to number of roundels in top row to unjumble
 
 	//recalc screen positions now letter positions have been jumbled
 	for (it = _top.begin(); it != _top.end(); ++it)
@@ -457,18 +525,35 @@ int Roundels::calcYPos(Roundel *r)
 
 //move the selected letter (_cx) to the first
 //free space in the top row
-void Roundels::moveLetterUp()
+bool Roundels::moveLetterUp(bool bEffect /*=true*/)
 {
 	//if letter already moved up or is moving so wait (as can cause undefined behaviour)
-	if (isMoving() || !_bot[_cx]) return;
+	if (isMoving() || !_bot[_cx]) return false;
 
     if (_bCopyBot)
     {
+        const int id = _bot[_cx]->_spr->getObjectId();
+
+        if (bEffect)
+        {
+            const int oldX = (int)(_bot[_cx]->_spr->getXPos());
+            const int oldY = (int)(_bot[_cx]->_spr->getYPos());
+            //create a cursor anim here to auto remove on completion
+            const int x = oldX - (( _pressEffW - _bot[_cx]->_spr->tileW()) / 2);
+            const int y = oldY - (( _pressEffH - _bot[_cx]->_spr->tileH()) / 2);
+            Locator::data()._effects.add(_pressResource, x, y);  //add global effect
+        }
+
         //need to remove from bottom, but leave top alone
         delete _bot[_cx];
         _bot[_cx] = 0;
         _botLength--;
-        return;
+
+        //notify parent single roundel has 'moved'
+        ppg::pushSDL_Event(USER_EV_END_MOVEMENT,
+            reinterpret_cast<void *>(id), reinterpret_cast<void *>(_rid));
+
+        return true;
     }
 
 	int xx;
@@ -476,8 +561,16 @@ void Roundels::moveLetterUp()
 	{
 		if (0 == _top[xx])	//blank position so use it
 		{
-			int oldX = (int)(_bot[_cx]->_spr->getXPos());
-			int oldY = (int)(_bot[_cx]->_spr->getYPos());
+			const int oldX = (int)(_bot[_cx]->_spr->getXPos());
+			const int oldY = (int)(_bot[_cx]->_spr->getYPos());
+
+            if (bEffect)
+            {
+                //create a cursor anim here to auto remove on completion
+                const int x = oldX - (( _pressEffW - _bot[_cx]->_spr->tileW()) / 2);
+                const int y = oldY - (( _pressEffH - _bot[_cx]->_spr->tileH()) / 2);
+                Locator::data()._effects.add(_pressResource, x, y);  //add global effect
+            }
 
 			_top[xx] = _bot[_cx];
 			_top[xx]->_pos = xx;
@@ -491,18 +584,19 @@ void Roundels::moveLetterUp()
 			_top[xx]->_spr->startMoveTo(endX, endY, rate, 0, velX, velY);
 
             _botLength--;
-			return;
+			return true;
 		}
 	}
+	return false;
 }
 
 //move the selected letter (_cx) to the first
 //free space in the bottom row
-void Roundels::moveLetterDown()
+bool Roundels::moveLetterDown(bool bEffect /*=true*/)
 {
 	//if letter already moved down or is moving so wait (as can cause undefined behaviour)
-	if (isMoving() || !_top[_cx]) return;
-    if (_botLength >= _botLengthMax) return;    //can't move any more
+	if (isMoving() || !_top[_cx]) return false;
+    if (_botLength >= _botLengthMax) return false;    //can't move any more
 
 	int xx;
 	for (xx=0; xx < (int)_word.length(); ++xx)
@@ -511,6 +605,14 @@ void Roundels::moveLetterDown()
 		{
 			int oldX = (int)(_top[_cx]->_spr->getXPos());
 			int oldY = (int)(_top[_cx]->_spr->getYPos());
+
+            if (bEffect)
+            {
+                //create a cursor anim here to auto remove on completion
+                const int x = oldX - (( _pressEffW - _top[_cx]->_spr->tileW()) / 2);
+                const int y = oldY - (( _pressEffH - _top[_cx]->_spr->tileH()) / 2);
+                Locator::data()._effects.add(_pressResource, x, y);  //add global effect
+            }
 
             if (_bCopyBot)
             {
@@ -534,9 +636,10 @@ void Roundels::moveLetterDown()
             _bot[xx]->_spr->startMoveTo(endX, endY, rate, 0, velX, velY);
 
             _botLength++;
-			return;
+			return true;
 		}
 	}
+	return false;
 }
 
 //move the cursor to the first non space (on either top or bottom row)
@@ -673,7 +776,7 @@ void Roundels::clearAllToTop(bool bResetCursor /*=true*/)
 		if (_bot[xx] == 0) return; 	//no more in bottom row
 
 		_cx = xx;
-		moveLetterUp();
+		moveLetterUp(false);
 	}
 }
 
@@ -695,7 +798,7 @@ void Roundels::setWordToLast()
 			if (_top[xtop] == _last[xlast])
 			{
 				_cx = xtop;
-				moveLetterDown();
+				moveLetterDown(false);
 				break;
 			}
 		}

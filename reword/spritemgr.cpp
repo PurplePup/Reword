@@ -37,6 +37,11 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include "spritemgr.h"
 
+#include "screen.h"
+#include "global.h"
+
+//#include <iostream> //for debug msgs
+
 SpriteMgr::SpriteMgr() :
 	_handle(0)
 {
@@ -52,8 +57,7 @@ void SpriteMgr::clear()
 	//delete all sprites previously added to the manager
 	for (_it = _sprmap.begin(); _it != _sprmap.end(); ++_it)
 	{
-		delete (*_it).second;
-		_sprmap.erase(_it);
+	    del( (*_it).first );  //handle
 	}
 
 	_handle = 0;
@@ -64,35 +68,78 @@ Sprite * SpriteMgr::get(Uint32 handle)
 {
 	_it = _sprmap.find(handle);
 	if (_it == _sprmap.end()) return NULL;
-	return (*_it).second;
+	return (*_it).second._spr.get();
 }
 
 //add a sprite and return the (unique) allocated handle
-Uint32 SpriteMgr::add(Sprite * spr)
+Uint32 SpriteMgr::add(t_pSprite &pSpr)
 {
-	if (!spr) return 0;
-//	if (_sprmap.find(handle+1) == _sprmap.end()) ??? find next handle...
-	_sprmap[++_handle] = spr;	//##TODO## will eventually wrap and reuse ....
+	if (!pSpr.get()) return 0;
+
+    SpriteX sx;
+    sx._spr = pSpr;
+	_sprmap[++_handle] = sx;
+
+    pSpr->setObjectId(_handle);  //used to lookup spr after event return
+    pSpr->_sigEvent2.Connect(this, &SpriteMgr::SpriteEvent);
+
 	return _handle;
+}
+
+//add using image resource name and initial params to start anim etc
+Sprite * SpriteMgr::add(const std::string resource, int x, int y, Uint32 rate_ms, ImageAnim::eAnim anim)
+{
+    t_pSprite pSpr(new Sprite(Resource::image(resource)));
+
+    SpriteX sx;
+    sx._spr = pSpr;
+	_sprmap[++_handle] = sx;
+
+    pSpr->setObjectId(_handle);  //used to lookup spr after event return
+    pSpr->_sigEvent2.Connect(this, &SpriteMgr::SpriteEvent);
+
+    pSpr->startAnim( 0, -1, anim, rate_ms);
+    pSpr->setPos(x, y);
+
+	return pSpr.get();
 }
 
 bool SpriteMgr::del(Uint32 handle)
 {
-	tSprMap::iterator it = _sprmap.find(handle);
+	t_SprMap::iterator it = _sprmap.find(handle);
+	return del(it);
+}
+
+bool SpriteMgr::del(t_SprMap::iterator it)
+{
 	if (it == _sprmap.end()) return false;
-	delete (*it).second;
+
+    if ((*it).second._spr.get())
+    {
+        (*it).second._spr->_sigEvent2.Disconnect(this, &SpriteMgr::SpriteEvent);
+        (*it).second._spr.reset(); //delete
+    }
 	_sprmap.erase(it);
 	return true;
 }
 
+
 void SpriteMgr::work(Uint32 handle)
 {
+   	t_SprMap::iterator it = _sprmap.find(handle);
+	if (it == _sprmap.end()) return;
+
+    if ((*it).second._bDead)
+    {
+        del(it);
+        return;
+    }
+
 	//find actual sprite and update it
-	_s = get(handle);
-	if (_s)
+	Sprite *s = (*it).second._spr.get();
+	if (s)
 	{
-//		if (_s->isLive()) _s->work(); else del(handle);
-            _s->work();
+        s->work();
 	}
 }
 
@@ -102,65 +149,46 @@ void SpriteMgr::work(void)
 	_itend = _sprmap.end();
 	for (_it = _sprmap.begin(); _it != _itend; ++_it)
 	{
-//		if ((*_it).second->isLive()) (*_it).second->work(); else del((*_it).first);
-            (*_it).second->work();
+        if ((*_it).second._bDead)
+        {
+            del(_it);
+            return;
+        }
+
+        (*_it).second._spr->work();
 	}
 }
 
 void SpriteMgr::draw(Uint32 handle, Screen* screen)
 {
 	//find actual sprite and draw it
-	_s = get(handle);
-	if (_s) _s->draw(screen);
+	Sprite *s = get(handle);
+	if (s) s->draw(screen);
 }
 
 void SpriteMgr::draw(Screen* screen)
 {
 	//draw all in map
 	_itend = _sprmap.end();
-	for (_it = _sprmap.begin(); _it != _itend; ++_it, (*_it).second->draw(screen));
+	for (_it = _sprmap.begin(); _it != _itend; ++_it)
+	{
+        if ((*_it).second._spr.get())
+            (*_it).second._spr->draw(screen);
+	}
 }
 
-
-
-OneShot::OneShot()
+void SpriteMgr::SpriteEvent(int event, int spr_id)
 {
-
-}
-
-OneShot::~OneShot()
-{
-}
-
-void OneShot::event(int, int)
-{
-}
-
-void event2(int, int)
-{
-}
-
-void OneShot::add(Sprite* spr)
-{
-    if (_unused.size())
+    if (event == USER_EV_END_DELETE)
     {
-        int i = _unused.back();
-        _unused.erase(_unused.end()-1);
-        _list[i] = spr;
+        //remove the sprite from the map
+        t_SprMap::iterator it = _sprmap.find(spr_id);
+        if (it == _sprmap.end()) return;
+
+        (*it).second._bDead = true;    //delete next work cycle
     }
-    else
-        _list.push_back(spr);
-
-    spr->addObserver(&event2);
 }
 
-void OneShot::work(void)
-{
-}
-
-void OneShot::draw(Screen* s)
-{
-}
 
 
 

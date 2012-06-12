@@ -456,7 +456,7 @@ int Audio::addSfx(const std::string &filename, unsigned int reqPos)
     const bool bOk= (_sfxList.size() == reqPos+1);
 
 #if _DEBUG
-std::cout << "count of sounds " << _sfxList.size() << " - added " << filename << (bOk?" ok":" failed") << std::endl;
+std::cout << "# of sounds " << _sfxList.size() << " - added " << filename << (bOk?" ok":" failed") << std::endl;
 #endif
 
     return bOk?reqPos:-1;

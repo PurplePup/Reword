@@ -42,15 +42,24 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include <iostream>
 
+GameData::GameData() : _bTouch(false),  _init(false)
+{
+}
+
 GameData::GameData(GameOptions &opt) : _options(opt), _bTouch(false),  _init(false)
 {
-    init();
 }
 
 void GameData::init()
 {
 	//initialise, load everything needed...
 	bool bErr = false;
+
+	//SCORES ETC
+	Uint32 hash = _score.load();
+
+	//LOAD WORDS - 	//pass score hash + ticks as random seed
+	bErr |= !_words.load(RES_WORDS + _options._defaultWordFile, hash + SDL_GetTicks());
 
 	//FONTS
 	bErr |= !_fntTiny.load(RES_FONTS + "FreeSansBold.ttf", FONT_TINY);
@@ -59,31 +68,27 @@ void GameData::init()
 	bErr |= !_fntMed.load(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_MEDIUM);
 	bErr |= !_fntBig.load(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_BIG);
 
+    if (!bErr)
+    {
+        //SOUNDS - no wrapper class so need to free on exit
+        _fxCountdown = Mix_LoadWAV(std::string(RES_SOUNDS + "ping.wav").c_str());	//<10 seconds remaining
+        _fxBadword = Mix_LoadWAV(std::string(RES_SOUNDS + "boing.wav").c_str());	//word not in dict
+        _fxOldword = Mix_LoadWAV(std::string(RES_SOUNDS + "beepold.wav").c_str());	//word already picked
+        _fx6notfound = Mix_LoadWAV(std::string(RES_SOUNDS + "honk.wav").c_str());	//not found a 6 letter word
+        _fx6found = Mix_LoadWAV(std::string(RES_SOUNDS + "binkbink.wav").c_str());	//found a/the 6 letter word
+        _fxFound = Mix_LoadWAV(std::string(RES_SOUNDS + "blipper.wav").c_str());	//found a non 6 letter word
+        _fxBonus = Mix_LoadWAV(std::string(RES_SOUNDS + "fanfare.wav").c_str());	//all words done before countdown
+        _fxWoosh = Mix_LoadWAV(std::string(RES_SOUNDS + "woosh2.wav").c_str());		//jumble letters sound
+        _fxRoundel = Mix_LoadWAV(std::string(RES_SOUNDS + "blipper.wav").c_str());	//roundel press
+        _fxControl = Mix_LoadWAV(std::string(RES_SOUNDS + "blipper.wav").c_str());	//control press
 
-	//SOUNDS - no wrapper class so need to free on exit
-	_fxCountdown = Mix_LoadWAV(std::string(RES_SOUNDS + "ping.wav").c_str());	//<10 seconds remaining
-	_fxBadword = Mix_LoadWAV(std::string(RES_SOUNDS + "boing.wav").c_str());	//word not in dict
-	_fxOldword = Mix_LoadWAV(std::string(RES_SOUNDS + "beepold.wav").c_str());	//word already picked
-	_fx6notfound = Mix_LoadWAV(std::string(RES_SOUNDS + "honk.wav").c_str());	//not found a 6 letter word
-	_fx6found = Mix_LoadWAV(std::string(RES_SOUNDS + "binkbink.wav").c_str());	//found a/the 6 letter word
-	_fxFound = Mix_LoadWAV(std::string(RES_SOUNDS + "blipper.wav").c_str());	//found a non 6 letter word
-	_fxBonus = Mix_LoadWAV(std::string(RES_SOUNDS + "fanfare.wav").c_str());	//all words done before countdown
-	_fxWoosh = Mix_LoadWAV(std::string(RES_SOUNDS + "woosh2.wav").c_str());		//jumble letters sound
-	_fxRoundel = Mix_LoadWAV(std::string(RES_SOUNDS + "blipper.wav").c_str());	//roundel press
-	_fxControl = Mix_LoadWAV(std::string(RES_SOUNDS + "blipper.wav").c_str());	//control press
-
-//#ifdef _USE_MIKMOD
-	_musicMenu = Mix_LoadMUS(std::string(RES_SOUNDS + "cascade.mod").c_str());	//in sounds, not music dir
-	std::cerr << "Mix_LoadMUS cascade.mod result : " << Mix_GetError() << std::endl;
-//#else
-//	_musicMenu = 0;	//load later
-//#endif
-
-	//SCORES ETC
-	Uint32 hash = _score.load();
-
-	//LOAD WORDS - 	//pass score hash + ticks as random seed
-	bErr |= !_words.load(RES_WORDS + _options._defaultWordFile, hash + SDL_GetTicks());
+        //#ifdef _USE_MIKMOD
+        _musicMenu = Mix_LoadMUS(std::string(RES_SOUNDS + "cascade.mod").c_str());	//in sounds, not music dir
+        std::cerr << "Mix_LoadMUS cascade.mod result : " << Mix_GetError() << std::endl;
+        //#else
+        //	_musicMenu = 0;	//load later
+        //#endif
+    }
 
 	//GAME STATES
 	//start in main menu
@@ -101,16 +106,18 @@ void GameData::init()
 GameData::~GameData()
 {
 	//other specific resources to clear up
+    if (_init)
+    {
+        Mix_FreeChunk(_fxBadword);
+        Mix_FreeChunk(_fxOldword);
+        Mix_FreeChunk(_fxCountdown);
+        Mix_FreeChunk(_fx6notfound);
+        Mix_FreeChunk(_fx6found);
+        Mix_FreeChunk(_fxFound);
+        Mix_FreeChunk(_fxBonus);
 
-	Mix_FreeChunk(_fxBadword);
-	Mix_FreeChunk(_fxOldword);
-	Mix_FreeChunk(_fxCountdown);
-	Mix_FreeChunk(_fx6notfound);
-	Mix_FreeChunk(_fx6found);
-	Mix_FreeChunk(_fxFound);
-	Mix_FreeChunk(_fxBonus);
-
-	Mix_FreeMusic(_musicMenu);
+        Mix_FreeMusic(_musicMenu);
+    }
 }
 
 //set the relevant vars (value, name, colour) for the difficulty level

@@ -195,5 +195,5 @@ void Control::fade(bool bFlip)
     }
 
     _saveTouchPt = Point(); //blank
-    _pCtrl->startAnim(frameFrom, frameTo, ImageAnim::ANI_ONCE, 50, 0, 0, 100); //unpress
+    _pCtrl->startAnim(frameFrom, frameTo, ImageAnim::ANI_ONCEPAUSE, 50, 0, 0, 100); //unpress
 }

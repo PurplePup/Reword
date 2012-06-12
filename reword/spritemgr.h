@@ -1,65 +1,55 @@
 //spritemgr.h
 
-
 #ifndef _SPRITEMGR_H
 #define _SPRITEMGR_H
 
 #include "sprite.h"
-#include "screen.h"
 
 #include <map>
+#include <boost/shared_ptr.hpp>
+
+class Screen;
 
 class SpriteMgr
 {
 public:
-	typedef std::map <Uint32, Sprite*> tSprMap;
+    typedef boost::shared_ptr<Sprite> t_pSprite;
+
+    struct SpriteX
+    {
+        SpriteX() : _bDead(false) {}
+        bool        _bDead;
+        t_pSprite   _spr;
+    };
+
+	typedef std::map <Uint32, SpriteX> t_SprMap;
 
 	SpriteMgr();
 	~SpriteMgr();
 
 	void clear();
 
-	Sprite *	get(Uint32 handle);
-	Uint32	 	add(Sprite* spr);
+	Sprite *    get(Uint32 handle);
+	Uint32	 	add(t_pSprite &pSpr);
+	Sprite *    add(const std::string resource, int x=0, int y=0, Uint32 rate_ms=25, ImageAnim::eAnim anim=ImageAnim::ANI_ONCEDEL);
 	bool		del(Uint32 handle);
+    bool        del(t_SprMap::iterator it);
 
 	void		work(Uint32 handle);
 	void		work(void);				//for all sprites
 	void		draw(Uint32 handle, Screen* screen);
 	void		draw(Screen* screen);	//for all sprites
 
+    void        SpriteEvent(int event, int spr_id);
+
 private:
-	tSprMap	_sprmap;
-	Uint32	_handle;
-	Sprite *_s;
+	t_SprMap	_sprmap;
+	Uint32  	_handle;
 
     //some iterators for use in updates
-	tSprMap::iterator _it;	    //not thread safe (but we're not using threads so...)
-	tSprMap::iterator _itend;	//not thread safe
+	t_SprMap::iterator _it;	    //not thread safe (but we're not using threads so...)
+	t_SprMap::iterator _itend;	//not thread safe
 };
-
-//class to add a sprite animation, play it then delete it
-//to allow one off effect animations to be run
-class OneShot
-{
-public:
-    typedef std::vector<Sprite *> tSpriteList;
-
-    OneShot();
-    ~OneShot();
-
-    void        add(Sprite* spr);
-	void		work(void);
-	void		draw(Screen* s);
-    void        event(int, int);
-
-protected:
-
-    tSpriteList         _list;
-    std::vector<int>    _unused;
-};
-
-
 
 #endif //_SPRITEMGR_H
 

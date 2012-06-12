@@ -45,7 +45,7 @@ private:
 	int			_size;
 	bool		_init;
 	SDL_Color	_shadow;		//font shadow colour
-	char		_buffer[100];	//general purpose char buffer (for number formatting etc)
+	char		_buffer[400];	//general purpose char buffer (for number formatting etc)
 	int 		_height;
 };
 

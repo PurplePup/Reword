@@ -15,7 +15,7 @@
 #include "states.h"
 #include "words.h"		//SDL.h should be declared before this
 #include "score.h"
-#include "sprite.h"
+#include "spritemgr.h"
 
 //loadable game options and set using the options screen
 struct GameOptions
@@ -49,10 +49,12 @@ private:
 //to persist global data throughout app
 class GameData
 {
-
 public:
+	GameData();
 	GameData(GameOptions &opt);
 	~GameData();
+
+    void setOptions(const GameOptions &opt) { _options = opt; }
 	void init();
 
 	bool isLoaded() {return _init;}
@@ -89,7 +91,7 @@ public:
 	//Game vars
 	///////////////////////////////
 
-    GameOptions &_options;
+    GameOptions _options;
 
 	int			_mainmenuoption;	// (0=play, 1=level, 2=hiscore etc)
 
@@ -112,6 +114,8 @@ public:
 
 	bool 		_bTouch;			//true if touchscreen/mouse detected
     std::string _prev_inits;        //for scoreboard
+
+    SpriteMgr   _effects;       //sprite effects used in main game loop
 
 private:
 	bool		_init;
