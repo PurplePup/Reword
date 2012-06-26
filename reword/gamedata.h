@@ -29,6 +29,7 @@ struct GameOptions
     void setDefaultSfxOn(bool b);
     void setDefaultMusicOn(bool b);
     void setDefaultDiff(eGameDiff e);
+    bool setDefaultWordFile(const std::string &wordFile);
 
     //command line options, override default options
     bool        _bSound;    //if false, loads null IAudio

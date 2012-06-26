@@ -91,7 +91,7 @@ Rect FontTTF::put_text(Surface *s, int x, int y, const char *textstr, const SDL_
 	if (bShadow)
 	{
 		SDL_Surface *text = TTF_RenderText_Blended( _font, textstr, _shadow );
-		if (text != NULL)
+		if (text)
 		{
 			if (-999 == x) x = (s->surface()->w - text->w ) / 2;
 			ppg::blit_surface(text, 0, s->surface(), x+1, y+1);
@@ -102,7 +102,7 @@ Rect FontTTF::put_text(Surface *s, int x, int y, const char *textstr, const SDL_
 	}
 
 	SDL_Surface *text = TTF_RenderText_Blended( _font, textstr, textColour );
-	if (text != NULL)
+	if (text)
 	{
 		if (-999 == x) x = (s->surface()->w - text->w ) / 2;
 		ppg::blit_surface(text, 0, s->surface(), x, y);
@@ -125,8 +125,14 @@ Rect FontTTF::put_text(Surface *s, int y, const char *textstr, const SDL_Color &
 //right justify to edge of screen
 Rect FontTTF::put_text_right(Surface *s, int y, int xDelta, const char *textstr, const SDL_Color &textColour, bool bShadow /*= false*/)
 {
+    int textW(0);
 	SDL_Surface *text = TTF_RenderText_Solid( _font, textstr, textColour );
-	return put_text(s, s->surface()->w - text->w - xDelta, y, textstr, textColour, bShadow);
+	if (text)
+	{
+        textW = text->w;
+        SDL_FreeSurface(text);
+	}
+	return put_text(s, s->surface()->w - textW - xDelta, y, textstr, textColour, bShadow);
 }
 
 Rect FontTTF::put_text_mid(Surface *s, int y, int xStart, const char *textstr, const SDL_Color &textColour, bool bShadow /*= false*/)
@@ -152,8 +158,14 @@ Rect FontTTF::put_number(Surface *s, int y, int number, const char *format, cons
 Rect FontTTF::put_number_right(Surface *s, int y, int xDelta, int number, const char *format, const SDL_Color &textColour, bool bShadow /*= false*/)
 {
 	snprintf(_buffer, 100, format, number);
+	int textW(0);
 	SDL_Surface *text = TTF_RenderText_Solid( _font, _buffer, textColour );
-	return put_text(s, s->surface()->w - text->w - xDelta, y, _buffer, textColour, bShadow);
+	if (text)
+	{
+	    textW = text->w;
+	    SDL_FreeSurface(text);
+	}
+	return put_text(s, s->surface()->w - textW - xDelta, y, _buffer, textColour, bShadow);
 }
 
 //place number mid point at xStart position i.e "NNNxNNN" gixing x as the mid point
@@ -175,7 +187,7 @@ Rect FontTTF::calc_text_metrics(const char *textstr, bool bShadow /*= false*/, i
 	Rect r(0, 0, 0, 0);
 
 	SDL_Surface *text = TTF_RenderText_Solid( _font, textstr, BLACK_COLOUR );
-	if (text != NULL)
+	if (text)
 	{
 		r._min = Point(xOffset, yOffset);   //start from x,y
 		r._max = r._min.add(Point(text->w+(bShadow?1:0), height()+(bShadow?1:0)));

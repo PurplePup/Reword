@@ -87,5 +87,5 @@ void PlayMainMenu::render(Screen *s)
     PlayMenu::render(s);
 
     //add version no - specific to main menu screen
-	_gd._fntTiny.put_text_right(s, 5, 0, VERSION_STRING, BLACK_COLOUR); //display vN.N at top right
+	_gd._fntClean.put_text_right(s, 5, 0, VERSION_STRING, BLACK_COLOUR); //display vN.N at top right
 }

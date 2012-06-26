@@ -34,6 +34,8 @@
 class NullInput : public IInput
 {
 public:
+    NullInput() {}
+	virtual ~NullInput() {}
     virtual void init() { std::cout << "NullInput (no control) initialised" << std::endl; }
 	virtual bool initDone() { return true; };
     virtual ppkey::eButtonType translate(int key) { (void)(key); return ppkey::UP; }

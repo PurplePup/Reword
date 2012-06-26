@@ -13,13 +13,11 @@ class Screen;
 class SpriteMgr
 {
 public:
-    typedef boost::shared_ptr<Sprite> t_pSprite;
-
     struct SpriteX
     {
         SpriteX() : _bDead(false) {}
-        bool        _bDead;
-        t_pSprite   _spr;
+        bool            _bDead;
+        t_pSharedSpr   _spr;
     };
 
 	typedef std::map <Uint32, SpriteX> t_SprMap;
@@ -30,7 +28,7 @@ public:
 	void clear();
 
 	Sprite *    get(Uint32 handle);
-	Uint32	 	add(t_pSprite &pSpr);
+	Uint32	 	add(t_pSharedSpr &pSpr);
 	Sprite *    add(const std::string resource, int x=0, int y=0, Uint32 rate_ms=25, ImageAnim::eAnim anim=ImageAnim::ANI_ONCEDEL);
 	bool		del(Uint32 handle);
     bool        del(t_SprMap::iterator it);

@@ -68,13 +68,13 @@ void PlayGameDict::init(Input *input)
 //    _gd._arrowDown.setTouchable(true);
 
     {
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_up.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_round_scroll_up.png")));
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2);
     Control c(p, CTRLID_SCROLL_UP, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsDict.add(c);
     }
     {
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_down.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_round_scroll_down.png")));
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2+p->tileH()+6);
     Control c(p, CTRLID_SCROLL_DOWN, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsDict.add(c);
@@ -94,12 +94,12 @@ void PlayGameDict::init(Input *input)
     tSharedImage &letters = Resource::image("roundel_letters.png");
     _roundDict= tAutoRoundels(new Roundels());
     _roundDict->setWordCenterHoriz(_dictWord, letters, (BG_LINE_TOP-letters.get()->height())/2, 4);
-    _roundDict->startMoveFrom(Screen::width(), 0, 10, 50, 18, 0);
+    _roundDict->easeMoveFrom(Screen::width(), 0, 1400, 20);
 
     _menubg = Resource::image("menubg.png");
 
     //[BACK] dictionary screen buttons - only shown in dict display
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_back_small.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_square_back_small.png")));
     p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
     Control c(p, CTRLID_BACK, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsDict.add(c);

@@ -56,7 +56,7 @@ void PlayInst::init(Input *input)
 
     tSharedImage &letters = Resource::image("roundel_letters.png");
 	_title.setWordCenterHoriz(std::string("INFO"), letters, (BG_LINE_TOP-letters.get()->height())/2, 2);
-	_title.startMoveFrom( 0, -(letters.get()->height()*2), 15, 100, 0, ROUNDEL_VEL);
+	_title.easeMoveFrom( 0, -(letters.get()->height()*2), 1000, -40);
 	_titleW.start(3000, 1000);
 
     _menubg = Resource::image("menubg.png");
@@ -71,14 +71,14 @@ void PlayInst::init(Input *input)
 
 	//set arrow controls (scroll positions)
     {
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_up.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_round_scroll_up.png")));
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2);
     p->_sigEvent2.Connect(this, &PlayInst::ControlEvent);
     Control c(p, CTRLID_SCROLL_UP, CTRLGRP_SCROLL, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsInst.add(c);
     }
     {
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_down.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_round_scroll_down.png")));
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_BOT-p->tileH()-2);
     p->_sigEvent2.Connect(this, &PlayInst::ControlEvent);
     Control c(p, CTRLID_SCROLL_DOWN, CTRLGRP_SCROLL, Control::CAM_DIS_HIT_IDLE_SINGLE);
@@ -87,7 +87,7 @@ void PlayInst::init(Input *input)
 
     //music on/off icon
     { // round music button placed in top left of scorebar
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_music.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_round_music.png")));
     p->setPos(5,5);
     IAudio &audio = Locator::audio();
     Control c(p, CTRLID_MUSIC, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, audio.musicEnabled()?1:2);
@@ -96,14 +96,14 @@ void PlayInst::init(Input *input)
     }
     //load EXIT/NEXT buttons
     {
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_exit_small.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_square_exit_small.png")));
     p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
     p->_sigEvent2.Connect(this, &PlayInst::ControlEvent);
     Control c(p, CTRLID_EXIT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsInst.add(c);
     }
     {
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_next_small.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_square_next_small.png")));
     p->setPos(SCREEN_WIDTH - p->tileW() - 8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
     Control c(p, CTRLID_NEXT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsInst.add(c);

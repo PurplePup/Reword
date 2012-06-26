@@ -54,6 +54,8 @@
 		<Unit filename="controls.cpp" />
 		<Unit filename="controls.h" />
 		<Unit filename="delegate.h" />
+		<Unit filename="easing.cpp" />
+		<Unit filename="easing.h" />
 		<Unit filename="error.cpp" />
 		<Unit filename="error.h" />
 		<Unit filename="fontttf.cpp" />

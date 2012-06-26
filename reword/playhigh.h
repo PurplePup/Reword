@@ -55,9 +55,11 @@ protected:
 	void moveLeft();
 	void moveRight();
 	bool isEditing() { return _bEditing; }
-	void setEditing(bool b) { _bEditing = b; }
+	void setEditing(bool b);
+	void updateKbdCursor();
     void updateScrollButtons();
     void ControlEvent(int event, int ctrl_id);
+    void insertNewScore();
 
 private:
 	GameData &	_gd;		//shared data between screens (play classes)
@@ -65,6 +67,7 @@ private:
 
 	int			_pos;           //new position in score table
 	bool        _bEditing;      //user entering inits
+	bool        _bLastActionTouch;  //last selection was a touch event not D-pad movement etc
 
 //	int			_currPos;		//which of the 3 inits you are currently editing
 
@@ -79,17 +82,18 @@ private:
 	int			_xTimesLen;		// .. times
 	int         _maxGap;
 
-	tHiScoreEntry _curr;		//temp inits during payer editing
+	HiScoreEntry _curr;		//temp inits during payer editing
 
 	int			_diff;			//curr difficulty hiscore table to display
 	SDL_Color	_diffColour;	//colour of text to denote hi score difficulty
 	int			_mode;			//locally used game mode
-	std::string	_description;	//"mode : difficulty"
+	std::string	_strMode, _strDiff;	//mode & difficulty descriptions for display
 
 	Roundels	_title;
 
 	RoundelsKbd _kbd;           //3 rows displayed as kbd q-p, a-l, z-m
 	int         _kbdTileW, _kbdTileH;
+	t_pSharedSpr _cursorSpr;     //highlight cursor for non touch movement
 
 	Waiting		_titleW;		//delay between jumbling
 	Waiting		_doubleClick;	//touch support

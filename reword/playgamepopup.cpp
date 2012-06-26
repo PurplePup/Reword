@@ -249,7 +249,7 @@ bool PlayGamePopup::tap(const Point &pt)
 void PlayGamePopup::choose()
 {
 	tMenuMap::iterator it = (*_pItems).find(_menuoption);
-	assert(it != _itemList.end());
+	assert(it != (*_pItems).end());
 	MenuItem *pItem = &(it->second);
 	assert(pItem);
 

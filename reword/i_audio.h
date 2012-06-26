@@ -7,6 +7,9 @@
 class IAudio
 {
 public:
+    IAudio() {}
+	virtual ~IAudio() {}
+
 	virtual void setup(bool bSfx, bool bMusic, const std::string &baseTrackDir, bool bMute) = 0;
 	virtual void closedown() = 0;
 

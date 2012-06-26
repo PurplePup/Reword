@@ -24,33 +24,35 @@ const int SCORE_FASTEST = 2;	//each time a speeder or TT word is got faster than
 //file, it needs to have its own serializer or be text (XML/JSON/INI etc?)
 #pragma pack(push, 1)
 
-typedef struct
+struct HiScoreEntryPre04
 {
+    HiScoreEntryPre04() : words(0), score(0) { memset(inits, 0, 4); }
 	char	inits[4];	//3 letters + \0
 	Uint32	words;
 	Uint32	score;
-} tHiScoreEntryPre04;		//pre v0.4 score format
+};		//pre v0.4 score format
 
-typedef struct
+struct HiScoreLevelsPre04
 {
 	//1 more than (10) to display, to allow insert when adding inits at last pos in table
-	tHiScoreEntryPre04 level[11];
-} tHiScoreLevelsPre04;
+	HiScoreEntryPre04 level[11];
+};
 
-typedef struct
+struct HiScoreEntry
 {
+    HiScoreEntry() : words(0), score(0), fastest(0), ttSeconds(0) { memset(inits, 0, 4); }
 	char	inits[4];	//3 letters + \0
 	Uint32	words;
 	Uint32	score;
 	Uint32	fastest;
 	Uint32	ttSeconds;	//amount of seconds - user can change for timetrial
-} tHiScoreEntry;
+};
 
-typedef struct
+struct HiScoreLevels
 {
 	//1 more than (10) to display, to allow insert when adding inits at last pos in table
-	tHiScoreEntry level[11];
-} tHiScoreLevels;
+	HiScoreEntry level[11];
+};
 
 //back to whatever the platform uses
 #pragma pack(pop)
@@ -61,14 +63,16 @@ public:
 	Score();
 
 	void init();
-	Uint32 load(std::string scorefile = "");
-	void save(std::string scorefile = "");
+
+    Uint32 loadUsingWordfileName(const std::string &wordfile);
+	Uint32 load(const std::string &scorefile = "");
+	void save(const std::string &scorefile = "");
 
 	int isHiScore(int mode, int diffLevel);
-	void insert(int mode, int diff, int pos, tHiScoreEntry &curr);
+	void insert(int mode, int diff, int pos, HiScoreEntry &curr);
 
 	//current score accessors
-	void setCurr(tHiScoreEntry &curr);
+	void setCurr(HiScoreEntry &curr);
 	void setCurrInits(std::string inits);
 	void setCurrWords(unsigned int words);
 	unsigned int addCurrWords(unsigned int words);
@@ -77,7 +81,7 @@ public:
 	bool setCurrFastest(unsigned int fastest);
 	void resetCurr();
 
-	tHiScoreEntry curr() {return _curr;}
+	HiScoreEntry curr() {return _curr;}
 	std::string currInits() {return std::string(_curr.inits);}
 	unsigned int currWords() {return _curr.words;}
 	unsigned int currScore() {return _curr.score;}
@@ -92,16 +96,16 @@ public:
 	void setSeed(unsigned int seed) { _seed = seed; }
 
 protected:
-	tHiScoreLevels * getLevel(int mode, int diff);
+	HiScoreLevels * getLevel(int mode, int diff);
 
 protected:
 	std::string		_scorefile;
 
-	tHiScoreEntry	_curr;			//current score, words and inits to save to scoretable
-	tHiScoreLevels	_hiScoreRA[3];	//Reword Arcade - 3 difficulties (easy, med, hard) of 10x hi scores
-	tHiScoreLevels	_hiScore[3];	//Reword - 3 difficulties (easy, med, hard) of 10x hi scores
-	tHiScoreLevels	_hiScoreS6[3];	//Speed - 3 difficulties (easy, med, hard) of 10x hi scores
-	tHiScoreLevels	_hiScoreTT[3];	//TimeTrial - 3 difficulties (easy, med, hard) of 10x hi scores
+	HiScoreEntry	_curr;			//current score, words and inits to save to scoretable
+	HiScoreLevels	_hiScoreRA[3];	//Reword Arcade - 3 difficulties (easy, med, hard) of 10x hi scores
+	HiScoreLevels	_hiScore[3];	//Reword - 3 difficulties (easy, med, hard) of 10x hi scores
+	HiScoreLevels	_hiScoreS6[3];	//Speed - 3 difficulties (easy, med, hard) of 10x hi scores
+	HiScoreLevels	_hiScoreTT[3];	//TimeTrial - 3 difficulties (easy, med, hard) of 10x hi scores
 
     unsigned int 	_seed;
 };

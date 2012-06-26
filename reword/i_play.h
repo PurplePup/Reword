@@ -38,6 +38,9 @@ public:
 	//pure virtual functions - must be implemented
 	///////////////////////////////////////////////
 
+    IPlay() {}
+    virtual ~IPlay() {}
+
     //init the level/screen
     virtual void init(Input * /*input*/) = 0;
     // drawing operation
@@ -63,8 +66,6 @@ public:
 	virtual bool running() const { return _running; }
 	//quit the screen
 	virtual void quit() { _running = false; }
-
-	virtual ~IPlay() {}
 
 protected:
 	bool _init;		//must be set true to render etc

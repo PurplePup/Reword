@@ -36,7 +36,9 @@ public:
 	void setWordCenterHoriz(const std::string &wrd, tSharedImage &letters, int y = 0, int gap =0);
 	void setWordCenterVert(const std::string &wrd, tSharedImage &letters, int x = 0, int gap =0);
 	void startMoveFrom(int deltaX, int deltaY, Uint32 rate, Uint32 delay, int xVel, int yVel, Sprite::eSprite type = Sprite::SPR_NONE);
+    void easeMoveFrom(int deltaX, int deltaY, Uint32 duration, Uint32 delay, Easing::eType ease = Easing::EASE_OUTBOUNCE);
 	void setBottomPos(int xPosBot, int yPosBot);
+	Point getBottomPos();
 	void setBottomMax(int iMax);
 	void setBottomCopy(bool bCopyBot = true) { _bCopyBot = bCopyBot; }
     int getLastId();
@@ -75,6 +77,9 @@ public:
 	int getX() const { return _xScratchTop; }	//screen x pos of first roundel
 	int getY() const { return _yScratchTop; }	//screen y ...
 
+    int getRoundelW() { return _roundelW; }
+    int getRoundelH() { return _roundelH; }
+
     //init the level/screen
     virtual void init(Input * /*input*/);
     // drawing operation
@@ -106,14 +111,14 @@ protected:
 
 	std::string	_word;			//original word used to set roundels
 
-    typedef boost::shared_ptr<Sprite> t_pSprite;
-    t_pSprite   _pressEffect;
     std::string _pressResource;
     int         _pressEffW, _pressEffH;
 
     //positioning...
 	int     _xScratchTop, _yScratchTop,
             _xScratchBot, _yScratchBot;		//previously #defined SCRATCHY1 and SCRATCHY2
+    int     _roundelW, _roundelH;
+
 	int		_gap;       		//gap betwen letters on screen
 	bool	_bHoriz;
 	bool	_bMoving;			//indicates if all sprites have stopped moving or not

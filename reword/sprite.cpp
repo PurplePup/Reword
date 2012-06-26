@@ -40,6 +40,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "global.h"
 #include "sprite.h"
 #include "screen.h"
+#include "utils.h"
 #include <math.h>
 
 
@@ -47,7 +48,8 @@ Sprite::Sprite() :
 	ImageAnim(),
 	_xStart(0), _yStart(0), _xEnd(0), _yEnd(0),
 	_xDir(0), _yDir(0), _xVel(0), _yVel(0), _type(Sprite::SPR_NONE),
-	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true)
+	_pauseM(true), _loopM(false), _rateM(0), _waitM(0), _touchable(true),
+	_bEase(false)
 {
 }
 
@@ -55,7 +57,8 @@ Sprite::Sprite(std::string fileName, bool bAlpha, Uint32 nFrames) :
 	ImageAnim(fileName, bAlpha, nFrames),
 	_xStart(0), _yStart(0), _xEnd(0), _yEnd(0),
 	_xDir(0), _yDir(0), _xVel(0), _yVel(0), _type(Sprite::SPR_NONE),
-	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true)
+	_pauseM(true), _loopM(false), _rateM(0), _waitM(0), _touchable(true),
+	_bEase(false)
 {
 }
 
@@ -63,7 +66,8 @@ Sprite::Sprite(tSharedImage &img) :
 	ImageAnim(img), //constructs underlying Image member
 	_xStart(0), _yStart(0), _xEnd(0), _yEnd(0),
 	_xDir(0), _yDir(0), _xVel(0), _yVel(0), _type(Sprite::SPR_NONE),
-	_pauseM(true),_loopM(false), _rateM(0), _waitM(0), _touchable(true)
+	_pauseM(true), _loopM(false), _rateM(0), _waitM(0), _touchable(true),
+	_bEase(false)
 {
 }
 
@@ -103,7 +107,6 @@ void Sprite::setPos(float x, float y)
 	ImageAnim::setPos(x,y);
 }
 
-
 //set up move to without specifying velocities (just time, ie speed to get there)
 //so we need to call calcXYRate to return the values required
 void Sprite::startMoveTo(int xEnd, int yEnd, Uint32 time, Uint32 delay)
@@ -111,6 +114,55 @@ void Sprite::startMoveTo(int xEnd, int yEnd, Uint32 time, Uint32 delay)
 	float xVel, yVel;
 	Uint32 rate = calcXYRate(time, xEnd, yEnd, (int)getXPos(), (int)getYPos(), xVel, yVel);
 	startMoveTo(xEnd, yEnd, rate, delay, xVel, yVel, SPR_NONE);
+}
+
+void Sprite::easeMoveTo(int xEnd, int yEnd, Uint32 duration, Sint32 delay, Easing::eType ease)
+{
+	//direction
+	int xDiff = 0;
+    //set by end x or y, or overridden by SPR_ direction flags
+    if ((xEnd < getXPos()))
+    {
+        _xDir = -1;
+        xDiff = -(getXPos() - xEnd);
+    }
+    else if ((xEnd > getXPos()))
+    {
+        _xDir = 1;	//pos=right, neg=left
+        xDiff = xEnd - getXPos();
+    }
+    else
+        _xDir = 0;
+
+	int yDiff = 0;
+    if ((yEnd < getYPos()))
+    {
+        _yDir = -1;
+        yDiff = -(getYPos() - yEnd);
+    }
+    else if ((yEnd > getYPos()))
+    {
+        _yDir = 1;	//pos=down, neg=up
+        yDiff = yEnd - getYPos();
+    }
+    else
+        _yDir = 0;
+
+	_xEnd = xEnd;
+	_yEnd = yEnd;
+
+    _easeX.setup(ease, 0, getXPos(), xDiff, duration);
+    _easeY.setup(ease, 0, getYPos(), yDiff, duration);
+
+	//unpause movement if movement is set up correctly
+	pauseMove( false );		//set true to allow moving
+
+    if (delay < 0)
+        delay = g_randInt.random(abs(delay));   //delay between 0-n where abs(delay) is max
+    _waitM.start(0, delay);
+	setMoveLoop(false);	 //not repeat any timer/movement
+
+	_bEase = true;
 }
 
 //start move from A (curr pos) to B (to end) then stop or reverse etc.
@@ -160,11 +212,7 @@ void Sprite::startMoveTo(int xEnd, int yEnd,
 	_xVel = xVel;
 	_yVel = yVel;
 
-	//attributes
-//##TODO## effects flags stuff here
-
 //	calcWaypoints(_x, _y, xEnd, yEnd);
-
 
 	//unpause movement if movement is set up correctly
 	pauseMove( !canMove() );		//set false, if moving set
@@ -173,45 +221,70 @@ void Sprite::startMoveTo(int xEnd, int yEnd,
 	//finally start the timer if requested
 	if (rate && canMove()) setMoveRate(rate, delay);
 
+    _bEase = false;
 }
+
 
 void Sprite::work()
 {
-	//update position etc
-	if (!_pauseM && _waitM.done(_loopM))
-	{
+    if (_bEase) //use easing not linear
+    {
+        if (!_pauseM && _waitM.done(_loopM))
+        {
+            if (_xDir && !_easeX.done()) _x = _easeX.work();
+            if (_yDir && !_easeY.done()) _y = _easeY.work();
 
-		_x += _xVel*_xDir;
-		_y += _yVel*_yDir;
+            //check if end of move reached
+            if ((!_xDir || ((_xDir>0 && _x >= _xEnd) || (_xDir<0 && _x <= _xEnd)) || (_easeX.done())) &&
+                (!_yDir || ((_yDir>0 && _y >= _yEnd) || (_yDir<0 && _y <= _yEnd)) || (_easeY.done())) )
+            {
+                _x = _xEnd;	//make sure it stops at the exact end point given
+                _y = _yEnd;
+                pauseMove();
 
-		//check if end of move reached
-		if ((!_xDir || ((_xDir>0 && _x >= _xEnd) || (_xDir<0 && _x <= _xEnd))) &&
-			(!_yDir || ((_yDir>0 && _y >= _yEnd) || (_yDir<0 && _y <= _yEnd))) )
-		{
-			_x = _xEnd;	//make sure it stops at the exact end point given
-			_y = _yEnd;
-			pauseMove();
+                //some use sig/slot
+                _sigEvent2(USER_EV_END_MOVEMENT, _objectId);
+                //others use SDL event  notification
+                ppg::pushSDL_Event(USER_EV_END_MOVEMENT, reinterpret_cast<void *>(_objectId), 0);
+            }
+        }
+    }
+    else
+    {
+        //update position etc
+        if (!_pauseM && _waitM.done(_loopM))
+        {
 
-            //some use sig/slot
-            _sigEvent2(USER_EV_END_MOVEMENT, _objectId);
-            //others use SDL event  notification
-            ppg::pushSDL_Event(USER_EV_END_MOVEMENT, reinterpret_cast<void *>(_objectId), 0);
-		}
+            _x += _xVel*_xDir;
+            _y += _yVel*_yDir;
 
-/*
-		if (_pointit != _points.end())
-		{
-			_x = (*_pointit)._x;
-			_y = (*_pointit)._y;
-			++_pointit;	//next waypoint
-		}
-		else
-		{
-			//finished all waypoints
-			pauseMove();
-		}
-*/
-	}
+            //check if end of move reached
+            if ((!_xDir || ((_xDir>0 && _x >= _xEnd) || (_xDir<0 && _x <= _xEnd))) &&
+                (!_yDir || ((_yDir>0 && _y >= _yEnd) || (_yDir<0 && _y <= _yEnd))) )
+            {
+                _x = _xEnd;	//make sure it stops at the exact end point given
+                _y = _yEnd;
+                pauseMove();
+
+                //some use sig/slot
+                _sigEvent2(USER_EV_END_MOVEMENT, _objectId);
+                //others use SDL event  notification
+                ppg::pushSDL_Event(USER_EV_END_MOVEMENT, reinterpret_cast<void *>(_objectId), 0);
+            }
+
+//            if (_pointit != _points.end())
+//            {
+//                _x = (*_pointit)._x;
+//                _y = (*_pointit)._y;
+//                ++_pointit;	//next waypoint
+//            }
+//            else
+//            {
+//                //finished all waypoints
+//                pauseMove();
+//            }
+        }
+    }
 
 	ImageAnim::work();	//call parent to do the animation work
 }

@@ -55,10 +55,10 @@ void GameData::init()
 	//initialise, load everything needed...
 	bool bErr = false;
 
-	//SCORES ETC
-	Uint32 hash = _score.load();
+	//SCORES ETC - load scores for this wordfile
+    Uint32 hash = _score.loadUsingWordfileName(_options._defaultWordFile);
 
-	//LOAD WORDS - 	//pass score hash + ticks as random seed
+	//LOAD WORDS - 	pass score hash + ticks as random seed
 	bErr |= !_words.load(RES_WORDS + _options._defaultWordFile, hash + SDL_GetTicks());
 
 	//FONTS
@@ -115,6 +115,9 @@ GameData::~GameData()
         Mix_FreeChunk(_fx6found);
         Mix_FreeChunk(_fxFound);
         Mix_FreeChunk(_fxBonus);
+        Mix_FreeChunk(_fxWoosh);
+        Mix_FreeChunk(_fxRoundel);
+        Mix_FreeChunk(_fxControl);
 
         Mix_FreeMusic(_musicMenu);
     }
@@ -124,7 +127,7 @@ GameData::~GameData()
 void GameData::setDiffLevel(eGameDiff newDiff)
 {
 	_diffLevel = newDiff;
-	_diffName = (_diffLevel==DIF_EASY)?"   Easy":(_diffLevel==DIF_MED)?"Medium":"   Hard";
+	_diffName = (_diffLevel==DIF_EASY)?"EASY":(_diffLevel==DIF_MED)?"MEDIUM":"HARD";
 	_diffColour = (_diffLevel==DIF_EASY)?GREEN_COLOUR:(_diffLevel==DIF_MED)?ORANGE_COLOUR:RED_COLOUR;
 }
 
@@ -166,6 +169,7 @@ bool GameData::loadQuickState()
             std::cerr << "Fall back to default word file" << std::endl;
             if (!_words.load(RES_WORDS + _options._defaultWordFile, SDL_GetTicks()))
             {
+                //user won't see much without a word file - don't know how this'll end...
                 std::cerr << "Cannot load default word file" << std::endl;
                 return false;
             }
@@ -250,6 +254,16 @@ bool GameOptions::save()
 	}
 	_bDirty = false;
     return true;
+}
+
+bool GameOptions::setDefaultWordFile(const std::string &wordFile)
+{
+    if (_defaultWordFile!= wordFile)
+    {
+        _bDirty = true;
+        _defaultWordFile = wordFile;
+    }
+    return _bDirty;
 }
 
 //make sure dirty flag set

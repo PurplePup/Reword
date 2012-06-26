@@ -22,7 +22,7 @@ History:		Version	Date		Change
 									Added popup menu for quick exit/save/move-on
 									Changed to stack for various major states in-play and added
 										seperate functions for each render/work state.
-									Added pinger when in popup menu, to warn user
+									Added pinger sound when in popup menu, to warn user
 				0.5		28.05.08	Added touchscreen support
 				0.5.1	02.10.08	Add Pandora and other device screen layout/sizes
 
@@ -76,6 +76,9 @@ Uint32 countdown_callback(Uint32 interval, void *param)
 	return(interval);
 }
 
+//define static
+Uint32 PlayGame::next_time = 0;
+
 PlayGame::PlayGame(GameData& gd) :
     _gd(gd), _pPopup(NULL), _play(NULL)
 {
@@ -89,6 +92,31 @@ PlayGame::PlayGame(GameData& gd) :
 	_bAbort = false;	//until L+R+CLICK which exits game to hiscore if needed or to menu
 	_bSaveExit = false; //if user saves and exit for later restart
 	_tmpDefMore = false;
+    _maxwordlen = 0;
+
+    _longestWordLen = 0;
+    _shortestWordLen = 0;
+    _xxWordHi =  _yyWordHi = 0;
+    _boxOffsetY = 0;
+    memset(_boxOffset, 0, sizeof(_boxOffset));
+    memset(_boxLength, 0, sizeof(_boxLength));
+    memset(_boxWordNeeded, 0, sizeof(_boxWordNeeded));
+    memset(_boxWordOffset, 0, sizeof(_boxWordOffset));
+
+    _nWordBoxHighlightOffset = _nWordBoxEmptyOffset = _nWordBoxNeededOffset = 0;
+	_xScratch = _yScratchTop = _yScratchBot = 0;
+   	_posRButtonLeft = _posRButtonRight = _posRButtonTop = _posRButtonBot = 0;
+	_score0_x = _words0_x = _countdown0_x = 0;
+	_score0_y = _words0_y = _countdown0_y = 0;
+
+	_countdownID = 0;
+
+	_success = SU_NONE;
+	_bonusScore = _fastest = _fastestCountStart = 0;
+	_randomTitle = 0;
+    _debugTotalLetters = _debugNeededAll = _debugNeededNow = 0;
+
+    _countdown = 0;     //init static var
 
 	statePush(PG_PLAY);		//also sets default to PG_PLAY
 }
@@ -141,44 +169,44 @@ void PlayGame::init(Input *input)
 
 
     { // round music button placed in top left of scorebar
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_music.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_round_music.png")));
     IAudio &audio = Locator::audio();
     Control c(p, CTRLID_MUSIC, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_DOUBLE, audio.musicEnabled()?1:2);
     _controlsPlay.add(c);
     _controlsPlay.enableControl(audio.hasSound(), CTRLID_MUSIC);  //disable override?
     }
     { // round fx button placed in top left of scorebar
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_fx.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_round_fx.png")));
     IAudio &audio = Locator::audio();
     Control c(p, CTRLID_SFX, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_DOUBLE, audio.sfxEnabled()?1:2);
     _controlsPlay.add(c);
     _controlsPlay.enableControl(audio.hasSound(), CTRLID_SFX);  //disable override?
     }
     { // round up/down buttons used next to word boxes at end level
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_up_small.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_round_scroll_up_small.png")));
     Control c(p, CTRLID_SCROLL_UP, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
     { // round up/down buttons used next to word boxes at end level
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_down_small.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_round_scroll_down_small.png")));
     Control c(p, CTRLID_SCROLL_DOWN, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
     { //[MENU] shows in top left (unless [EXIT] shown)
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_menu.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_square_menu.png")));
     p->setPos(3, 0);
     Control c(p, CTRLID_MENU, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
     { //[EXIT] goes in same place as [MENU] when game over
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_exit.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_square_exit.png")));
     p->setPos(3, 0);
     p->setVisible(false);  //not available until countdown finished
     Control c(p, CTRLID_EXIT, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
     { //[NEXT] goes over the countdown position
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_next.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_square_next.png")));
     p->setPos(Screen::width() - p->tileW() - 3, 0);
     p->setVisible(false);  //not available until countdown finished
     Control c(p, CTRLID_NEXT, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_SINGLE);
@@ -191,22 +219,22 @@ void PlayGame::init(Input *input)
 
     //now the four letter/word controls... positions set in newLevel()
     { //shuffle
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_word_shuffle.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_round_word_shuffle.png")));
     Control c(p, CTRLID_SHUFFLE, CTRLGRP_LETTERS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
     { //try word
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_word_try.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_round_word_try.png")));
     Control c(p, CTRLID_TRYWORD, CTRLGRP_LETTERS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
     { //totop
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_word_totop.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_round_word_totop.png")));
     Control c(p, CTRLID_TOTOP, CTRLGRP_LETTERS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
     { //last
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_word_last.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_round_word_last.png")));
     Control c(p, CTRLID_LAST, CTRLGRP_LETTERS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsPlay.add(c);
     }
@@ -229,7 +257,7 @@ void PlayGame::init(Input *input)
         return;
     }
 
-    _round.setPressEffect("roundel_letters_ping.png");
+    _round.setPressEffect("ping_small.png");
 
 	//need to set the _init and _running flags
 	_init = true;
@@ -408,7 +436,8 @@ void PlayGame::render_play(Screen* s)
 				{
 					if (PG_PLAY == _state)
 						_gd._fntTiny.put_number(s, _boxOffset[xx]+6, boxOffsetY,
-                              nWords-_wordsFound[xx].size()-MAX_WORD_COL, "%d more",
+                              (nWords-MAX_WORD_COL) - (_wordsFound[xx].size() > MAX_WORD_COL ? _wordsFound[xx].size() - MAX_WORD_COL : 0),
+                            "%d more",
 							(nWords==(int)_wordsFound[xx].size())?GREEN_COLOUR:BLUE_COLOUR);
 
 					break;	//out of this n letters loop
@@ -731,7 +760,10 @@ void PlayGame::stopPopup()
 	delete _pPopup;
 	_pPopup = NULL;
 
-    slideRoundButtonsIn();
+std::cout << "abort = " << _bAbort << ", state = " << _state << std::endl;
+
+//    if (!_bAbort && _state == PG_PLAY)
+        slideRoundButtonsIn();
 }
 
 void PlayGame::button(Input* input, ppkey::eButtonType b)
@@ -1013,7 +1045,10 @@ void PlayGame::handlePopup()
 	{
 	case PlayGamePopup::POP_CANCEL:
 		//continue with game level
-		break;
+//		stopPopup();
+//		slideRoundButtonsIn();
+//		return;
+        break;
 	case PlayGamePopup::POP_SKIP:
 		if (_state != PG_END)	//not already at end
 			ppg::pushSDL_Event(USER_EV_END_COUNTDOWN);	//next level - if not got a 6, will end game
@@ -1028,7 +1063,11 @@ void PlayGame::handlePopup()
 		ppg::pushSDL_Event(USER_EV_END_COUNTDOWN); //try to exit more gracefully, pushes end of level
 		break;
 
-	default:break;	//do nothing
+	default:
+//        stopPopup();
+//   		slideRoundButtonsIn();
+//        return;	//do nothing
+        break;
 	}
 
 	stopPopup();	//deletes _pPopup after user selects, if SELECT pressed, button() fn stops popup
@@ -1188,12 +1227,6 @@ bool PlayGame::tap(const Point &pt)
     {
         if (PG_END == _state)
         {
-            _controlsPlay.showControl(false, CTRLID_NEXT);
-            _controlsPlay.showControl(false, CTRLID_EXIT);
-
-            //the round letter action buttons should now be visible
-            _controlsPlay.showGroup(true, CTRLGRP_LETTERS);
-
             doMoveOn();
             return true;
         }
@@ -1256,7 +1289,8 @@ void PlayGame::commandTryWord()
 //from off screen, to their correct place beside the letters.
 void PlayGame::slideRoundButtonsIn()
 {
-    if (_pPopup) return;    //not if popup visible (say before letters finish rolling in)
+    if (_pPopup)
+        return;    //not if popup visible (say before letters finish rolling in)
 
     //these four controls should always be created and available
     const int ms = 450;
@@ -1426,6 +1460,9 @@ void PlayGame::handleEvent(SDL_Event &sdlevent)
 
 void PlayGame::doMoveOn()
 {
+    _controlsPlay.showControl(false, CTRLID_NEXT);
+    _controlsPlay.showControl(false, CTRLID_EXIT);
+
 	//play over so do we go to next level or back to menu...?
 	switch (_success)
 	{
@@ -1529,10 +1566,9 @@ void PlayGame::doPauseGame()
 		//prepare roundel class ready for a pause
 		tSharedImage &letters = Resource::image("roundel_letters.png");
 		_roundPaused = tAutoRoundels(new Roundels());
-		_roundPaused->setWordCenterHoriz(std::string("PAUSED"),
-                                    letters,
-									(SCREEN_HEIGHT/2)-letters.get()->height(), 4);
-		_roundPaused->startMoveFrom(Screen::width(), 0, 10, 50, 18, 0);
+		const int y = (SCREEN_HEIGHT/2)-letters.get()->height();
+		_roundPaused->setWordCenterHoriz(std::string("PAUSED"), letters, y, 4);
+		_roundPaused->easeMoveFrom(Screen::width(), 0, 1200, 20);
 
 		Mix_FadeOutChannel(-1, 1000);
 	}
@@ -1687,7 +1723,7 @@ bool PlayGame::newLevel()
 	_round.setWord(newword, Resource::image("roundel_letters.png"), _xScratch+2, _yScratchTop+2, 6, true);
 	_round.setBottomPos(_xScratch+2, _yScratchBot+2);
 	_round.jumbleWord(false);		//randomize the letters
-	_round.startMoveFrom(Screen::width(), 0, 15, 100, 18, 0);//animate roundels into screen pos
+	_round.easeMoveFrom(Screen::width(), 0, 800, 150, Easing::EASE_OUTQUART);//animate roundels into screen pos
 
 	//paint this levels word boxes onto the background for quick blit display rather
 	//than having to loop through and blit each box every frame as in prev versions
@@ -1719,8 +1755,7 @@ bool PlayGame::newLevel()
 	_controlsPlay.getControlSprite(CTRLID_TRYWORD)->setPos(-btnWidth, _posRButtonBot);
 	_controlsPlay.getControlSprite(CTRLID_TOTOP)->setPos(SCREEN_WIDTH, _posRButtonTop);
 	_controlsPlay.getControlSprite(CTRLID_LAST)->setPos(SCREEN_WIDTH, _posRButtonBot);
-
-//	_gd._gamemusic_icon.setFrame(Locator::audio().musicEnabled()?0:1);    //first frame (on) or second frame (off)
+    _controlsPlay.showGroup(true, CTRLGRP_LETTERS);
 
     calcArcadeNeededWords();    //arcade mode highlights
 
@@ -1768,7 +1803,6 @@ void PlayGame::calcArcadeNeededWords()
         }
         _debugNeededNow = needed;
 
-//        for (xx=_longestWordLen; xx>=_shortestWordLen; --xx)
         for (xx=_shortestWordLen; xx<=_longestWordLen; ++xx)
         {
             //only count nWords on screen, not overflow
@@ -2037,13 +2071,14 @@ void PlayGame::prepareBackground()
 	fontText.put_text(_gamebg.get(), words_x, titles_y, "WORDS:", WHITE_COLOUR);
 
 	//draw mode in bot right corner (before/under word boxes so if 8 6-letter words, it doesnt cover anything up)
+	std::string strMode;
 	Image *pImage = 0;
 	switch (_gd._mode)
 	{
-	case GM_ARCADE:		pImage = Resource::image("game_arcade.png").get();	break;
-	case GM_REWORD:		pImage = Resource::image("game_reword.png").get();	break;
-	case GM_SPEEDER:	pImage = Resource::image("game_speeder.png").get(); break;
-	case GM_TIMETRIAL:	pImage = Resource::image("game_timetrial.png").get(); break;
+	case GM_ARCADE:		pImage = Resource::image("game_arcade.png").get();	strMode = "ARCADE";break;
+	case GM_REWORD:		pImage = Resource::image("game_reword.png").get();	strMode = "REWORD";break;
+	case GM_SPEEDER:	pImage = Resource::image("game_speeder.png").get(); strMode = "SPEEDWORD";break;
+	case GM_TIMETRIAL:	pImage = Resource::image("game_timetrial.png").get(); strMode = "TIMETRIAL";break;
 	default:break;
 	}
 	assert(pImage);
@@ -2053,7 +2088,8 @@ void PlayGame::prepareBackground()
 	ppg::blit_surface(pImage->surface(), NULL, _gamebg->surface(), mode_x, mode_y);
 
 	//draw difficulty level in bot right corner (before/under word boxes so if 8 6-letter words, it doesnt cover anything up)
-	_gd._fntSmall.put_text_right(_gamebg.get(), SCREEN_HEIGHT - _gd._fntSmall.height(), 0, _gd._diffName.c_str(), _gd._diffColour);
+	std::string strDiff = strMode + " (" + _gd._diffName + ")";
+	_gd._fntTiny.put_text_right(_gamebg.get(), SCREEN_HEIGHT - _gd._fntTiny.height(), 0, strDiff.c_str(), _gd._diffColour);
 }
 
 
