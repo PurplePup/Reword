@@ -4,6 +4,7 @@ SOURCES = reword.cpp \
 		button.cpp \
 		control.cpp \
 		controls.cpp \
+		easing.cpp \
 		error.cpp \
 		fontttf.cpp \
 		framerate.cpp \
@@ -13,16 +14,20 @@ SOURCES = reword.cpp \
 		image.cpp \
 		imageanim.cpp \
 		input.cpp \
+		locator.cpp \
 		play.cpp \
 		playdiff.cpp \
 		playgame.cpp \
+		playgamedict.cpp \
 		playgamepopup.cpp \
 		playhigh.cpp \
 		playinst.cpp \
 		playmainmenu.cpp \
-		playmodemenu.cpp \
 		playmenu.cpp \
+		playmodemenu.cpp \
+		playoptions.cpp\
 		random.cpp \
+		resource.cpp \
 		roundels.cpp \
 		score.cpp \
 		screen.cpp \
@@ -63,20 +68,31 @@ STRIP = $(CROSS_PATH)/bin/arm-open2x-linux-strip
 endif
 
 ifdef pan
-CROSS_PATH = /usr/local/pandora/arm-2009q3
+##CROSS_PATH = /usr/local/pandora/arm-2009q3
+##LD_LIBRARY_PATH=$(CROSS_PATH)/usr/lib
+##LD_RUN_PATH=$(CROSS_PATH)/bin
+##LD_AOUT_LIBRARY_PATH=$(LD_RUN_PATH)
+##SDL_CONFIG = $(CROSS_PATH)/usr/bin/sdl-config
+###LDFLAGS = -L$(CROSS_PATH)/usr/lib -L$(CROSS_PATH)/lib -static -DPANDORA -lm -lg -lpthread -lSDL -lSDL_mixer -lSDL_image -lSDL_ttf `$(SDL_CONFIG) --static-libs`
+##LDFLAGS = -L$(CROSS_PATH)/lib -L$(CROSS_PATH)/usr/lib
+##LDFLAGS	+= -lm -lg -lpthread -lts -lfreetype -lSDL -lSDL_mixer -lSDL_image -lSDL_ttf
+###CC = $(CROSS_PATH)/bin/arm-none-linux-gnueabi-gcc
+###CXX = $(CROSS_PATH)/bin/arm-none-linux-gnueabi-g++ -v -shared
+##CXX = $(CROSS_PATH)/bin/arm-none-linux-gnueabi-g++
+##LD = $(CROSS_PATH)/bin/arm-none-linux-gnueabi-ld
+##CXXFLAGS = -DPANDORA -c -Wall `$(SDL_CONFIG) --cflags` -I$(CROSS_PATH)/usr/include -I$(CROSS_PATH)/usr/include/SDL
+##STRIP = $(CROSS_PATH)/bin/arm-none-linux-gnueabi-strip
+CROSS_PATH = /usr/local/angstrom/arm/arm-angstrom-linux-gnueabi
 LD_LIBRARY_PATH=$(CROSS_PATH)/usr/lib
 LD_RUN_PATH=$(CROSS_PATH)/bin
 LD_AOUT_LIBRARY_PATH=$(LD_RUN_PATH)
 SDL_CONFIG = $(CROSS_PATH)/usr/bin/sdl-config
-#LDFLAGS = -L$(CROSS_PATH)/usr/lib -L$(CROSS_PATH)/lib -static -DPANDORA -lm -lg -lpthread -lSDL -lSDL_mixer -lSDL_image -lSDL_ttf `$(SDL_CONFIG) --static-libs`
 LDFLAGS = -L$(CROSS_PATH)/lib -L$(CROSS_PATH)/usr/lib
-LDFLAGS	+= -lm -lg -lpthread -lts -lfreetype -lSDL -lSDL_mixer -lSDL_image -lSDL_ttf
-#CC = $(CROSS_PATH)/bin/arm-none-linux-gnueabi-gcc
-#CXX = $(CROSS_PATH)/bin/arm-none-linux-gnueabi-g++ -v -shared
-CXX = $(CROSS_PATH)/bin/arm-none-linux-gnueabi-g++
-LD = $(CROSS_PATH)/bin/arm-none-linux-gnueabi-ld
+LDFLAGS	+= -lm -lg -lpthread -lts -lfreetype -lSDL -lSDL_mixer -lSDL_image -lSDL_ttf -lboost_filesystem-mt -lboost_system-mt
 CXXFLAGS = -DPANDORA -c -Wall `$(SDL_CONFIG) --cflags` -I$(CROSS_PATH)/usr/include -I$(CROSS_PATH)/usr/include/SDL
-STRIP = $(CROSS_PATH)/bin/arm-none-linux-gnueabi-strip
+CXX = $(CROSS_PATH)/bin/g++
+LD = $(CROSS_PATH)/bin/ld
+STRIP = $(CROSS_PATH)/bin/strip
 endif
 
 all:

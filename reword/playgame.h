@@ -69,6 +69,7 @@ protected:
 
 struct DisplayWord //: public DictWord
 {
+    DisplayWord() : _x(0), _y(0), _len(0) {}
 public:
 	short	_x;
 	short	_y;

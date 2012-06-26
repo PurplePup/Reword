@@ -23,6 +23,9 @@
 class NullAudio : public IAudio
 {
 public:
+    NullAudio() {}
+	virtual ~NullAudio() {}
+
 	virtual void setup(bool bSfx, bool bMusic, const std::string &baseTrackDir, bool bMute);
 	virtual void closedown() {}
 
@@ -85,7 +88,7 @@ class Audio : public IAudio
 {
 public:
 	Audio();
-	~Audio();
+	virtual ~Audio();
 	virtual void setup(bool bSfx, bool bMusic, const std::string &baseTrackDir, bool bMute);
 	virtual void closedown();
 

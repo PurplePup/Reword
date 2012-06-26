@@ -65,20 +65,15 @@ void PlayHigh::init(Input *input)
 	setDifficulty(_gd._diffLevel);
 	setMode(_gd._mode);	//calls prepareBackground();
 
-//	_currPos = 0;
-	//set pos to -1 if not editing a high score, ie -1=editing high score
-//	_pos = (ST_HIGHEDIT==_gd._state)?_gd._score.isHiScore(_mode, _diff):-1;
-
-    setEditing(ST_HIGHEDIT==_gd._state);
+    bool bEdit = ST_HIGHEDIT==_gd._state;
+    setEditing(bEdit);
     _pos = _gd._score.isHiScore(_mode, _diff);
+    if (!bEdit) _pos = -1;   //dont highlight if not editing from start
 
-
-//##DEBUG
-_pos = 3;
-setEditing(true);
-
-
-
+//#ifdef DEBUG
+////##DEBUG
+//setEditing(true);
+//#endif
 
 	//calc hiscore table element positions
 
@@ -101,20 +96,23 @@ setEditing(true);
 
     tSharedImage &letters = Resource::image("roundel_letters.png");
 	_title.setWordCenterHoriz(std::string("HISCORE"), letters, (BG_LINE_TOP-letters.get()->height())/2, 2);
-	_title.startMoveFrom( 0, -(letters.get()->height()*2), 15, 100, 0, ROUNDEL_VEL);
+	_title.easeMoveFrom( 0, -(letters.get()->height()*2), 1000, -40);   //up to 40ms individual roundel delay
 	_titleW.start(3000, 1000);  //jumble wait/delay
 	_title.setRoundelsId(1);
 
-    tSharedImage &lettersKbd = Resource::image("roundel_kbd_letters.png");
-    int xkbd = (Screen::width() - ((lettersKbd->tileW()+8)*10)) / 2; //center top row of kbd on screen
-    int ykbd = 	BG_LINE_TOP + _yyGap + _gd._fntClean.height() + (_yyGap*2);
-	_kbd.setKbdLetters(lettersKbd, xkbd, ykbd, 6);
+    if (isEditing())
+    {
+        tSharedImage &lettersKbd = Resource::image("roundel_kbd_letters.png");
+        const int kbdGap = 14;
+        const int xkbd = (Screen::width() - (((lettersKbd->tileW()+kbdGap)*10)-kbdGap)) / 2; //center top row of 10
+        const int ykbd = 	BG_LINE_TOP + _yyGap + _gd._fntClean.height() + (_yyGap*2);
+        _kbd.setKbdLetters(lettersKbd, xkbd, ykbd, kbdGap);
+        _kbdTileW = lettersKbd->tileW();
+        _kbdTileH = lettersKbd->tileH();
 
-    _kbd.setPressEffect("roundel_kbd_ping.png");
-
-    _kbdTileW = lettersKbd->tileW();
-    _kbdTileH = lettersKbd->tileH();
-
+        //used when non touch controls used to highlight a letter
+        _cursorSpr = t_pSharedSpr(new Sprite(Resource::image("ping_small.png")));
+    }
 
 	//set the repeat of the keys required
 	input->setRepeat(ppkey::UP, 100, 300);		//button, rate, delay
@@ -124,28 +122,28 @@ setEditing(true);
 
 	//set arrow controls (scroll positions)
     {
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_up.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_round_scroll_up.png")));
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2);
     p->_sigEvent2.Connect(this, &PlayHigh::ControlEvent);
     Control c(p, CTRLID_SCROLL_UP, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
     {
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_down.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_round_scroll_down.png")));
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2+p->tileH()+6);
     p->_sigEvent2.Connect(this, &PlayHigh::ControlEvent);
     Control c(p, CTRLID_SCROLL_DOWN, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
     {
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_left.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_round_scroll_left.png")));
     p->setPos(SCREEN_WIDTH-(p->tileW()*2)-8, BG_LINE_BOT-p->tileH()-2);
     p->_sigEvent2.Connect(this, &PlayHigh::ControlEvent);
     Control c(p, CTRLID_SCROLL_LEFT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
     {
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_scroll_right.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_round_scroll_right.png")));
     p->setPos(SCREEN_WIDTH-(p->tileW())-2, BG_LINE_BOT-p->tileH()-2);
     p->_sigEvent2.Connect(this, &PlayHigh::ControlEvent);
     Control c(p, CTRLID_SCROLL_RIGHT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
@@ -154,7 +152,7 @@ setEditing(true);
 
     //music on/off icon
     { // round music button placed in top left of scorebar
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_music.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_round_music.png")));
     p->setPos(5,5);
     IAudio &audio = Locator::audio();
     Control c(p, CTRLID_MUSIC, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, audio.musicEnabled()?1:2);
@@ -164,7 +162,7 @@ setEditing(true);
 
     //[EXIT] hi score screen buttons
     {
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_exit_small.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_square_exit_small.png")));
     p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
     p->_sigEvent2.Connect(this, &PlayHigh::ControlEvent);
     Control c(p, CTRLID_EXIT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
@@ -172,16 +170,18 @@ setEditing(true);
     }
     //[NEXT] for ending inits input
     {
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_next_small.png")));
-    int x = (Screen::width() - p->tileW()) / 2; //center
-    int y = BG_LINE_BOT - _yyGap - p->tileH();
+    t_pSharedSpr p(new Sprite(Resource::image("btn_square_next_small.png")));
+    int x = _kbd.getBottomPos()._x + ((Screen::width() - _kbd.getBottomPos()._x) /2);    //(Screen::width() - p->tileW()) / 2; //center
+    int y = _kbd.getBottomPos()._y;   //BG_LINE_BOT - _yyGap - p->tileH();
     p->setPos(x, y);
     p->_sigEvent2.Connect(this, &PlayHigh::ControlEvent);
     Control c(p, CTRLID_NEXT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
 
+    _bLastActionTouch = false;
     updateScrollButtons();  //show initial state
+    updateKbdCursor();
 
 	//need to set the _init and _running flags
 	_init = true;
@@ -229,19 +229,21 @@ void PlayHigh::render(Screen *s)
         _xxStart = _xxGap + _xDiffLen + xDiffTrail;
     }
 
-	_gd._fntClean.put_text(s, _xxGap, yy, _description.c_str(), _diffColour, false);
+	_gd._fntSmall.put_text(s, 5, yy, _strMode.c_str(), _diffColour, false);
+	_gd._fntSmall.put_text(s, 5, yy + _gd._fntSmall.height() + _yyGap, _strDiff.c_str(), _diffColour, false);
 
     int xx(_xxStart);
     if (isEditing())
     {
-        _gd._fntClean.put_number(s, xx, yy, _curr.score, "SCORE: %08d", BLACK_COLOUR);
+        _gd._fntClean.put_number(s, xx, yy, _curr.score, "SCORE: %08d", BLUE_COLOUR);
         xx += _xScoreLen*1.5 + _xxGap;
-        _gd._fntClean.put_number(s, xx, yy, _curr.words, "WORDS: %04dw", BLACK_COLOUR);
+        _gd._fntClean.put_number(s, xx, yy, _curr.words, "WORDS: %04dw", BLUE_COLOUR);
         xx += _xWordsLen*1.5 + _xxGap;
         if (_mode > GM_REWORD)  //speed or timetrial show speed
-            _gd._fntClean.put_number(s, xx, yy, _curr.fastest, "SPEED: %03ds", BLACK_COLOUR);
+            _gd._fntClean.put_number(s, xx, yy, _curr.fastest, "SPEED: %03ds", BLUE_COLOUR);
 
         _kbd.render(s);
+        _cursorSpr->draw(s);
     }
     else
     {
@@ -250,7 +252,7 @@ void PlayHigh::render(Screen *s)
             xx = _xxStart;
 
             const SDL_Color lineColour =
-                (yyLine == _pos && _diff == (int)_gd._diffLevel && _mode == (int)_gd._mode)?BLACK_COLOUR:_diffColour;
+                (yyLine == _pos && _diff == (int)_gd._diffLevel && _mode == (int)_gd._mode)?BLUE_COLOUR:_diffColour;
             //draw scores in order as normal
             _gd._fntClean.put_text(s, xx, yy, _gd._score.inits(_mode, _diff, yyLine).c_str(), lineColour);
             xx += _xInitsLen + _xxGap;
@@ -270,7 +272,7 @@ void PlayHigh::render(Screen *s)
 	if (!isEditing())
 		_gd._fntClean.put_text(s, helpYpos, "Up/down:mode, left/right:difficulty, or EXIT (B)", GREY_COLOUR, true);
 	else
-		_gd._fntClean.put_text(s, helpYpos, "Enter initials then B to save, or EXIT", GREY_COLOUR, true);
+		_gd._fntClean.put_text(s, helpYpos, "Move using arrows, B to select and save, or EXIT", GREY_COLOUR, true);
 
 	_controlsHigh.render(s);
 }
@@ -331,24 +333,15 @@ void PlayHigh::button(Input *input, ppkey::eButtonType b)
 	case ppkey::B:
 		if (input->isPressed(b))
 		{
-//			if (isEditing() && _currPos < 2)
-//			{
-//				_currPos++;	//treat as button right unless on 3rd char
-//				break;
-//			}
-//			if (isEditing())	//is editing and position must be 2 (3rd char)
-//			{
-//				//so player has pressed B on last char to save to entered inits
-//				_gd._score.insert(_mode, _diff, _pos, _curr);
-//				_gd._score.save();	//save now so player can switch off or return to menu if wishes
-//                _gd._prev_inits = _curr.inits;
-//
-//				setEditing(false);		//set to not-editing
-//				break;
-//			}
-
             if (isEditing())
             {
+                //are we about to end init adding and show hiscore?
+                if (_kbd.getBottomWordLength() == 3)
+                {
+                    setEditing(false);
+                    insertNewScore();
+                    break;
+                }
                 //user still in play so select curr letter
                 if (_kbd.cursorIsTop())
                     _kbd.moveLetterDown();
@@ -359,9 +352,9 @@ void PlayHigh::button(Input *input, ppkey::eButtonType b)
                     if (!_kbd.cursorPrev())
                         _kbd.cursorUp();
                 }
+                updateKbdCursor();
+                break;  //dont exit
             }
-
-
 			//else pos is -1 (not editing) so follow on to exit...
 		}
 		//follow on to exit to ST_MENU ...
@@ -379,6 +372,29 @@ void PlayHigh::button(Input *input, ppkey::eButtonType b)
 	updateScrollButtons();
 }
 
+void PlayHigh::setEditing(bool b)
+{
+    _bEditing = b;
+    if (_cursorSpr)
+    {
+        updateKbdCursor();
+        _cursorSpr->setVisible(b);
+    }
+}
+
+void PlayHigh::insertNewScore()
+{
+    _controlsHigh.showControl(false, CTRLID_NEXT); //moves on from editing inits
+
+    //so player has pressed NEXT after last char to save entered inits
+    memset(_curr.inits, 0, sizeof(_curr.inits));
+    memcpy(_curr.inits, _kbd.getBottomWord().c_str(), std::min(sizeof(_curr.inits), _kbd.getBottomWord().length()));
+    _gd._score.insert(_mode, _diff, _pos, _curr);
+    _gd._score.save();	//save now so player can switch off or return to menu if wishes
+    _gd._prev_inits = _curr.inits;
+}
+
+
 void PlayHigh::moveUp()
 {
 	//move from C to B to A
@@ -386,6 +402,7 @@ void PlayHigh::moveUp()
 	{
 		//if (_curr.inits[_currPos] > ' ') --_curr.inits[_currPos];
 		_kbd.cursorUp();
+		updateKbdCursor();
 	}
 	else
 		setMode((eGameMode)--_mode);
@@ -398,6 +415,7 @@ void PlayHigh::moveDown()
 	{
 		//if (_curr.inits[_currPos] < 'Z') ++_curr.inits[_currPos];
 		_kbd.cursorDown();
+		updateKbdCursor();
 	}
 	else
 		setMode((eGameMode)++_mode);
@@ -409,6 +427,7 @@ void PlayHigh::moveLeft()
 	{
 		//if (_currPos > 0) _currPos--;
 		_kbd.cursorPrev();
+		updateKbdCursor();
 	}
 	else
 		setDifficulty((eGameDiff)(_diff-1));
@@ -420,10 +439,30 @@ void PlayHigh::moveRight()
 	{
 		//if (_currPos < 2) _currPos++;
 		_kbd.cursorNext();
+		updateKbdCursor();
 	}
 	else
 		setDifficulty((eGameDiff)(_diff+1));
 }
+
+void PlayHigh::updateKbdCursor()
+{
+    if(!isEditing()) return;
+
+    if (_bLastActionTouch)
+        _cursorSpr->setVisible(false);
+    else
+    {
+        Point pt = _kbd.getCurrSelPt();
+
+        //create a cursor around curr kbd letter
+        const int x = pt._x - (( _cursorSpr->tileW() - _kbd.getRoundelW()) / 2);
+        const int y = pt._y - (( _cursorSpr->tileH() - _kbd.getRoundelH()) / 2);
+        _cursorSpr->setPos(x, y);
+        _cursorSpr->setVisible(true);
+    }
+    _bLastActionTouch = false;
+ }
 
 void PlayHigh::updateScrollButtons()
 {
@@ -470,7 +509,7 @@ void PlayHigh::handleEvent(SDL_Event &sdlevent)
 		if (USER_EV_END_MOVEMENT == sdlevent.user.code)
 		{
             const int rid = reinterpret_cast<int>(sdlevent.user.data2);
-		    if (rid == _kbd.getRoundelsId())    //is kbd roundels event, not title jumbling
+		    if (isEditing() && rid == _kbd.getRoundelsId())    //is kbd roundels event, not title jumbling
 		    {
                 //enables NEXT button if all inits entered, but only after
                 //last init stops moving (to bottom row)
@@ -484,20 +523,11 @@ bool PlayHigh::touch(const Point &pt)
 {
     _controlsHigh.touched(pt);    //needed to highlight a touched control
 
-    if (_kbd.touch(pt)) //needed to initiate roundel touch
-    {
-//        //create a cursor anim here to auto remove on completion
-//        SpriteMgr::t_pSprite eff(new Sprite(Resource::image("roundel_kbd_ping.png")));
-//
-//        Point pt = _kbd.getCurrSelPt();
-//        //as cursor(animation) i bigger than kbd tile, calc offset left and up
-//        const int x = pt._x - (( eff->tileW() - _kbdTileW) / 2);
-//        const int y = pt._y - (( eff->tileH() - _kbdTileH) / 2);
-//
-//        eff->startAnim( 0, -1, ImageAnim::ANI_ONCEDEL, 25);
-//        eff->setPos(x, y);
-//        _gd._effects.add(eff);  //add global effect
-    }
+    if (isEditing())
+        _kbd.touch(pt); //needed to initiate roundel touch
+
+    _bLastActionTouch = true;
+    updateKbdCursor();  //removes cursor
 
     return true;
 }
@@ -542,16 +572,8 @@ bool PlayHigh::tap(const Point &pt)
     }
     else if (ctrl_id == CTRLID_NEXT)
     {
-        _controlsHigh.showControl(false, CTRLID_NEXT); //moves on from editing inits
-
-        //so player has pressed NEXT after last char to save entered inits
-        memset(_curr.inits, 0, sizeof(_curr.inits));
-        memcpy(_curr.inits, _kbd.getBottomWord().c_str(), std::min(sizeof(_curr.inits), _kbd.getBottomWord().length()));
-        _gd._score.insert(_mode, _diff, _pos, _curr);
-        _gd._score.save();	//save now so player can switch off or return to menu if wishes
-        _gd._prev_inits = _curr.inits;
-
-        setEditing(false);		//set to not-editing
+        setEditing(false);
+        insertNewScore();
         return true;
     }
     //game music icon action on press, not tap(release)
@@ -585,12 +607,20 @@ void PlayHigh::setMode(eGameMode mode)
 
 void PlayHigh::setDescription()
 {
+    switch (_mode)
+    {
+        case GM_ARCADE:     _strMode = "ARCADE";break;
+        case GM_REWORD:     _strMode = "REWORD";break;
+        case GM_SPEEDER:    _strMode = "SPEEDWORD";break;
+        case GM_TIMETRIAL:  _strMode = "TIMETRIAL";break;
+        default:break;
+    }
 	switch (_diff)
 	{
-	case DIF_EASY:		_description = "EASY";break;
-	case DIF_MED:		_description = "MEDIUM";break;
-	case DIF_HARD:		_description = "HARD";break;
-	default:break;
+        case DIF_EASY:		_strDiff = "(EASY)";break;
+        case DIF_MED:		_strDiff = "(MEDIUM)";break;
+        case DIF_HARD:		_strDiff = "(HARD)";break;
+        default:break;
 	}
 }
 
@@ -631,18 +661,18 @@ void PlayHigh::prepareBackground()
 
 void RoundelsKbd::setKbdLetters(tSharedImage &letters, int x, int y, int gap)
 {
-
-
     Roundels::setWord("QWERTYUIOPASDFGHJKLZXCVBNM", letters, x, y, gap, true);
 	setRoundelsId(2);
 
-    int xinits = (Screen::width() - ((letters->tileW()+8)*3)) / 2; //center inits row
-    setBottomPos(xinits, y + ((letters->tileW()+gap)*3 + letters->tileW()));
+    int xinits = (Screen::width() - (((letters->tileW()+gap)*3)-gap)) / 2; //center inits row
+    setBottomPos(xinits, y + (((letters->tileW()+gap)*3) + letters->tileW()));
 
     setBottomMax(3);        //3 letter initials for high score
-    setBottomCopy(true);    //leaves top word in tact (copy not move tile)
+    setBottomCopy(true);    //leaves top word in tact (copy, not move tile)
 
-    //now reset the letter positions - 3 rows
+    setPressEffect("ping_small.png");
+
+    //now reset the single letter row positions to 3 rows
 
 	tRoundVect::iterator it = _top.begin();
 	int tile(0), column(0);
@@ -654,7 +684,7 @@ void RoundelsKbd::setKbdLetters(tSharedImage &letters, int x, int y, int gap)
         (*it)->_spr->setPos(xPos, y);
 
         column++;
-        if (tile == 9 || tile == 18)
+        if (tile == 9 || tile == 18)        //break on P(9) or L(18)
         {
             x += ((*it)->_spr->tileW() / 2);    //move each/next row in a bit
             y += (*it)->_spr->tileH()+gap;      //move down with a gap

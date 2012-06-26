@@ -16,9 +16,11 @@
 
 //base data location depending on system
 #if defined(WIN32)
-#define RES_SYS_BASE	(std::string("../data/"))
+///#define RES_SYS_BASE	(std::string("../data/"))
+#define RES_SYS_BASE	(std::string("../../reword/data/"))
 #else
 #define RES_SYS_BASE	(std::string("./data/"))
+///#define RES_SYS_BASE	(std::string("../../data/"))
 #endif
 
 

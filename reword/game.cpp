@@ -137,8 +137,7 @@ bool Game::loadResources()
 
 	//IMAGE TILES (MULTIPLE TILE IMAGES)
     bErr |= !Resource::image().add("cursors.png", -1, 3);
-    bErr |= !Resource::image().add("roundel_letters_ping.png", 255, 6);
-    bErr |= !Resource::image().add("roundel_kbd_ping.png", 255, 6);
+    bErr |= !Resource::image().add("ping_small.png", 255, 6);
 
 	bErr |= !Resource::image().add("boxes.png", -1, 24, Image::TILE_VERT);
 	bErr |= !Resource::image().add("scratch.png", -1, 7);
@@ -539,10 +538,11 @@ bool Game::play(IPlay *p)
 		_screen->lock();
 		p->render(_screen);	//screen render
 
+        //render short term effects over any other renders
         _gd->_effects.draw(_screen);
 
 #ifdef _DEBUG	//overlay the framerate and any other debug info required
-		_gd->_fntSmall.put_number(_screen,0,60,fr.fps(),"%d", BLACK_COLOUR);
+//		_gd->_fntSmall.put_number(_screen,0,60,fr.fps(),"%d", BLACK_COLOUR);
 #endif
 
 

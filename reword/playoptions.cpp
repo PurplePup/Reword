@@ -58,6 +58,14 @@ PlayOptions::~PlayOptions()
 
     //save changed settings...
 
+    if (_gd._options.setDefaultWordFile(_wordFileList[_wordFileIdx]))
+    {
+        //load newly selected word file
+        _gd._words.load(RES_WORDS + _gd._options._defaultWordFile, SDL_GetTicks());
+        //load scores for this wordfile
+        _gd._score.loadUsingWordfileName(_gd._options._defaultWordFile);
+    }
+
     p = _controlsOptn.getControl(CTRLID_YES_NO);
     if (p) _gd._options.setSingleTap(p->isFirstState());  //first = yes
 
@@ -94,7 +102,7 @@ void PlayOptions::init(Input *input)
     _yyWordFile = wordItem._rBox.top();
 
     {
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_yes_no_small.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_square_yes_no_small.png")));
     MenuItem i = getItem(1);
     p->setPos(_xxStartCtrls, i._rBox.top());
     p->_sigEvent2.Connect(this, &PlayOptions::ControlEvent);
@@ -102,7 +110,7 @@ void PlayOptions::init(Input *input)
     _controlsOptn.add(c);
     }
     {
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_diff.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_square_diff.png")));
     MenuItem i = getItem(2);
     p->setPos(_xxStartCtrls, i._rBox.top());
     p->_sigEvent2.Connect(this, &PlayOptions::ControlEvent);
@@ -110,7 +118,7 @@ void PlayOptions::init(Input *input)
     _controlsOptn.add(c);
     }
     {
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_yes_no_small.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_square_yes_no_small.png")));
     MenuItem i = getItem(3);
     p->setPos(_xxStartCtrls, i._rBox.top());
     p->_sigEvent2.Connect(this, &PlayOptions::ControlEvent);
@@ -118,7 +126,7 @@ void PlayOptions::init(Input *input)
     _controlsOptn.add(c);
     }
     {
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_yes_no_small.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_square_yes_no_small.png")));
     MenuItem i = getItem(4);
     p->setPos(_xxStartCtrls, i._rBox.top());
     p->_sigEvent2.Connect(this, &PlayOptions::ControlEvent);
@@ -127,7 +135,7 @@ void PlayOptions::init(Input *input)
     }
 
     {//load EXIT/NEXT buttons
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_square_exit_small.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_square_exit_small.png")));
     p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
     p->_sigEvent2.Connect(this, &PlayOptions::ControlEvent);
     Control c(p, CTRLID_EXIT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
@@ -149,8 +157,6 @@ void PlayOptions::render(Screen *s)
 
     //difficulty
 	_gd._fntClean.put_text(s, _xxStartCtrls, _yyWordFile, _wordFileList[_wordFileIdx].c_str(), BLACK_COLOUR, false);
-
-
 }
 
 void PlayOptions::work(Input *input, float speedFactor)
@@ -296,7 +302,11 @@ void PlayOptions::setupWordFile()
             {
                 _wordFileIdx = idx;
             }
+#ifdef WIN32
+            _wordFileList.push_back(pos->path().filename().generic_string());
+#else
             _wordFileList.push_back(pos->path().filename());
+#endif
 //            std::cout << pos->path().filename() << " : " << boost::filesystem::file_size( pos->path() ) << "\n";
         }
     }

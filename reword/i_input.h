@@ -35,6 +35,8 @@ enum eButtonType
 class IInput
 {
 public:
+    IInput() {}
+	virtual ~IInput() {}
     virtual void init() = 0;
     virtual bool initDone() = 0;
     virtual ppkey::eButtonType translate(int key) = 0;	    // Translate key to button

@@ -39,6 +39,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include <iostream>
 #include <cerrno>
+#include <boost/filesystem.hpp>
+
 
 Score::Score()
 {
@@ -74,16 +76,38 @@ void Score::init()
 	setCurrInits("AAA");	//needed for first time into hiscore update
 }
 
+//now we can have multiple word files in the options screen, we need to change the
+//score file name to reflect the wordfile name.
+Uint32 Score::loadUsingWordfileName(const std::string &wordfile)
+{
+    boost::filesystem::path w( wordfile );
+
+    std::string scorefile;
+#ifdef PANDORA
+	//pandora .pnd directory structure requires a unnamed directory for data written back to the SD card,
+	//so create a score directory in the startup/run .sh script and read/write scores files in there.
+	_scorefile = "./" + w.stem() + ".score";
+#else
+#ifdef WIN32
+	_scorefile = RES_BASE + w.stem().generic_string() + ".score";
+#else
+	_scorefile = RES_BASE + w.stem() + ".score";
+#endif
+#endif
+
+    return load(scorefile);
+}
 
 //return a hash total to help seed random number gen
 //NOTE: from v0.4, save files lead with a zero byte and a version byte to allow future score
 // 		file mods without the player having to trash the score file and restart from scratch
-Uint32 Score::load(std::string scorefile)
+Uint32 Score::load(const std::string &scorefile)
 {
-	if (!scorefile.length())
-		scorefile = _scorefile;	//none passed in so load from default file
-	else
+	if (!scorefile.empty())
 		_scorefile = scorefile;	//file passed in so save as default
+	//else none passed in so load from default name or prev saved
+
+	std::cout << "Loading score file: " << _scorefile << std::endl;
 
 	init();
 
@@ -94,7 +118,7 @@ Uint32 Score::load(std::string scorefile)
 	//variable enough time clock on the gp2x to use for this purpose.
 
 	unsigned int total = 0, diff = 0, item = 0;
-	std::ifstream in(scorefile.c_str());
+	std::ifstream in(_scorefile.c_str());
 
 	if (in.is_open())
 	{
@@ -132,7 +156,7 @@ Uint32 Score::load(std::string scorefile)
 			//is an old style (pre v0.4) score file so load it in as before.
 			//On saving, it will be output as the latest format, along with a version byte
 			in.seekg (0, std::ios::beg);	//back to start
-			tHiScoreLevelsPre04 hiScorePre04;
+			HiScoreLevelsPre04 hiScorePre04;
 			for (diff=0; diff<3; ++diff)	//3 levels easy, med, hard
 			{
 				memset(&hiScorePre04, 0, sizeof(hiScorePre04));
@@ -159,11 +183,14 @@ Uint32 Score::load(std::string scorefile)
 	return total;
 }
 
-void Score::save(std::string scorefile)
+void Score::save(const std::string &scorefile)
 {
-	if (!scorefile.length()) scorefile = _scorefile; //none passed in so use default
+	if (!scorefile.empty())
+        _scorefile = scorefile; //use passed in and make default
 
-	std::ofstream out(scorefile.c_str(), std::ios::out|std::ifstream::binary);
+	std::cout << "Saving score file: " << _scorefile << std::endl;
+
+	std::ofstream out(_scorefile.c_str(), std::ios::out|std::ifstream::binary);
 	if (out)
 	{
         out.put( 0x00 );	//format: 0x00 byte first denotes >= v0.4 score file
@@ -185,7 +212,7 @@ void Score::save(std::string scorefile)
 	}
 	else
 	{
-		std::cerr << "Cannot save score file: " << scorefile << " - error: " << strerror(errno) << std::endl;
+		std::cerr << "Cannot save score file: " << _scorefile << " - error: " << strerror(errno) << std::endl;
 	}
 }
 
@@ -236,7 +263,7 @@ int Score::isHiScore(int mode, int diff)
 {
 	if (!_curr.score) return -1;	//never on hi score if scored zero
 
-	tHiScoreLevels *pScore = getLevel(mode, diff);
+	HiScoreLevels *pScore = getLevel(mode, diff);
 	int item;
 	for (item=0; item<10; ++item)	//from [0] top score to [9] lowest hi-score
 		if ((_curr.score == pScore->level[item].score &&
@@ -259,16 +286,16 @@ e.g.
 
 //move everything at and below the new hi sore pos down
 //and drop off the last entry (9)
-void Score::insert(int mode, int diff, int level, tHiScoreEntry &curr)
+void Score::insert(int mode, int diff, int level, HiScoreEntry &curr)
 {
-	tHiScoreLevels *pScore = getLevel(mode, diff);
+	HiScoreLevels *pScore = getLevel(mode, diff);
 	int item;
 	for (item=9; item>=level; --item)
 		memcpy(&pScore->level[item+1],	//move into [10] ..
 				&pScore->level[item],	//from [9], etc etc
-				sizeof(tHiScoreEntry));
+				sizeof(HiScoreEntry));
 	//copy "curr" inits, score and words to correct hi score table
-	memcpy(&pScore->level[level], &curr, sizeof(tHiScoreEntry));
+	memcpy(&pScore->level[level], &curr, sizeof(HiScoreEntry));
 }
 
 std::string Score::inits(int mode, int diff, int level)
@@ -291,13 +318,13 @@ unsigned int Score::fastest(int mode, int diff, int level)
 	return getLevel(mode, diff)->level[level].fastest;
 }
 
-void Score::setCurr(tHiScoreEntry &curr)
+void Score::setCurr(HiScoreEntry &curr)
 {
 	_curr = curr;
 }
 
 //return a pointer to the correct array depending on mode and difficulty level
-tHiScoreLevels *Score::getLevel(int mode, int diff)
+HiScoreLevels *Score::getLevel(int mode, int diff)
 {
 	if (diff >= DIF_EASY && diff < DIF_MAX) --diff; else diff = 0;
 	switch ((eGameMode)mode)
@@ -384,7 +411,16 @@ bool QuickState::quickStateExists()
 //able to keep resuming the same game and get better scores each time.
 void QuickState::quickStateDelete()
 {
-	std::remove(_quickstatefile.c_str());
+    try
+    {
+        boost::filesystem::path p(_quickstatefile);
+        boost::filesystem::remove(p);
+    }
+//    catch (const boost::filesystem::basic_filesystem_error<boost::filesystem::path> &e)
+    catch (const boost::filesystem::filesystem_error &e)
+    {
+        std::cerr << "Error deleting quick save file " << _quickstatefile << " - " << e.what() << std::endl;
+    }
 }
 
 void QuickState::setQuickState(const tQuickStateSave &qss)

@@ -72,7 +72,7 @@ Sprite * SpriteMgr::get(Uint32 handle)
 }
 
 //add a sprite and return the (unique) allocated handle
-Uint32 SpriteMgr::add(t_pSprite &pSpr)
+Uint32 SpriteMgr::add(t_pSharedSpr &pSpr)
 {
 	if (!pSpr.get()) return 0;
 
@@ -89,7 +89,12 @@ Uint32 SpriteMgr::add(t_pSprite &pSpr)
 //add using image resource name and initial params to start anim etc
 Sprite * SpriteMgr::add(const std::string resource, int x, int y, Uint32 rate_ms, ImageAnim::eAnim anim)
 {
-    t_pSprite pSpr(new Sprite(Resource::image(resource)));
+    if (resource.empty())
+    {
+        assert(false);  //fail!
+        return 0;
+    }
+    t_pSharedSpr pSpr(new Sprite(Resource::image(resource)));
 
     SpriteX sx;
     sx._spr = pSpr;

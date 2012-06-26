@@ -100,6 +100,8 @@ protected:
     FontTTF     *_font, *_fontHelp;
     Controls    _controlsMenu;
     bool        _bSetStarPos;
+
+    Roundels    _beta;
 };
 
 #endif //_PlayMenu_H

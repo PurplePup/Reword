@@ -71,7 +71,7 @@ void PlayMenu::init(Input *input)
 	input->setRepeat(ppkey::DOWN, 150, 300);
 
     tSharedImage &letters = Resource::image("roundel_letters.png");
-	_title.startMoveFrom( 0, -(letters->height()*2), 15, 100, 0, ROUNDEL_VEL);
+	_title.easeMoveFrom( 0, -(letters->height()*2), 1000, -40);
 	_titleW.start(3000, 1000);
 
     _menubg = Resource::image("menubg.png");
@@ -83,13 +83,17 @@ void PlayMenu::init(Input *input)
 
     //music on/off icon
     { // round music button placed in top left of scorebar
-    boost::shared_ptr<Sprite> p(new Sprite(Resource::image("btn_round_music.png")));
+    t_pSharedSpr p(new Sprite(Resource::image("btn_round_music.png")));
     p->setPos(5,5);
     IAudio &audio = Locator::audio();
     Control c(p, CTRLID_MUSIC, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, audio.musicEnabled()?1:2);
     _controlsMenu.add(c);
     _controlsMenu.enableControl(audio.hasSound(), CTRLID_MUSIC);  //disable override?
     }
+
+//  tSharedImage &let = Resource::image("roundel_kbd_letters.png");
+//	_beta.setWord("BETA", let, Screen::width() - ((let->tileW()+2)*4), Screen::height() - let->tileH(), 2);
+//	_beta.easeMoveFrom( 0, Screen::height(), 800, -100, Easing::EASE_OUTQUART);
 
 	//need to set the _init and _running flags
 	_init = true;
@@ -144,6 +148,7 @@ void PlayMenu::render(Screen *s)
 	ppg::blit_surface(_menubg->surface(), NULL, s->surface(), 0, 0);
 
 	_title.render(s);
+//	_beta.render(s);
 
 	int selected = getSelected()._id;
 	int nextY = 0;
@@ -190,6 +195,8 @@ void PlayMenu::work(Input *input, float speedFactor)
 
 	_title.work(input, speedFactor);
 	_star.work();
+
+//	_beta.work(input, speedFactor);
 
 	//animate the roundel title if it's not moving and
 	//we have waited long enough since it animated last

@@ -16,8 +16,8 @@ Date:			06 April 2007
 History:		Version	Date		Change
 				-------	----------	--------------------------------
 				0.5		18.06.2008	Changed volume control to use /dev/mixer as SDL_mixer
-										not altering .mod file volume, just wav/mp3/ogg and fx
-										Code from "Senor Quack"
+									not altering .mod volume, just wav/mp3/ogg and fx.
+									Code from "Senor Quack"
 
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by
@@ -134,12 +134,22 @@ void Audio::closedown()
 //	if (_bMusic) modStop();
 //#endif
 
-	if (_volTest)
-		Mix_FreeChunk(_volTest);
+    stopTrack();
+
+	Mix_FreeChunk(_volTest);
+    Mix_FreeMusic(_musicTrack);
+
+    std::vector<Mix_Chunk *>::iterator it = _sfxList.begin();
+    std::vector<Mix_Chunk *>::iterator end = _sfxList.end();
+    for ( ; it!=end; ++it)
+    {
+        Mix_FreeChunk((*it));
+        (*it) = NULL;
+    }
+    _sfxList.clear();
 
 	if (_init)
-    {
-        stopTrack();
+	{
         Mix_CloseAudio();
 	}
 
@@ -376,6 +386,7 @@ void Audio::startTrack(const std::string &trackName)
 	{
 		printf("Play: %s\n", trackName.c_str());
 		std::string newTrack = _baseTrackDir + "/" + trackName;
+        Mix_FreeMusic(_musicTrack);
 		_musicTrack = Mix_LoadMUS(newTrack.c_str());
 		if(_musicTrack)
 		{

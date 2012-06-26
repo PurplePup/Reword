@@ -86,13 +86,10 @@ void Roundels::init(Input * /*input*/)
 
 void Roundels::setPressEffect(const std::string &resource)
 {
-    //create a cursor anim here to auto remove on completion
+    //create a cursor and press anim here to auto remove on completion
     _pressResource = resource;
-//    _pressEffect = t_pSprite(new Sprite(Resource::image(resource)));
     _pressEffW = Resource::image(resource)->tileW();
     _pressEffH = Resource::image(resource)->tileH();
-//    _pressEffW = _pressEffect->tileW();
-//    _pressEffH = _pressEffect->tileH();
 }
 
 // drawing operation
@@ -147,16 +144,6 @@ bool Roundels::touch(const Point &pt)
 {
     _currSelId = cursorAt(pt);
 
-    if (_currSelId)
-    {
-        if (cursorIsTop())
-            _currSelPt = Point((int)_top[_currSelId-1]->_spr->getXPos(), (int)_top[_currSelId-1]->_spr->getYPos());
-        else
-            _currSelPt = Point((int)_bot[_currSelId-1]->_spr->getXPos(), (int)_bot[_currSelId-1]->_spr->getYPos());
-    }
-    else
-        _currSelPt = Point();
-
     return _currSelId != 0;
 }
 
@@ -169,7 +156,6 @@ bool Roundels::tap(const Point &pt)
         {
             if (moveLetterDown())
             {
-                Locator::audio().playSfx(AUDIO_SFX_ROUNDEL);
                 cursorDown();
             }
         }
@@ -177,7 +163,6 @@ bool Roundels::tap(const Point &pt)
         {
             if (moveLetterUp())
             {
-                Locator::audio().playSfx(AUDIO_SFX_ROUNDEL);
                 if (!cursorPrev())
                     cursorUp();
             }
@@ -194,7 +179,7 @@ void Roundels::cleanUp()
 	for (it = _top.begin(); it != _top.end(); ++it) if (*it) delete *it;
 	_top.clear();
 
-    if (!_bCopyBot)
+//    if (!_bCopyBot)
         for (it = _bot.begin(); it != _bot.end(); ++it) if (*it) delete *it;
 	_bot.clear();
 
@@ -203,6 +188,7 @@ void Roundels::cleanUp()
 	_last.clear();	//only uses a copy of _top or _bot pointers so doesnt delete
 
 	_xScratchTop = _yScratchTop = _xScratchBot = _yScratchBot = 0;
+	_roundelW = _roundelH = 0;
 	_bMoving = false;
 	_currSelId=0;
 	_currSelPt=Point();
@@ -270,6 +256,12 @@ void Roundels::setWord(const std::string &wrd,
 		_bot.push_back(prnd);	//set to null
 		_last.push_back(prnd);	//set to null
 	}
+
+    if (wrd.length())
+    {
+        _roundelW = _top[0]->_spr->tileW();
+        _roundelH = _top[0]->_spr->tileH();
+    }
 }
 
 //Event signal from imageanim indicating an individual sprite has
@@ -307,16 +299,39 @@ int Roundels::getCurrSelId()
 //return the position of the currently selected/highlighted roundel
 Point Roundels::getCurrSelPt()
 {
+    int pos(0);
+    if (_currSelId)
+    {
+        //touched/tapped a roundel so use id
+        pos = _currSelId-1;
+    }
+    else
+    {
+        //need to use _cx to determine cursor position
+        pos = _cx;
+    }
+
+    if (cursorIsTop())
+        _currSelPt = Point((int)_top[pos]->_spr->getXPos(), (int)_top[pos]->_spr->getYPos());
+    else
+        _currSelPt = Point((int)_bot[pos]->_spr->getXPos(), (int)_bot[pos]->_spr->getYPos());
+
     return _currSelPt;
 }
 
-
+//set the start pos of the bottom word
 void Roundels::setBottomPos(int xPosBot, int yPosBot)
 {
 	_xScratchBot = xPosBot;
 	_yScratchBot = yPosBot;
 }
 
+Point Roundels::getBottomPos()
+{
+    return Point(_xScratchBot, _yScratchBot);
+}
+
+//set the number of letters in the bottom word
 void Roundels::setBottomMax(int iMax)
 {
     if (iMax > (int)_word.length())
@@ -378,6 +393,27 @@ void Roundels::startMoveFrom(int deltaX, int deltaY,
 	}
 }
 
+void Roundels::easeMoveFrom(int deltaX, int deltaY,
+							 Uint32 duration, Uint32 delay,
+							 Easing::eType ease /*= Easing::EASE_OUTBOUNCE*/)
+{
+    _lastIdCountdown = (int)_word.length(); //reset to number of roundels
+
+	int oldX, oldY;
+	int i = 0;
+	tRoundVect::iterator it;
+	for (it = _top.begin(); it != _top.end(); ++it)
+	{
+		if (*it)
+		{
+			oldX = (int)((*it)->_spr->getXPos());
+			oldY = (int)((*it)->_spr->getYPos());
+			(*it)->_spr->setPos(deltaX+oldX, deltaY+oldY);
+            (*it)->_spr->easeMoveTo(oldX, oldY, duration, delay*i, ease);    //ease over Nms
+		}
+		++i;
+	}
+}
 
 //determine if the word (in _top) is in the correct order, ie. matches the target N letter _word
 bool Roundels::isInOrder()
@@ -445,7 +481,7 @@ bool Roundels::jumbleWord(bool bAnimate /*=true*/)
 		if (*it && !(*it)->_spr->isMoving())
 		{
 			if (bAnimate)
-				(*it)->_spr->startMoveTo(calcXPos((*it)), calcYPos((*it)), 25, 0, 9, 0);	//start slide anim
+				(*it)->_spr->easeMoveTo(calcXPos((*it)), calcYPos((*it)), 800, 0, Easing::EASE_OUTQUART);
 			else
 				recalcXYPosition((*it));
 		}
@@ -500,7 +536,7 @@ bool Roundels::unJumbleWord(bool bAnimate /*=true*/)
 		if (*it)
 		{
 			if (bAnimate)
-				(*it)->_spr->startMoveTo(calcXPos((*it)), calcYPos((*it)), 25, 0, 9, 0);	//start slide anim
+				(*it)->_spr->easeMoveTo(calcXPos((*it)), calcYPos((*it)), 800, 0, Easing::EASE_OUTQUART);
 			else
 				recalcXYPosition((*it));
 		}
@@ -528,13 +564,13 @@ int Roundels::calcYPos(Roundel *r)
 bool Roundels::moveLetterUp(bool bEffect /*=true*/)
 {
 	//if letter already moved up or is moving so wait (as can cause undefined behaviour)
-	if (isMoving() || !_bot[_cx]) return false;
+	if (!_bot[_cx]) return false;
 
     if (_bCopyBot)
     {
         const int id = _bot[_cx]->_spr->getObjectId();
 
-        if (bEffect)
+        if (bEffect && !_pressResource.empty())
         {
             const int oldX = (int)(_bot[_cx]->_spr->getXPos());
             const int oldY = (int)(_bot[_cx]->_spr->getYPos());
@@ -553,6 +589,9 @@ bool Roundels::moveLetterUp(bool bEffect /*=true*/)
         ppg::pushSDL_Event(USER_EV_END_MOVEMENT,
             reinterpret_cast<void *>(id), reinterpret_cast<void *>(_rid));
 
+        if (bEffect)
+            Locator::audio().playSfx(AUDIO_SFX_ROUNDEL);
+
         return true;
     }
 
@@ -564,7 +603,7 @@ bool Roundels::moveLetterUp(bool bEffect /*=true*/)
 			const int oldX = (int)(_bot[_cx]->_spr->getXPos());
 			const int oldY = (int)(_bot[_cx]->_spr->getYPos());
 
-            if (bEffect)
+            if (bEffect && !_pressResource.empty())
             {
                 //create a cursor anim here to auto remove on completion
                 const int x = oldX - (( _pressEffW - _bot[_cx]->_spr->tileW()) / 2);
@@ -579,11 +618,13 @@ bool Roundels::moveLetterUp(bool bEffect /*=true*/)
 			int endX = _xScratchTop+(xx*(_top[xx]->_spr->tileW()+_gap));
 			int endY = _yScratchTop;
 
-			float velX, velY;
-			Uint32 rate = _top[xx]->_spr->calcXYRate(200, oldX, oldY, endX, endY, velX, velY);
-			_top[xx]->_spr->startMoveTo(endX, endY, rate, 0, velX, velY);
+            _top[xx]->_spr->easeMoveTo(endX, endY, 400, 0);    //ease over Nms
 
             _botLength--;
+
+            if (bEffect)
+                Locator::audio().playSfx(AUDIO_SFX_ROUNDEL);
+
 			return true;
 		}
 	}
@@ -594,8 +635,7 @@ bool Roundels::moveLetterUp(bool bEffect /*=true*/)
 //free space in the bottom row
 bool Roundels::moveLetterDown(bool bEffect /*=true*/)
 {
-	//if letter already moved down or is moving so wait (as can cause undefined behaviour)
-	if (isMoving() || !_top[_cx]) return false;
+	if (!_top[_cx]) return false;
     if (_botLength >= _botLengthMax) return false;    //can't move any more
 
 	int xx;
@@ -606,7 +646,7 @@ bool Roundels::moveLetterDown(bool bEffect /*=true*/)
 			int oldX = (int)(_top[_cx]->_spr->getXPos());
 			int oldY = (int)(_top[_cx]->_spr->getYPos());
 
-            if (bEffect)
+            if (bEffect && !_pressResource.empty())
             {
                 //create a cursor anim here to auto remove on completion
                 const int x = oldX - (( _pressEffW - _top[_cx]->_spr->tileW()) / 2);
@@ -631,11 +671,13 @@ bool Roundels::moveLetterDown(bool bEffect /*=true*/)
             int endX = _xScratchBot+(xx*(_bot[xx]->_spr->tileW()+_gap));
             int endY = _yScratchBot;
 
-            float velX, velY;
-            Uint32 rate = _bot[xx]->_spr->calcXYRate(400, oldX, oldY, endX, endY, velX, velY);
-            _bot[xx]->_spr->startMoveTo(endX, endY, rate, 0, velX, velY);
+            _bot[xx]->_spr->easeMoveTo(endX, endY, 400, 0);    //ease over Nms
 
             _botLength++;
+
+            if (bEffect)
+                Locator::audio().playSfx(AUDIO_SFX_ROUNDEL);
+
 			return true;
 		}
 	}
@@ -763,7 +805,7 @@ int Roundels::cursorAt(Point pt)
 //to the top, to the gaps already there
 void Roundels::clearAllToTop(bool bResetCursor /*=true*/)
 {
-	if (isMoving()) return;	//can't move if any already moving
+//	if (isMoving()) return;	//can't move if any already moving
 
 	//make sure players cursor is on top line
 	_bCursorTop = true;
@@ -824,5 +866,6 @@ std::string Roundels::getBottomWord()
 	}
 	return newword;
 }
+
 
 
