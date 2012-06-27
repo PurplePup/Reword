@@ -270,7 +270,7 @@ void PlayGame::exit(eGameState toState)
 	stopCountdown();
 	clearEventBuffer();
 	_gd._state = toState;	//ST_MENU, ST_PLAY etc
-	std::cout << "state: exit = " << toState << std::endl;
+//	std::cout << "state: exit = " << toState << std::endl;
 	_running = false;
 }
 
@@ -413,7 +413,7 @@ void PlayGame::render_play(Screen* s)
 	const int yo = _yScratchBot + CURSORH + _boxOffsetY;	//start y offset
 	tWordsFoundList::const_iterator it;
 
-    const bool bHighlightAllColumns = foundEnoughWords() && PG_PLAY == _state;
+    const bool bHighlightAllColumns = PG_PLAY == _state && foundEnoughWords();
 
 	//[3..], [4...], [5....], [N.....] letter boxes
 	for (xx=_shortestWordLen; xx<=_longestWordLen; ++xx)	//accross the screen
@@ -568,12 +568,12 @@ void PlayGame::render_end(Screen* s)
 		case 2:_gd._fntBig.put_text(s, yyTitle, "COOL!", PURPLE_COLOUR, true);break;
 		default:_gd._fntBig.put_text(s, yyTitle, "WELL DONE!", PURPLE_COLOUR, true);break;
 		}
-		_gd._fntMed.put_number(s, yyReward, _bonusScore, "You got a Reword, add %d points", PURPLE_COLOUR, false);
+		_gd._fntMed.put_number(s, yyReward, _bonusScore, "You got a Re-Word, add %d points", PURPLE_COLOUR, false);
 		break;
 	case SU_BONUS:		//BONUS!! - You got all words
 		switch (_randomTitle)
 		{
-		case 0:_gd._fntBig.put_text(s, yyTitle, "PERFECT!", PURPLE_COLOUR, true);break;
+		case 0:_gd._fntBig.put_text(s, yyTitle, "FABULOUS!", PURPLE_COLOUR, true);break;
 		case 1:_gd._fntBig.put_text(s, yyTitle, "EXCELLENT!", PURPLE_COLOUR, true);break;
 		case 2:_gd._fntBig.put_text(s, yyTitle, "AMAZING!!", PURPLE_COLOUR, true);break;
 		default:_gd._fntBig.put_text(s, yyTitle, "AWESOME!!", PURPLE_COLOUR, true);break;
@@ -697,7 +697,6 @@ void PlayGame::work(Input* input, float speedFactor)
     _controlsPlay.work(input, speedFactor);
 }
 
-
 void PlayGame::work_play(Input* input, float speedFactor)
 {
     (void)(speedFactor);
@@ -716,6 +715,7 @@ void PlayGame::work_play(Input* input, float speedFactor)
 //	_gd._gamemusic_icon.work();
 
 }
+
 void PlayGame::work_wait(Input* input, float speedFactor)
 {
     (void)(input);
@@ -728,17 +728,23 @@ void PlayGame::work_wait(Input* input, float speedFactor)
 		statePush(PG_END);	//into end state
 	}
 }
+
 void PlayGame::work_end(Input* input, float speedFactor)
 {
     (void)(input);
     (void)(speedFactor);
+
+    if (input->repeat(ppkey::UP))	button(input, ppkey::UP);
+    if (input->repeat(ppkey::DOWN))  button(input, ppkey::DOWN);
 }
+
 void PlayGame::work_pause(Input* input, float speedFactor)
 {
     (void)(input);
     (void)(speedFactor);
 	_roundPaused->work(input, speedFactor);
 }
+
 void PlayGame::work_popup(Input* input, float speedFactor)
 {
 	_pPopup->work(input, speedFactor);
@@ -760,10 +766,7 @@ void PlayGame::stopPopup()
 	delete _pPopup;
 	_pPopup = NULL;
 
-std::cout << "abort = " << _bAbort << ", state = " << _state << std::endl;
-
-//    if (!_bAbort && _state == PG_PLAY)
-        slideRoundButtonsIn();
+    slideRoundButtonsIn();
 }
 
 void PlayGame::button(Input* input, ppkey::eButtonType b)
@@ -778,12 +781,19 @@ void PlayGame::button(Input* input, ppkey::eButtonType b)
 		_inputR = input->isPressed(b);
 		break;
 	case ppkey::SELECT:
-		if (input->isPressed(b) && (_state != PG_PAUSE))
+		if (input->isPressed(b))
 		{
-			if (_pPopup)
-				stopPopup();
-			else
-				startPopup(input);
+            if (_state == PG_END)
+            {
+                doMoveOn();
+            }
+            else if (_state != PG_PAUSE)
+            {
+                if (_pPopup)
+                    stopPopup();
+                else
+                    startPopup(input);
+            }
 		}
 		break;
 	case ppkey::CLICK:
@@ -839,10 +849,10 @@ void PlayGame::button_play(Input* input, ppkey::eButtonType b)
 	case ppkey::DOWN:
 		if (input->isPressed(b)) _round.cursorDown(); //will only go down if letters exist
 		break;
-	case ppkey::L:
+	case ppkey::L:  //left shoulder
 		if (input->isPressed(b)) commandWordToLast();
 		break;
-	case ppkey::R:
+	case ppkey::R:  //right shoulder
 		if (input->isPressed(b)) commandWordToLast();
 		break;
 	case ppkey::A:
@@ -1792,7 +1802,7 @@ void PlayGame::calcArcadeNeededWords()
         //for easy, need to find 20% of all words, or an all-letter word
         //for med, need to find 30% of all words, or an all-letter word
         //for hard, need to find 40% of all words, or an all-letter word
-        const int pc = (DIF_EASY == _gd._diffLevel)?20:(DIF_MED == _gd._diffLevel)?30:40;
+        const int pc = (DIF_EASY == _gd._diffLevel)?25:(DIF_MED == _gd._diffLevel)?30:40;
         int needed = (nTotalLetters * ((float)pc/100));
         _debugNeededAll = needed; //for debug display
 
@@ -1803,6 +1813,7 @@ void PlayGame::calcArcadeNeededWords()
         }
         _debugNeededNow = needed;
 
+        bool bAtLeaseOne = false;
         for (xx=_shortestWordLen; xx<=_longestWordLen; ++xx)
         {
             //only count nWords on screen, not overflow
@@ -1813,8 +1824,28 @@ void PlayGame::calcArcadeNeededWords()
                 {
                     _boxWordNeeded[xx]++;
                     needed -= xx;
-                    if (xx == _longestWordLen) break; //only need one longest word
+                    bAtLeaseOne = true;
+                    if (xx == _longestWordLen) break; //only need to show one longest word
                 }
+            }
+        }
+        //now try and ensure we never get a situation where % so low no boxes are needed and
+        //whole box grid turns green before user plays any words! Also make sure we don't re-yellow
+        //the longest word.
+        if (!bAtLeaseOne)
+        {
+            //find first valid column and one to get
+            for (xx=_shortestWordLen; xx<=_longestWordLen; ++xx)
+            {
+                const int nWords = std::min(_gd._words.wordsOfLength(xx), MAX_WORD_COL);
+                if (!nWords) continue; //no words in this column so ignore
+
+                if (_wordsFound[xx].size() == 0) //none found for this col yet
+                {
+                    if (xx != _longestWordLen)  //and not the re-word col
+                        _boxWordNeeded[xx]++;   //so force at least one word
+                }
+                break;
             }
         }
     }
@@ -1920,8 +1951,8 @@ bool PlayGame::foundEnoughWords()
 
     if (_gd._mode == GM_ARCADE)
     {
-        int xx, iCount(0);
-        for (xx=_shortestWordLen; xx<=_longestWordLen; iCount += _boxWordNeeded[xx++]);
+        int iCount(0);
+        for (int xx=_shortestWordLen; xx<=_longestWordLen; iCount += _boxWordNeeded[xx++]);
         if (iCount == 0)
             return true;
     }

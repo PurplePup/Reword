@@ -56,6 +56,15 @@ void PlayDiff::init(Input *input)
 	//limit items to smaller area
 	setMenuArea(Rect(0, BG_LINE_TOP, SCREEN_WIDTH, (int)(BG_LINE_TOP + ((BG_LINE_BOT - BG_LINE_TOP)*0.85))));
 
+    //load EXIT/NEXT buttons
+    {
+    t_pSharedSpr p(new Sprite(Resource::image("btn_square_exit_small.png")));
+    p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
+//    p->_sigEvent2.Connect(this, &PlayDiff::ControlEvent);
+    Control c(p, CTRLID_EXIT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
+    _controlsDiff.add(c);
+    }
+
 	PlayMenu::init(input);
 }
 
@@ -96,4 +105,35 @@ void PlayDiff::render(Screen *s)
 		break;
 	default:break;
 	}
+
+	_controlsDiff.render(s);
+}
+
+void PlayDiff::work(Input *input, float speedFactor)
+{
+    PlayMenu::work(input, speedFactor);
+
+    _controlsDiff.work(input, speedFactor);
+}
+
+bool PlayDiff::touch(const Point &pt)
+{
+    const int ctrl_id = _controlsDiff.touched(pt);    //needed to highlight a touched control
+
+	return PlayMenu::touch(pt);
+}
+
+//releasing 'touch' press
+bool PlayDiff::tap(const Point &pt)
+{
+    const int ctrl_id = _controlsDiff.tapped(pt);
+
+    if (ctrl_id == CTRLID_EXIT)  //exit after anim faded
+    {
+        _gd._state = ST_MENU;	//back to menu
+        _running = false;
+        return true;
+    }
+
+    return PlayMenu::tap(pt);
 }

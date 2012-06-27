@@ -630,7 +630,6 @@ void PlayHigh::prepareBackground()
 	//pre drawing so we dont need to do it each frame.
 	//...
 	_menubg = tSharedImage(new Image());
-	//_menubg->cloneFrom(_gd._menubg_plain);	//copy of basic menubg without roundel
 	_menubg->cloneFrom(*Resource::image("menubg_plain.png"));	//copy of basic menubg without roundel
 
     tSharedImage &img = Resource::image("menu_arcade.png");
