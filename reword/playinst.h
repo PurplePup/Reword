@@ -48,7 +48,7 @@ private:
 	Controls    _controlsInst;
 
 	std::vector<std::string> _inst;
-	int	_instLine;				//offset into _dictDef (ie start at _dictDef.begin+_dictLine)
+	int	        _instLine;	    //offset into _dictDef (ie start at _dictDef.begin+_dictLine)
 	SDL_Color	_txtColour;
 	int			_lines;
 	bool		_bCentered;
