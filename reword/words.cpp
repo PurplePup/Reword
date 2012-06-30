@@ -180,6 +180,7 @@ bool Words::load(const std::string &wordFile, unsigned int rndSeed, unsigned int
 		std::cerr << "Wordfile not specified, cannot load" << std::endl;
 		return false;	//no previously opened/saved file
 	}
+	std::cerr << "Loading word file " << wordFile << std::endl;
 
 	//reset all containers and working vars and totals to 0 etc
 	reset();

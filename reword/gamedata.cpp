@@ -188,7 +188,7 @@ GameOptions::GameOptions() :
     _defaultDifficulty(DIF_MED),   //medium diff
     _bDirty(false)
 {
-    _defaultWordFile = "reword_english_uk.txt"; //"words/" gets prepended
+    _defaultWordFile = "eng_british_oxford.txt"; //"words/" gets prepended
     _defaultMusicDir = "music/";
 #ifdef PANDORA
 	//pandora .pnd directory structure requires a unnamed directory for data written back to the SD card,

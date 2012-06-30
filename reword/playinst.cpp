@@ -351,12 +351,18 @@ void PlayInst::buildPage(int page)
             "the selection.\n"
             "\n\n"
 			"Controls during play:\n\n"
+			"Cycle - jumble remaining letters\n"
+			"Query - Try selected letters (or double tap screen)\n"
+			"Up    - move selected letter to top\n"
+			"Down  - move last word to selection area\n"
+			"\n\n"
+			"Keyboard controls:\n\n"
 			"B  -  select a letter\n"
 			"X  -  try the word against dictionary\n"
 			"Y  -  clear the word\n"
 			"A  -  jumble the available letters\n"
 			"START or P  -  pause game (easy mode only)\n"
-			"SELECT -  in-game skip or quit options\n"
+			"SELECT -  in-game menu options\n"
 			"L or R  -  select last word\n"
 			"\nAt end of level:\n\n"
 			"B  -  continue to next level\n"
@@ -374,49 +380,50 @@ void PlayInst::buildPage(int page)
 			"on hardest difficulty.\n\n"
 			"1) Arcade\n"
 			"A quick game, allowing you to progress even if you can't get the "
-			"all-letter word, as long as you get enough shorter length words shown "
+			"re-word (longest) word, as long as you get enough shorter length words shown "
 			"by the decreasing highlighted boxes. Get longer words for quicker progress."
 			"\n\n"
-			"2) Reword (Original)\n"
+			"2) Classic (Original Reword)\n"
 			"Make as many words from the letters given, aiming to use all letters. "
-			"You must make at least one word with all letters (a Re-word) in each "
+			"You must make at least one re-word (longest) word in each "
 			"round to move on to the next round. If all words are found, "
 			"a bonus is given for each second remaining."
 			"\n\n"
 			"3) SpeedWord\n"
-			"You must get a single all-letter (Re-word) word to continue to the "
+			"You must get a single re-word (longest) word to continue to the "
 			"next round.\nA bonus is given each time a fastest word is achieved."
 			"\n\n"
 			"4) TimeTrial\n"
-			"You must get as many all-letter (Re-word) words as you can in the time "
+			"You must get as many re-word (long) words as you can in the time "
 			"allowed.\nA bonus is given each time a fastest word is achieved.\n"
 			"Note that the timer will continue to count down even after a word has been "
 			"found. You must move on as quickly as possible for a good score!"
 			"\n\n"
-			"General Info:\n"
-			"Press 'Select' or touch MENU button in-game to access music tracks, "
-			"quick\nadvance, save and exit options.\n"
+			"Other Info:\n"
+			"Press 'SELECT' or touch MENU button in-game to access music tracks in\n"
+			"data/music folder, quick advance, save and exit options.\n"
 			;
 			_txtColour = BLACK_COLOUR;
 			break;
 
 	case 4: strstr <<	//scoring
             "In Arcade:\n" <<
-            SCORE_ARCADE << " for enough words to get next level\n" <<
-			SCORE_SECONDS << " * seconds left, if ALL words found\n" <<
-			SCORE_WORD6 << " for each all-letter word found\n" <<
-			SCORE_WORD << " for each smaller letter words\n" <<
+            SCORE_ARCADE << "pts for enough words to get next level\n" <<
+            "25% in Easy, 35% in Med, 45% in Hard mode to continue.\n" <<
+			SCORE_SECONDS << "pts * seconds left, if ALL words found\n" <<
+			SCORE_WORD6 << "pts for each re-word (longest) word found\n" <<
+			SCORE_WORD << "pts for each smaller letter words\n" <<
 			"\nIn Reword:\n" <<
-			SCORE_BONUS <<" for each level passed\n" <<
-			SCORE_SECONDS << " * seconds left, if ALL words found\n" <<
-			SCORE_WORD6 << " for each all-letter word found\n" <<
-			SCORE_WORD << " for each smaller letter words\n" <<
+			SCORE_BONUS <<"pts for each level passed\n" <<
+			SCORE_SECONDS << "pts * seconds left, if ALL words found\n" <<
+			SCORE_WORD6 << "pts for each re-word (longest) word found\n" <<
+			SCORE_WORD << "pts for each smaller letter words\n" <<
 			"\nIn SpeedWord:\n" <<
-			SCORE_WORD6 << " * for each all-letter word found\n" <<
-			SCORE_FASTEST << " * remainder seconds for each fastest\n" <<
+			SCORE_WORD6 << "pts * for each re-word (longest) word found\n" <<
+			SCORE_FASTEST << "pts * remainder seconds for each fastest\n" <<
 			"\nIn TimeTrial:\n" <<
-			SCORE_WORD6 << " for each all-letter word found\n" <<
-			SCORE_FASTEST << " * remainder seconds for each fastest\n"
+			SCORE_WORD6 << "pts for each re-word (longest) word found\n" <<
+			SCORE_FASTEST << "pts * remainder seconds for each fastest\n"
 			;
 			_txtColour = BLACK_COLOUR;
 			break;

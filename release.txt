@@ -1,3 +1,31 @@
+
+
+-- new ----------------------------------------------------------------------------
+
+I've finally had enough time to update my word find letter jumbling game, Reword to version 0.6
+
+Improvements:
+- Updated dictionaries to support 6, 7 and 8 letter longest (re-word) words
+- Ability to switch dictionaries within the options screen (UK and US included)
+- New 'Arcade' game mode that allows progress without requiring a longest word
+- Save game feature for returning to a part-played game
+- Some animation and design improvements
+
+Known bugs (to be fixed):
+- sound (fx) button sometimes gets reversed
+- have seen touch offset move though corrected with a game restart
+- may not count found words on first level but score increases
+
+Download from the repo:
+http://repo.openpandora.org/?page=detail&app=reword.purplepup
+
+Hope it's an improvement
+Cheers
+Al
+
+-- old ----------------------------------------------------------------------------
+
+
 This is a clone of a great Flash game called TextTwist I found on the Net a while ago.
 
 Updates:
