@@ -39,7 +39,7 @@ struct GameOptions
 	bool        _bSingleTapMenus;
 	bool        _bDefaultSfxOn;
 	bool        _bDefaultMusicOn;
-	std::string _defaultWordFile;   //"words/reword_english_uk.txt"
+	std::string _defaultWordFile;   //eg "words/eng_british_oxford.txt"
 	std::string _defaultMusicDir;   //"music"
 	eGameDiff   _defaultDifficulty; //0,1,or 2 (easy, med or hard)
 private:

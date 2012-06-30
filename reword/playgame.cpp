@@ -1799,10 +1799,10 @@ void PlayGame::calcArcadeNeededWords()
         _debugTotalLetters = nTotalLetters; //for debug display
 
         //2. calc number of letters needed to continue (% based on difficulty)
-        //for easy, need to find 20% of all words, or an all-letter word
-        //for med, need to find 30% of all words, or an all-letter word
-        //for hard, need to find 40% of all words, or an all-letter word
-        const int pc = (DIF_EASY == _gd._diffLevel)?25:(DIF_MED == _gd._diffLevel)?30:40;
+        //for easy, need to find 25% of all words, or an all-letter word
+        //for med, need to find 35% of all words, or an all-letter word
+        //for hard, need to find 45% of all words, or an all-letter word
+        const int pc = (DIF_EASY == _gd._diffLevel)?25:(DIF_MED == _gd._diffLevel)?35:45;
         int needed = (nTotalLetters * ((float)pc/100));
         _debugNeededAll = needed; //for debug display
 

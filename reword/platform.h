@@ -16,13 +16,18 @@
 
 //base data location depending on system
 #if defined(WIN32)
-///#define RES_SYS_BASE	(std::string("../data/"))
-#define RES_SYS_BASE	(std::string("../../reword/data/"))
+    #if defined(DEBUG)
+        #define RES_SYS_BASE	(std::string("../../reword/data/"))
+    #else
+        #define RES_SYS_BASE	(std::string("../data/"))
+    #endif
 #else
-#define RES_SYS_BASE	(std::string("./data/"))
-///#define RES_SYS_BASE	(std::string("../../data/"))
+    #if defined(DEBUG)
+        #define RES_SYS_BASE	(std::string("./data/"))
+    #else
+        #define RES_SYS_BASE	(std::string("./data/"))
+    #endif
 #endif
-
 
 //screen and hardware dependant settings
 #if defined (GP2X)

@@ -11,7 +11,6 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option use_console_runner="0" />
 				<Option parameters="-nosoundXXXX" />
 				<Compiler>
 					<Add option="-Wextra" />
