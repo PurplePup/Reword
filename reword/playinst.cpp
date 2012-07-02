@@ -109,6 +109,14 @@ void PlayInst::init(Input *input)
     _controlsInst.add(c);
     }
 
+    //format some messages depending on platform
+    std::string ssB = Locator::input().keyDescription(ppkey::B);
+    std::string ssY = Locator::input().keyDescription(ppkey::Y);
+    _page1help = "Press " + ssB + " for controls, or " + ssY + " to exit";
+    _page2help = "Press " + ssB + " for rules of play, or " + ssY + " to exit";
+    _page3help = "Press " + ssB + " for scoring, or " + ssY + " to exit";
+    _page4help = "Press " + ssB + " or " + ssY + " to exit";
+
 	_page = 0;
 	nextPage();	//start at page 1 - updates scroll buttons
 
@@ -133,24 +141,24 @@ void PlayInst::render(Screen *s)
 	if (_page == 1)
 	{
 		_gd._fntMed.put_text(s, yyStart, "About", BLUE_COLOUR, true);
-		_gd._fntClean.put_text(s, helpYpos, "Press NEXT (B) for controls, or EXIT (Y)", GREY_COLOUR, true);
+		_gd._fntClean.put_text(s, helpYpos, _page1help.c_str(), GREY_COLOUR, true);
 	}
 
 	if (_page == 2)
 	{
 		_gd._fntMed.put_text(s, yyStart, "Controls", BLUE_COLOUR, true);
-		_gd._fntClean.put_text(s, helpYpos, "Press NEXT (B) for rules, or EXIT (Y)", GREY_COLOUR, true);
+		_gd._fntClean.put_text(s, helpYpos, _page2help.c_str(), GREY_COLOUR, true);
 	}
 
 	if (_page == 3)
 	{
 		_gd._fntMed.put_text(s, yyStart, "How to play", BLUE_COLOUR, true);
-		_gd._fntClean.put_text(s, helpYpos, "Press NEXT (B) for scoring, or EXIT (Y)", GREY_COLOUR, true);
+		_gd._fntClean.put_text(s, helpYpos, _page3help.c_str(), GREY_COLOUR, true);
 	}
 	else if (_page == 4)
 	{
 		_gd._fntMed.put_text(s, yyStart, "Scoring", BLUE_COLOUR, true);
-		_gd._fntClean.put_text(s, helpYpos, "Press EXIT (B or Y)", GREY_COLOUR, true);
+		_gd._fntClean.put_text(s, helpYpos, _page4help.c_str(), GREY_COLOUR, true);
 	}
 
 	//draw the text here... use same code as drawing dictionary...
@@ -222,7 +230,7 @@ void PlayInst::ControlEvent(int event, int ctrl_id)
     }
 }
 
-void PlayInst::button(Input *input, ppkey::eButtonType b)
+bool PlayInst::button(Input *input, ppkey::eButtonType b)
 {
 	switch (b)
 	{
@@ -249,10 +257,11 @@ void PlayInst::button(Input *input, ppkey::eButtonType b)
 		if (input->isPressed(b))
 			nextPage();
 		break;
-	default:break;
+	default:return false;
 	}
 
     updateScrollButtons();
+    return true;
 }
 
 void PlayInst::nextPage()
@@ -350,24 +359,24 @@ void PlayInst::buildPage(int page)
             "helpful messages. Slide away while holding to cancel "
             "the selection.\n"
             "\n\n"
-			"Controls during play:\n\n"
+			"Keyboard controls:\n\n"
+			<< Locator::input().keyDescription(ppkey::B) << "  -  select a letter\n"
+			<< Locator::input().keyDescription(ppkey::X) << "  -  try the word against dictionary\n"
+			<< Locator::input().keyDescription(ppkey::Y) << "  -  clear the word\n"
+			<< Locator::input().keyDescription(ppkey::A) << "  -  jumble the available letters\n"
+			<< Locator::input().keyDescription(ppkey::START) << "  -  pause game (easy mode only)\n"
+			<< Locator::input().keyDescription(ppkey::SELECT) << " -  in-game menu options\n"
+			<< Locator::input().keyDescription(ppkey::L) << "  -  select last word\n"
+			"\nAt end of level:\n\n"
+			<< Locator::input().keyDescription(ppkey::B) << "  -  continue to next level\n"
+			<< Locator::input().keyDescription(ppkey::Y) << "  -  show dictionary definition of highlighted words\n"
+			"\nAdditional options are displayed on screen as required.\n\n"
+			"On screen controls during play:\n\n"
 			"Cycle - jumble remaining letters\n"
 			"Query - Try selected letters (or double tap screen)\n"
 			"Up    - move selected letter to top\n"
 			"Down  - move last word to selection area\n"
-			"\n\n"
-			"Keyboard controls:\n\n"
-			"B  -  select a letter\n"
-			"X  -  try the word against dictionary\n"
-			"Y  -  clear the word\n"
-			"A  -  jumble the available letters\n"
-			"START or P  -  pause game (easy mode only)\n"
-			"SELECT -  in-game menu options\n"
-			"L or R  -  select last word\n"
-			"\nAt end of level:\n\n"
-			"B  -  continue to next level\n"
-			"Y  -  show dictionary definition of highlighted words\n"
-			"\nAdditional options are displayed on screen as required."
+			"[MENU] - displays save and move on early options (if re-word found)\n"
 			;
 			_txtColour = BLACK_COLOUR;
 			break;
@@ -400,7 +409,8 @@ void PlayInst::buildPage(int page)
 			"found. You must move on as quickly as possible for a good score!"
 			"\n\n"
 			"Other Info:\n"
-			"Press 'SELECT' or touch MENU button in-game to access music tracks in\n"
+			"Press " << Locator::input().keyDescription(ppkey::SELECT) <<
+			" or touch [MENU] screen button to access music tracks in\n"
 			"data/music folder, quick advance, save and exit options.\n"
 			;
 			_txtColour = BLACK_COLOUR;

@@ -86,7 +86,7 @@ public:
     virtual void init(Input *input);
     virtual void render(Screen* s);
     virtual void work(Input* input, float speedFactor);
-    virtual void button(Input* input, ppkey::eButtonType b);
+    virtual bool button(Input* input, ppkey::eButtonType b);
     virtual bool touch(const Point &pt);   //press
     virtual bool tap(const Point &pt);     //release
 
@@ -136,11 +136,11 @@ protected:
     void work_pause(Input*, float);
     void work_popup(Input*, float);
 
-    void button_play(Input*, ppkey::eButtonType);
-    void button_wait(Input*, ppkey::eButtonType);
-    void button_end(Input*, ppkey::eButtonType);
-    void button_pause(Input*, ppkey::eButtonType);
-    void button_popup(Input*, ppkey::eButtonType);
+    bool button_play(Input*, ppkey::eButtonType);
+    bool button_wait(Input*, ppkey::eButtonType);
+    bool button_end(Input*, ppkey::eButtonType);
+    bool button_pause(Input*, ppkey::eButtonType);
+    bool button_popup(Input*, ppkey::eButtonType);
 
 	bool touch_play(const Point &pt);
 	bool touch_end(const Point &pt);
@@ -170,7 +170,7 @@ private:
 	//function pointers for render(), work(), button() etc
 	void (PlayGame::*pRenderFn)(Screen*);
     void (PlayGame::*pWorkFn)(Input*, float);
-	void (PlayGame::*pButtonFn)(Input*, ppkey::eButtonType);
+	bool (PlayGame::*pButtonFn)(Input*, ppkey::eButtonType);
 	bool (PlayGame::*pTouchFn)(const Point &pt);
 
     enum { CTRLGRP_BUTTONS = 1, CTRLGRP_LETTERS=2 };    //...4,8,16 etc
@@ -242,6 +242,8 @@ private:
 	//different modes during play that are handled by different classes
 	PlayGamePopup	*_pPopup;
     IPlay           *_play;
+
+    std::string _endWorDefExit, _endWorDefExitMore, _endWorDefNext, _endWorDefNextMore;
 
     int _debugTotalLetters, _debugNeededAll, _debugNeededNow;
 };

@@ -34,6 +34,8 @@ private:
 	IAudio		*_audio;
 	GameData	*_gd;
     ResourceImg	_images;
+
+    SDL_Cursor *hiddenCursor;
 };
 
 #endif //GAME_H

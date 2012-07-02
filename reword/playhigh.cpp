@@ -72,7 +72,7 @@ void PlayHigh::init(Input *input)
 
 //#ifdef DEBUG
 ////##DEBUG
-//setEditing(true);
+//setEditing(true); //testing kbd mode
 //#endif
 
 	//calc hiscore table element positions
@@ -112,6 +112,8 @@ void PlayHigh::init(Input *input)
 
         //used when non touch controls used to highlight a letter
         _cursorSpr = t_pSharedSpr(new Sprite(Resource::image("ping_small.png")));
+
+        _kbd.setWordToLast(std::string(_curr.inits));
     }
 
 	//set the repeat of the keys required
@@ -178,6 +180,10 @@ void PlayHigh::init(Input *input)
     Control c(p, CTRLID_NEXT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
+
+    _helpMsg = "Up/down:mode, left/right:difficulty, press " + Locator::input().keyDescription(ppkey::B) + " to exit";
+	_helpMsgEditing = "Arrows, " + Locator::input().keyDescription(ppkey::B) + " to select and save, or " +
+        Locator::input().keyDescription(ppkey::Y) + " to unselect & exit";
 
     _bLastActionTouch = false;
     updateScrollButtons();  //show initial state
@@ -269,10 +275,10 @@ void PlayHigh::render(Screen *s)
     }
 
 	int helpYpos = BG_LINE_BOT+((SCREEN_HEIGHT-BG_LINE_BOT-_gd._fntClean.height())/2);
-	if (!isEditing())
-		_gd._fntClean.put_text(s, helpYpos, "Up/down:mode, left/right:difficulty, or EXIT (B)", GREY_COLOUR, true);
+	if (isEditing())
+		_gd._fntClean.put_text(s, helpYpos, _helpMsgEditing.c_str(), GREY_COLOUR, true);
 	else
-		_gd._fntClean.put_text(s, helpYpos, "Move using arrows, B to select and save, or EXIT", GREY_COLOUR, true);
+		_gd._fntClean.put_text(s, helpYpos, _helpMsg.c_str(), GREY_COLOUR, true);
 
 	_controlsHigh.render(s);
 }
@@ -306,11 +312,16 @@ void PlayHigh::work(Input *input, float speedFactor)
     {
         _kbd.work(input, speedFactor);
     }
-
 }
 
-void PlayHigh::button(Input *input, ppkey::eButtonType b)
+bool PlayHigh::button(Input *input, ppkey::eButtonType b)
 {
+    //intercept any PC or PANDORA keyboard a-z key presses to process
+    //in roundels class - bypassing the normal console controls to
+    //move letters down, allowing user to type the word.
+    if (isEditing() && _kbd.button(input, b))
+        return true;    //roundel processed the a-z keys
+
 	switch (b)
 	{
 	case ppkey::UP:
@@ -359,17 +370,29 @@ void PlayHigh::button(Input *input, ppkey::eButtonType b)
 		}
 		//follow on to exit to ST_MENU ...
 		//not break
-	case ppkey::X:
+	case ppkey::Y:
 		if (input->isPressed(b))
 		{
-			_gd._state = ST_MENU;
-			_running = false;	//exit this class running state
+            if (!isEditing() || (isEditing() && _kbd.getBottomWordLength() == 0))
+            {
+                _gd._state = ST_MENU;
+                _running = false;	//exit this class running state
+            }
+            else if (isEditing())
+            {
+                _kbd.cursorDown();
+                _kbd.moveLetterUp();
+                _kbd.cursorUp();
+
+                updateKbdCursor();
+            }
 		}
 		break;
-	default:break;
+	default:return false;
 	}
 	//update show/hide enable/disable after key press or setEditing(false) etc
 	updateScrollButtons();
+	return true;
 }
 
 void PlayHigh::setEditing(bool b)

@@ -218,7 +218,7 @@ void PlayMenu::work(Input *input, float speedFactor)
     _controlsMenu.work(input, speedFactor);
 }
 
-void PlayMenu::button(Input *input, ppkey::eButtonType b)
+bool PlayMenu::button(Input *input, ppkey::eButtonType b)
 {
 	switch (b)
 	{
@@ -249,9 +249,14 @@ void PlayMenu::button(Input *input, ppkey::eButtonType b)
 		if (input->isPressed(b) && _itemList[_item]._enabled)
 			choose(_itemList[_item]);
 		break;
+    case ppkey::Y:
+        if (input->isPressed(b))
+            choose(MenuItem()); //id = -1 == keyboard exit
+        break;
 
-	default:break;
+	default:return false;
 	}
+	return true;
 }
 
 //touch (press) to highlight the menu item

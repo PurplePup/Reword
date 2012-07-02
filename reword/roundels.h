@@ -67,7 +67,7 @@ public:
 	int getBottomWordLength() { return _botLength; }
 
 	void clearAllToTop(bool bResetCursor = true);
-	void setWordToLast();
+	void setWordToLast(const std::string &strOverride = "");
 
 	bool isMoving() {return _bMoving;}
 
@@ -87,7 +87,7 @@ public:
     // other processing
     virtual void work(Input* input, float speedFactor);
     // notification of button/input state change
-    virtual void button(Input* /*input*/, ppkey::eButtonType /*b*/);
+    virtual bool button(Input* /*input*/, ppkey::eButtonType /*b*/);
 
 	// screen touch (press)
 	virtual bool touch(const Point &pt);
@@ -97,6 +97,7 @@ public:
 
 protected:
 
+    bool selectKbdLetter(char letter);
 	void recalcXYPosition(Roundel *r);
 	int calcXPos(Roundel *r);
 	int calcYPos(Roundel *r);

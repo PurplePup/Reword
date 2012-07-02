@@ -93,8 +93,9 @@ void Controls::work(Input* input, float speedFactor)
     }
 };
 // notification of button/input state change
-void Controls::button(Input* /*input*/, ppkey::eButtonType /*b*/)
+bool Controls::button(Input* /*input*/, ppkey::eButtonType /*b*/)
 {
+    return false;
 };
 
 // screen touch (press) of one of the controls?

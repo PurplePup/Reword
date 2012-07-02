@@ -131,10 +131,16 @@ int main(int argc, char* argv[]) // <- this must match exactly, since SDL rewrit
 	Game game;
 	if (game.init(options))
 	{
-		if (game.run()) return 0;
+		if (game.run())
+		{
+            std::cerr << "Exit ok" << std::endl;
+		    exit(0);
+		    return 0;
+		}
 		//else fall through to return error
 	}
 	std::cerr << "Error : " << game.lastError() << std::endl;
-	return 1;
+    exit(1);
+    return 1;
 }
 

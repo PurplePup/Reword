@@ -64,6 +64,8 @@ public:
 	void toggleMove()				{ _pauseM = !_pauseM; }		//toggle pause state
 	bool canMove() const            { return ((_xVel || _yVel) && (_xDir || _yDir)); }
 	bool isMoving() const       	{ return !(_x == _xEnd && _y == _yEnd); }	//has it reached end point yet
+	int  getXEnd() const            { return _xEnd; }
+	int  getYEnd() const            { return _yEnd; }
 
 	//overridden functions
 	virtual void setPos(float x, float y);

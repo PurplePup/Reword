@@ -45,7 +45,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 void PlayDiff::init(Input *input)
 {
 	setTitle("LEVEL");
-	setHelp("Press B to select difficulty", GREY_COLOUR);
+	std::string msg = "Press " + input->keyDescription(ppkey::B) + " to select difficulty";
+	setHelp(msg, GREY_COLOUR);
 	addItem(MenuItem(DIF_EASY, GREEN_COLOUR,
 		"Easy", ""));
 	addItem(MenuItem(DIF_MED, ORANGE_COLOUR,
@@ -70,7 +71,9 @@ void PlayDiff::init(Input *input)
 
 void PlayDiff::choose(MenuItem i)
 {
-	_gd.setDiffLevel((eGameDiff)i._id);
+    if (i._id >= 0)
+        _gd.setDiffLevel((eGameDiff)i._id);
+
 	_gd._state = ST_MENU;
 	_running = false;	//exit this class running state
 }
@@ -118,7 +121,8 @@ void PlayDiff::work(Input *input, float speedFactor)
 
 bool PlayDiff::touch(const Point &pt)
 {
-    const int ctrl_id = _controlsDiff.touched(pt);    //needed to highlight a touched control
+    //const int ctrl_id =
+        _controlsDiff.touched(pt);    //needed to highlight a touched control
 
 	return PlayMenu::touch(pt);
 }

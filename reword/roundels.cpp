@@ -134,9 +134,44 @@ void Roundels::work(Input* input, float speedFactor)
 	_bMoving = bMoving;	//if any are moving, something/someone might need to know
 }
 
-// notification of button/input state change
-void Roundels::button(Input* /*input*/, ppkey::eButtonType /*b*/)
+
+//select a roundel from the top using a kbd letter (ie. A-Z)
+//rather than selecting a roundel positioni and pressing
+//a game pad control to select (useful for PC and Pandora that
+//have full keyboards)
+bool Roundels::selectKbdLetter(char letter)
 {
+    //iterate over top letters and find one matching the letter passed in.
+    //select that as if the user had tapped it or moved the cursor and
+    //selected it
+
+   	tRoundVect::iterator it;
+   	int i = 0;
+	for (it = _top.begin(); it != _top.end(); ++it, ++i)
+	{
+	    if (*it && (*it)->_letter == letter)
+        {
+            _bCursorTop = true;
+            _cx = i;
+            moveLetterDown();
+            return true;
+        }
+	}
+	return false;
+}
+
+// notification of button/input state change
+bool Roundels::button(Input* input, ppkey::eButtonType b)
+{
+    if (input->isPressed(b))
+    {
+        if (b >= ppkey::a && b <= ppkey::z)
+        {
+            selectKbdLetter('A' + (b - ppkey::a));  //_top uses 'A' upper case letters
+            return true;    //processed the key even if it didn't match
+        }
+    }
+    return false;
 }
 
 // screen touch (press)
@@ -179,8 +214,8 @@ void Roundels::cleanUp()
 	for (it = _top.begin(); it != _top.end(); ++it) if (*it) delete *it;
 	_top.clear();
 
-//    if (!_bCopyBot)
-        for (it = _bot.begin(); it != _bot.end(); ++it) if (*it) delete *it;
+    //bottom may be empty or have _bCopyBot entries, so always delete
+    for (it = _bot.begin(); it != _bot.end(); ++it) if (*it) delete *it;
 	_bot.clear();
 
 	_botLength = _botLengthMax = 0;
@@ -241,7 +276,7 @@ void Roundels::setWord(const std::string &wrd,
 		//to determine the current last letter id.
         pspr->setObjectId((_lastId = i+1));
 
-		prnd->_letter = wrd[i];	//wrd[i] - 65 == 0=a, 1=b
+		prnd->_letter = wrd[i];	//wrd[i] - 65 == 0=A, 1=B
 		prnd->_pos = i;			//letter position in string
 		prnd->_spr = pspr;		//pointer to sprite
 
@@ -636,6 +671,31 @@ bool Roundels::moveLetterUp(bool bEffect /*=true*/)
 bool Roundels::moveLetterDown(bool bEffect /*=true*/)
 {
 	if (!_top[_cx]) return false;
+
+    //if we're in kdb/copy mode shuffle new letters to end
+	if (_bCopyBot && _botLength  && _botLength >= _botLengthMax)
+	{
+	    //shuffle the bottom word back to allow another letter to be
+	    //placed on the end. Because user may press keys quickly, we
+	    //need the sprites end position rather than the pos it's
+	    //currently moving through before getting to its end point.
+        Roundel *orig = _bot[0];
+        int posx = _bot[0]->_spr->getXEnd();
+	    int posy = _bot[0]->_spr->getYEnd();
+        for (int xx=0; xx < _botLengthMax-1; ++xx)
+        {
+            int nextx = _bot[xx+1]->_spr->getXEnd();
+            int nexty = _bot[xx+1]->_spr->getYEnd();
+	        _bot[xx+1]->_spr->setPos(posx, posy);
+            _bot[xx]= _bot[xx+1];
+            posx = nextx;
+            posy = nexty;
+	    }
+	    _bot[_botLengthMax-1] = 0;
+	    _botLength--;
+	    delete orig;
+	}
+
     if (_botLength >= _botLengthMax) return false;    //can't move any more
 
 	int xx;
@@ -824,18 +884,37 @@ void Roundels::clearAllToTop(bool bResetCursor /*=true*/)
 
 //redisplay (as selected tiles) the last word that was tried
 //Allows player to quickly redo a word and add or remove a letter at the end
-void Roundels::setWordToLast()
+void Roundels::setWordToLast(const std::string &strOverride)
 {
 	if (isMoving()) return;	//can't move if any already moving
 
 	int oldcx = _cx;
 	clearAllToTop(false);
-	int xtop = 0;
-	int xlast = 0;
-	for (xlast=0; xlast < (int)_word.length(); ++xlast)
+
+    if (!strOverride.empty() && (int)strOverride.length() <= _botLengthMax)
+    {
+        //select letters from the override word and find them in the
+        //roundels letters and move/copy them down. Ignore letters
+        //not in original word.
+        int xlast(0);
+        for (int xov=0; xov < (int)strOverride.length(); ++xov)
+        {
+            //find letter in top
+            for (int xtop=0; xtop < (int)_word.length(); ++xtop)
+            {
+                if (_top[xtop]->_letter == strOverride[xov])
+                {
+                    _last[xlast++] = _top[xtop];
+                    break;
+                }
+            }
+        }
+    }
+
+	for (int xlast=0; xlast < (int)_word.length(); ++xlast)
 	{
 		if (0 == _last[xlast]) break;	//no more letters in last[] array
-		for (xtop=0; xtop < (int)_word.length(); ++xtop)
+		for (int xtop=0; xtop < (int)_word.length(); ++xtop)
 		{
 			if (_top[xtop] == _last[xlast])
 			{

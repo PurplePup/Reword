@@ -108,6 +108,8 @@ void PlayGameDict::init(Input *input)
 	//end of display area minus start of screen lines+title height, div by line height. Minus 1 for a reasonable gap
 	_lines = ((BG_LINE_BOT - BG_LINE_TOP - _gd._fntMed.height()) / _gd._fntClean.height()) - 1;
 
+    _helpMsg = "Press " + Locator::input().keyDescription(ppkey::Y) + " to go back";
+
 	//need to set the _init and _running flags
 	_init = true;
 	_running = true;
@@ -138,7 +140,7 @@ void PlayGameDict::render(Screen* s)
 	}
 
 	int helpYpos = BG_LINE_BOT+((SCREEN_HEIGHT-BG_LINE_BOT-_gd._fntClean.height())/2);
-	_gd._fntClean.put_text(s, helpYpos, "Press BACK (Y) to continue", GREY_COLOUR, true);
+	_gd._fntClean.put_text(s, helpYpos, _helpMsg.c_str(), GREY_COLOUR, true);
 
 	_controlsDict.render(s);
 }
@@ -164,7 +166,7 @@ void PlayGameDict::work(Input* input, float speedFactor)
 
 }
 
-void PlayGameDict::button(Input* input, ppkey::eButtonType b)
+bool PlayGameDict::button(Input* input, ppkey::eButtonType b)
 {
 	switch (b)
 	{
@@ -184,8 +186,9 @@ void PlayGameDict::button(Input* input, ppkey::eButtonType b)
             ppg::pushSDL_Event(USER_EV_EXIT_SUB_SCREEN);
 		break;
 
-	default:break;
+	default:return false;
 	}
+	return true;
 }
 void PlayGameDict::scrollDictUp()
 {

@@ -23,7 +23,7 @@ public:
     virtual void init(Input *input);
     virtual void render(Screen* s);
     virtual void work(Input* input, float speedFactor);
-    virtual void button(Input* input, ppkey::eButtonType b);
+    virtual bool button(Input* input, ppkey::eButtonType b);
 
 	virtual bool touch(const Point &pt);
 	virtual bool tap(const Point &pt);
@@ -52,6 +52,8 @@ private:
 	SDL_Color	_txtColour;
 	int			_lines;
 	bool		_bCentered;
+
+	std::string _page1help, _page2help, _page3help, _page4help;
 };
 
 #endif //_PLAYINST_H

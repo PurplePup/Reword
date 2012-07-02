@@ -46,6 +46,7 @@ public:
     virtual bool repeat(ppkey::eButtonType b) {  (void)(b); return false; }
 	virtual void setRepeat(ppkey::eButtonType b, Uint32 rate, Uint32 delay) { (void)(b); (void)(rate); (void)(delay); }
 	virtual void clearRepeat() {}
+    virtual std::string keyDescription(ppkey::eButtonType /*b*/) { return ""; }
 };
 
 //Standard input implementation
@@ -64,6 +65,7 @@ public:
     virtual bool repeat(ppkey::eButtonType b);	// Returns true if button repeats
 	virtual void setRepeat(ppkey::eButtonType b, Uint32 rate, Uint32 delay);
 	virtual void clearRepeat();
+    virtual std::string keyDescription(ppkey::eButtonType b);
 
 protected:
     // Initise joystick
