@@ -167,7 +167,7 @@ void PlayGamePopup::work(Input *input, float speedFactor)
     if (input->repeat(ppkey::DOWN))	button(input, ppkey::DOWN);
 }
 
-void PlayGamePopup::button(Input *input, ppkey::eButtonType b)
+bool PlayGamePopup::button(Input *input, ppkey::eButtonType b)
 {
 	switch (b)
 	{
@@ -195,8 +195,9 @@ void PlayGamePopup::button(Input *input, ppkey::eButtonType b)
 			choose();
 		break;
 
-	default:break;
+	default:return false;
 	}
+	return true;
 }
 
 bool PlayGamePopup::touch(const Point &pt)

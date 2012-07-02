@@ -21,7 +21,7 @@ public:
     virtual void init(Input *input);
     virtual void render(Screen* s);
     virtual void work(Input* input, float speedFactor);
-    virtual void button(Input* input, ppkey::eButtonType b);
+    virtual bool button(Input* input, ppkey::eButtonType b);
 
 	// screen touch (press)
 	virtual bool touch(const Point &/*pt*/);
@@ -48,7 +48,7 @@ private:
 	int _lines;					//number of lines we can display dictionary entry without scrolling
 
 	tAutoRoundels   _roundDict;		//"xxxxx" word highlighted for dictionary display
-
+    std::string     _helpMsg;
 };
 
 #endif // PLAYGAMEDICT_H

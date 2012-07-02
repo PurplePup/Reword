@@ -80,8 +80,9 @@ void Control::work(Input* input, float speedFactor)
 };
 
 // notification of button/input state change
-void Control::button(Input* /*input*/, ppkey::eButtonType /*b*/)
+bool Control::button(Input* /*input*/, ppkey::eButtonType /*b*/)
 {
+    return false;
 };
 
 // Set to idle frame (last in state frames) for curr state

@@ -84,7 +84,8 @@ PlayOptions::~PlayOptions()
 void PlayOptions::init(Input *input)
 {
 	setTitle("OPTIONS");
-	setHelp("Press (B) to select option", GREY_COLOUR);
+    std::string msg = "Press " + input->keyDescription(ppkey::B) + " to select option";
+	setHelp(msg, GREY_COLOUR);
 
     setFont( MENU_FONT_SMALL, MENU_FONT_CLEAN );
 	setLayout(MENU_LAYOUT_LEFT, SCREEN_WIDTH/8);
@@ -170,6 +171,10 @@ void PlayOptions::choose(MenuItem i)
 {
     //make buttons flash/fade when menu items selected to show selection
 	switch (i._id) {
+	    case -1:    //exit (using kbd Y)
+                _gd._state = ST_MENU;		//back to menu
+                _running = false;
+                break;
 		case 0: //preferred wordfile
                 _wordFileIdx++;
                 if (_wordFileIdx >= (int)_wordFileList.size())
@@ -224,38 +229,9 @@ void PlayOptions::ControlEvent(int event, int ctrl_id)
 }
 
 
-void PlayOptions::button(Input *input, ppkey::eButtonType b)
+bool PlayOptions::button(Input *input, ppkey::eButtonType b)
 {
-    PlayMenu::button(input, b);
-//	switch (b)
-//	{
-//	case ppkey::UP:
-//		if (input->isPressed(b))
-//			//move the _instLine offset var up a line
-//			scrollDown();
-//		break;
-//	case ppkey::DOWN:
-//		if (input->isPressed(b))
-//			//move the _instLine offset var down a line
-//			scrollUp();
-//		break;
-//	case ppkey::Y:
-//	case ppkey::START:
-//		if (input->isPressed(b))	//exit back to menu
-//		{
-//			_gd._state = ST_MENU;
-//			_running = false;	//exit this class running state
-//		}
-//		break;
-//	case ppkey::CLICK:
-//	case ppkey::B:
-//		if (input->isPressed(b))
-//			nextPage();
-//		break;
-//	default:break;
-//	}
-//
-//    updateScrollButtons();
+    return PlayMenu::button(input, b);
 }
 
 bool PlayOptions::touch(const Point &pt)

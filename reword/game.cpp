@@ -95,6 +95,10 @@ Game::~Game()
 
 	if (_init)
 	{
+#if (defined(GP2X) || defined(PANDORA))
+        SDL_FreeCursor(hiddenCursor);
+#endif
+
 		TTF_Quit();
 	}
 }
@@ -223,7 +227,21 @@ bool Game::init(GameOptions &options)
 	}
 
 #if (defined(GP2X) || defined(PANDORA))
-	SDL_ShowCursor (0);		//hide - place here after video init else stays on screen on GP2X
+    uint8_t hiddenCursorData = 0;
+    hiddenCursor = SDL_CreateCursor(&hiddenCursorData, &hiddenCursorData, 8, 1, 0, 0);
+    /* On the OpenPandora we need to work around an SDL assumption that
+       returns relative mouse coordinates when you get to the screen
+       edges using the touchscreen and a custom surface for the cursor.
+       The workaround is to set a blank SDL cursor and NOT disable it
+       (Hackish I know).
+
+       The root issues lies in the Windows Manager GRAB code in SDL.
+       That is why the issue is not seen on framebuffer devices like the
+       GP2X (there is no X window manager ;) ).
+    */
+    SDL_ShowCursor(SDL_ENABLE);
+    SDL_SetCursor(hiddenCursor);
+    //SDL_ShowCursor (0);	//hide - place here after video init else stays on screen on GP2X
 #endif
 	splash();				//show splash png not text
 
@@ -404,7 +422,7 @@ bool Game::play(IPlay *p)
 						if (b != ppkey::NUMBER_OF_BUTTONS)
 						{
 							_input->down(b);
-							p->button(_input,b);
+							p->button(_input, b);
 						}
 					}
 					break;

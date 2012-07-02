@@ -28,6 +28,7 @@ enum eButtonType
     VOLDOWN,
     CLICK,
     PAUSE,
+    a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,    //for Pandora kbd
     NUMBER_OF_BUTTONS
 };
 }
@@ -47,6 +48,7 @@ public:
     virtual bool repeat(ppkey::eButtonType b) = 0;      	    // Returns true if button repeats
 	virtual void setRepeat(ppkey::eButtonType b, Uint32 rate, Uint32 delay) = 0; // Set a repeat speed for a key
 	virtual void clearRepeat() = 0;                         // Clear any repeats set
+    virtual std::string keyDescription(ppkey::eButtonType b) = 0;
 };
 
 #endif // I_INPUT_H_INCLUDED

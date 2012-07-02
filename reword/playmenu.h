@@ -58,7 +58,7 @@ public:
     virtual void chooseDone();
     virtual void render(Screen* s);
     virtual void work(Input* input, float speedFactor);
-    virtual void button(Input* input, ppkey::eButtonType b);
+    virtual bool button(Input* input, ppkey::eButtonType b);
     virtual bool touch(const Point &pt);
     virtual bool tap(const Point &pt);
     virtual void handleEvent(SDL_Event &sdlevent);

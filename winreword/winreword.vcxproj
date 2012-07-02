@@ -10,6 +10,95 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\reword\audio.cpp" />
+    <ClCompile Include="..\reword\button.cpp" />
+    <ClCompile Include="..\reword\control.cpp" />
+    <ClCompile Include="..\reword\controls.cpp" />
+    <ClCompile Include="..\reword\easing.cpp" />
+    <ClCompile Include="..\reword\error.cpp" />
+    <ClCompile Include="..\reword\fontttf.cpp" />
+    <ClCompile Include="..\reword\framerate.cpp" />
+    <ClCompile Include="..\reword\game.cpp" />
+    <ClCompile Include="..\reword\gamedata.cpp" />
+    <ClCompile Include="..\reword\helpers.cpp" />
+    <ClCompile Include="..\reword\image.cpp" />
+    <ClCompile Include="..\reword\imageanim.cpp" />
+    <ClCompile Include="..\reword\input.cpp" />
+    <ClCompile Include="..\reword\locator.cpp" />
+    <ClCompile Include="..\reword\play.cpp" />
+    <ClCompile Include="..\reword\playdiff.cpp" />
+    <ClCompile Include="..\reword\playgame.cpp" />
+    <ClCompile Include="..\reword\playgamedict.cpp" />
+    <ClCompile Include="..\reword\playgamepopup.cpp" />
+    <ClCompile Include="..\reword\playhigh.cpp" />
+    <ClCompile Include="..\reword\playinst.cpp" />
+    <ClCompile Include="..\reword\playmainmenu.cpp" />
+    <ClCompile Include="..\reword\playmenu.cpp" />
+    <ClCompile Include="..\reword\playmodemenu.cpp" />
+    <ClCompile Include="..\reword\playoptions.cpp" />
+    <ClCompile Include="..\reword\random.cpp" />
+    <ClCompile Include="..\reword\resource.cpp" />
+    <ClCompile Include="..\reword\reword.cpp" />
+    <ClCompile Include="..\reword\roundels.cpp" />
+    <ClCompile Include="..\reword\score.cpp" />
+    <ClCompile Include="..\reword\screen.cpp" />
+    <ClCompile Include="..\reword\singleton.cpp" />
+    <ClCompile Include="..\reword\sprite.cpp" />
+    <ClCompile Include="..\reword\spritemgr.cpp" />
+    <ClCompile Include="..\reword\surface.cpp" />
+    <ClCompile Include="..\reword\utils.cpp" />
+    <ClCompile Include="..\reword\waiting.cpp" />
+    <ClCompile Include="..\reword\words.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\reword\audio.h" />
+    <ClInclude Include="..\reword\button.h" />
+    <ClInclude Include="..\reword\constants.h" />
+    <ClInclude Include="..\reword\control.h" />
+    <ClInclude Include="..\reword\controls.h" />
+    <ClInclude Include="..\reword\delegate.h" />
+    <ClInclude Include="..\reword\easing.h" />
+    <ClInclude Include="..\reword\error.h" />
+    <ClInclude Include="..\reword\fontttf.h" />
+    <ClInclude Include="..\reword\framerate.h" />
+    <ClInclude Include="..\reword\game.h" />
+    <ClInclude Include="..\reword\gamedata.h" />
+    <ClInclude Include="..\reword\global.h" />
+    <ClInclude Include="..\reword\helpers.h" />
+    <ClInclude Include="..\reword\image.h" />
+    <ClInclude Include="..\reword\imageanim.h" />
+    <ClInclude Include="..\reword\input.h" />
+    <ClInclude Include="..\reword\i_audio.h" />
+    <ClInclude Include="..\reword\i_input.h" />
+    <ClInclude Include="..\reword\i_play.h" />
+    <ClInclude Include="..\reword\locator.h" />
+    <ClInclude Include="..\reword\platform.h" />
+    <ClInclude Include="..\reword\playdiff.h" />
+    <ClInclude Include="..\reword\playgame.h" />
+    <ClInclude Include="..\reword\playgamedict.h" />
+    <ClInclude Include="..\reword\playgamepopup.h" />
+    <ClInclude Include="..\reword\playhigh.h" />
+    <ClInclude Include="..\reword\playinst.h" />
+    <ClInclude Include="..\reword\playmainmenu.h" />
+    <ClInclude Include="..\reword\playmenu.h" />
+    <ClInclude Include="..\reword\playmodemenu.h" />
+    <ClInclude Include="..\reword\playoptions.h" />
+    <ClInclude Include="..\reword\random.h" />
+    <ClInclude Include="..\reword\resource.h" />
+    <ClInclude Include="..\reword\roundels.h" />
+    <ClInclude Include="..\reword\score.h" />
+    <ClInclude Include="..\reword\screen.h" />
+    <ClInclude Include="..\reword\signal.h" />
+    <ClInclude Include="..\reword\singleton.h" />
+    <ClInclude Include="..\reword\sprite.h" />
+    <ClInclude Include="..\reword\spritemgr.h" />
+    <ClInclude Include="..\reword\states.h" />
+    <ClInclude Include="..\reword\surface.h" />
+    <ClInclude Include="..\reword\utils.h" />
+    <ClInclude Include="..\reword\waiting.h" />
+    <ClInclude Include="..\reword\words.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4F8D2C19-08D1-4B4C-B768-E96DD7CDB0DD}</ProjectGuid>
     <RootNamespace>winreword</RootNamespace>
@@ -70,91 +159,6 @@
       <SubSystem>Windows</SubSystem>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="..\audio.h" />
-    <ClInclude Include="..\button.h" />
-    <ClInclude Include="..\constants.h" />
-    <ClInclude Include="..\control.h" />
-    <ClInclude Include="..\controls.h" />
-    <ClInclude Include="..\error.h" />
-    <ClInclude Include="..\fontttf.h" />
-    <ClInclude Include="..\framerate.h" />
-    <ClInclude Include="..\game.h" />
-    <ClInclude Include="..\gamedata.h" />
-    <ClInclude Include="..\global.h" />
-    <ClInclude Include="..\helpers.h" />
-    <ClInclude Include="..\image.h" />
-    <ClInclude Include="..\imageanim.h" />
-    <ClInclude Include="..\input.h" />
-    <ClInclude Include="..\i_audio.h" />
-    <ClInclude Include="..\i_input.h" />
-    <ClInclude Include="..\locator.h" />
-    <ClInclude Include="..\platform.h" />
-    <ClInclude Include="..\play.h" />
-    <ClInclude Include="..\playdiff.h" />
-    <ClInclude Include="..\playgame.h" />
-    <ClInclude Include="..\playgamedict.h" />
-    <ClInclude Include="..\playgamepopup.h" />
-    <ClInclude Include="..\playhigh.h" />
-    <ClInclude Include="..\playinst.h" />
-    <ClInclude Include="..\playmainmenu.h" />
-    <ClInclude Include="..\playmenu.h" />
-    <ClInclude Include="..\playmodemenu.h" />
-    <ClInclude Include="..\playoptions.h" />
-    <ClInclude Include="..\random.h" />
-    <ClInclude Include="..\resource.h" />
-    <ClInclude Include="..\roundels.h" />
-    <ClInclude Include="..\score.h" />
-    <ClInclude Include="..\screen.h" />
-    <ClInclude Include="..\singleton.h" />
-    <ClInclude Include="..\sprite.h" />
-    <ClInclude Include="..\spritemgr.h" />
-    <ClInclude Include="..\states.h" />
-    <ClInclude Include="..\surface.h" />
-    <ClInclude Include="..\utils.h" />
-    <ClInclude Include="..\waiting.h" />
-    <ClInclude Include="..\words.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\audio.cpp" />
-    <ClCompile Include="..\button.cpp" />
-    <ClCompile Include="..\control.cpp" />
-    <ClCompile Include="..\controls.cpp" />
-    <ClCompile Include="..\error.cpp" />
-    <ClCompile Include="..\fontttf.cpp" />
-    <ClCompile Include="..\framerate.cpp" />
-    <ClCompile Include="..\game.cpp" />
-    <ClCompile Include="..\gamedata.cpp" />
-    <ClCompile Include="..\helpers.cpp" />
-    <ClCompile Include="..\image.cpp" />
-    <ClCompile Include="..\imageanim.cpp" />
-    <ClCompile Include="..\input.cpp" />
-    <ClCompile Include="..\locator.cpp" />
-    <ClCompile Include="..\play.cpp" />
-    <ClCompile Include="..\playdiff.cpp" />
-    <ClCompile Include="..\playgame.cpp" />
-    <ClCompile Include="..\playgamedict.cpp" />
-    <ClCompile Include="..\playgamepopup.cpp" />
-    <ClCompile Include="..\playhigh.cpp" />
-    <ClCompile Include="..\playinst.cpp" />
-    <ClCompile Include="..\playmainmenu.cpp" />
-    <ClCompile Include="..\playmenu.cpp" />
-    <ClCompile Include="..\playmodemenu.cpp" />
-    <ClCompile Include="..\playoptions.cpp" />
-    <ClCompile Include="..\random.cpp" />
-    <ClCompile Include="..\resource.cpp" />
-    <ClCompile Include="..\reword.cpp" />
-    <ClCompile Include="..\roundels.cpp" />
-    <ClCompile Include="..\score.cpp" />
-    <ClCompile Include="..\screen.cpp" />
-    <ClCompile Include="..\singleton.cpp" />
-    <ClCompile Include="..\sprite.cpp" />
-    <ClCompile Include="..\spritemgr.cpp" />
-    <ClCompile Include="..\surface.cpp" />
-    <ClCompile Include="..\utils.cpp" />
-    <ClCompile Include="..\waiting.cpp" />
-    <ClCompile Include="..\words.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

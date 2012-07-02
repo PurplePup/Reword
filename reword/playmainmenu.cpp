@@ -45,7 +45,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 void PlayMainMenu::init(Input *input)
 {
 	setTitle("REWORD");
-	setHelp("Press (B) to select option", GREY_COLOUR);
+	std::string msg = "Press " + input->keyDescription(ppkey::B) + " to select item";
+	setHelp(msg, GREY_COLOUR);
 	addItem(MenuItem(0, GREEN_COLOUR, "Play", "Go for it"));
 	std::string s = "Difficulty ";
 	s += (_gd._diffLevel==DIF_EASY)?"(easy)":(_gd._diffLevel==DIF_MED)?"(med)":"(hard)";
@@ -68,6 +69,7 @@ void PlayMainMenu::choose(MenuItem i)
 		case 3: _gd._state = ST_INST; break;
 		case 4: _gd._state = ST_OPTN; break;
 		case 5:
+//		case -1:    //kbd exit - commented out otherwise too easy to exit game
 		{
 		    exitMenu(); //start exit anim (all slide off)
 		    return;     //don't set running false just yet

@@ -103,6 +103,11 @@ PlayGame::PlayGame(GameData& gd) :
     memset(_boxWordNeeded, 0, sizeof(_boxWordNeeded));
     memset(_boxWordOffset, 0, sizeof(_boxWordOffset));
 
+    _endWorDefExit = "Press " + Locator::input().keyDescription(ppkey::B) + " to exit";
+    _endWorDefExitMore = "Click word or " + Locator::input().keyDescription(ppkey::Y) + " for detail, or " + Locator::input().keyDescription(ppkey::B) + " to exit";
+    _endWorDefNext = "Press " + Locator::input().keyDescription(ppkey::B) + " to continue";
+    _endWorDefNextMore = "Click word or " + Locator::input().keyDescription(ppkey::Y) + " for detail, or " + Locator::input().keyDescription(ppkey::B) + " to continue";
+
     _nWordBoxHighlightOffset = _nWordBoxEmptyOffset = _nWordBoxNeededOffset = 0;
 	_xScratch = _yScratchTop = _yScratchBot = 0;
    	_posRButtonLeft = _posRButtonRight = _posRButtonTop = _posRButtonBot = 0;
@@ -651,8 +656,8 @@ void PlayGame::render_end(Screen* s)
 		const int yo = (_yScratchBot+CURSORH+_boxOffsetY) - _gd._fntClean.height() - (_gd._fntClean.height()/2);
 		_gd._fntClean.put_text(s, yo,
             (_success == SU_GAMEOVER || _success == SU_SAVEEXIT) ?
-                ((_tmpDefMore) ? "Click word (Y) for detail, or EXIT (B) to continue" : "Press EXIT (B) to continue") :
-                ((_tmpDefMore) ? "Click word (Y) for detail, or NEXT (B) to continue" : "Press NEXT (B) to continue"),
+                ((_tmpDefMore) ? _endWorDefExitMore.c_str() : _endWorDefExit.c_str()) :
+                ((_tmpDefMore) ? _endWorDefNextMore.c_str() : _endWorDefNext.c_str()),
             GREY_COLOUR, false);
 	}
 }
@@ -769,7 +774,7 @@ void PlayGame::stopPopup()
     slideRoundButtonsIn();
 }
 
-void PlayGame::button(Input* input, ppkey::eButtonType b)
+bool PlayGame::button(Input* input, ppkey::eButtonType b)
 {
 	//first handle any global keys
 	switch (b)
@@ -783,11 +788,12 @@ void PlayGame::button(Input* input, ppkey::eButtonType b)
 	case ppkey::SELECT:
 		if (input->isPressed(b))
 		{
-            if (_state == PG_END)
-            {
-                doMoveOn();
-            }
-            else if (_state != PG_PAUSE)
+//            if (_state == PG_END)
+//            {
+//                doMoveOn();
+//            }
+//            else
+            if (_state != PG_PAUSE)
             {
                 if (_pPopup)
                     stopPopup();
@@ -817,24 +823,30 @@ void PlayGame::button(Input* input, ppkey::eButtonType b)
     if (_play)
     {
         //dictionary screen etc
-        _play->button(input, b);
-        return;
+        return _play->button(input, b);
     }
 
 	//now handle popup menu on top of curr screen or depending on state,
 	//call the function pointer of the correctly mapped button function
 	if (_pPopup)
-		button_popup(input, b);
+		return button_popup(input, b);
 	else
-		(*this.*pButtonFn)(input, b);
+		return (*this.*pButtonFn)(input, b);
 
 }
 
-void PlayGame::button_play(Input* input, ppkey::eButtonType b)
+bool PlayGame::button_play(Input* input, ppkey::eButtonType b)
 {
-	if (!_waiting.done()) return;	//no user input until finished waiting
+	if (!_waiting.done()) return false;	//no user input until finished waiting
 
 	//not waiting so allow button use...
+
+    //intercept any PC or PANDORA keyboard a-z key presses to process
+    //in roundels class - bypassing the normal console controls to
+    //move letters down, allowing user to type the word.
+    if (_round.button(input, b))
+        return true;    //roundel processed the a-z keys
+
 	switch (b)
 	{
 	case ppkey::LEFT:
@@ -888,15 +900,17 @@ void PlayGame::button_play(Input* input, ppkey::eButtonType b)
 		if (input->isPressed(b)) commandTryWord();
 		break;
 
-	default:break;
+	default:
+        return false;
 	}
+	return true;
 }
-void PlayGame::button_wait(Input* input, ppkey::eButtonType b)
+bool PlayGame::button_wait(Input* input, ppkey::eButtonType b)
 {
 	//currently same as play state
-	button_play(input, b);
+	return button_play(input, b);
 }
-void PlayGame::button_end(Input* input, ppkey::eButtonType b)
+bool PlayGame::button_end(Input* input, ppkey::eButtonType b)
 {
 	//in end state, not waiting so allow button use...
 	switch (b)
@@ -945,10 +959,11 @@ void PlayGame::button_end(Input* input, ppkey::eButtonType b)
 		}
 		break;
 
-	default:break;
+	default:return false;
 	}
 
 	state_end_setup_scrollers();
+	return true;
 }
 
 //user pressed up button or the up scroll control
@@ -1030,7 +1045,7 @@ void PlayGame::state_end_setup_scrollers()
     }
 }
 
-void PlayGame::button_pause(Input* input, ppkey::eButtonType b)
+bool PlayGame::button_pause(Input* input, ppkey::eButtonType b)
 {
 	switch (b)
 	{
@@ -1039,13 +1054,15 @@ void PlayGame::button_pause(Input* input, ppkey::eButtonType b)
 		if (input->isPressed(b)) doPauseGame();	//will un-pause if it's in pause mode
 		break;
 
-	default:break;
+	default:return false;
 	}
+	return true;
 }
-void PlayGame::button_popup(Input* input, ppkey::eButtonType b)
+bool PlayGame::button_popup(Input* input, ppkey::eButtonType b)
 {
-	_pPopup->button(input, b);
+	const bool bRet = _pPopup->button(input, b);
 	handlePopup();
+	return bRet;
 }
 void PlayGame::handlePopup()
 {
@@ -1201,8 +1218,8 @@ bool PlayGame::tap(const Point &pt)
 
     _round.tap(pt);
 
-    //NOTE: tests must be done in order for when popup is running
-    /////////////////////////////////////////////////////////////
+    //NOTE: tests must be done in this order for when popup is running
+    //////////////////////////////////////////////////////////////////
 
     //must check buttons available during popup, otherwise they animate but
     //but don't update their state when pressed.

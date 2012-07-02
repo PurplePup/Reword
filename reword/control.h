@@ -47,7 +47,7 @@ public:
     // other processing
     virtual void work(Input* input, float speedFactor);
     // notification of button/input state change
-    virtual void button(Input* /*input*/, ppkey::eButtonType /*b*/);
+    virtual bool button(Input* /*input*/, ppkey::eButtonType /*b*/);
 
 	// screen touch (press)
 	virtual bool touch(const Point &pt);
