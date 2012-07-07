@@ -46,39 +46,19 @@ public:
 	}
 };
 
+
 class RandInt
 {
 public:
-	RandInt() {
-//SDL.h may not have been included
-#ifdef _SDL_H
-#ifdef WIN32
-#pragma message("words.h: Using SDL_GetTicks() to seed random\n")
-#endif
-		setSeed(SDL_GetTicks());
-#else
-#ifdef WIN32
-#pragma message("words.h: Using ctime to seed random\n")
-#endif
-		m_rnd.Randomize();	//uses ctime to seed
-#endif
-	}	//incase setSeed not called
-	void setSeed(unsigned int seed) {
-		m_rnd.SetRandomSeed(seed);
-		m_rnd.Randomize();
-	}
-	int random(int limit)
-	{
-		return (int)m_rnd.Random(limit);
-	}
-	int operator() (int limit)	//for sorting calls
-	{
-		return (int)m_rnd.Random(limit);
-	}
+	RandInt();
+	void setSeed(unsigned int seed);
+	int random(int limit);
+	int operator() (int limit);
+
 	CRandom	m_rnd;					//random number generator class
 };
-
 static RandInt g_randInt;
+
 
 namespace ppg 	//pp game functions
 {

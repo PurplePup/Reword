@@ -124,7 +124,7 @@ public:
 	virtual void stopTrack();
 	virtual void pauseTrack();
 	virtual bool isPlayingMusic() { return _bPlayingTrack; }
-	virtual bool isActuallyPlayingMusic() { return Mix_PlayingMusic(); }
+	virtual bool isActuallyPlayingMusic() { return Mix_PlayingMusic() == 1; }
 
     virtual int addSfx(const std::string &filename, unsigned int reqPos);
 	virtual void playSfx(unsigned int iSnd, unsigned int count = 0);

@@ -406,7 +406,7 @@ void Roundels::setWordCenterVert(const std::string &wrd,
 //stated in setWord() and move them back to their original position using speed and direction
 //ie this fn should be called after setWord()
 void Roundels::startMoveFrom(int deltaX, int deltaY,
-							 Uint32 rate, Uint32 delay,
+							 Uint32 rate, Sint32 delay,
 							 int xVel, int yVel,
 							 Sprite::eSprite type /*= Sprite::SPR_NONE*/)
 {
@@ -422,14 +422,15 @@ void Roundels::startMoveFrom(int deltaX, int deltaY,
 			oldX = (int)((*it)->_spr->getXPos());
 			oldY = (int)((*it)->_spr->getYPos());
 			(*it)->_spr->setPos(deltaX+oldX, deltaY+oldY);
-			(*it)->_spr->startMoveTo(oldX, oldY, rate, delay*i, xVel, yVel, type);
+			//if delay negative (random up to abs(delay)) don't compound the amount
+			(*it)->_spr->startMoveTo(oldX, oldY, rate, (delay>0)?delay*i:delay, xVel, yVel, type);
 		}
 		++i;
 	}
 }
 
 void Roundels::easeMoveFrom(int deltaX, int deltaY,
-							 Uint32 duration, Uint32 delay,
+							 Uint32 duration, Sint32 delay,
 							 Easing::eType ease /*= Easing::EASE_OUTBOUNCE*/)
 {
     _lastIdCountdown = (int)_word.length(); //reset to number of roundels
@@ -444,7 +445,8 @@ void Roundels::easeMoveFrom(int deltaX, int deltaY,
 			oldX = (int)((*it)->_spr->getXPos());
 			oldY = (int)((*it)->_spr->getYPos());
 			(*it)->_spr->setPos(deltaX+oldX, deltaY+oldY);
-            (*it)->_spr->easeMoveTo(oldX, oldY, duration, delay*i, ease);    //ease over Nms
+			//if delay negative (random up to abs(delay)) don't compound the amount
+            (*it)->_spr->easeMoveTo(oldX, oldY, duration, (delay>0)?delay*i:delay, ease);    //ease over Nms
 		}
 		++i;
 	}
@@ -889,7 +891,7 @@ void Roundels::setWordToLast(const std::string &strOverride)
 	if (isMoving()) return;	//can't move if any already moving
 
 	int oldcx = _cx;
-	clearAllToTop(false);
+//	clearAllToTop(false);   //if we DONT call this you can insert last word before/after others
 
     if (!strOverride.empty() && (int)strOverride.length() <= _botLengthMax)
     {

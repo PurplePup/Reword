@@ -70,6 +70,7 @@ void PlayMainMenu::choose(MenuItem i)
 		case 4: _gd._state = ST_OPTN; break;
 		case 5:
 //		case -1:    //kbd exit - commented out otherwise too easy to exit game
+        default:    //should never happen
 		{
 		    exitMenu(); //start exit anim (all slide off)
 		    return;     //don't set running false just yet

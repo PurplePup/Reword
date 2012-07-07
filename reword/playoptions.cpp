@@ -210,6 +210,8 @@ void PlayOptions::choose(MenuItem i)
                 break;
 		case 5: //music dir
                 break;
+
+        default:break;
 	}
 }
 

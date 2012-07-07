@@ -62,8 +62,8 @@ public:
 	void setMoveLoop(bool loop)		{ _loopM = loop;}			//keep moving each time?
 	void pauseMove(bool b = true)	{ _pauseM = b; }			//stop/start moving
 	void toggleMove()				{ _pauseM = !_pauseM; }		//toggle pause state
-	bool canMove() const            { return ((_xVel || _yVel) && (_xDir || _yDir)); }
-	bool isMoving() const       	{ return !(_x == _xEnd && _y == _yEnd); }	//has it reached end point yet
+	bool canMove() const            { return (((int)_xVel || (int)_yVel) && (_xDir || _yDir)); }
+	bool isMoving() const       	{ return !((int)_x == _xEnd && (int)_y == _yEnd); }	//has it reached end point yet
 	int  getXEnd() const            { return _xEnd; }
 	int  getYEnd() const            { return _yEnd; }
 

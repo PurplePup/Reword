@@ -114,7 +114,7 @@ ImageAnim& ImageAnim::operator=(const ImageAnim &ia)
         this->_frameCustom = ia._frameCustom;
     }
     return *this;
-};
+}
 
 //Code constructing an ImageAnim without an image can call this to pass in a resource image
 //and apply all setup required before use.

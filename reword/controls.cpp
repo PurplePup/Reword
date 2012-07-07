@@ -71,7 +71,7 @@ Sprite * Controls::getControlSprite(int id)
 //init the level/screen
 void Controls::init(Input * /*input*/)
 {
-};
+}
 // drawing operation
 void Controls::render(Screen* s)
 {
@@ -81,7 +81,7 @@ void Controls::render(Screen* s)
     {
         it->render(s);
     }
-};
+}
 // other processing
 void Controls::work(Input* input, float speedFactor)
 {
@@ -91,12 +91,12 @@ void Controls::work(Input* input, float speedFactor)
     {
         it->work(input, speedFactor);
     }
-};
+}
 // notification of button/input state change
 bool Controls::button(Input* /*input*/, ppkey::eButtonType /*b*/)
 {
     return false;
-};
+}
 
 // screen touch (press) of one of the controls?
 int Controls::touched(const Point &pt)

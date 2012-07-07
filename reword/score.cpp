@@ -216,40 +216,40 @@ void Score::save(const std::string &scorefile)
 	}
 }
 
-void Score::setCurrInits(std::string inits)
+void Score::setCurrInits(std::string newInits)
 {
 	//only use first 3 chars and make sure 4th is NULL
-    if (inits.empty())
-        inits = "AAA";
-	memcpy(&_curr.inits, inits.c_str(), 3);
+    if (newInits.empty())
+        newInits = "AAA";
+	memcpy(&_curr.inits, newInits.c_str(), 3);
 	_curr.inits[3] = '\0';
 
 }
 //set number of words to a value
-void Score::setCurrWords(unsigned int words)
+void Score::setCurrWords(unsigned int newWords)
 {
-	 _curr.words = words;
+	 _curr.words = newWords;
 }
 //add to words
-unsigned int Score::addCurrWords(unsigned int words)
+unsigned int Score::addCurrWords(unsigned int newWords)
 {
-	return _curr.words += words;
+	return _curr.words += newWords;
 }
 //set score to a value
-void Score::setCurrScore(unsigned int score)
+void Score::setCurrScore(unsigned int newScore)
 {
-	 _curr.score = score;
+	 _curr.score = newScore;
 }
 //add to score
-unsigned int Score::addCurrScore(unsigned int score)
+unsigned int Score::addCurrScore(unsigned int newScore)
 {
-	return _curr.score += score;
+	return _curr.score += newScore;
 }
 //set the current fastest value if it actually is faster, otherwise return false
-bool Score::setCurrFastest(unsigned int fastest)
+bool Score::setCurrFastest(unsigned int newFastest)
 {
-	if (_curr.fastest && (fastest >= _curr.fastest)) return false;
-	_curr.fastest = fastest;
+	if (_curr.fastest && (newFastest >= _curr.fastest)) return false;
+	_curr.fastest = newFastest;
 	return true;
 }
 void Score::resetCurr()
@@ -286,7 +286,7 @@ e.g.
 
 //move everything at and below the new hi sore pos down
 //and drop off the last entry (9)
-void Score::insert(int mode, int diff, int level, HiScoreEntry &curr)
+void Score::insert(int mode, int diff, int level, HiScoreEntry &scoreEntry)
 {
 	HiScoreLevels *pScore = getLevel(mode, diff);
 	int item;
@@ -295,7 +295,7 @@ void Score::insert(int mode, int diff, int level, HiScoreEntry &curr)
 				&pScore->level[item],	//from [9], etc etc
 				sizeof(HiScoreEntry));
 	//copy "curr" inits, score and words to correct hi score table
-	memcpy(&pScore->level[level], &curr, sizeof(HiScoreEntry));
+	memcpy(&pScore->level[level], &scoreEntry, sizeof(HiScoreEntry));
 }
 
 std::string Score::inits(int mode, int diff, int level)
@@ -318,9 +318,9 @@ unsigned int Score::fastest(int mode, int diff, int level)
 	return getLevel(mode, diff)->level[level].fastest;
 }
 
-void Score::setCurr(HiScoreEntry &curr)
+void Score::setCurr(HiScoreEntry &newCurr)
 {
-	_curr = curr;
+	_curr = newCurr;
 }
 
 //return a pointer to the correct array depending on mode and difficulty level

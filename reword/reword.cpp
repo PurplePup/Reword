@@ -74,9 +74,18 @@ Licence:		This program is free software; you can redistribute it and/or modify
 */
 ////////////////////////////////////////////////////////////////////
 
-#include "stdio.h"
+#include <stdio.h>  /* defines FILENAME_MAX */
+#ifdef WINDOWS
+    #include <direct.h>
+    #define GetCurrentDir _getcwd
+#else
+    #include <unistd.h>
+    #define GetCurrentDir getcwd
+ #endif
+
 #include <string>
 #include <iostream>
+
 #include "SDL.h"		//include for SDLMain to be defined (as main)
 
 #include "global.h"
@@ -85,6 +94,15 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 int main(int argc, char* argv[]) // <- this must match exactly, since SDL rewrites it
 {
+    //first off print the curr executable and working dir for debugging
+    char cCurrentPath[FILENAME_MAX];
+    if (!GetCurrentDir(cCurrentPath, sizeof(cCurrentPath) / sizeof(char)))
+        memcpy(cCurrentPath, "unknown", 7);
+    cCurrentPath[sizeof(cCurrentPath) - 1] = '\0'; /* not really required */
+    std::cout << "Executable Dir: " << argv[0] << std::endl;
+    std::cout << "Current Working Dir: " << cCurrentPath << std::endl;
+    std::cout << "Trying to load data from: " << RES_BASE << std::endl;
+
 	bool bHelp = false;
     GameOptions options;
     options.load(); //defaults

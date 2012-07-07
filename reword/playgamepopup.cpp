@@ -191,6 +191,7 @@ bool PlayGamePopup::button(Input *input, ppkey::eButtonType b)
 		break;
 	case ppkey::CLICK:
 	case ppkey::B:
+	case ppkey::X:
 		if (input->isPressed(b))
 			choose();
 		break;

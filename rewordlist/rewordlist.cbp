@@ -11,8 +11,9 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters="./bin/Debug/test.dict.xdxf -s" />
+				<Option parameters="-x -s /home/ajm/dev/src/reword_dictionaries/_test/full_wordlist_en-GB-oed-wlist.txt /home/ajm/dev/src/reword_dictionaries/_test/oxford_dict.xdxf" />
 				<Compiler>
+					<Add option="-Wextra" />
 					<Add option="-g" />
 				</Compiler>
 				<Linker>

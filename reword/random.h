@@ -18,19 +18,19 @@
 
 class CRandom {
    // DATA
-   unsigned int             rseed;
-   unsigned long mt[CMATH_N];       /* the array for the state vector */
-   int mti;                 /* mti==N+1 means mt[N] is not initialized */
+   unsigned int     rseed;
+   unsigned long    mt[CMATH_N];       /* the array for the state vector */
+   int              mti;               /* mti==N+1 means mt[N] is not initialized */
 
 
    // FUNCTIONS
 public:
    CRandom(void);
 
-   unsigned int     Random( unsigned int n );
-   void   SetRandomSeed(unsigned int n);
-   unsigned int     GetRandomSeed(void);
-   void   Randomize(void);
+   unsigned int Random(unsigned int n);
+   void         SetRandomSeed(unsigned int n);
+   unsigned int GetRandomSeed(void);
+   void         Randomize(void);
 };
 
 #endif // __RANDOM_H__

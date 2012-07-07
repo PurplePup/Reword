@@ -96,7 +96,7 @@ Sprite& Sprite::operator=(const Sprite &s)
         this->_touchable = s._touchable;
     }
     return *this;
-};
+}
 
 void Sprite::setPos(float x, float y)
 {
@@ -319,7 +319,6 @@ void Sprite::calcWaypoints(int x1, int y1, int x2, int y2)
 		dy <<= 1;
 		e = dy - dx;
 		dx <<= 1;
-//		while (x1 != x2)
 		while (((inx>0)?(x1<x2):(x1>x2)))
 		{
 			Point point(x1,y1);
@@ -338,7 +337,6 @@ void Sprite::calcWaypoints(int x1, int y1, int x2, int y2)
 		dx <<= 1;
 		e = dx - dy;
 		dy <<= 1;
-//		while (y1 != y2)
 		while (((iny>0)?(y1<y2):(y1>y2)))
 		{
 			Point point(x1,y1);
@@ -362,8 +360,7 @@ void Sprite::calcWaypoints(int x1, int y1, int x2, int y2)
 int Sprite::calcDistance(int x1, int y1, int x2, int y2)
 {
 	float dx = x2 - x1;
-	float dy = y2 - y1
-;
+	float dy = y2 - y1;
 	float distance=sqrt(dx*dx + dy*dy);
 
 	return abs((int)round(distance));
@@ -396,8 +393,8 @@ void Sprite::calcXYSteps(int frames, int x1, int y1, int x2, int y2, float &delt
 //depending on the time required to move the sprite to its destination
 Uint32 Sprite::calcXYRate(Uint32 time, int x1, int y1, int x2, int y2, float &deltaX, float &deltaY)
 {
-	float dist = calcDistance(x1,y1, x2,y2);
-	float rate = (dist)?(time / dist):time;
+	int dist = calcDistance(x1,y1, x2,y2);
+	float rate = (dist)?(time / (float)dist):time;
 	float dx = abs(x2 - x1);
 	float dy = abs(y2 - y1);
 	if (rate)

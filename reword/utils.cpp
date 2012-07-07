@@ -41,6 +41,37 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <SDL_image.h>	//for IMG_ functions
 
 
+
+RandInt::RandInt()
+{
+//SDL.h may not have been included
+#ifdef _SDL_H
+    #ifdef WIN32
+    #pragma message("RandInt: Using SDL_GetTicks() to seed random\n")
+    #endif
+    setSeed(SDL_GetTicks());
+#else
+    #ifdef WIN32
+    #pragma message("RandInt: Using ctime to seed random\n")
+    #endif
+#endif
+    m_rnd.Randomize();	//uses ctime to seed
+}	//incase setSeed not called
+
+void RandInt::setSeed(unsigned int seed) {
+	m_rnd.SetRandomSeed(seed);
+	m_rnd.Randomize();
+}
+int RandInt::random(int limit)
+{
+	return (int)m_rnd.Random(limit);
+}
+int RandInt::operator() (int limit)	//for sorting calls
+{
+	return (int)m_rnd.Random(limit);
+}
+
+
 /*
 float Utils::round( float x, int places )
 {
@@ -166,6 +197,8 @@ void blit_surface(SDL_Surface* source, SDL_Rect* srcRect, SDL_Surface* dest, int
 //	//do it
 //	SDL_BlitSurface( source, srcRect, _surface, &_r );
 //}
+
+
 
 }	//namespace ppg
 

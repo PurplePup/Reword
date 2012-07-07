@@ -47,7 +47,7 @@ public:
 	Uint32 tileW() const        { return _tileW; }
 	Uint32 tileH() const        { return _tileH; }
 	Uint32 tileCount()	const   { return _tileCount; }
-    void setTileCount(Uint32 nTiles, eTileDir tileDir = TILE_HORIZ);
+    void setTileCount(Uint32 nTiles, eTileDir tileDirection = TILE_HORIZ);
 
 #if _DEBUG
     std::string _dbgName;
@@ -55,7 +55,7 @@ public:
 
 protected:
 	void cleanUp();
-	bool setTileSize(Uint32 w = 0, Uint32 h = 0, eTileDir tileDir = TILE_HORIZ);
+	bool setTileSize(Uint32 w = 0, Uint32 h = 0, eTileDir tileDirection = TILE_HORIZ);
 
 private:
 	bool    _init;

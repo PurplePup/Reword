@@ -137,7 +137,8 @@ bool Words::splitDictLine(std::string text, DictWord &dictword)
 //return true if word passed in is not useable in the game due to size or content
 bool Words::rejectWord(const std::string &strWord)
 {
-	const size_t found = strWord.find_first_of("\' .-;,");
+    const size_t found=strWord.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    //const size_t found = strWord.find_first_of("\' .-;,");
 	if (found!=std::string::npos)  //ignore words with apostrophies or whitespace
 	{
 		if (_bDebug) std::cout << "DEBUG: Ignore (\') " << strWord.c_str() << std::endl;
@@ -248,11 +249,14 @@ bool Words::load(const std::string &wordFile, unsigned int rndSeed, unsigned int
 		if (rndSeed) g_rndSeed = rndSeed; //srand(rndSeed);
 		std::random_shuffle(_vecTarget.begin(), _vecTarget.end(), pwrandom);
 
-/*		//output the start of the sorted list to check order
-		std::cout << "DEBUG: rnd seed = " << rndSeed << std::endl;
-		std::cout << "List first 20..." << std::endl;
-		std::copy(_vecTarget.begin(), _vecTarget.begin()+20, std::ostream_iterator<std::string>(std::cout, "\n"));	//list first 20
-*/
+        if (_bDebug)
+        {
+            //output the start of the sorted list to check order
+            std::cout << "DEBUG: rnd seed = " << rndSeed << std::endl;
+            std::cout << "List first 20 words ... ";
+            std::copy(_vecTarget.begin(), _vecTarget.begin()+20, std::ostream_iterator<std::string>(std::cout, ", "));	//list first 20
+            std::cout << std::endl;
+        }
 //#endif
 		//set the 6word iterator to start (or a specific position)
 		if (startAtWord >=  (unsigned int)_vecTarget.size())

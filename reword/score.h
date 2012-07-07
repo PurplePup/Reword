@@ -69,16 +69,16 @@ public:
 	void save(const std::string &scorefile = "");
 
 	int isHiScore(int mode, int diffLevel);
-	void insert(int mode, int diff, int pos, HiScoreEntry &curr);
+	void insert(int mode, int diff, int pos, HiScoreEntry &scoreEntry);
 
 	//current score accessors
-	void setCurr(HiScoreEntry &curr);
-	void setCurrInits(std::string inits);
-	void setCurrWords(unsigned int words);
-	unsigned int addCurrWords(unsigned int words);
-	void setCurrScore(unsigned int score);
-	unsigned int addCurrScore(unsigned int score);
-	bool setCurrFastest(unsigned int fastest);
+	void setCurr(HiScoreEntry &newCurr);
+	void setCurrInits(std::string newInits);
+	void setCurrWords(unsigned int newWords);
+	unsigned int addCurrWords(unsigned int newWords);
+	void setCurrScore(unsigned int newScore);
+	unsigned int addCurrScore(unsigned int newScore);
+	bool setCurrFastest(unsigned int newFastest);
 	void resetCurr();
 
 	HiScoreEntry curr() {return _curr;}
@@ -93,7 +93,7 @@ public:
 	unsigned int score(int mode, int diff, int level);
 	unsigned int fastest(int mode, int diff, int level);
 	unsigned int seed() { return _seed; }
-	void setSeed(unsigned int seed) { _seed = seed; }
+	void setSeed(unsigned int newSeed) { _seed = newSeed; }
 
 protected:
 	HiScoreLevels * getLevel(int mode, int diff);

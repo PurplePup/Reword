@@ -238,28 +238,28 @@ SDL_Rect Image::tileRect(Uint32 tile)
 }
 
 //try to calc tile sizes depending on number of tiles and the direction of the repeating tiles
-void Image::setTileCount(Uint32 nTiles, eTileDir tileDir /*= TILE_HORIZ*/)
+void Image::setTileCount(Uint32 nTiles, eTileDir tileDirection /*= TILE_HORIZ*/)
 {
-    if (tileDir == TILE_HORIZ)
-        setTileSize( (Uint32)(width() / ((nTiles>0)?nTiles:1)), 0, tileDir );	//w=pixels/frames, h=default full height
+    if (tileDirection == TILE_HORIZ)
+        setTileSize( (Uint32)(width() / ((nTiles>0)?nTiles:1)), 0, tileDirection );	//w=pixels/frames, h=default full height
     else
-        setTileSize( 0, (Uint32)(height() / ((nTiles>0)?nTiles:1)), tileDir );	//h=pixels/frames, w=default full width
+        setTileSize( 0, (Uint32)(height() / ((nTiles>0)?nTiles:1)), tileDirection );	//h=pixels/frames, w=default full width
 }
 
 //set the predefined size of a tile
 //Currently tiles in images should be placed horizontally [0,1,2,3,4,5...]
-bool Image::setTileSize(Uint32 w /*= 0*/, Uint32 h /*= 0*/, eTileDir tileDir /*= TILE_HORIZ*/)
+bool Image::setTileSize(Uint32 w /*= 0*/, Uint32 h /*= 0*/, eTileDir tileDirection /*= TILE_HORIZ*/)
 {
 	if (!initDone()) return false; //can't set dimentions of no image
 
 	if ((h < 1) || (h > height())) h = height();	//default to height of image
 	if ((w < 1) || (w > width())) w = width();	//default to whole width of image
 
-    _tileDir = tileDir;
+    _tileDir = tileDirection;
 	_tileW = w;
 	_tileH = h;
 
-    if (tileDir == TILE_HORIZ)
+    if (_tileDir == TILE_HORIZ)
     {
         _tileHOffset = 0;
         _tileWOffset = _tileW;

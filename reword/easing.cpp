@@ -97,7 +97,7 @@ float Easing::work()
 
 float Easing::easeLinear(Ease e)
 {
-    return 0;   //not supported yet
+    return (e.c*e.t/e.d) + e.b;
 }
 
 float Easing::easeOutBounce(Ease e)

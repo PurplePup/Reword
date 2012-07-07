@@ -62,13 +62,6 @@ Words2::~Words2()
 	xdxfCloseDict();
 }
 
-bool Words2::empty()
-{
-	int count = 0;
-	for (int i=SHORTW_MIN; i<=TARGET_MAX; count += (int)_wordSet[i++].size());
-	return count == 0;
-}
-
 bool Words2::xdxfOpenDict(const std::string &dictFile)
 {
 	if (!dictFile.length()) return false;
@@ -168,7 +161,7 @@ TiXmlElement* Words2::xdxfNextWord(TiXmlElement* ar, std::string &word, std::str
 //Needs 2 processes to build valid 6to8 letter words first, then those 6to8 letter words
 //with shorter letter words within them that will be saved as the result file.
 //Don't reset values before starting as .include files may have been loaded
-bool Words2::xdxfBuildDict(const std::string& dictFile, bool bUpdateDef)
+bool Words2::xdxfBuildDict(const std::string& dictFile, bool bUpdateDef, bool bXdxfDefOnly)
 {
 	//scan any xdxf format dictionary file and assign the description to the
 	//same word in our list of acceptable words for the game.
@@ -176,6 +169,7 @@ bool Words2::xdxfBuildDict(const std::string& dictFile, bool bUpdateDef)
 	{
 		//first, load all words into memory
 
+        long lDefsUpdated(0);
 		tWordSet dictSet;	//to remove duplicates... discarded after load()
 		std::pair<tWordSet::const_iterator, bool> dictPair;
 		DictWord dictWord;
@@ -190,6 +184,22 @@ bool Words2::xdxfBuildDict(const std::string& dictFile, bool bUpdateDef)
 				_stats._total++;
 				pptxt::makeAlpha(word);			//strip any non a-z chars
 				pptxt::makeUpper(word);			//force to UPPER case
+
+                //if we're only updating existing words, with definitions from the xdxf
+                //dictionary, don't add words just find them and poss update the definition.
+                if (bXdxfDefOnly)
+                {
+                    tWordMap::iterator it = _mapAll.find(word);
+                    if (it != _mapAll.end())    //found?
+                    {
+                        if (bUpdateDef || it->second._description.empty())
+                        {
+                            it->second._description = def;
+                            ++lDefsUpdated;
+                        }
+                    }
+                    continue;
+                }
 
 				if (rejectWord(word))
 				{
@@ -208,20 +218,12 @@ bool Words2::xdxfBuildDict(const std::string& dictFile, bool bUpdateDef)
 				}
 
 				//add/update word in dict
-//				tWordMap::iterator it_word = _mapAll.find(word);
-//				const bool bExists = (it_word != _mapAll.end());
 				const bool bExists = (_mapAll.find(word) != _mapAll.end());
 
 				dictWord._word = word;
 				dictWord._description = def;
                 dictWord._level = 0;    //level only defined in .txt files, not .xdxf
 
-//				if (bExists)
-//                {
-//                    if (it_word->second._level != 0)
-//                    dictWord._level = it_word->second._level;  //may have been loaded in a reword.txt type fileloaded first
-//                }
-//
 				_mapAll[word] = dictWord;			//so insert/amend it in the ALL word map
 				if (!bExists && (word.length() >= TARGET_MIN && word.length() <= TARGET_MAX))
                 {
@@ -230,19 +232,12 @@ bool Words2::xdxfBuildDict(const std::string& dictFile, bool bUpdateDef)
                 }
 			}
 		}
-/*		std::cout << "Words loaded : " << _mapAll.size() << std::endl;
-		std::cout << "Target words loaded : " << _vecTarget.size() << std::endl;
 
-		//now again, to match 3, 4, 5 etc, letter words
-		addWordsToSets();
+		if (bXdxfDefOnly)
+		{
+            std::cout << "Updated " << lDefsUpdated << " words from Xdxf file " << dictFile << std::endl;
+		}
 
-		for (int i=SHORTW_MIN; i<=TARGET_MAX; ++i)
-			std::cout << i << " letter words : found " << _wordSet[i].size() << std::endl;
-
-		std::cout << std::endl << "From Xdxf dict : " << dictFile << std::endl;
-		std::cout << std::endl << "      Loaded   : " << _total << " words" << std::endl;
-		std::cout << std::endl << "      Rejected : " << _ignored << " words" << std::endl;
-*/
 		return true;
 	}
 	return false;
@@ -356,7 +351,6 @@ int Words2::calcScrabbleSkillLevel(const std::string &word)
     if (_bDebug)
         std::cout << "Scrabble: '" << word << "' -> '" << out << "' score : " << iTotal << " = " << score << std::endl;
 
-//    return iTotal; //score;
     return score;
 }
 
@@ -430,6 +424,7 @@ bool Words2::save(std::string outFile)
 		fclose(fp);
 
 		std::cout << std::endl << "Saved: " << itotal << " total filtered words " << std::endl;
+		std::cout << std::endl << "Rejected: " << _stats._ignored << " total filtered words " << std::endl;
 
         if (_bAutoSkillUpd)
         {

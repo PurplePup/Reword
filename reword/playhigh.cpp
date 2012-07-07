@@ -340,6 +340,7 @@ bool PlayHigh::button(Input *input, ppkey::eButtonType b)
 		if (input->isPressed(b))
 			moveRight();
 		break;
+    case ppkey::X:
 	case ppkey::CLICK:
 	case ppkey::B:
 		if (input->isPressed(b))

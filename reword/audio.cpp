@@ -391,7 +391,7 @@ void Audio::startTrack(const std::string &trackName)
 		if(_musicTrack)
 		{
 			Mix_PlayMusic(_musicTrack, 1);
-			_bPlayingTrack = Mix_PlayingMusic();	//actualy playing?
+			_bPlayingTrack = isActuallyPlayingMusic();	//actualy playing?
 		}
 		else
 			printf("Failed to start track %s (%s)\n", newTrack.c_str(), Mix_GetError());

@@ -71,7 +71,7 @@ void PlayMenu::init(Input *input)
 	input->setRepeat(ppkey::DOWN, 150, 300);
 
     tSharedImage &letters = Resource::image("roundel_letters.png");
-	_title.easeMoveFrom( 0, -(letters->height()*2), 1000, -40);
+	_title.easeMoveFrom( 0, -(letters->height()*2), 1000, -500);
 	_titleW.start(3000, 1000);
 
     _menubg = Resource::image("menubg.png");
@@ -93,7 +93,7 @@ void PlayMenu::init(Input *input)
 
     tSharedImage &let = Resource::image("roundel_kbd_letters.png");
 	_beta.setWord("BETA", let, Screen::width() - ((let->tileW()+2)*4), Screen::height() - let->tileH(), 2);
-	_beta.easeMoveFrom( 0, Screen::height(), 2200, -300, Easing::EASE_OUTQUART);
+	_beta.easeMoveFrom( 0, Screen::height(), 800, -1000, Easing::EASE_OUTQUART);
 
 	//need to set the _init and _running flags
 	_init = true;
@@ -246,6 +246,7 @@ bool PlayMenu::button(Input *input, ppkey::eButtonType b)
 	case ppkey::CLICK:
 	case ppkey::START:
 	case ppkey::B:
+	case ppkey::X:
 		if (input->isPressed(b) && _itemList[_item]._enabled)
 			choose(_itemList[_item]);
 		break;

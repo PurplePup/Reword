@@ -63,13 +63,13 @@ Control::Control(t_pControl &pCtrl, int id, unsigned int group,
 // init the control
 void Control::init(Input * /*input*/)
 {
-};
+}
 
 // drawing operation
 void Control::render(Screen* s)
 {
     _pCtrl->draw(s);
-};
+}
 
 // other processing
 void Control::work(Input* input, float speedFactor)
@@ -77,13 +77,13 @@ void Control::work(Input* input, float speedFactor)
     (void)(input);
     (void)(speedFactor);
     _pCtrl->work();
-};
+}
 
 // notification of button/input state change
 bool Control::button(Input* /*input*/, ppkey::eButtonType /*b*/)
 {
     return false;
-};
+}
 
 // Set to idle frame (last in state frames) for curr state
 // [disabled][active][fade][fade][idle][active][fade][fade][idle]...[etc]

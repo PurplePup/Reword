@@ -915,6 +915,7 @@ bool PlayGame::button_end(Input* input, ppkey::eButtonType b)
 	//in end state, not waiting so allow button use...
 	switch (b)
 	{
+	case ppkey::X:
 	case ppkey::B:
 		if (input->isPressed(b))
 			doMoveOn();

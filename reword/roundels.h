@@ -35,8 +35,8 @@ public:
 	void setWord(const std::string &wrd, tSharedImage &letters, int x = 0, int y = 0, int gap = 0, bool bHoriz = true);
 	void setWordCenterHoriz(const std::string &wrd, tSharedImage &letters, int y = 0, int gap =0);
 	void setWordCenterVert(const std::string &wrd, tSharedImage &letters, int x = 0, int gap =0);
-	void startMoveFrom(int deltaX, int deltaY, Uint32 rate, Uint32 delay, int xVel, int yVel, Sprite::eSprite type = Sprite::SPR_NONE);
-    void easeMoveFrom(int deltaX, int deltaY, Uint32 duration, Uint32 delay, Easing::eType ease = Easing::EASE_OUTBOUNCE);
+	void startMoveFrom(int deltaX, int deltaY, Uint32 rate, Sint32 delay, int xVel, int yVel, Sprite::eSprite type = Sprite::SPR_NONE);
+    void easeMoveFrom(int deltaX, int deltaY, Uint32 duration, Sint32 delay, Easing::eType ease = Easing::EASE_OUTBOUNCE);
 	void setBottomPos(int xPosBot, int yPosBot);
 	Point getBottomPos();
 	void setBottomMax(int iMax);

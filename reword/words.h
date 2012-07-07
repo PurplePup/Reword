@@ -16,7 +16,6 @@
 #include "memory.h"
 
 #include "states.h"
-#include "random.h"
 
 //SDL header for ticks - now NOT included here so we can use with or without SDL libraries
 //include SDL.h in your own code before including words.h if you want to use SDL_GetTicks()
@@ -83,34 +82,6 @@ typedef std::map<std::string, bool> tWordsInTarget;	//map of words during a leve
 typedef std::set<std::string> tWordSet;				//for unique set of words
 typedef std::vector<std::string> tWordVect;
 
-/*
-class RandInt
-{
-public:
-	RandInt() {
-#ifdef _SDL_H
-#ifdef WIN32
-#pragma message("words.h: Using SDL_GetTicks() to seed random\n")
-#endif
-		setSeed(SDL_GetTicks());
-#else
-#ifdef WIN32
-#pragma message("words.h: Using ctime to seed random\n")
-#endif
-		m_rnd.Randomize();	//uses ctime to seed
-#endif
-	}	//incase setSeed not called
-	void setSeed(unsigned int seed) {
-		m_rnd.SetRandomSeed(seed);
-		m_rnd.Randomize();
-	}
-	int operator() (int limit)
-	{
-		return (int)m_rnd.Random(limit);
-	}
-	CRandom	m_rnd;					//random number generator class
-};
-*/
 
 struct Stats
 {
