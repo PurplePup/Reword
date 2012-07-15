@@ -75,7 +75,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 ////////////////////////////////////////////////////////////////////
 
 #include <stdio.h>  /* defines FILENAME_MAX */
-#ifdef WINDOWS
+#ifdef WIN32
     #include <direct.h>
     #define GetCurrentDir _getcwd
 #else

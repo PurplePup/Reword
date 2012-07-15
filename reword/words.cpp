@@ -155,22 +155,6 @@ bool Words::rejectWord(const std::string &strWord)
 }
 
 
-//randomizer fn
-//ptrdiff_t wrandom (ptrdiff_t i) { return rand()%i;}
-
-//using restartable rnd function to re-generate same
-//random sequence if given same seed again (for resume games)
-unsigned int g_rndSeed  = 1234;
-
-#ifdef WIN32
-ptrdiff_t wrandom (ptrdiff_t i) { return rand_s(&g_rndSeed)%i;}
-#else
-std::ptrdiff_t wrandom (std::ptrdiff_t i) { return rand_r(&g_rndSeed)%i;}
-#endif
-// pointer object to it:
-std::ptrdiff_t (*pwrandom)(std::ptrdiff_t) = wrandom;
-
-
 //call with default param (blank wordFile string) to reload previous file
 //Load all words from wordlist file. The nextWord() function locates next
 //valid word and all its shortedr words.
@@ -240,14 +224,10 @@ bool Words::load(const std::string &wordFile, unsigned int rndSeed, unsigned int
 
 		if (_bDebug) std::cout << "Ignored: " << _stats._ignored << std::endl;
 
-//#ifndef _DEBUG	//curr only shuffle in release version so we can test things in debug
-		//randomize the 6 letter vector to be the order we get each new word in
-//		if (rndSeed) g_randInt.setSeed(rndSeed);
-//		std::random_shuffle(_vect6.begin(), _vect6.end(), g_randInt);
-
-		// random generator function:
-		if (rndSeed) g_rndSeed = rndSeed; //srand(rndSeed);
-		std::random_shuffle(_vecTarget.begin(), _vecTarget.end(), pwrandom);
+        //using restartable rnd function to try re-generate same
+        //random sequence if given same seed again (for resume games)
+		if (rndSeed) srand(rndSeed);
+		std::random_shuffle(_vecTarget.begin(), _vecTarget.end());
 
         if (_bDebug)
         {
@@ -257,7 +237,7 @@ bool Words::load(const std::string &wordFile, unsigned int rndSeed, unsigned int
             std::copy(_vecTarget.begin(), _vecTarget.begin()+20, std::ostream_iterator<std::string>(std::cout, ", "));	//list first 20
             std::cout << std::endl;
         }
-//#endif
+
 		//set the 6word iterator to start (or a specific position)
 		if (startAtWord >=  (unsigned int)_vecTarget.size())
 			startAtWord = 0;	//invalid for size of word llist so just reset to 0

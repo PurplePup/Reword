@@ -788,13 +788,10 @@ bool PlayGame::button(Input* input, ppkey::eButtonType b)
 	case ppkey::SELECT:
 		if (input->isPressed(b))
 		{
-//            if (_state == PG_END)
-//            {
-//                doMoveOn();
-//            }
-//            else
             if (_state != PG_PAUSE)
             {
+                _controlsPlay.forceFade(CTRLID_MENU);
+
                 if (_pPopup)
                     stopPopup();
                 else
@@ -822,7 +819,7 @@ bool PlayGame::button(Input* input, ppkey::eButtonType b)
 
     if (_play)
     {
-        //dictionary screen etc
+        //other 'embedded' screen, eg. dictionary screen etc
         return _play->button(input, b);
     }
 
@@ -862,14 +859,17 @@ bool PlayGame::button_play(Input* input, ppkey::eButtonType b)
 		if (input->isPressed(b)) _round.cursorDown(); //will only go down if letters exist
 		break;
 	case ppkey::L:  //left shoulder
-		if (input->isPressed(b)) commandWordToLast();
-		break;
 	case ppkey::R:  //right shoulder
-		if (input->isPressed(b)) commandWordToLast();
+		if (input->isPressed(b))
+		{
+		    _controlsPlay.forceFade(CTRLID_LAST);
+		    commandWordToLast();
+		}
 		break;
 	case ppkey::A:
 		if (input->isPressed(b))
 		{
+		    _controlsPlay.forceFade(CTRLID_SHUFFLE);
 			commandJumbleWord();
 		}
 		break;
@@ -894,10 +894,18 @@ bool PlayGame::button_play(Input* input, ppkey::eButtonType b)
 		if (input->isPressed(b)) doPauseGame();
 		break;
 	case ppkey::Y:
-		if (input->isPressed(b)) commandClearAllToTop();
+		if (input->isPressed(b))
+		{
+		    _controlsPlay.forceFade(CTRLID_TOTOP);
+		    commandClearAllToTop();
+		}
 		break;
 	case ppkey::X:
-		if (input->isPressed(b)) commandTryWord();
+		if (input->isPressed(b))
+		{
+		    _controlsPlay.forceFade(CTRLID_TRYWORD);
+		    commandTryWord();
+		}
 		break;
 
 	default:
@@ -918,7 +926,13 @@ bool PlayGame::button_end(Input* input, ppkey::eButtonType b)
 	case ppkey::X:
 	case ppkey::B:
 		if (input->isPressed(b))
+		{
 			doMoveOn();
+
+		    //would need to wait for forced fade to end before screen exit to see any effect
+		    //on screen, so don't bother at the moment.
+		    //_controlsPlay.forceFade(_running?CTRLID_NEXT:CTRLID_EXIT);
+		}
 		break;
 	case ppkey::LEFT:
 		if (input->isPressed(b))
@@ -1895,6 +1909,7 @@ void PlayGame::tryWord()
 	{
 		if (_longestWordLen == wordlen)
 		{
+			_gd._score.addCurrWords(1);
 			ppg::pushSDL_Event(USER_EV_END_COUNTDOWN);	//pushes end of level
 			return;
 		}

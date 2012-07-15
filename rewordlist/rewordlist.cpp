@@ -78,9 +78,11 @@ int main(int argc, char* argv[])
 	bool bList(false), bDebug(false), bForceDef(false), bXdxfDefOnly(false), bAutoSkillUpd(false);
 	bool bHelp(true), bHelpForce(false);
 	std::string::size_type pos;
-	std::string includeList, excludeList;
 	tWordSet xdxfFiles;
 	tWordSet txtFiles;
+	tWordSet txtInclude;
+	tWordSet txtExclude;
+	std::string outFile("rewordlist.txt");  //default
 
 	//v. simple loop to load cmd line args - in any order,
 	//but must be seperately 'dashed' ie. -l -f not -lf
@@ -117,6 +119,11 @@ int main(int argc, char* argv[])
             bAutoSkillUpd = true;    //update word scrabble skill value on any word list input
             continue;
         }
+		if ("-o" == arg.substr(0,2))    //e.g. "-oOutputFile.txt"
+        {
+            outFile = arg.substr(2);
+            continue;
+        }
 		pos = arg.find_last_of(".");		//find the last period for file extension
 		if (pos == string::npos) continue;	//unknown (doesnt end in a file extension)
 		std::string ext(arg.substr(pos));
@@ -131,26 +138,26 @@ int main(int argc, char* argv[])
 		//allow multiple input .txt files
 		if (".txt" == ext)
 		{
-			if (strcasecmp(arg.c_str(), "rewordlist.txt") == 0)
+			if (strcasecmp(arg.c_str(), outFile.c_str()) == 0)
 			{
-				std::cout << std::endl << "You cannot use the file rewordlist.txt as an input file" <<  std::endl;
+				std::cout << std::endl << outFile << " cannot be used as an input and output file" <<  std::endl;
 				exit(0);
 			}
 			txtFiles.insert(arg);
 			bHelp = false;	//valid input
 			continue;
 		}
-		//only allow a single .include file
+		//allow multiple .include file
 		if (".include" == ext)
 		{
-			includeList = arg;
+			txtInclude.insert(arg);
 			bHelp = false;	//valid input
 			continue;
 		}
-		//only allow a single .exclude file
+		//allow multiple .exclude file
 		if (".exclude" == ext)
 		{
-			excludeList = arg;
+			txtExclude.insert(arg);
 			bHelp = false;	//valid input
 			continue;
 		}
@@ -168,17 +175,19 @@ int main(int argc, char* argv[])
 		finalWords.setDebug(bDebug);
 		finalWords.setAutoSkillUpd(bAutoSkillUpd);
 
-		std::string outFile("rewordlist.txt");
-
 		bool bSave = false;
 
-		if (includeList.length() > 0)
+		if (!txtInclude.empty())
 		{
-			std::cout << "Adding include list file '" << includeList <<  "'" << std::endl;
-			Words2 includeWords(includeList);
-			int iOrig = finalWords.size();
-			finalWords += includeWords;	//add any forced include words
-			std::cout << "Added " << finalWords.size() - iOrig <<  " words using " << includeList << std::endl;
+            std::cout << "Adding include list" << std::endl;
+			tWordSet::const_iterator it_txt = txtInclude.begin();
+			for ( ; it_txt != txtInclude.end(); ++it_txt)
+            {
+                Words2 includeWords(*it_txt);
+                int iOrig = finalWords.size();
+                finalWords += includeWords;	//add any forced include words
+                std::cout << "Included " << finalWords.size() - iOrig <<  " words from '" << *it_txt << "'" << std::endl;
+            }
 		}
 		if (!txtFiles.empty())
 		{
@@ -189,7 +198,7 @@ int main(int argc, char* argv[])
 			tWordSet::const_iterator it_txt = txtFiles.begin();
 			for ( ; it_txt != txtFiles.end(); ++it_txt)
 			{
-				std::cout << "Adding word list .txt file '" << *it_txt <<  "'" << std::endl;
+				std::cout << "Adding wordlist .txt file '" << *it_txt <<  "'" << std::endl;
 				Words2 txtWords;
 				if (txtWords.load(*it_txt))
 				{
@@ -231,14 +240,18 @@ int main(int argc, char* argv[])
 			}
 			std::cout << "Added " << finalWords.size() - iOrig <<  " words using xdxf dictionary files" << std::endl;
 		}
-        if (excludeList.length() > 0)
-        {
-            std::cout << "Removing words found in exclude list file '" << excludeList <<  "'" << std::endl;
-            Words2 excludeWords(excludeList);
-            int iOrig = finalWords.size();
-            finalWords -= excludeWords;	//remove any exclusion words
-            std::cout << "Removed " << finalWords.size() - iOrig <<  " words using " << excludeList << std::endl;
-        }
+		if (!txtExclude.empty())
+		{
+            std::cout << "Adding exclude list" << std::endl;
+			tWordSet::const_iterator it_txt = txtExclude.begin();
+			for ( ; it_txt != txtExclude.end(); ++it_txt)
+            {
+                Words2 includeWords(*it_txt);
+                int iOrig = finalWords.size();
+                finalWords -= includeWords;	//remove any forced exclude words
+                std::cout << "Excluded " << finalWords.size() - iOrig <<  " words from '" << *it_txt << "'" << std::endl;
+            }
+		}
 
         if (finalWords.size() == 0)
 		{

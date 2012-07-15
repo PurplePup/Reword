@@ -42,7 +42,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include <sstream>
 
-enum { CTRLGRP_SCROLL = 1,CTRLGRP_BUTTONS = 2 };
+enum { CTRLGRP_SCROLL = 1, CTRLGRP_BUTTONS = 2 };
 
 PlayInst::PlayInst(GameData &gd)  : _gd(gd)
 {

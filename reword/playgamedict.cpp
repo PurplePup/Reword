@@ -40,6 +40,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "audio.h"
 #include "platform.h"
 
+enum { CTRLGRP_SCROLL = 1, CTRLGRP_BUTTONS = 2 };
+
 PlayGameDict::PlayGameDict(GameData& gd, const std::string &strDictWord) :
     _gd(gd),
     _dictWord(strDictWord)
@@ -70,13 +72,15 @@ void PlayGameDict::init(Input *input)
     {
     t_pSharedSpr p(new Sprite(Resource::image("btn_round_scroll_up.png")));
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2);
-    Control c(p, CTRLID_SCROLL_UP, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
+    p->_sigEvent2.Connect(this, &PlayGameDict::ControlEvent);
+    Control c(p, CTRLID_SCROLL_UP, CTRLGRP_SCROLL, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsDict.add(c);
     }
     {
     t_pSharedSpr p(new Sprite(Resource::image("btn_round_scroll_down.png")));
     p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2+p->tileH()+6);
-    Control c(p, CTRLID_SCROLL_DOWN, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
+    p->_sigEvent2.Connect(this, &PlayGameDict::ControlEvent);
+    Control c(p, CTRLID_SCROLL_DOWN, CTRLGRP_SCROLL, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsDict.add(c);
     }
 
@@ -101,7 +105,7 @@ void PlayGameDict::init(Input *input)
     //[BACK] dictionary screen buttons - only shown in dict display
     t_pSharedSpr p(new Sprite(Resource::image("btn_square_back_small.png")));
     p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
-    Control c(p, CTRLID_BACK, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
+    Control c(p, CTRLID_BACK, CTRLGRP_BUTTONS, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsDict.add(c);
 
 	//calc number of lines available for displaying dictionary lines
@@ -109,6 +113,8 @@ void PlayGameDict::init(Input *input)
 	_lines = ((BG_LINE_BOT - BG_LINE_TOP - _gd._fntMed.height()) / _gd._fntClean.height()) - 1;
 
     _helpMsg = "Press " + Locator::input().keyDescription(ppkey::Y) + " to go back";
+
+    updateScrollButtons();
 
 	//need to set the _init and _running flags
 	_init = true;
@@ -126,7 +132,7 @@ void PlayGameDict::render(Screen* s)
 	_gd._fntClean.put_text(s, BG_LINE_TOP, "Definition:", GREY_COLOUR, true);
 
 	//draw the dictionary text here... previously split into vector string "lines"
-	int yy = BG_LINE_TOP + _gd._fntClean.height() +
+	int yy = BG_LINE_TOP + (_gd._fntClean.height()*2) +
 			(((int)_dictDef.size() > _lines)?0:(((_lines-(int)_dictDef.size())/2)*_gd._fntClean.height()));
 	std::vector<std::string>::const_iterator it = _dictDef.begin() + _dictLine;	//add offset
 	int lines = 0;
@@ -157,13 +163,7 @@ void PlayGameDict::work(Input* input, float speedFactor)
     if (input->repeat(ppkey::RIGHT)) button(input, ppkey::RIGHT);
 
 	_roundDict->work(input, speedFactor);
-
-    _controlsDict.showAllControls(true);
-    _controlsDict.showControl((_dictLine > 0), CTRLID_SCROLL_UP);
-    _controlsDict.showControl((_dictLine < (int)_dictDef.size()-_lines), CTRLID_SCROLL_DOWN);
-
     _controlsDict.work(input, speedFactor);
-
 }
 
 bool PlayGameDict::button(Input* input, ppkey::eButtonType b)
@@ -188,6 +188,8 @@ bool PlayGameDict::button(Input* input, ppkey::eButtonType b)
 
 	default:return false;
 	}
+
+    updateScrollButtons();
 	return true;
 }
 void PlayGameDict::scrollDictUp()
@@ -224,15 +226,37 @@ bool PlayGameDict::tap(const Point &pt)
     }
     else if (ctrl_id == CTRLID_SCROLL_UP)
     {
-		scrollDictUp();
+		scrollDictDown();
     }
     else if (ctrl_id == CTRLID_SCROLL_DOWN)
     {
-		scrollDictDown();
+		scrollDictUp();
     }
 
 
     return false;
+}
+
+void PlayGameDict::updateScrollButtons()
+{
+    const bool bShow = ((int)_dictDef.size()>_lines);
+    _controlsDict.showGroup(bShow, CTRLGRP_SCROLL);
+    if (bShow)
+    {
+        _controlsDict.enableControl((_dictLine > 0), CTRLID_SCROLL_UP);
+        _controlsDict.enableControl((_dictLine < (int)_dictDef.size()-_lines), CTRLID_SCROLL_DOWN);
+    }
+}
+
+//event signal from imageanim indicating end of animation
+void PlayGameDict::ControlEvent(int event, int ctrl_id)
+{
+    (void)(ctrl_id);    //unused
+
+    if (event == USER_EV_END_ANIMATION)
+    {
+        updateScrollButtons();
+    }
 }
 
 

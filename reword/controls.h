@@ -18,8 +18,8 @@ public:
     bool showControl(bool bShow, int id);
     void showGroup(bool bShow, unsigned int groupMask);
     void showAllControls(bool bShow = true, int exceptID = 0);
-
     bool enableControl(bool bEnable, int id);
+    bool forceFade(int id, bool bFlip = true); //manual 'press'
 
     //init the level/screen
     virtual void init(Input * input);

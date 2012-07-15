@@ -17,7 +17,7 @@
 //base data location depending on system
 #if defined(WIN32)
     #if defined(DEBUG)
-        #define RES_SYS_BASE	(std::string("../../reword/data/"))
+        #define RES_SYS_BASE	(std::string("../../reword/reword/data/"))
     #else
         #define RES_SYS_BASE	(std::string("../data/"))
     #endif
@@ -100,7 +100,7 @@
 #define FONT_BIG		34
 #define FONT_TINY		18
 #define FONT_CLEAN		22
-#define FONT_CLEAN_MAX	80
+#define FONT_CLEAN_MAX	75
 #define ROUNDEL_VEL		20
 #define BG_LINE_TOP		85
 #define BG_LINE_BOT		415
@@ -143,7 +143,7 @@
 #define FONT_BIG		34
 #define FONT_TINY		14
 #define FONT_CLEAN		22
-#define FONT_CLEAN_MAX	80
+#define FONT_CLEAN_MAX	75
 #define ROUNDEL_VEL		20
 #define BG_LINE_TOP		85
 #define BG_LINE_BOT		415

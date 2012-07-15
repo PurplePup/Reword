@@ -210,3 +210,16 @@ bool Controls::enableControl(bool bEnable, int id)
     return false;   //id not found
 }
 
+//manual 'press' selected ID
+//bFlip option only needed for CAM_DIS_HIT_IDLE_DOUBLE control types
+bool Controls::forceFade(int id, bool bFlip)
+{
+    Control *pc = getControl(id);
+    if (pc)
+    {
+        pc->fade(bFlip);
+        return true;
+    }
+    return false;   //id not found
+}
+

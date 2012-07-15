@@ -181,29 +181,29 @@ void PlayOptions::choose(MenuItem i)
                     _wordFileIdx = 0;
                 break;
 		case 1: { //single touch
-                    Control *p = _controlsOptn.getControl(CTRLID_YES_NO);
-                    if (p) p->fade();  //manually switch yes/no
+                    _controlsOptn.forceFade(CTRLID_YES_NO); //manually switch yes/no
                 }
                 break;
 		case 2: { //default diff
-                    Control *p = _controlsOptn.getControl(CTRLID_DIFF);
-                    if (p) p->fade();  //manually switch easy/med/hard
+                    _controlsOptn.forceFade(CTRLID_DIFF);   //manually switch yes/no
                 }
                 break;
 		case 3: { //sound fx
+                    //manually call fade() as we need the control state for the audio
                     Control *p = _controlsOptn.getControl(CTRLID_SFX);
                     if (p)
                     {
-                        p->fade();  //manually switch yes/no
+                        p->fade();
                         Locator::audio().setSfxEnabled(p->isFirstState());
                     }
                 }
                 break;
 		case 4: { //music
+                    //manually call fade() as we need the control state for the audio
                     Control *p = _controlsOptn.getControl(CTRLID_MUSIC);
                     if (p)
                     {
-                        p->fade();  //manually switch yes/no
+                        p->fade();
                         Locator::audio().setMusicEnabled(p->isFirstState());
                     }
                 }

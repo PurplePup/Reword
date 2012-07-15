@@ -34,6 +34,8 @@ private:
 
 	void scrollDictUp();
 	void scrollDictDown();
+    void updateScrollButtons();
+    void ControlEvent(int event, int ctrl_id);
 
 private:
 

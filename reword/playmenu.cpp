@@ -71,7 +71,7 @@ void PlayMenu::init(Input *input)
 	input->setRepeat(ppkey::DOWN, 150, 300);
 
     tSharedImage &letters = Resource::image("roundel_letters.png");
-	_title.easeMoveFrom( 0, -(letters->height()*2), 1000, -500);
+	_title.easeMoveFrom( 0, -(letters->height()*2), 800, -400);
 	_titleW.start(3000, 1000);
 
     _menubg = Resource::image("menubg.png");
