@@ -28,6 +28,7 @@
 #define TARGET_MIN	((int)6)
 #define TARGET_MAX	((int)8)
 
+#define MAX_REWORD_DESCRIPTION    1000
 
 struct DictWord
 {

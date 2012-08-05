@@ -98,7 +98,7 @@ void PlayGameDict::init(Input *input)
     tSharedImage &letters = Resource::image("roundel_letters.png");
     _roundDict= tAutoRoundels(new Roundels());
     _roundDict->setWordCenterHoriz(_dictWord, letters, (BG_LINE_TOP-letters.get()->height())/2, 4);
-    _roundDict->easeMoveFrom(Screen::width(), 0, 1400, 20);
+    _roundDict->easeMoveFrom(Screen::width(), 0, 800, 40, Easing::EASE_OUTQUART);
 
     _menubg = Resource::image("menubg.png");
 
@@ -258,8 +258,3 @@ void PlayGameDict::ControlEvent(int event, int ctrl_id)
         updateScrollButtons();
     }
 }
-
-
-
-
-

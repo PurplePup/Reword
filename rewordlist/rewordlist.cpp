@@ -249,7 +249,7 @@ int main(int argc, char* argv[])
                 Words2 includeWords(*it_txt);
                 int iOrig = finalWords.size();
                 finalWords -= includeWords;	//remove any forced exclude words
-                std::cout << "Excluded " << finalWords.size() - iOrig <<  " words from '" << *it_txt << "'" << std::endl;
+                std::cout << "Excluded " << iOrig - finalWords.size() <<  " words from '" << *it_txt << "'" << std::endl;
             }
 		}
 

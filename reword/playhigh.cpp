@@ -96,7 +96,7 @@ void PlayHigh::init(Input *input)
 
     tSharedImage &letters = Resource::image("roundel_letters.png");
 	_title.setWordCenterHoriz(std::string("HISCORE"), letters, (BG_LINE_TOP-letters.get()->height())/2, 2);
-	_title.easeMoveFrom( 0, -(letters.get()->height()*2), 1000, -40);   //up to 40ms individual roundel delay
+	_title.easeMoveFrom( 0, -(letters.get()->height()*2), 800, -400);   //up to 400ms individual roundel delay
 	_titleW.start(3000, 1000);  //jumble wait/delay
 	_title.setRoundelsId(1);
 

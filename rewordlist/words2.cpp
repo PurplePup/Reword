@@ -143,9 +143,9 @@ TiXmlElement* Words2::xdxfNextWord(TiXmlElement* ar, std::string &word, std::str
 			if (word == prefix)
 				def = def.substr(pos);
 
-			if (def.length() > 2000)
+			if (def.length() > MAX_REWORD_DESCRIPTION)
 			{
-				def.erase(2000);
+				def.erase(MAX_REWORD_DESCRIPTION);
 				def += "...";	//indicate it was cut short
 			}
 //			std::cout << word.c_str() << " - def: " << tmpstr << std::endl;
@@ -247,13 +247,15 @@ bool Words2::xdxfBuildDict(const std::string& dictFile, bool bUpdateDef, bool bX
 void Words2::addWordsToSets()
 {
     int iCount = _vecTarget.size(),
-        iMod = _vecTarget.size() / 50;
+        iMod = _vecTarget.size() / 100;
+
+    std::cout << std::endl << std::unitbuf; // enable automatic flushing
 
 	tWordVect::const_iterator target_it = _vecTarget.begin();
 	while (target_it != _vecTarget.end())
 	{
 	    if (!(iCount-- % iMod))
-            std::cout << std::unitbuf << "." << iCount;
+            std::cout << "\r" << "Adding words... " << iCount << "       ";
 
 		//make sure its a word length we support (say 3..8)
 		if ((*target_it).length() >= SHORTW_MIN && (*target_it).length() <= TARGET_MAX)
@@ -276,7 +278,7 @@ void Words2::addWordsToSets()
 		}
 		++target_it;
 	}
-	std::cout << std::nounitbuf << std::endl;
+	std::cout << std::endl << std::nounitbuf << std::endl;
 }
 
 

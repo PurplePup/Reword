@@ -56,7 +56,7 @@ void PlayInst::init(Input *input)
 
     tSharedImage &letters = Resource::image("roundel_letters.png");
 	_title.setWordCenterHoriz(std::string("INFO"), letters, (BG_LINE_TOP-letters.get()->height())/2, 2);
-	_title.easeMoveFrom( 0, -(letters.get()->height()*2), 1000, -40);
+	_title.easeMoveFrom( 0, -(letters.get()->height()*2), 800, -400);   //up to 400ms individual roundel delay
 	_titleW.start(3000, 1000);
 
     _menubg = Resource::image("menubg.png");
@@ -443,6 +443,3 @@ void PlayInst::buildPage(int page)
 	str = strstr.str();
 	pptxt::buildTextPage(str, FONT_CLEAN_MAX, _inst);	//pass max chars wide displayable
 }
-
-
-

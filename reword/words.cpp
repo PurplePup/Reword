@@ -123,7 +123,12 @@ bool Words::splitDictLine(std::string text, DictWord &dictword)
 				break;
 		case 1:	dictword._level = atoi(newword.c_str());
 				break;
-		case 2:	dictword._description = newword;
+		case 2:	if (newword.length() > MAX_REWORD_DESCRIPTION)
+                {
+                    newword.erase(MAX_REWORD_DESCRIPTION);
+                    newword += "...";	//indicate it was cut short
+                }
+                dictword._description = newword;
 				break;
 		default:break;
 		}

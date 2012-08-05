@@ -1610,7 +1610,7 @@ void PlayGame::doPauseGame()
 		_roundPaused = tAutoRoundels(new Roundels());
 		const int y = (SCREEN_HEIGHT/2)-letters.get()->height();
 		_roundPaused->setWordCenterHoriz(std::string("PAUSED"), letters, y, 4);
-		_roundPaused->easeMoveFrom(Screen::width(), 0, 1200, 20);
+		_roundPaused->easeMoveFrom(Screen::width(), 0, 800, 40, Easing::EASE_OUTQUART);
 
 		Mix_FadeOutChannel(-1, 1000);
 	}
@@ -2155,5 +2155,3 @@ void PlayGame::prepareBackground()
 	std::string strDiff = strMode + " (" + _gd._diffName + ")";
 	_gd._fntTiny.put_text_right(_gamebg.get(), SCREEN_HEIGHT - _gd._fntTiny.height(), 0, strDiff.c_str(), _gd._diffColour);
 }
-
-

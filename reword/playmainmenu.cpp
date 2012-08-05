@@ -54,7 +54,7 @@ void PlayMainMenu::init(Input *input)
 	addItem(MenuItem(2, BLUE_COLOUR, "Highscores", "Past Heroes"));
 	addItem(MenuItem(3, PURPLE_COLOUR, "Instructions", "How to play"));
 	addItem(MenuItem(4, GOLD_COLOUR, "Options", "Settings and preferences"));
-	addItem(MenuItem(5, RED_COLOUR, "Exit", "Quit game"));
+	addItem(MenuItem(5, RED_COLOUR, "Exit !", "Quit game"));
 	setItem(_gd._mainmenuoption);
 	PlayMenu::init(input);
 }
