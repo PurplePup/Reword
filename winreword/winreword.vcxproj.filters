@@ -15,261 +15,261 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\reword\reword\audio.h">
+    <ClInclude Include="..\reword\audio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\button.h">
+    <ClInclude Include="..\reword\button.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\constants.h">
+    <ClInclude Include="..\reword\constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\control.h">
+    <ClInclude Include="..\reword\control.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\controls.h">
+    <ClInclude Include="..\reword\controls.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\delegate.h">
+    <ClInclude Include="..\reword\delegate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\easing.h">
+    <ClInclude Include="..\reword\easing.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\error.h">
+    <ClInclude Include="..\reword\error.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\fontttf.h">
+    <ClInclude Include="..\reword\fontttf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\framerate.h">
+    <ClInclude Include="..\reword\framerate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\game.h">
+    <ClInclude Include="..\reword\game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\gamedata.h">
+    <ClInclude Include="..\reword\gamedata.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\global.h">
+    <ClInclude Include="..\reword\global.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\helpers.h">
+    <ClInclude Include="..\reword\helpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\i_audio.h">
+    <ClInclude Include="..\reword\i_audio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\i_input.h">
+    <ClInclude Include="..\reword\i_input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\i_play.h">
+    <ClInclude Include="..\reword\i_play.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\image.h">
+    <ClInclude Include="..\reword\image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\imageanim.h">
+    <ClInclude Include="..\reword\imageanim.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\input.h">
+    <ClInclude Include="..\reword\input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\locator.h">
+    <ClInclude Include="..\reword\locator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\platform.h">
+    <ClInclude Include="..\reword\platform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\playdiff.h">
+    <ClInclude Include="..\reword\playdiff.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\playgame.h">
+    <ClInclude Include="..\reword\playgame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\playgamedict.h">
+    <ClInclude Include="..\reword\playgamedict.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\playgamepopup.h">
+    <ClInclude Include="..\reword\playgamepopup.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\playhigh.h">
+    <ClInclude Include="..\reword\playhigh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\playinst.h">
+    <ClInclude Include="..\reword\playinst.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\playmainmenu.h">
+    <ClInclude Include="..\reword\playmainmenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\playmenu.h">
+    <ClInclude Include="..\reword\playmenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\playmodemenu.h">
+    <ClInclude Include="..\reword\playmodemenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\playoptions.h">
+    <ClInclude Include="..\reword\playoptions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\random.h">
+    <ClInclude Include="..\reword\random.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\resource.h">
+    <ClInclude Include="..\reword\resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\roundels.h">
+    <ClInclude Include="..\reword\roundels.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\score.h">
+    <ClInclude Include="..\reword\score.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\screen.h">
+    <ClInclude Include="..\reword\screen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\signal.h">
+    <ClInclude Include="..\reword\signal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\singleton.h">
+    <ClInclude Include="..\reword\singleton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\sprite.h">
+    <ClInclude Include="..\reword\sprite.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\spritemgr.h">
+    <ClInclude Include="..\reword\spritemgr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\states.h">
+    <ClInclude Include="..\reword\states.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\surface.h">
+    <ClInclude Include="..\reword\surface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\utils.h">
+    <ClInclude Include="..\reword\utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\waiting.h">
+    <ClInclude Include="..\reword\waiting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\words.h">
+    <ClInclude Include="..\reword\words.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\reword\reword\audio.cpp">
+    <ClCompile Include="..\reword\audio.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\button.cpp">
+    <ClCompile Include="..\reword\button.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\control.cpp">
+    <ClCompile Include="..\reword\control.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\controls.cpp">
+    <ClCompile Include="..\reword\controls.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\easing.cpp">
+    <ClCompile Include="..\reword\easing.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\error.cpp">
+    <ClCompile Include="..\reword\error.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\fontttf.cpp">
+    <ClCompile Include="..\reword\fontttf.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\framerate.cpp">
+    <ClCompile Include="..\reword\framerate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\game.cpp">
+    <ClCompile Include="..\reword\game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\gamedata.cpp">
+    <ClCompile Include="..\reword\gamedata.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\helpers.cpp">
+    <ClCompile Include="..\reword\helpers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\image.cpp">
+    <ClCompile Include="..\reword\image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\imageanim.cpp">
+    <ClCompile Include="..\reword\imageanim.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\input.cpp">
+    <ClCompile Include="..\reword\input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\locator.cpp">
+    <ClCompile Include="..\reword\locator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\play.cpp">
+    <ClCompile Include="..\reword\play.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\playdiff.cpp">
+    <ClCompile Include="..\reword\playdiff.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\playgame.cpp">
+    <ClCompile Include="..\reword\playgame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\playgamedict.cpp">
+    <ClCompile Include="..\reword\playgamedict.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\playgamepopup.cpp">
+    <ClCompile Include="..\reword\playgamepopup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\playhigh.cpp">
+    <ClCompile Include="..\reword\playhigh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\playinst.cpp">
+    <ClCompile Include="..\reword\playinst.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\playmainmenu.cpp">
+    <ClCompile Include="..\reword\playmainmenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\playmenu.cpp">
+    <ClCompile Include="..\reword\playmenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\playmodemenu.cpp">
+    <ClCompile Include="..\reword\playmodemenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\playoptions.cpp">
+    <ClCompile Include="..\reword\playoptions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\random.cpp">
+    <ClCompile Include="..\reword\random.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\resource.cpp">
+    <ClCompile Include="..\reword\resource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\reword.cpp">
+    <ClCompile Include="..\reword\reword.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\roundels.cpp">
+    <ClCompile Include="..\reword\roundels.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\score.cpp">
+    <ClCompile Include="..\reword\score.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\screen.cpp">
+    <ClCompile Include="..\reword\screen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\singleton.cpp">
+    <ClCompile Include="..\reword\singleton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\sprite.cpp">
+    <ClCompile Include="..\reword\sprite.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\spritemgr.cpp">
+    <ClCompile Include="..\reword\spritemgr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\surface.cpp">
+    <ClCompile Include="..\reword\surface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\utils.cpp">
+    <ClCompile Include="..\reword\utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\waiting.cpp">
+    <ClCompile Include="..\reword\waiting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\words.cpp">
+    <ClCompile Include="..\reword\words.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
