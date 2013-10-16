@@ -1,6 +1,6 @@
 //PlayMainMenu.h
 
-#ifndef _PlayMainMenu_H
+#if !defined _PlayMainMenu_H
 #define _PlayMainMenu_H
 
 #include "screen.h"

@@ -1,6 +1,6 @@
 //playgamepopup.h
 
-#ifndef _PLAYGAMEPOPUP_H
+#if !defined _PLAYGAMEPOPUP_H
 #define _PLAYGAMEPOPUP_H
 
 #include "i_play.h"		//IPlay interface

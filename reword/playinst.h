@@ -1,6 +1,6 @@
 //playinst.h
 
-#ifndef _PLAYINST_H
+#if !defined _PLAYINST_H
 #define _PLAYINST_H
 
 #include "i_play.h"		//IPlay interface

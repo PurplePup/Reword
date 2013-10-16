@@ -1,12 +1,11 @@
 //spritemgr.h
 
-#ifndef _SPRITEMGR_H
+#if !defined _SPRITEMGR_H
 #define _SPRITEMGR_H
 
 #include "sprite.h"
 
 #include <map>
-#include <boost/shared_ptr.hpp>
 
 class Screen;
 

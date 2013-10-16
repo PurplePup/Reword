@@ -1,12 +1,12 @@
 //roundels.h
 
-#ifndef _ROUNDELS_H
+#if !defined _ROUNDELS_H
 #define _ROUNDELS_H
 
 #include <string>
 #include <map>
 #include <vector>
-#include <memory>
+#include <memory>   //for unique_ptr
 
 #include "sprite.h"
 #include "states.h"
@@ -138,6 +138,6 @@ protected:
     int     _rid;               //unique id for this roundels class implementation
 };
 
-typedef std::auto_ptr<Roundels> tAutoRoundels;
+typedef std::unique_ptr<Roundels> tAutoRoundels;
 
 #endif //_ROUNDELS_H

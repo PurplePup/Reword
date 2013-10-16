@@ -47,11 +47,13 @@ CXX = g++
 # LDFLAGS = -lm -lg -lpthread -lSDL -lSDL_image -lSDL_mixer -lSDL_ttf
 # CXX = g++
 # CXXFLAGS = -c -Wall `sdl-config --cflags` -ggdb -D_DEBUG -I/usr/include/SDL
-LDFLAGS = -lm -lg -lpthread -lSDL -lSDL_mixer -lSDL_image -lSDL_ttf `sdl-config --static-libs`
+#LDFLAGS = -lm -lg -lpthread -lSDL -lSDL_mixer -lSDL_image -lSDL_ttf `sdl-config --static-libs`
 #LDFLAGS = -L/lib -DGP2X -lSDL_image  -lSDL_gfx  -lSDL_ttf  -ljpeg -lpng12 -lz -lSDL_mixer -lvorbisidec -lmikmod -lmad -lSDL -lgcc -lm -lc -lexpat -lpthread -msoft-float
 #-lfreetype
+LDFLAGS = -Wl,-rpath,/usr/local/lib -L/usr/local/lib lSDL2 -lSDL2_mixer -lSDL2_image -lSDL2_ttf -lpthread
 #=====BUILD DEBUG
-CXXFLAGS = -c -Wall `sdl-config --cflags` -ggdb -D_DEBUG -I/usr/include/SDL
+#CXXFLAGS = -c -Wall `sdl-config --cflags` -ggdb -D_DEBUG -I/usr/include/SDL
+CXXFLAGS = -g -O2 -D_REENTRANT -I/usr/local/include/SDL2 -std=c++11
 STRIP = ls -l
 #=====BUILD RELEASE
 #CXXFLAGS = -c -Wall `sdl-config --cflags` -I/usr/include/SDL

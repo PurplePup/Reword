@@ -39,6 +39,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "helpers.h"
 #include "platform.h"
 #include "signal.h"
+#include "resource.h"
+#include "locator.h"
 
 #include <sstream>
 
@@ -129,9 +131,8 @@ void PlayInst::render(Screen *s)
 {
 	if (!_init) return;
 
-	//_gd._menubg.blitTo( s );
-	//ppg::blit_surface(_gd._menubg.surface(), NULL, s->surface(), 0, 0);
-	ppg::blit_surface(_menubg->surface(), NULL, s->surface(), 0, 0);
+	//ppg::blit_surface(_menubg->surface(), nullptr, s->surface(), 0, 0);
+	s->blit(_menubg->tex(), nullptr, 0, 0);
 
 	//draw screen title
 	_title.render(s);

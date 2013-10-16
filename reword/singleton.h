@@ -1,6 +1,6 @@
 //singleton.h
 
-#ifndef _SINGLETON_H
+#if !defined _SINGLETON_H
 #define _SINGLETON_H
 
 #include <memory>
@@ -34,12 +34,12 @@ protected:
     Singleton();   // constructor NOT public
 
 private:
-    static std::auto_ptr<T> _instance;
+    static std::unique_ptr<T> _instance;
 };
 
 
 template <class T>
-  	std::auto_ptr<T> Singleton<T>::_instance(0);    //   definition
+  	std::unique_ptr<T> Singleton<T>::_instance(0);    //   definition
 
 
 // Create an instance of the object, or return the existing ptr

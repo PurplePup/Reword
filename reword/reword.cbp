@@ -22,6 +22,7 @@
 					<Add option="-Wunreachable-code" />
 					<Add option="-Wswitch-default" />
 					<Add option="-pedantic" />
+					<Add option="-std=c++11" />
 					<Add option="-Wextra" />
 					<Add option="-Wall" />
 					<Add option="-g" />
@@ -32,6 +33,14 @@
 					<Add library="/usr/lib/libboost_filesystem.so" />
 					<Add library="/usr/lib/libboost_system.so" />
 				</Linker>
+				<MakeCommands>
+					<Build command="$make -f $makefile pc" />
+					<CompileFile command="$make -f $makefile $file" />
+					<Clean command="$make -f $makefile clean$target" />
+					<DistClean command="$make -f $makefile distclean$target" />
+					<AskRebuildNeeded command="$make -q -f $makefile $target" />
+					<SilentBuild command="$make -f $makefile pc &gt; $(CMD_NULL)" />
+				</MakeCommands>
 			</Target>
 			<Target title="Release">
 				<Option output="bin/Release/reword" prefix_auto="1" extension_auto="1" />
@@ -51,7 +60,15 @@
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
+			<Add directory="/usr/local/include/SDL2" />
 		</Compiler>
+		<Linker>
+			<Add library="/usr/local/lib/libSDL2_image.so" />
+			<Add library="/usr/local/lib/libSDL2_mixer.so" />
+			<Add library="/usr/local/lib/libSDL2_ttf.so" />
+			<Add library="/usr/local/lib/libSDL2.so" />
+			<Add directory="/usr/lib/" />
+		</Linker>
 		<Unit filename="audio.cpp" />
 		<Unit filename="audio.h" />
 		<Unit filename="button.cpp" />
@@ -138,7 +155,10 @@
 		<Unit filename="words.cpp" />
 		<Unit filename="words.h" />
 		<Extensions>
-			<code_completion />
+			<code_completion>
+				<search_path add="/usr/local/include/SDL2/" />
+				<search_path add="/usr/include/boost" />
+			</code_completion>
 			<debugger />
 			<envvars />
 			<DoxyBlocks>

@@ -23,6 +23,7 @@
     #endif
 #else
     #if defined(DEBUG)
+        //#define RES_SYS_BASE	(std::string("../../data/"))
         #define RES_SYS_BASE	(std::string("./data/"))
     #else
         #define RES_SYS_BASE	(std::string("./data/"))
@@ -115,7 +116,7 @@
 
 #define DEBUG_HW_NAME	"PC"
 //default 'PC' Linux or Win
-#define RES_BASE		(RES_SYS_BASE + std::string("pandora/"))
+#define RES_BASE		(RES_SYS_BASE + std::string("pc/"))
 #define SCREEN_WIDTH	800
 #define SCREEN_HEIGHT	480
 //#define SCREEN_SURFACE	SDL_HWSURFACE|SDL_DOUBLEBUF

@@ -4,11 +4,11 @@
 //fonts, images, scores, counters etc
 
 
-#ifndef GAMEDATA_H
+#if !defined GAMEDATA_H
 #define GAMEDATA_H
 
-#include "SDL.h"
-#include "SDL_mixer.h"
+#include <SDL.h>
+#include <SDL_mixer.h>
 
 #include "image.h"
 #include "fontttf.h"
@@ -17,9 +17,12 @@
 #include "score.h"
 #include "spritemgr.h"
 
+#pragma message("defining GameOptions\n")
+
 //loadable game options and set using the options screen
 struct GameOptions
 {
+public:
     GameOptions();
     ~GameOptions();
     bool load();

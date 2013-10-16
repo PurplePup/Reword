@@ -1,6 +1,6 @@
 //helpers.h
 
-#ifndef _HELPERS_H
+#if !defined _HELPERS_H
 #define _HELPERS_H
 
 #include <string>

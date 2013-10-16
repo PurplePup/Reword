@@ -34,8 +34,9 @@ Licence:		This program is free software; you can redistribute it and/or modify
 */
 ////////////////////////////////////////////////////////////////////
 
-#include "global.h"
 #include "gamedata.h"
+
+#include "global.h"
 #include "platform.h"
 #include "score.h"
 #include "helpers.h"

@@ -143,9 +143,8 @@ void PlayMenu::render(Screen *s)
 {
 	if (!_init) return;
 
-	//_gd._menubg.blitTo( s );
-	//ppg::blit_surface(_gd._menubg.surface(), NULL, s->surface(), 0, 0);
-	ppg::blit_surface(_menubg->surface(), NULL, s->surface(), 0, 0);
+	//ppg::blit_surface(_menubg->surface(), nullptr, s->surface(), 0, 0);
+	s->blit(_menubg->tex(), nullptr, 0, 0);
 
 	_title.render(s);
 	_beta.render(s);
@@ -265,7 +264,7 @@ bool PlayMenu::touch(const Point &pt)
 {
     /*const int ctrl_id = */ _controlsMenu.touched(pt);
 
-    _saveTouchPt._x = _saveTouchPt._y = 0;
+    _saveTouchPt.x = _saveTouchPt.y = 0;
 	Uint32 item(0);
 
 	for (tMenuItems::iterator it = _itemList.begin(); it != _itemList.end(); ++item, ++it)

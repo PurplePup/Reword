@@ -36,10 +36,10 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include "easing.h"
 
-#include <cassert>
-#include <math.h>
-
 #include <SDL.h>
+
+#include <cassert>
+#include <cmath>
 
 
 #define PI 3.14159265

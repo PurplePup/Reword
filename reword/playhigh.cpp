@@ -42,6 +42,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "resource.h"
 #include "utils.h"
 #include "signal.h"
+#include "locator.h"
 
 #include <cassert>
 #include <memory>
@@ -173,8 +174,8 @@ void PlayHigh::init(Input *input)
     //[NEXT] for ending inits input
     {
     t_pSharedSpr p(new Sprite(Resource::image("btn_square_next_small.png")));
-    int x = _kbd.getBottomPos()._x + ((Screen::width() - _kbd.getBottomPos()._x) /2);    //(Screen::width() - p->tileW()) / 2; //center
-    int y = _kbd.getBottomPos()._y;   //BG_LINE_BOT - _yyGap - p->tileH();
+    int x = _kbd.getBottomPos().x + ((Screen::width() - _kbd.getBottomPos().x) /2);    //(Screen::width() - p->tileW()) / 2; //center
+    int y = _kbd.getBottomPos().y;   //BG_LINE_BOT - _yyGap - p->tileH();
     p->setPos(x, y);
     p->_sigEvent2.Connect(this, &PlayHigh::ControlEvent);
     Control c(p, CTRLID_NEXT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
@@ -210,7 +211,8 @@ void PlayHigh::render(Screen *s)
 	//
 
 	//_menubg->blitTo( s );
-	ppg::blit_surface(_menubg->surface(), 0, s->surface(), 0,0);
+	//ppg::blit_surface(_menubg->surface(), 0, s->surface(), 0,0);
+	s->blit(_menubg->tex(), nullptr, 0, 0);
 
 	//draw screen title roundals
 	_title.render(s);
@@ -480,8 +482,8 @@ void PlayHigh::updateKbdCursor()
         Point pt = _kbd.getCurrSelPt();
 
         //create a cursor around curr kbd letter
-        const int x = pt._x - (( _cursorSpr->tileW() - _kbd.getRoundelW()) / 2);
-        const int y = pt._y - (( _cursorSpr->tileH() - _kbd.getRoundelH()) / 2);
+        const int x = pt.x - (( _cursorSpr->tileW() - _kbd.getRoundelW()) / 2);
+        const int y = pt.y - (( _cursorSpr->tileH() - _kbd.getRoundelH()) / 2);
         _cursorSpr->setPos(x, y);
         _cursorSpr->setVisible(true);
     }
@@ -650,6 +652,8 @@ void PlayHigh::setDescription()
 
 void PlayHigh::prepareBackground()
 {
+    Screen *screen = &Locator::screen();
+
 	//create the background to be used for this level,
 	//pre drawing so we dont need to do it each frame.
 	//...
@@ -663,16 +667,20 @@ void PlayHigh::prepareBackground()
 	switch (_mode)
 	{
 	case GM_ARCADE:		//_menubg->blitFrom(&_gd._menu_arcade, -1, x, y);
-                        ppg::blit_surface(Resource::image("menu_arcade.png")->surface(), NULL, _menubg->surface(), x, y);
+                        //ppg::blit_surface(Resource::image("menu_arcade.png")->surface(), nullptr, _menubg->surface(), x, y);
+                       	screen->blit(Resource::image("menu_arcade.png")->tex(), nullptr, x, y);
 						break;
 	case GM_REWORD:		//_menubg->blitFrom(&_gd._menu_reword, -1, x, y);
-                        ppg::blit_surface(Resource::image("menu_reword.png")->surface(), NULL, _menubg->surface(), x, y);
+                        //ppg::blit_surface(Resource::image("menu_reword.png")->surface(), nullptr, _menubg->surface(), x, y);
+                       	screen->blit(Resource::image("menu_reword.png")->tex(), nullptr, x, y);
 						break;
 	case GM_SPEEDER:	//_menubg->blitFrom(&_gd._menu_speeder, -1, x, y);
-                        ppg::blit_surface(Resource::image("menu_speeder.png")->surface(), NULL, _menubg->surface(), x, y);
+                        //ppg::blit_surface(Resource::image("menu_speeder.png")->surface(), nullptr, _menubg->surface(), x, y);
+                       	screen->blit(Resource::image("menu_speeder.png")->tex(), nullptr, x, y);
 						break;
 	case GM_TIMETRIAL:	//_menubg->blitFrom(&_gd._menu_timetrial, -1, x, y);
-                        ppg::blit_surface(Resource::image("menu_timetrial.png")->surface(), NULL, _menubg->surface(), x, y);
+                        //ppg::blit_surface(Resource::image("menu_timetrial.png")->surface(), nullptr, _menubg->surface(), x, y);
+                       	screen->blit(Resource::image("menu_timetrial.png")->tex(), nullptr, x, y);
 						break;
 	default:break;
 	}

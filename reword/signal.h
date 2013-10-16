@@ -7,7 +7,7 @@
 *
 */
 
-#ifndef _Signal_H_
+#if !defined _Signal_H_
 #define _Signal_H_
 
 #include "delegate.h"

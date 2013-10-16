@@ -1,4 +1,4 @@
-#ifndef PLAYGAMEDICT_H
+#if !defined PLAYGAMEDICT_H
 #define PLAYGAMEDICT_H
 
 #include "i_play.h"
@@ -7,7 +7,7 @@
 #include "gamedata.h"	//also holds constants and stuff
 #include "controls.h"
 #include "roundels.h"
-#include "utils.h"
+//#include "utils.h"
 
 //#include <memory>
 

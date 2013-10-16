@@ -1,11 +1,12 @@
 //imageanim.h
 
-#ifndef _IMAGEANIM_H
+#if !defined _IMAGEANIM_H
 #define _IMAGEANIM_H
 
 #include "image.h"
 #include "waiting.h"
 #include "signal.h"
+#include "screen.h"
 
 #include <string>
 #include <vector>
@@ -97,14 +98,14 @@ public:
 	tSharedImage &getImage() { return _image; }
 
 	//specific blit for Image class types
-	SDL_Surface *surface(void) const { return _image->surface(); }
-	void blitTo(Surface* dest, int destX = 0, int destY = 0, int tileNum = -1);
-	void blitFrom(Image* source, int destX = 0, int destY = 0);
-	void blitFrom(ImageAnim* source, int tileNum = -1, int destX = 0, int destY = 0);
+//	SDL_Surface *surface(void) const { return _image->surface(); }
+	void blitTo(Screen *dest, int destX = 0, int destY = 0, int tileNum = -1);
+	void blitFrom(Image *source, int destX = 0, int destY = 0);
+	void blitFrom(ImageAnim *source, int tileNum = -1, int destX = 0, int destY = 0);
 
 	//main functions
 	virtual void work();	//calc new pos/frame etc
-	void draw(Surface *s);	//render the image
+	void draw(Screen *s);	//render the image
 
 private:
 	//animating functions

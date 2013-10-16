@@ -66,11 +66,11 @@ bool FontTTF::load(std::string fileName, int size)
 {
 	cleanUp();
 	_font = TTF_OpenFont( fileName.c_str(), size );
-	if (NULL == _font)
+	if (nullptr == _font)
 		std::cerr << "Failed to load font " << fileName << ". Cannot start." << std::endl;
 	else
 //		_height = size;	//calc_text_metrics("X")._y;
-//		_height = calc_text_metrics("A")._max._y;
+//		_height = calc_text_metrics("A")._max.y;
 //		_height = TTF_FontHeight(_font);
 		_height = TTF_FontAscent(_font);
 	/*
@@ -79,13 +79,13 @@ bool FontTTF::load(std::string fileName, int size)
 			return 0;
 		_height =  maxy;// - miny;
 	*/
-	_init = (_font != NULL);
+	_init = (_font != nullptr);
 	return _init;
 }
 
 //output a text string to the destination surface
 //If shadow selected, then draw in the shadow colour first offset by 1, then the text in the actual position
-Rect FontTTF::put_text(Surface *s, int x, int y, const char *textstr, const SDL_Color &textColour, bool bShadow /*= false*/)
+Rect FontTTF::put_text(Screen *s, int x, int y, const char *textstr, const SDL_Color &textColour, bool bShadow /*= false*/)
 {
 	Rect r(0, 0, 0, 0);
 	if (bShadow)
@@ -93,10 +93,16 @@ Rect FontTTF::put_text(Surface *s, int x, int y, const char *textstr, const SDL_
 		SDL_Surface *text = TTF_RenderText_Blended( _font, textstr, _shadow );
 		if (text)
 		{
-			if (-999 == x) x = (s->surface()->w - text->w ) / 2;
-			ppg::blit_surface(text, 0, s->surface(), x+1, y+1);
+			if (-999 == x) x = (s->width() - text->w ) / 2;
+
+			//ppg::blit_surface(text, 0, s->surface(), x+1, y+1);
 			r._min = Point(x, y);
 			r._max = r._min.add(Point(text->w+1, text->h+1));
+
+            SDL_Texture * ptex = SDL_CreateTextureFromSurface(s->renderer(), text);
+            SDL_Rect r2 = r.toSDL();
+			s->blit(ptex, &r2, x+1, y+1);
+
 			SDL_FreeSurface(text);
 		}
 	}
@@ -104,12 +110,18 @@ Rect FontTTF::put_text(Surface *s, int x, int y, const char *textstr, const SDL_
 	SDL_Surface *text = TTF_RenderText_Blended( _font, textstr, textColour );
 	if (text)
 	{
-		if (-999 == x) x = (s->surface()->w - text->w ) / 2;
-		ppg::blit_surface(text, 0, s->surface(), x, y);
+		if (-999 == x) x = (s->width() - text->w ) / 2;
+
+		//ppg::blit_surface(text, 0, s->surface(), x, y);
 		if(!bShadow){
 			r._min = Point(x, y);
 			r._max = r._min.add(Point(text->w, text->h));
 		}
+
+        SDL_Texture * ptex = SDL_CreateTextureFromSurface(s->renderer(), text);
+        SDL_Rect r2 = r.toSDL();
+        s->blit(ptex, &r2, x, y);
+
 		SDL_FreeSurface(text);
 	}
 
@@ -117,13 +129,13 @@ Rect FontTTF::put_text(Surface *s, int x, int y, const char *textstr, const SDL_
 }
 
 //centered text
-Rect FontTTF::put_text(Surface *s, int y, const char *textstr, const SDL_Color &textColour, bool bShadow /*= false*/)
+Rect FontTTF::put_text(Screen *s, int y, const char *textstr, const SDL_Color &textColour, bool bShadow /*= false*/)
 {
 	return put_text(s, -999, y, textstr, textColour, bShadow);
 }
 
 //right justify to edge of screen
-Rect FontTTF::put_text_right(Surface *s, int y, int xDelta, const char *textstr, const SDL_Color &textColour, bool bShadow /*= false*/)
+Rect FontTTF::put_text_right(Screen *s, int y, int xDelta, const char *textstr, const SDL_Color &textColour, bool bShadow /*= false*/)
 {
     int textW(0);
 	SDL_Surface *text = TTF_RenderText_Solid( _font, textstr, textColour );
@@ -132,30 +144,30 @@ Rect FontTTF::put_text_right(Surface *s, int y, int xDelta, const char *textstr,
         textW = text->w;
         SDL_FreeSurface(text);
 	}
-	return put_text(s, s->surface()->w - textW - xDelta, y, textstr, textColour, bShadow);
+	return put_text(s, s->width() - textW - xDelta, y, textstr, textColour, bShadow);
 }
 
-Rect FontTTF::put_text_mid(Surface *s, int y, int xStart, const char *textstr, const SDL_Color &textColour, bool bShadow /*= false*/)
+Rect FontTTF::put_text_mid(Screen *s, int y, int xStart, const char *textstr, const SDL_Color &textColour, bool bShadow /*= false*/)
 {
 	const int len = calc_text_length(textstr);
 	return put_text(s, xStart - (len / 2), y, textstr, textColour, bShadow);
 }
 
 //output a integer number string to the destination surface
-Rect FontTTF::put_number(Surface *s, int x, int y, int number, const char *format, const SDL_Color &textColor, bool bShadow /*= false*/)
+Rect FontTTF::put_number(Screen *s, int x, int y, int number, const char *format, const SDL_Color &textColor, bool bShadow /*= false*/)
 {
 	snprintf(_buffer, 100, format, number);
 	return put_text(s, x, y, _buffer, textColor, bShadow);
 }
 
 //center a integer number string to the destination surface
-Rect FontTTF::put_number(Surface *s, int y, int number, const char *format, const SDL_Color &textColor, bool bShadow /*= false*/)
+Rect FontTTF::put_number(Screen *s, int y, int number, const char *format, const SDL_Color &textColor, bool bShadow /*= false*/)
 {
 	snprintf(_buffer, 100, format, number);
 	return put_text(s, -999, y, _buffer, textColor, bShadow);
 }
 
-Rect FontTTF::put_number_right(Surface *s, int y, int xDelta, int number, const char *format, const SDL_Color &textColour, bool bShadow /*= false*/)
+Rect FontTTF::put_number_right(Screen *s, int y, int xDelta, int number, const char *format, const SDL_Color &textColour, bool bShadow /*= false*/)
 {
 	snprintf(_buffer, 100, format, number);
 	int textW(0);
@@ -165,11 +177,11 @@ Rect FontTTF::put_number_right(Surface *s, int y, int xDelta, int number, const 
 	    textW = text->w;
 	    SDL_FreeSurface(text);
 	}
-	return put_text(s, s->surface()->w - textW - xDelta, y, _buffer, textColour, bShadow);
+	return put_text(s, s->width() - textW - xDelta, y, _buffer, textColour, bShadow);
 }
 
 //place number mid point at xStart position i.e "NNNxNNN" gixing x as the mid point
-Rect FontTTF::put_number_mid(Surface *s, int y, int xStart, int number, const char *format, const SDL_Color &textColour, bool bShadow /*= false*/)
+Rect FontTTF::put_number_mid(Screen *s, int y, int xStart, int number, const char *format, const SDL_Color &textColour, bool bShadow /*= false*/)
 {
 	snprintf(_buffer, 100, format, number);
 	const int len = calc_text_length(_buffer);
@@ -208,7 +220,7 @@ Rect FontTTF::calc_text_metrics(const char *textstr, bool bShadow /*= false*/, i
 int FontTTF::calc_text_length(const char *textstr, bool bShadow /*= false*/) const
 {
 	Rect r = calc_text_metrics(textstr, bShadow, 0, 0);
-	return r._max._x;
+	return r._max.x;
 }
 
 int FontTTF::height() const	//helper to quickly return font height in pixels

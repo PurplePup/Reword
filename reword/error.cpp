@@ -31,6 +31,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include "global.h"
 #include <SDL.h>
+#include <SDL_error.h>
 #include "error.h"
 
 using namespace std;
@@ -53,8 +54,15 @@ void Error::setLastError(std::string err, bool bAddSDLError /* = true */)
 	}
 }
 
-std::string Error::lastError()
+std::string Error::lastError(bool bClear)
 {
-	return _lastErr;
+    if (bClear && hasError())
+    {
+        std::string err(_lastErr);
+        _lastErr.clear();
+        SDL_ClearError();
+        return err;
+    }
+    else return _lastErr;
 }
 

@@ -1,4 +1,4 @@
-#ifndef RESOURCE_H
+#if !defined RESOURCE_H
 #define RESOURCE_H
 
 #include "image.h"	//defines tSharedImage

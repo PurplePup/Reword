@@ -1,4 +1,4 @@
-#ifndef EASING_H
+#if !defined EASING_H
 #define EASING_H
 
 #include <SDL.h>

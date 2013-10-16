@@ -1,12 +1,12 @@
 //surface.h
 
-#ifndef _SURFACE_H
+#if !defined _SURFACE_H
 #define _SURFACE_H
 
 #include <SDL.h>
 #include <SDL_image.h>	//for IMG_ functions
 
-#include "utils.h"
+//#include "utils.h"
 
 class Surface
 {
@@ -38,7 +38,7 @@ public:
 
 protected:
 	void cleanUp();
-	bool initSurface(SDL_Surface *newSurface, int iAlpha);
+	bool initSurface(int iAlpha);
 	void setSurface(SDL_Surface *s);
 
 protected:

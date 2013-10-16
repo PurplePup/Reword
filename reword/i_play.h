@@ -3,11 +3,12 @@
 //based on code by  Dave Parker drparker@freenet.co.uk
 
 
-#ifndef _I_PLAY_H
+#if !defined _I_PLAY_H
 #define _I_PLAY_H
 
-#include "SDL.h"
+#include <SDL.h>
 
+#include "utils.h"
 #include "screen.h"	//physical screen handling class
 #include "input.h"	//button/joystich handling class
 

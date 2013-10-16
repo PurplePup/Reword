@@ -5,15 +5,15 @@ File:			singleton.cpp
 
 Class impl:		Singleton
 
-Description:	A template class to allow creation of other classes 
-				as singletons. Uses a auto_ptr for assured destruction
+Description:	A template class to allow creation of other classes
+				as singletons. Uses a unique_ptr for assured destruction
 				Useage:
 
 				//creation
 					Singleton<MyClass>::Instance();
 				or:
 					MyClass *p = Singleton<MyClass>::Instance();
-					
+
 				//calling
 					Singleton<MyClass>::getPtr()->myFunction();
 				or:
@@ -49,7 +49,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 
 //template <class T>
-//  	std::auto_ptr<T> Singleton<T>::_instance(0);    //   definition
+//  	std::unique_ptr<T> Singleton<T>::_instance(0);    //   definition
 
 /*
 // Create an instance of the object, or return the existing ptr

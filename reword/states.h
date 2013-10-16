@@ -4,7 +4,7 @@
 //
 //
 
-#ifndef _STATES_H
+#if !defined _STATES_H
 #define _STATES_H
 
 //namespace Game

@@ -41,6 +41,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "platform.h"
 #include "sprite.h"
 #include "signal.h"
+#include "resource.h"
+#include "locator.h"
 
 #include <sstream>
 #include <boost/filesystem.hpp>
@@ -283,7 +285,7 @@ void PlayOptions::setupWordFile()
 #ifdef WIN32
             _wordFileList.push_back(pos->path().filename().generic_string());
 #else
-            _wordFileList.push_back(pos->path().filename());
+            _wordFileList.push_back(pos->path().filename().c_str());
 #endif
 //            std::cout << pos->path().filename() << " : " << boost::filesystem::file_size( pos->path() ) << "\n";
         }

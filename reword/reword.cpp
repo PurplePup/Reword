@@ -74,23 +74,29 @@ Licence:		This program is free software; you can redistribute it and/or modify
 */
 ////////////////////////////////////////////////////////////////////
 
+
+#include <SDL.h>		//include for SDLMain to be defined (as main)
+//#include <SDL_main.h>
+
+//#include "utils.h"
+#include "global.h"
+#include "game.h"
+#include "platform.h"
+#include "gamedata.h"
+
 #include <stdio.h>  /* defines FILENAME_MAX */
 #ifdef WIN32
+    #pragma message("include WIN32 files\n")
     #include <direct.h>
     #define GetCurrentDir _getcwd
 #else
+    #pragma message("include Linux files\n")
     #include <unistd.h>
     #define GetCurrentDir getcwd
  #endif
 
 #include <string>
 #include <iostream>
-
-#include "SDL.h"		//include for SDLMain to be defined (as main)
-
-#include "global.h"
-#include "game.h"
-
 
 int main(int argc, char* argv[]) // <- this must match exactly, since SDL rewrites it
 {

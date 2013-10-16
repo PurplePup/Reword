@@ -39,6 +39,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "helpers.h"
 #include "audio.h"
 #include "platform.h"
+#include "resource.h"
+#include "locator.h"
 
 enum { CTRLGRP_SCROLL = 1, CTRLGRP_BUTTONS = 2 };
 
@@ -124,8 +126,8 @@ void PlayGameDict::init(Input *input)
 void PlayGameDict::render(Screen* s)
 {
 	//_gd._menubg.blitTo( s );
-	//ppg::blit_surface(_gd._menubg.surface(), NULL, s->surface(), 0, 0);
-	ppg::blit_surface(_menubg->surface(), NULL, s->surface(), 0, 0);
+	//ppg::blit_surface(_menubg->surface(), nullptr, s->surface(), 0, 0);
+	s->blit(_menubg->tex(), nullptr, 0, 0);
 
 	_roundDict->render(s);
 

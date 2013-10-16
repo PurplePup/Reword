@@ -1,15 +1,13 @@
 //sprite.h
 
-#ifndef _SPRITE_H
+#if !defined _SPRITE_H
 #define _SPRITE_H
 
 #include "imageanim.h"
 #include "easing.h"
 
 #include <deque>
-
-
-
+#include <memory>
 
 class Sprite : public ImageAnim
 {
@@ -101,7 +99,7 @@ private:
 
 };
 
-typedef boost::shared_ptr<Sprite> t_pSharedSpr;
+typedef std::shared_ptr<Sprite> t_pSharedSpr;
 
 #endif //_SPRITE_H
 

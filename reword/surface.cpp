@@ -32,18 +32,20 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "global.h"
 #include "surface.h"
 #include "utils.h"
+#include "platform.h"
 
 // #include <SDL_gfxPrimitives.h>
+#include <SDL_surface.h>
 
-Surface::Surface() : _surface(0)
+Surface::Surface() : _surface(nullptr)
 {
 }
 
-Surface::Surface(SDL_Surface *s) : _surface(0)
+Surface::Surface(SDL_Surface *s) : _surface(nullptr)
 {
     setSurface(s);
-//	_surface = s;
-//	s->refcount++;
+	_surface = s;
+	s->refcount++;
 }
 
 Surface::~Surface()
@@ -55,47 +57,89 @@ Surface::~Surface()
 bool Surface::create(Uint32 w, Uint32 h, int iAlpha /*=-1*/)
 {
 	cleanUp();	//destroy any existing surface
-	SDL_Surface *s;
-	s = SDL_CreateRGBSurface(SCREEN_SURFACE|(iAlpha>=0)?SDL_SRCALPHA:SDL_SRCCOLORKEY, w, h, SCREEN_BPP,
-//		0, 0, 0, 0);
+
+	//SDL_Surface *s;
+    Uint32 rmask, gmask, bmask, amask;
+
+    /* SDL interprets each pixel as a 32-bit number, so our masks must depend
+       on the endianness (byte order) of the machine */
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-		0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff);
+    rmask = 0xff000000;
+    gmask = 0x00ff0000;
+    bmask = 0x0000ff00;
+    amask = 0x000000ff;
 #else
-		0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+    rmask = 0x000000ff;
+    gmask = 0x0000ff00;
+    bmask = 0x00ff0000;
+    amask = 0xff000000;
 #endif
-	bool b = initSurface(s, iAlpha);
-	return (b && _surface != NULL);
+
+	_surface = SDL_CreateRGBSurface(
+                          0, //SCREEN_SURFACE|(iAlpha>=0)?SDL_SRCALPHA:SDL_SRCCOLORKEY,
+                          w, h, SCREEN_BPP,
+                          rmask, gmask, bmask, amask);
+
+    /* or using the default masks for the depth: */
+    //s = SDL_CreateRGBSurface(0,w,h,32,0,0,0,0);
+
+	bool b = initSurface(iAlpha);
+	return (b && _surface != nullptr);
+
+//    return _surface != nullptr;
 }
 
-bool Surface::initSurface(SDL_Surface *newSurface, int iAlpha)
+bool Surface::initSurface(int iAlpha)
 {
-	if( newSurface != NULL )
-	{
-		//Create an optimized image
-		if (newSurface->format->Amask && iAlpha >= 0)
-		{
-			 //per pixel - iAlpha: 0=transparent, 255 = full opacity
-			SDL_SetAlpha(newSurface, SDL_SRCALPHA, iAlpha);
-			_surface = SDL_DisplayFormatAlpha( newSurface );
-		}
-		else
-		{
-			//set the transparent pixel - doesnt affect per pixel alpha surfaces
-			Uint32 key = SDL_MapRGB(newSurface->format, 255,0,255); //putrid purple
-			SDL_SetColorKey(newSurface, SDL_RLEACCEL | SDL_SRCCOLORKEY, key);
-			if (iAlpha >= 0)
-				SDL_SetAlpha(newSurface, SDL_SRCALPHA, iAlpha); //per surface transparency only
-			else
-				SDL_SetAlpha(newSurface, 0, 0); //no transparency
-			_surface = SDL_DisplayFormat( newSurface );
-		}
+//	if( newSurface != nullptr )
+//	{
+//		//Create an optimized image
+//		if (newSurface->format->Amask && iAlpha >= 0)
+//		{
+//			 //per pixel - iAlpha: 0=transparent, 255 = full opacity
+//			SDL_SetAlpha(newSurface, SDL_SRCALPHA, iAlpha);
+//			_surface = SDL_DisplayFormatAlpha( newSurface );
+//		}
+//		else
+//		{
+//			//set the transparent pixel - doesnt affect per pixel alpha surfaces
+//			Uint32 key = SDL_MapRGB(newSurface->format, 255,0,255); //putrid purple
+//			SDL_SetColorKey(newSurface, SDL_TRUE, key);
+//			if (iAlpha >= 0)
+//				SDL_SetAlpha(newSurface, SDL_SRCALPHA, iAlpha); //per surface transparency only
+//			else
+//				SDL_SetAlpha(newSurface, 0, 0); //no transparency
+//			_surface = SDL_DisplayFormat( newSurface );
+//		}
+//
+//		//Free the old image
+//		SDL_FreeSurface( newSurface );
 
-		//Free the old image
-		SDL_FreeSurface( newSurface );
+
+        /* Set transparent pixel as the pixel at (0,0) */
+        if (_surface->format->palette) {
+            SDL_SetColorKey(_surface, 1, *(Uint8 *) _surface->pixels);
+        } else {
+            switch (_surface->format->BitsPerPixel) {
+            case 15:
+                SDL_SetColorKey(_surface, 1, (*(Uint16 *) _surface->pixels) & 0x00007FFF);
+                break;
+            case 16:
+                SDL_SetColorKey(_surface, 1, *(Uint16 *) _surface->pixels);
+                break;
+            case 24:
+                SDL_SetColorKey(_surface, 1, (*(Uint32 *) _surface->pixels) & 0x00FFFFFF);
+                break;
+            case 32:
+                SDL_SetColorKey(_surface, 1, *(Uint32 *) _surface->pixels);
+                break;
+            }
+        }
+
 
 		return true;
-	}
-	return false;
+//	}
+//	return false;
 }
 
 /*
@@ -112,12 +156,12 @@ void Surface::copy(Surface &s)
 void Surface::cleanUp()
 {
 	if (_surface) SDL_FreeSurface(_surface);
-	_surface = 0;
+	_surface = nullptr;
 }
 
 void Surface::setSurface(SDL_Surface *s)
 {
-	if (s == NULL) return;
+	if (s == nullptr) return;
 	cleanUp();
 	_surface = s;
 	s->refcount++;

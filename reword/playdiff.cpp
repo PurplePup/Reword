@@ -38,6 +38,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include "global.h"
 #include "playdiff.h"
+#include "resource.h"
 #include "states.h"
 #include "utils.h"
 #include <sstream>

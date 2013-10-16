@@ -44,6 +44,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "audio.h"
 #include "platform.h"
 #include "score.h"
+#include "resource.h"
+#include "locator.h"
 
 #include <string>
 #include <cassert>
@@ -116,8 +118,8 @@ void PlayGamePopup::render(Screen *s)
 	//draw menu overlay
 	const int x = (s->_width - _menubg->width()) / 2;
 	const int y = (s->_height - _menubg->height()) / 2;
-//	_menubg->blitTo(s, x, y, 0);
-	ppg::blit_surface(_menubg->surface(), NULL, s->surface(), x, y);
+	//ppg::blit_surface(_menubg->surface(), nullptr, s->surface(), x, y);
+	s->blit(_menubg->tex(), nullptr, x, y);
 
 	//calculate best text gap
 	const int maxGap = _gd._fntSmall.height()*2; //max gap
@@ -138,8 +140,8 @@ void PlayGamePopup::render(Screen *s)
 		if (it->first == _menuoption)
 		{
 			r = _gd._fntSmall.put_text(s, yy, it->second._title.c_str(), (it->second._enabled)?it->second._hoverOn:GREY_COLOUR, true);
-			r._min._x -= _star.tileW()+5;
-			_star.setPos(r._min._x, yy);
+			r._min.x -= _star.tileW()+5;
+			_star.setPos(r._min.x, yy);
 			//help/comment str
 			_gd._fntClean.put_text(s, (y+_menubg->height())-(_gd._fntSmall.height()*2), it->second._comment.c_str(), GREY_COLOUR, true);
 		}

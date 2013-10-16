@@ -1,6 +1,6 @@
 //playdiff.h
 
-#ifndef _PLAYDIFF_H
+#if !defined _PLAYDIFF_H
 #define _PLAYDIFF_H
 
 #include "i_play.h"		//IPlay interface

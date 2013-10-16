@@ -4,6 +4,7 @@
 #include "i_play.h"
 #include "control.h"
 #include <vector>
+#include <cassert>
 
 class Controls : IPlay
 {

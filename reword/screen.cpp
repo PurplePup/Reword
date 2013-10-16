@@ -5,13 +5,12 @@ File:			screen.cpp
 
 Class impl:		Screen
 
-Description:	A class based on the Surface class to manage drawing to the 
-				screen surface and allow locking 
+Description:	A class to manage drawing to the screen
 
 Author:			Al McLuckie (al-at-purplepup-dot-org)
-				Based on framework by Dave Parker drparker@freenet.co.uk
 
 Date:			06 April 2007
+                08 Oct 2013     - rewite to SDL2
 
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by
@@ -33,57 +32,153 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "global.h"
 #include "screen.h"
 #include "platform.h"
+
 #include <cassert>
 
 int Screen::_height = 0;
 int Screen::_width = 0;
 
+Screen::Screen() :
+    _window(nullptr), _renderer(nullptr), _texture(nullptr),
+    _init(false)
+{
+}
+
 // Construct 16 bit colour screen of given size
-Screen::Screen(int w, int h) : _init(false)
+Screen::Screen(int w, int h, const std::string &strTitle) :
+    _window(nullptr), _renderer(nullptr), _texture(nullptr),
+    _init(false)
 {
 	assert(!(w<320 || h<240));	//reasonable minimum for existing game graphics etc
-	
-	_surface = SDL_SetVideoMode(w, h, SCREEN_BPP, SCREEN_SURFACE);
 
-	if ( _surface == NULL )
+	_window = SDL_CreateWindow(strTitle.c_str(),
+                            SDL_WINDOWPOS_CENTERED_DISPLAY(0),
+                            SDL_WINDOWPOS_CENTERED_DISPLAY(0),
+                            w, h,
+                            SDL_WINDOW_SHOWN);
+
+	if ( _window != nullptr )
+	{
+//#if ((!defined(GP2X) && !defined(PANDORA)))
+//        SDL_SetWindowTitle(_window, strTitle.c_str());		//windowed caption
+//        std::cout << "Using window, Caption " << strTitle << std::endl;
+//#endif
+
+        //create screen renderer
+        _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED);
+        if (_renderer != nullptr)
+        {
+            //create texture (in GPU mem) to use as screen to 'flip'
+            _texture = SDL_CreateTexture(_renderer, SDL_PIXELFORMAT_ARGB8888,
+                                         SDL_TEXTUREACCESS_STREAMING, w, h);
+            if(_texture != nullptr)
+            {
+                _width = w;
+                _height = h;
+                _init = true;
+            }
+            else
+            {
+                setLastError("Unable to create screen texture");
+            }
+        }
+        else
+        {
+            setLastError("Unable to create screen renderer");
+        }
+	}
+	else
 	{
 		setLastError("Unable to set video resolution");
-	}
-	else 
-	{
-		_width = w;
-		_height = h;
-		_init = true;
 	}
 }
 
 Screen::~Screen()
 {
-	//Surface::~Surface will destroy the allocated _surface
+    SDL_DestroyTexture(_texture);
+    SDL_DestroyRenderer(_renderer);
+    SDL_DestroyWindow(_window);
 }
 
 // Lock screen
 void Screen::lock(void)
 {
-    if (SDL_MUSTLOCK(_surface)) 
-		if (SDL_LockSurface(_surface) < 0) 
-		    return;
+//    if (SDL_MUSTLOCK(_window))
+//		if (SDL_LockSurface(_window) < 0)
+//		    return;
 }
 
 // Unlock screen
 void Screen::unlock(void)
 {
-    if (SDL_MUSTLOCK(_surface)) 
-		SDL_UnlockSurface(_surface);
+//    if (SDL_MUSTLOCK(_window))
+//		SDL_UnlockSurface(_window);
 }
 
 // Update whole screen
 void Screen::update(void)
 {
-	SDL_Flip(_surface);
+//    SDL_SetRenderTarget()
 
-//SDL_UpdateRect is like SDL_Flip(_surface), but seems fractionally slower?
-//	SDL_UpdateRect(_surface, 0, 0, _surface->w, _surface->h); 
+    //SDL_RenderClear(_renderer);
+    //SDL_RenderCopy(_renderer, _texture, nullptr, nullptr);
+	SDL_RenderPresent(_renderer);
+}
+
+void Screen::clear()
+{
+    SDL_SetRenderDrawColor(_renderer, 0x00, 0x00, 0x00, 0xFF);  //black
+    SDL_RenderClear(_renderer);
+}
+
+// Draw a filled/solid rectangle
+void Screen::drawSolidRect (int x, int y, int w, int h, const SDL_Color& c)
+{
+    SDL_Rect r = { x, y, w, h };
+    SDL_SetRenderDrawColor(_renderer, c.r, c.g, c.b, c.a);
+    SDL_RenderFillRect(_renderer, &r);
+}
+
+// Draw a filled/solid alpha blended (transparent) rectangle
+void Screen::drawSolidRectA(int x, int y, int w, int h, const SDL_Color& c, int iAlpha)
+{
+    SDL_Rect r = { x, y, w, h };
+    SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(_renderer, c.r, c.g, c.b, c.a);
+    SDL_RenderFillRect(_renderer, &r);
+}
+
+void Screen::putPixel(int x, int y, Uint32 colour)
+{
+//	// Put pixel of colour c at x,y
+//	// If colour is NONE - no pixel is ploted
+//    if (x >=0 && x < s->w && y >=0 && y < s->h) // && c != Colour::NONE)
+//    {
+//		unsigned short* dst = static_cast<unsigned short*>(s->pixels);
+//		dst[y * s->pitch/sizeof(unsigned short) + x] = (unsigned short)colour;	//##fudge!!
+//    }
+}
+
+//function to blit to screen
+void Screen::blit(SDL_Texture* srcTex, SDL_Rect* srcRect, int destX, int destY)
+{
+    SDL_Rect destRect;
+    destRect.x = destX;
+    destRect.y = destY;
+    if (srcRect == nullptr)
+    {
+        Uint32 format;
+        int access, w, h;
+        SDL_QueryTexture(srcTex, &format, &access, &w, &h);
+        destRect.w = w;
+        destRect.h = h;
+    }
+    else
+    {
+        destRect.w = srcRect->w;
+        destRect.h = srcRect->h;
+    }
+	SDL_RenderCopy(_renderer, srcTex, srcRect, &destRect);
 }
 
 

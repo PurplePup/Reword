@@ -39,7 +39,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include <SDL.h>
 #include <SDL_image.h>	//for IMG_ functions
-#include <SDL_ttf.h>	//for TTF_ functions
+//#include <SDL_ttf.h>	//for TTF_ functions
 #ifdef GP2X
 #include <SDL_gp2x.h>
 #endif
@@ -52,6 +52,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include "audio.h"
 #include "framerate.h"
+#include "locator.h"
 
 #include "playmenu.h"
 #include "playmainmenu.h"
@@ -79,8 +80,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 
 Game::Game() :
-	_init(false), _screen(0), _input(0), _audio(0),
-	_gd(0)
+	_init(false),
+	_screen(nullptr), _input(nullptr), _audio(nullptr), _gd(nullptr)
 {
 }
 
@@ -98,7 +99,7 @@ Game::~Game()
 #if (defined(GP2X) || defined(PANDORA))
         SDL_FreeCursor(hiddenCursor);
 #endif
-
+        IMG_Quit();
 		TTF_Quit();
 	}
 }
@@ -108,9 +109,9 @@ void Game::splash()
 	if (!_screen) return;
 	Image img(RES_IMAGES + "splash.png");	//solid black background
 	SDL_Colour c = {0x00,0x00,0x00,0};	//black
-	ppg::drawSolidRect(_screen->surface(), 0, 0, Screen::width(), Screen::height(), c);
+	_screen->drawSolidRect(0, 0, Screen::width(), Screen::height(), c);
 	//center it - if needed
-	ppg::blit_surface(img.surface(), 0, _screen->surface(), (Screen::width()-img.width())/2, (Screen::height()-img.height())/2);
+	_screen->blit(img.tex(), nullptr, (Screen::width()-img.width())/2, (Screen::height()-img.height())/2);
 	_screen->update();	//flip
 //	sleep(2);	//so we can see it (POSIX)
 }
@@ -212,6 +213,12 @@ bool Game::init(GameOptions &options)
 
 	atexit(SDL_Quit);	//auto cleanup, just in case
 
+    //Set texture filtering to linear
+    if( !SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" ) )
+    {
+        std::cout << "Warning: Linear texture filtering not enabled!";
+    }
+
     if ((init_flags & SDL_INIT_AUDIO) == 0)
         Locator::initAudio();   //NullAudio in logs window
     else
@@ -219,12 +226,23 @@ bool Game::init(GameOptions &options)
     IAudio &audio = Locator::audio();
     audio.setup(options._bDefaultSfxOn, options._bDefaultMusicOn, options._defaultMusicDir, options._bMute);
 
-	_screen  = new Screen(SCREEN_WIDTH, SCREEN_HEIGHT);
+	_screen  = new Screen(SCREEN_WIDTH, SCREEN_HEIGHT, "REWORD");
 	if (!_screen->initDone())
 	{
 		setLastError(_screen->lastError());
 		return false;
 	}
+	Locator::registerScreen(_screen);
+
+    //Initialize PNG loading
+    int imgFlags = IMG_INIT_PNG;
+    if( !( IMG_Init( imgFlags ) & imgFlags ) )
+    {
+        std::string s = "SDL_image could not initialize! SDL_image Error: ";
+        s += IMG_GetError();
+        setLastError(s, false);
+        return false;
+    }
 
 #if (defined(GP2X) || defined(PANDORA))
     uint8_t hiddenCursorData = 0;
@@ -259,9 +277,6 @@ bool Game::init(GameOptions &options)
 #if ((defined(GP2X) || defined(PANDORA)))
 	//SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_VIDEO);
 //	joystick = SDL_JoystickOpen(0);
-#else
-    SDL_WM_SetCaption("REWORD", 0);		//windowed caption
-	std::cout << "Using window, Caption REWORD" << std::endl;
 #endif
 
 	//load all game data (images, fonts, etc, etc)
@@ -348,7 +363,7 @@ bool Game::run(void)
 
 bool Game::play(IPlay *p)
 {
-    if (NULL == p) return false;    //invalid IPlay object
+    if (nullptr == p) return false;    //invalid IPlay object
 
 	bool bCap = true;
 #ifdef GP2X
@@ -365,9 +380,9 @@ bool Game::play(IPlay *p)
 	SDL_Event event;
 
 #ifndef WIN32
-	int fbdev = open("/dev/fb0", O_RDONLY);
-//	void *buffer =
-        mmap(0, SCREEN_WIDTH*SCREEN_HEIGHT*2, PROT_WRITE, MAP_SHARED, fbdev, 0);
+//	int fbdev = open("/dev/fb0", O_RDONLY);
+//  //void *buffer =
+//      mmap(0, SCREEN_WIDTH*SCREEN_HEIGHT*2, PROT_WRITE, MAP_SHARED, fbdev, 0);
 #endif
 	// Initialise play/level specific stuff
 	p->init(_input);
@@ -554,6 +569,8 @@ bool Game::play(IPlay *p)
 		lastFrameTime = currentTime;
 */
 		_screen->lock();
+		_screen->clear();
+
 		p->render(_screen);	//screen render
 
         //render short term effects over any other renders
@@ -572,8 +589,8 @@ bool Game::play(IPlay *p)
 		#ifndef FBIO_WAITFORVSYNC
 		  #define FBIO_WAITFORVSYNC _IOW('F', 0x20, __u32)
 		#endif
-		int arg = 0;
-		ioctl(fbdev, FBIO_WAITFORVSYNC, &arg);
+//		int arg = 0;
+//		ioctl(fbdev, FBIO_WAITFORVSYNC, &arg);
 #endif
 
 		_screen->unlock();

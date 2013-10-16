@@ -32,6 +32,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "resource.h"
 #include "platform.h"
 #include <iostream>
+#include <cassert>
 
 ResourceImg::ResourceImg() : _alpha(-1)
 {
@@ -103,7 +104,7 @@ std::cout << "# of images " << _cache.size() << " - added " << image->_dbgName <
 
 //////////////////////////////// Resource Locator/////////////////////////////
 
-static ResourceImg * _img = 0;
+static ResourceImg * _img = nullptr;
 static ResourceImg _nullimg;
 
 void Resource::initImage()
@@ -112,17 +113,17 @@ void Resource::initImage()
 }
 ResourceImg& Resource::image()
 {
-    assert(_img != NULL);
+    assert(_img != nullptr);
     return *_img;
 }
 tSharedImage& Resource::image(const std::string &imgFile)
 {
-    assert(_img != NULL);
+    assert(_img != nullptr);
     return _img->get(imgFile);
 }
 void Resource::registerImage(ResourceImg* img)
 {
-    if (img == NULL)
+    if (img == nullptr)
         _img = &_nullimg;   // revert to null service
     else
         _img = img;

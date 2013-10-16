@@ -45,6 +45,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "global.h"
 #include "platform.h"
 
+#include <cassert>
+
 Control::Control(t_pControl &pCtrl, int id, unsigned int group,
                     eCtrlAnimMode type, unsigned int state) :
     _pCtrl(pCtrl), _id(id), _bPressed(false), _group(group),

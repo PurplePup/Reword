@@ -1,4 +1,4 @@
-#ifndef I_INPUT_H_INCLUDED
+#if !defined I_INPUT_H_INCLUDED
 #define I_INPUT_H_INCLUDED
 
 #include <SDL.h>

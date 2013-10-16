@@ -3,12 +3,13 @@
 
 #include "sprite.h"
 #include "i_play.h"
-#include <boost/shared_ptr.hpp>
+
+#include <memory>
 
 class Control : IPlay
 {
 public:
-    typedef boost::shared_ptr<Sprite> t_pControl;
+    typedef std::shared_ptr<Sprite> t_pControl;
     //define some control frame types. Specifically CAT_DIS_HIT_IDLE_DOUBLE which allows a frame set
     //with an on/off yes/no type of structure
     enum eCtrlAnimMode { CAM_SIMPLE,                  //simple first to last frame format

@@ -1,11 +1,11 @@
 //global.h
 
-#ifndef _GAME_GLOBAL_H_
+#if !defined _GAME_GLOBAL_H_
 #define _GAME_GLOBAL_H_
 
-#include "locator.h"    //as it's effectivly a global
-#include "platform.h"
-#include "SDL.h"
+//#include "locator.h"    //as it's effectivly a global
+//#include "platform.h"
+#include <SDL.h>
 
 
 #define VERSION_STRING		"v0.6.2 "	//only displayed on menu (playmenu)

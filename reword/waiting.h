@@ -1,9 +1,9 @@
 //waiting.h
 
-#ifndef _WAITING_H
+#if !defined _WAITING_H
 #define _WAITING_H
 
-#include "SDL.h"
+#include <SDL.h>
 
 class Waiting
 {
