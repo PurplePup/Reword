@@ -4,7 +4,9 @@
 #define _SURFACE_H
 
 #include <SDL.h>
-#include <SDL_image.h>	//for IMG_ functions
+#include <SDL_surface.h>
+
+#include <string>
 
 //#include "utils.h"
 
@@ -27,7 +29,12 @@ public:
 	}
 
 	bool create(Uint32 w, Uint32 h, int iAlpha = -1);	//create a surface of specific size
+    bool load(const std::string &fileName);
 	void copy(Surface &s);
+
+    void setTransparentColour(SDL_Color cAlphaKey);
+    void setTransparentColour();    //use first pixel
+    void setAlphaTransparency(Uint8 iAlpha);
 
 	//accessors
 	Uint32 width() const;

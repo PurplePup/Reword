@@ -173,7 +173,7 @@ void PlayGame::init(Input *input)
     if (Locator::audio().isPlayingMusic()==false)   //no user music
 		Mix_FadeOutMusic(3000);                     //fade out any menu music
 
-	_scorebar = Resource::image("scorebar.png");
+	_scorebar.load("scorebar.png");
 	_cursor.setImage(Resource::image("cursors.png"));
 	_scratch.setImage(Resource::image("scratch.png"));
 	_boxes.setImage(Resource::image("boxes.png"));
@@ -556,7 +556,7 @@ void PlayGame::render_end(Screen* s)
 
 	//finished level so show success type and bonus etc
 	const int minGap = _gd._fntSmall.height();	//useful distance based on small font
-	const int yyTitle = _scorebar->height() + minGap;
+	const int yyTitle = _scorebar.height() + minGap;
 	const int yyReward = yyTitle +_gd._fntBig.height() + minGap;
 	const int yyBonus = (_yScratchBot+CURSORH+_boxOffsetY) + (2*_gd._fntBig.height());
 	switch (_success)
@@ -1629,7 +1629,7 @@ void PlayGame::newGame()
 	//   (X pos depends on number of letters in word so calculated in newLevel()
 	//scratch letter area _yScratchTop (6 roundels on top)
 	//scratch box area _yScratchBot (6 boxes below roundels)
-	_yScratchTop = _scorebar->height() + GAME_GAP1;
+	_yScratchTop = _scorebar.height() + GAME_GAP1;
 	_yScratchBot = _yScratchTop + CURSORH + GAME_GAP1;
 
 	_gd._score.resetCurr();
@@ -2056,20 +2056,19 @@ void PlayGame::fillRemainingWords()
 
 void PlayGame::prepareBackground()
 {
-    Screen *screen = &Locator::screen();
 	//create the background to be used for this level,
 	//pre drawing so we dont need to do it each frame.
 	//...
-	_gamebg = tSharedImage(new Image(SCREEN_WIDTH, SCREEN_HEIGHT));
-	Locator::screen().drawSolidRect(0, 0, Screen::width(), Screen::height(), GAMEBG_COLOUR);
+
+    Surface tmpSurface; //to build background before convert to texture (at end)
+	tmpSurface.create(Screen::width(), Screen::height());
+    ppg::drawSolidRect (&tmpSurface, 0, 0, Screen::width(), Screen::height(), GAMEBG_COLOUR);
 
 	//place score bar centered - in case screen bigger than graphic
-	int sb_x = (SCREEN_WIDTH - _scorebar->width())/2;  //in case sb w < screen w
-	int sb_w = _scorebar->width();
-	int sb_h = _scorebar->height();
-	//_gamebg->blitFrom(&_gd._scorebar, sb_x, 0);
-	//ppg::blit_surface(_scorebar->surface(), nullptr, _gamebg->surface(), sb_x, 0);
-	screen->blit(_scorebar->tex(), nullptr, sb_x, 0);
+	int sb_x = (SCREEN_WIDTH - _scorebar.width())/2;  //in case sb w < screen w
+	int sb_w = _scorebar.width();
+	int sb_h = _scorebar.height();
+	ppg::blit_surface(_scorebar.surface(), nullptr, tmpSurface.surface(), sb_x, 0);
 
 	//prerender the score and words titles
 	//find out sizes and calc reasonable positions
@@ -2140,27 +2139,31 @@ void PlayGame::prepareBackground()
 	_countdown0_x = (sb_x + sb_w) - (edge_pad / 2);
 	_countdown0_y = (sb_h - fontCounter.height()) / 2;
 
-	fontText.put_text(screen, score_x, titles_y, "SCORE:", WHITE_COLOUR);
-	fontText.put_text(screen, words_x, titles_y, "WORDS:", WHITE_COLOUR);
+	fontText.put_text(&tmpSurface, score_x, titles_y, "SCORE:", WHITE_COLOUR);
+	fontText.put_text(&tmpSurface, words_x, titles_y, "WORDS:", WHITE_COLOUR);
 
-	//draw mode in bot right corner (before/under word boxes so if 8 6-letter words, it doesnt cover anything up)
+	//draw mode and difficulty in bot right corner
+	//(before/under word boxes so if 8 6-letter words, it doesnt cover boxes up)
 	std::string strMode;
-	Image *pImage = 0;
+	Surface modeSurface;
 	switch (_gd._mode)
 	{
-	case GM_ARCADE:		pImage = Resource::image("game_arcade.png").get();	strMode = "ARCADE";break;
-	case GM_REWORD:		pImage = Resource::image("game_reword.png").get();	strMode = "REWORD";break;
-	case GM_SPEEDER:	pImage = Resource::image("game_speeder.png").get(); strMode = "SPEEDWORD";break;
-	case GM_TIMETRIAL:	pImage = Resource::image("game_timetrial.png").get(); strMode = "TIMETRIAL";break;
+	case GM_ARCADE:		modeSurface.load("game_arcade.png");	strMode = "ARCADE";    break;
+	case GM_REWORD:		modeSurface.load("game_reword.png");	strMode = "REWORD";    break;
+	case GM_SPEEDER:	modeSurface.load("game_speeder.png");   strMode = "SPEEDWORD"; break;
+	case GM_TIMETRIAL:	modeSurface.load("game_timetrial.png"); strMode = "TIMETRIAL"; break;
 	default:break;
 	}
-	assert(pImage);
-	int mode_x = SCREEN_WIDTH - pImage->width() + 25; 	//slightly off screen
-	int mode_y = SCREEN_HEIGHT - pImage->height() + 25;	//ditto
-	//ppg::blit_surface(pImage->surface(), nullptr, _gamebg->surface(), mode_x, mode_y);
-	Locator::screen().blit(pImage->tex(), nullptr, mode_x, mode_y);
+	assert(modeSurface.surface());
+	modeSurface.setAlphaTransparency(100);
+	int mode_x = SCREEN_WIDTH - modeSurface.width() + 25; 	//slightly off screen
+	int mode_y = SCREEN_HEIGHT - modeSurface.height() + 25;	//ditto
+	ppg::blit_surface(modeSurface.surface(), nullptr, tmpSurface.surface(), mode_x, mode_y);
 
-	//draw difficulty level in bot right corner (before/under word boxes so if 8 6-letter words, it doesnt cover anything up)
+	//draw difficulty level in bot right corner
 	std::string strDiff = strMode + " (" + _gd._diffName + ")";
-	_gd._fntTiny.put_text_right(screen, SCREEN_HEIGHT - _gd._fntTiny.height(), 0, strDiff.c_str(), _gd._diffColour);
+	_gd._fntTiny.put_text_right(&tmpSurface, SCREEN_HEIGHT - _gd._fntTiny.height() - 4, 4, strDiff.c_str(), _gd._diffColour);
+
+    //now make texture to be rendered as background during actual play/update
+	_gamebg = tSharedImage(new Image(tmpSurface));
 }

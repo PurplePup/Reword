@@ -5,6 +5,7 @@
 
 #include <SDL.h>
 #include "random.h"
+#include "surface.h"
 
 
 struct Point : public SDL_Point
@@ -74,9 +75,9 @@ public:
  //   void drawRect(const Rect& r, const SDL_Color& c);
  //   void drawRect(const SDL_Rect& r, const SDL_Color& c);
  //   void drawRect(int x, int y, int w, int h, const SDL_Color& c);
-    static void drawSolidRect(SDL_Surface* s, int x, int y, int w, int h, const SDL_Color& c);
-    static void drawSolidRectA(SDL_Surface* s, int x, int y, int w, int h, const SDL_Color& c, int iAlpha);
-	static void putPixel(SDL_Surface* s, int x, int y, Uint32 colour);
+    static void drawSolidRect(Surface* s, int x, int y, int w, int h, const SDL_Color& c);
+    static void drawSolidRectA(Surface* s, int x, int y, int w, int h, const SDL_Color& c, int iAlpha);
+	static void putPixel(Surface* s, int x, int y, Uint32 colour);
 
 	static void blit_surface(SDL_Surface* source, SDL_Rect* srcRect, SDL_Surface* dest, int destX, int destY);
 	//void blit_surface(SDL_Surface* source, SDL_Rect* srcRect, int destX, int destY );

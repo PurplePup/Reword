@@ -19,9 +19,10 @@ public:
     enum eTileDir { TILE_HORIZ, TILE_VERT };
 
 	Image();
-	Image(unsigned int w, unsigned int h, int iAlpha = -1);
-	Image(const std::string &fileName, int iAlpha = -1, Uint32 nTiles = 1);
 	Image(const Image &img);
+	Image(unsigned int w, unsigned int h, Uint32 nTiles = 1, SDL_Color cAlphaKey = ALPHA_COLOUR, Uint8 iAlpha = 255);
+	Image(const std::string &fileName, Uint32 nTiles = 1, SDL_Color cAlphaKey = ALPHA_COLOUR, Uint8 iAlpha = 255);
+    Image(Surface &surface, Uint32 nTiles = 1, SDL_Color cAlphaKey = ALPHA_COLOUR, Uint8 iAlpha = 255);
 	virtual ~Image();
 
 //	Image& operator=(const Image& img)
@@ -33,16 +34,15 @@ public:
 //		return *this;
 //	};
 
-    bool create(unsigned int w, unsigned int h, int iAlpha =-1);
+    bool create(unsigned int w, unsigned int h, Uint32 nTiles = 1, SDL_Color cAlphaKey = ALPHA_COLOUR, Uint8 iAlpha = 255);
 	bool initDone() const { return _init; }	//has Image been initialised properly
-	bool initImage(SDL_Surface *newSurface, int iAlpha = -1, Uint32 nTiles = 1);
-
     SDL_Texture * tex() const { return _ptex; }
 
     void cloneFrom(Image &image, int iAlpha = -1);
     void cloneFrom(Image &image, Rect &r, int iAlpha = -1);
 
-	virtual bool load(const std::string &fileName, int iAlpha = -1, Uint32 nTiles = 1);	//default no alpha
+//	virtual bool load(const std::string &fileName, int iAlpha = -1, Uint32 nTiles = 1);	//default no alpha
+    bool load(const std::string &fileName, Uint32 nTiles = 1, SDL_Color cAlphaKey = ALPHA_COLOUR, Uint8 iAlpha = 255);
 
 	Uint32 width() const;
 	Uint32 height() const;
@@ -63,8 +63,9 @@ public:
 
 protected:
 	void cleanUp();
+	bool initImage(Surface *newSurface, Uint32 nTiles = 1, SDL_Color cAlphaKey = ALPHA_COLOUR, Uint8 iAlpha = 255);
 	bool setTileSize(Uint32 w = 0, Uint32 h = 0, eTileDir tileDirection = TILE_HORIZ);
-    bool createTexFromSurface(SDL_Surface *s);
+    bool createTexFromSurface(Surface *s);
 
 private:
 	bool    _init;

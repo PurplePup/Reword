@@ -42,7 +42,6 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <iostream>
 
 Image::Image() :
-	//Surface(),
 	_init(false),
 	_tileCount(0), _tileW(0), _tileH(0), _tileWOffset(0), _tileHOffset(0),
 	_tileDir(TILE_HORIZ), _ptex(nullptr)
@@ -50,19 +49,16 @@ Image::Image() :
 	cleanUp();
 }
 
-Image::Image(unsigned int w, unsigned int h, int iAlpha /*=-1*/) :
-	//Surface(),
+Image::Image(unsigned int w, unsigned int h, Uint32 nTiles /*=1*/, SDL_Color cAlphaKey /*=ALPHA_COLOUR*/, Uint8 iAlpha /* = 255 */ ) :
 	_init(false),
 	_tileCount(0), _tileW(0), _tileH(0), _tileWOffset(0), _tileHOffset(0),
 	_tileDir(TILE_HORIZ), _ptex(nullptr)
 {
 	cleanUp();
-	_init = create(w, h, iAlpha);	//create surface of required size
-	setTileSize();					//ensure tile size set (at least to size of image)
+	_init = create(w, h, nTiles, cAlphaKey, iAlpha);	//create surface of required size
 }
 
-Image::Image(const std::string &fileName, int iAlpha /*=-1*/, Uint32 nTiles /*=1*/) :
-	//Surface(),
+Image::Image(const std::string &fileName, Uint32 nTiles /*=1*/, SDL_Color cAlphaKey /*=ALPHA_COLOUR*/, Uint8 iAlpha /* = 255 */ ) :
 	_init(false),
 	_tileCount(0), _tileW(0), _tileH(0), _tileWOffset(0), _tileHOffset(0),
 	_tileDir(TILE_HORIZ), _ptex(nullptr)
@@ -72,11 +68,10 @@ Image::Image(const std::string &fileName, int iAlpha /*=-1*/, Uint32 nTiles /*=1
 #endif
 
 	cleanUp();
-	load(fileName, iAlpha, nTiles);
+	load(fileName, nTiles, cAlphaKey, iAlpha);
 }
 
 Image::Image(const Image &img) :
-	//Surface(img.surface()),
 	_init(img._init),
 	_tileCount(0), _tileW(0), _tileH(0), _tileWOffset(0), _tileHOffset(0),
 	_tileDir(TILE_HORIZ), _ptex(nullptr)
@@ -84,7 +79,17 @@ Image::Image(const Image &img) :
 #if _DEBUG
     _dbgName = img._dbgName;
 #endif
+    *this = img;
     setTileCount(img.tileCount(), img.tileDir());
+}
+
+//create a texture (Image) from a surface
+Image::Image(Surface &surface, Uint32 nTiles /*=1*/, SDL_Color cAlphaKey /*=ALPHA_COLOUR*/, Uint8 iAlpha /* = 255 */ ) :
+	_init(false),
+	_tileCount(0), _tileW(0), _tileH(0), _tileWOffset(0), _tileHOffset(0),
+	_tileDir(TILE_HORIZ), _ptex(nullptr)
+{
+    initImage(&surface, nTiles, cAlphaKey, iAlpha);
 }
 
 Image::~Image()
@@ -98,7 +103,14 @@ void Image::cleanUp()
 
 //	_clip = 0;	//use whole image (used in blit(Image*) )
 
-    SDL_DestroyTexture(_ptex);
+    if (_ptex != nullptr)
+    {
+        SDL_DestroyTexture(_ptex);
+        _ptex = nullptr;
+    }
+
+	_tileCount = _tileW = _tileH = _tileWOffset = _tileHOffset = 0;
+	_tileDir = TILE_HORIZ;
 
 	_init = false;
 }
@@ -119,13 +131,13 @@ Uint32 Image::height() const
     return h;
 }
 
-bool Image::create(unsigned int w, unsigned int h, int iAlpha /*=-1*/)
+bool Image::create(unsigned int w, unsigned int h, Uint32 nTiles /*=1*/, SDL_Color cAlphaKey /*=ALPHA_COLOUR*/, Uint8 iAlpha /* = 255 */ )
 {
     bool bOk = false;
     Surface surface;
-    if (surface.create(w, h, iAlpha))
+    if (surface.create(w, h))
     {
-        bOk = initImage(surface.surface());
+        bOk = initImage(&surface, nTiles, cAlphaKey, iAlpha);
     }
     return bOk;
 }
@@ -140,6 +152,7 @@ void Image::cloneFrom(Image &image, int iAlpha /*=-1*/)
 void Image::cloneFrom(Image &image, Rect &r, int iAlpha /*=-1*/)
 {
 	cleanUp();
+
 //	_init = Surface::create(r.width(), r.height(), iAlpha);
 //
 //	if (image.surface()->format->Amask && iAlpha!=-1)
@@ -153,6 +166,7 @@ void Image::cloneFrom(Image &image, Rect &r, int iAlpha /*=-1*/)
 //
 //	SDL_Rect sdlR = r.toSDL(); //{r.left(), r.top(), r.width(), r.height()};
 //	ppg::blit_surface(image._surface, &sdlR, this->_surface, 0, 0);   //into "this" newly created 'copy'
+
 }
 
 /*
@@ -220,30 +234,38 @@ bool Image::copy(Image &image)
 
 */
 
-bool Image::load(const std::string &fileName, int iAlpha /* =-1 */, Uint32 nTiles /*=1*/)
+//cAlphaKey is colour to be used as transparent pixel colour, default putrid purple
+//iAlpha is level of transparency (for all pixels) 0=full, 255=opaque
+bool Image::load(const std::string &fileName, Uint32 nTiles /*=1*/, SDL_Color cAlphaKey /*=ALPHA_COLOUR*/, Uint8 iAlpha /* = 255 */ )
+//bool Image::load(const std::string &fileName, int iAlpha /* =-1 */, Uint32 nTiles /*=1*/)
 {
 	//Temporary storage for the image that's loaded
-	SDL_Surface* loadedImage = nullptr;
-
-	 //Load the image
-//	loadedImage = SDL_LoadBMP( fileName.c_str() );	//using SDL dll
-	loadedImage = IMG_Load(fileName.c_str());		//using SDL_Image dll (png, jpg etc)
-	if (nullptr == loadedImage)
-	{
-		std::cerr << "Failed to load image " << fileName << ". Cannot start." << std::endl;
-		std::string strErr = SDL_GetError();
-		std::cerr << "SDL_Error = " << strErr << std::endl;
-		return false;
-	}
-
-    const bool bOk = initImage(loadedImage, iAlpha, nTiles);
-
-    SDL_FreeSurface(loadedImage);
-
-	return bOk;
+	Surface newSurface;
+	if (newSurface.load(fileName))
+    {
+        return initImage(&newSurface, nTiles, cAlphaKey, iAlpha);
+    }
+	return false;
 }
 
-bool Image::createTexFromSurface(SDL_Surface *s)
+//use the surface classes initSurface() fn to set up the image surface
+bool Image::initImage(Surface *newSurface, Uint32 nTiles, SDL_Color cAlphaKey, Uint8 iAlpha)
+{
+	cleanUp();
+
+    newSurface->setAlphaTransparency(iAlpha);
+    newSurface->setTransparentColour(cAlphaKey);
+
+	if (createTexFromSurface(newSurface))
+    {
+        _init = true;
+
+        setTileCount(nTiles);   //default tile dir (until changed)
+    }
+    return _init;
+}
+
+bool Image::createTexFromSurface(Surface *s)
 {
     if (_ptex)
     {
@@ -251,23 +273,11 @@ bool Image::createTexFromSurface(SDL_Surface *s)
         _ptex = nullptr;
     }
 
-    SDL_SetSurfaceBlendMode(s, SDL_BLENDMODE_BLEND);  //this is default anyway
+    _ptex = SDL_CreateTextureFromSurface(Locator::screen().renderer(), s->surface());
 
-    _ptex = SDL_CreateTextureFromSurface(Locator::screen().renderer(), s);
+    SDL_SetSurfaceBlendMode(s->surface(), SDL_BLENDMODE_BLEND);  //this is default anyway
 
     return (_ptex != nullptr);
-}
-
-//use the surface classes initSurface() fn to set up the image surface
-bool Image::initImage(SDL_Surface *newSurface, int iAlpha /* =-1 */, Uint32 nTiles /*=1*/)
-{
-	cleanUp();
-	if (createTexFromSurface(newSurface))
-    {
-        _init = true;
-        setTileCount(nTiles);
-    }
-    return _init;
 }
 
 ////assumes a single row of tiles [0,1,2,3,4,5...]

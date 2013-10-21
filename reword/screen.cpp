@@ -59,10 +59,10 @@ Screen::Screen(int w, int h, const std::string &strTitle) :
 
 	if ( _window != nullptr )
 	{
-//#if ((!defined(GP2X) && !defined(PANDORA)))
-//        SDL_SetWindowTitle(_window, strTitle.c_str());		//windowed caption
-//        std::cout << "Using window, Caption " << strTitle << std::endl;
-//#endif
+#if ((!defined(GP2X) && !defined(PANDORA)))
+        SDL_SetWindowTitle(_window, strTitle.c_str());		//windowed caption
+        std::cout << "Using window, Caption " << strTitle << std::endl;
+#endif
 
         //create screen renderer
         _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED);
@@ -150,6 +150,8 @@ void Screen::drawSolidRectA(int x, int y, int w, int h, const SDL_Color& c, int 
 
 void Screen::putPixel(int x, int y, Uint32 colour)
 {
+    assert(0);  //fn not implemented
+
 //	// Put pixel of colour c at x,y
 //	// If colour is NONE - no pixel is ploted
 //    if (x >=0 && x < s->w && y >=0 && y < s->h) // && c != Colour::NONE)
@@ -159,7 +161,7 @@ void Screen::putPixel(int x, int y, Uint32 colour)
 //    }
 }
 
-//function to blit to screen
+//function to blit a texture to screen
 void Screen::blit(SDL_Texture* srcTex, SDL_Rect* srcRect, int destX, int destY)
 {
     SDL_Rect destRect;

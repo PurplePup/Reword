@@ -29,13 +29,15 @@ Licence:		This program is free software; you can redistribute it and/or modify
 */
 ////////////////////////////////////////////////////////////////////
 
+
+#include <SDL_image.h>	//for IMG_ functions
+
+#include <iostream>
+
 #include "global.h"
 #include "surface.h"
 #include "utils.h"
 #include "platform.h"
-
-// #include <SDL_gfxPrimitives.h>
-#include <SDL_surface.h>
 
 Surface::Surface() : _surface(nullptr)
 {
@@ -58,7 +60,6 @@ bool Surface::create(Uint32 w, Uint32 h, int iAlpha /*=-1*/)
 {
 	cleanUp();	//destroy any existing surface
 
-	//SDL_Surface *s;
     Uint32 rmask, gmask, bmask, amask;
 
     /* SDL interprets each pixel as a 32-bit number, so our masks must depend
@@ -76,19 +77,81 @@ bool Surface::create(Uint32 w, Uint32 h, int iAlpha /*=-1*/)
 #endif
 
 	_surface = SDL_CreateRGBSurface(
-                          0, //SCREEN_SURFACE|(iAlpha>=0)?SDL_SRCALPHA:SDL_SRCCOLORKEY,
-                          w, h, SCREEN_BPP,
-                          rmask, gmask, bmask, amask);
+                          0,            //unused in SDL2
+                          w, h,
+                          SCREEN_BPP,   //from platform.h
+                          rmask, gmask, bmask, amask);  //used if > 8 bits
 
     /* or using the default masks for the depth: */
-    //s = SDL_CreateRGBSurface(0,w,h,32,0,0,0,0);
+    //_surface = SDL_CreateRGBSurface(0,w,h,32,0,0,0,0);
 
-	bool b = initSurface(iAlpha);
-	return (b && _surface != nullptr);
-
-//    return _surface != nullptr;
+	return _surface != nullptr;
 }
 
+//just load the image named
+bool Surface::load(const std::string &fileName)
+{
+    cleanUp();
+    //_surface = SDL_LoadBMP( fileName.c_str() );	//using SDL dll
+
+    //if fileName does not include a path prefix (has / or \ included in filename)
+    //then add RES_IMAGES prefix automatically. So callers can just use base filename or
+    //add own explicit path.
+    const bool bHasPath = (fileName.find_first_of("\\/") != std::string::npos);
+    if (bHasPath)
+        _surface = IMG_Load(fileName.c_str());		//using SDL_Image dll (png, jpg etc)
+    else
+        _surface = IMG_Load((RES_IMAGES + fileName).c_str());		//using SDL_Image dll (png, jpg etc)	if (nullptr == _surface)
+	{
+		std::cerr << "Failed to load image " << (bHasPath?"":(RES_IMAGES).c_str()) << fileName << ". Cannot start." << std::endl;
+		std::cerr << "SDL_Error = " << SDL_GetError() << std::endl;
+		return false;
+	}
+
+    return true;
+}
+
+void Surface::setTransparentColour(SDL_Color cAlphaKey)
+{
+    if (_surface == nullptr) return;
+
+    Uint32 key = SDL_MapRGB(_surface->format, cAlphaKey.r,cAlphaKey.g,cAlphaKey.b);
+    SDL_SetColorKey(_surface, 1, key);
+}
+
+void Surface::setTransparentColour()
+{
+    if (_surface == nullptr) return;
+
+    /* Set transparent pixel as that of the pixel at (0,0) */
+
+    if (_surface->format->palette) {
+        SDL_SetColorKey(_surface, 1, *(Uint8 *) _surface->pixels);
+    } else {
+        switch (_surface->format->BitsPerPixel) {
+        case 15:
+            SDL_SetColorKey(_surface, 1, (*(Uint16 *) _surface->pixels) & 0x00007FFF);
+            break;
+        case 16:
+            SDL_SetColorKey(_surface, 1, *(Uint16 *) _surface->pixels);
+            break;
+        case 24:
+            SDL_SetColorKey(_surface, 1, (*(Uint32 *) _surface->pixels) & 0x00FFFFFF);
+            break;
+        case 32:
+            SDL_SetColorKey(_surface, 1, *(Uint32 *) _surface->pixels);
+            break;
+        }
+    }
+}
+
+void Surface::setAlphaTransparency(Uint8 iAlpha)
+{
+    if (_surface == nullptr) return;
+    SDL_SetSurfaceAlphaMod(_surface, iAlpha);
+}
+
+/*
 bool Surface::initSurface(int iAlpha)
 {
 //	if( newSurface != nullptr )
@@ -115,32 +178,11 @@ bool Surface::initSurface(int iAlpha)
 //		//Free the old image
 //		SDL_FreeSurface( newSurface );
 
-
-        /* Set transparent pixel as the pixel at (0,0) */
-        if (_surface->format->palette) {
-            SDL_SetColorKey(_surface, 1, *(Uint8 *) _surface->pixels);
-        } else {
-            switch (_surface->format->BitsPerPixel) {
-            case 15:
-                SDL_SetColorKey(_surface, 1, (*(Uint16 *) _surface->pixels) & 0x00007FFF);
-                break;
-            case 16:
-                SDL_SetColorKey(_surface, 1, *(Uint16 *) _surface->pixels);
-                break;
-            case 24:
-                SDL_SetColorKey(_surface, 1, (*(Uint32 *) _surface->pixels) & 0x00FFFFFF);
-                break;
-            case 32:
-                SDL_SetColorKey(_surface, 1, *(Uint32 *) _surface->pixels);
-                break;
-            }
-        }
-
-
 		return true;
 //	}
 //	return false;
 }
+*/
 
 /*
 //make a deep copy (copy surface pointer etc) as assignment

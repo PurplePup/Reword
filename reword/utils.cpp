@@ -132,29 +132,32 @@ void ppg::pushSDL_EventKey(int key)
 
 
 // Draw a filled/solid rectangle
-void ppg::drawSolidRect (SDL_Surface* s, int x, int y, int w, int h, const SDL_Color& c)
+void ppg::drawSolidRect (Surface* s, int x, int y, int w, int h, const SDL_Color& c)
 {
+    if (!s->surface()) return;
     SDL_Rect r = { x, y, w, h };
-    const Uint32 colour = SDL_MapRGB(s->format, c.r, c.g, c.b);
-    SDL_FillRect(s, &r, colour);
+    const Uint32 colour = SDL_MapRGB(s->surface()->format, c.r, c.g, c.b);
+    SDL_FillRect(s->surface(), &r, colour);
 }
 
 // Draw a filled/solid alpha blended (transparent) rectangle
-void ppg::drawSolidRectA(SDL_Surface* s, int x, int y, int w, int h, const SDL_Color& c, int iAlpha)
+void ppg::drawSolidRectA(Surface* s, int x, int y, int w, int h, const SDL_Color& c, int iAlpha)
 {
+    if (!s->surface()) return;
     SDL_Rect r = { x, y, w, h };
-    const Uint32 colour = SDL_MapRGBA(s->format, c.r, c.g, c.b, iAlpha);
-    SDL_FillRect(s, &r, colour);
+    const Uint32 colour = SDL_MapRGBA(s->surface()->format, c.r, c.g, c.b, iAlpha);
+    SDL_FillRect(s->surface(), &r, colour);
 }
 
-void ppg::putPixel(SDL_Surface* s, int x, int y, Uint32 colour)
+// Put pixel of colour c at x,y
+void ppg::putPixel(Surface* s, int x, int y, Uint32 colour)
 {
-	// Put pixel of colour c at x,y
+    if (!s->surface()) return;
 	// If colour is NONE - no pixel is ploted
-    if (x >=0 && x < s->w && y >=0 && y < s->h) // && c != Colour::NONE)
+    if (x >=0 && x < s->width() && y >=0 && y < s->height()) // && c != Colour::NONE)
     {
-		unsigned short* dst = static_cast<unsigned short*>(s->pixels);
-		dst[y * s->pitch/sizeof(unsigned short) + x] = (unsigned short)colour;	//##fudge!!
+		unsigned short* dst = static_cast<unsigned short*>(s->surface()->pixels);
+		dst[y * s->surface()->pitch/sizeof(unsigned short) + x] = (unsigned short)colour;	//##fudge!!
     }
 }
 

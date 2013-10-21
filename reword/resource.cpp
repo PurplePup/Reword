@@ -34,7 +34,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <iostream>
 #include <cassert>
 
-ResourceImg::ResourceImg() : _alpha(-1)
+ResourceImg::ResourceImg() : _alpha(255), _alphaKey(ALPHA_COLOUR)
 {
     //ctor
 }
@@ -55,21 +55,35 @@ void ResourceImg::clear()
     _cache.clear();
 }
 
-//set the default alpha to be used if get needs to
-void ResourceImg::setAlpha(int iAlpha)
-{
-    _alpha = iAlpha;
-}
+////set the default alpha to be used if get needs to use it
+//void ResourceImg::setAlpha(SDL_Color cAlphaKey /*=ALPHA_COLOUR*/, int iAlpha /*=255*/)
+//{
+//    _alphaKey = cAlphaKey;
+//    _alpha = iAlpha;
+//}
 
 //precache/load an image with a specific alpha value. Returns false if image not found
 //DO NOT use filepath, just file name as path gets added in get()
-bool ResourceImg::add(const std::string & imageFile, int iAlpha /*=-1*/,
-                           Uint32 nTiles /* =1 */, Image::eTileDir tileDir /*= TILE_HORIZ*/)
+bool ResourceImg::add(const std::string & imageFile,
+                      Uint32 nTiles /* =1 */, SDL_Color cAlphaKey /*=ALPHA_COLOUR*/, Uint8 iAlpha /*=255*/,
+                      Image::eTileDir tileDir /*= TILE_HORIZ*/)
 {
-    int oldAlpha = _alpha;
+    auto oldTiles = _tiles;
+    auto oldAlpha = _alpha;
+    auto oldAlphaKey = _alphaKey;
+    auto oldTileDir =_tileDir;
+
+    _tiles = nTiles;
     _alpha = iAlpha;
+    _alphaKey = cAlphaKey;
+    _tileDir = tileDir;
+
     tSharedImage img = get(imageFile);
+
+    _tiles = oldTiles;
     _alpha = oldAlpha;
+    _alphaKey = oldAlphaKey;
+    _tileDir = oldTileDir;
 
     if (!img->initDone())
     {
@@ -107,10 +121,10 @@ std::cout << "# of images " << _cache.size() << " - added " << image->_dbgName <
 static ResourceImg * _img = nullptr;
 static ResourceImg _nullimg;
 
-void Resource::initImage()
-{
-    _img = &_nullimg;
-}
+//void Resource::initImage()
+//{
+//    _img = &_nullimg;
+//}
 ResourceImg& Resource::image()
 {
     assert(_img != nullptr);

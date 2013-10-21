@@ -162,7 +162,7 @@ protected:
 private:
 	GameData &	_gd;			//shared data between screens (play classes)
 	tSharedImage _gamebg;
-	tSharedImage _scorebar;
+	Surface     _scorebar;
 	ImageAnim	_scratch;
 	ImageAnim	_boxes;
 	ImageAnim	_cursor;
