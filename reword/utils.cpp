@@ -181,6 +181,5 @@ void ppg::blit_surface(SDL_Surface* source, SDL_Rect* srcRect, SDL_Surface* dest
 //}
 
 
-
 //}	//namespace ppg
 

@@ -45,9 +45,6 @@ Licence:		This program is free software; you can redistribute it and/or modify
 //#include "singleton.h"
 
 
-//NOTE : DOES NOT WORK IN VC6, MOST OTHER NEWER COMPILERS OK THOUGH
-
-
 //template <class T>
 //  	std::unique_ptr<T> Singleton<T>::_instance(0);    //   definition
 

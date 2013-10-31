@@ -212,7 +212,7 @@ void PlayHigh::render(Screen *s)
 
 	//_menubg->blitTo( s );
 	//ppg::blit_surface(_menubg->surface(), 0, s->surface(), 0,0);
-	s->blit(_menubg->tex(), nullptr, 0, 0);
+	s->blit(_menubg->texture(), nullptr, 0, 0);
 
 	//draw screen title roundals
 	_title.render(s);

@@ -38,6 +38,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "surface.h"
 #include "utils.h"
 #include "platform.h"
+#include "locator.h"
 
 Surface::Surface() : _surface(nullptr)
 {
@@ -85,6 +86,8 @@ bool Surface::create(Uint32 w, Uint32 h, int iAlpha /*=-1*/)
     /* or using the default masks for the depth: */
     //_surface = SDL_CreateRGBSurface(0,w,h,32,0,0,0,0);
 
+    SDL_SetSurfaceBlendMode(_surface, SDL_BLENDMODE_BLEND);  //this is default anyway
+
 	return _surface != nullptr;
 }
 
@@ -107,6 +110,8 @@ bool Surface::load(const std::string &fileName)
 		std::cerr << "SDL_Error = " << SDL_GetError() << std::endl;
 		return false;
 	}
+
+    SDL_SetSurfaceBlendMode(_surface, SDL_BLENDMODE_BLEND);  //this is default anyway
 
     return true;
 }
@@ -238,39 +243,41 @@ Uint32 Surface::height(void) const
 }
 
 
-
-
-#if 0
-// This is a way of telling whether or not to use hardware surfaces
-Uint32 FastestFlags(Uint32 flags, int width, int height, int bpp)
+Texture::Texture() :
+    _texture(nullptr), _width(0), _height(0)
 {
-   const SDL_VideoInfo *info;
-
-   /* Hardware acceleration is only used in fullscreen mode */
-   flags |= SDL_FULLSCREEN;
-
-   /* Check for various video capabilities */
-   info = SDL_GetVideoInfo();
-   if ( info->blit_hw_CC && info->blit_fill ) {
-      /* We use accelerated colorkeying and color filling */
-      flags |= SDL_HWSURFACE;
-   }
-   /* If we have enough video memory, and will use accelerated
-      blits directly to it, then use page flipping.
-    */
-   if ( (flags & SDL_HWSURFACE) == SDL_HWSURFACE ) {
-      /* Direct hardware blitting without double-buffering
-         causes really bad flickering.
-       */
-      if ( info->video_mem*1024 > (height*width*bpp/8) ) {
-         flags |= SDL_DOUBLEBUF;
-      } else {
-         flags &= ~SDL_HWSURFACE;
-      }
-   }
-
-   /* Return the flags */
-   return(flags);
 }
-#endif
+Texture::Texture(Surface &surface) :
+    _texture(nullptr), _width(0), _height(0)
+{
+    createFrom(surface);
+}
+void Texture::createFrom(Surface &surface)
+{
+//    SDL_SetSurfaceBlendMode(surface.surface(), SDL_BLENDMODE_BLEND);  //this is default anyway
+
+    _texture = SDL_CreateTextureFromSurface(Locator::screen().renderer(), surface.surface());
+
+    SDL_SetSurfaceBlendMode(surface.surface(), SDL_BLENDMODE_BLEND);  //this is default anyway
+
+    Uint32 format;
+    int access, w, h;
+    SDL_QueryTexture(_texture, &format, &access, &w, &h);
+    _width = w;
+    _height = h;
+}
+void Texture::cleanup()
+{
+    if (_texture)
+    {
+        SDL_DestroyTexture(_texture);
+        _texture = nullptr;
+    }
+}
+Texture::~Texture()
+{
+    cleanup();
+}
+
+
 

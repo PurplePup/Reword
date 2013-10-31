@@ -119,7 +119,7 @@ void PlayGamePopup::render(Screen *s)
 	const int x = (s->_width - _menubg->width()) / 2;
 	const int y = (s->_height - _menubg->height()) / 2;
 	//ppg::blit_surface(_menubg->surface(), nullptr, s->surface(), x, y);
-	s->blit(_menubg->tex(), nullptr, x, y);
+	s->blit(_menubg->texture(), nullptr, x, y);
 
 	//calculate best text gap
 	const int maxGap = _gd._fntSmall.height()*2; //max gap

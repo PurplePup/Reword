@@ -71,17 +71,17 @@ Image::Image(const std::string &fileName, Uint32 nTiles /*=1*/, SDL_Color cAlpha
 	load(fileName, nTiles, cAlphaKey, iAlpha);
 }
 
-Image::Image(const Image &img) :
-	_init(img._init),
-	_tileCount(0), _tileW(0), _tileH(0), _tileWOffset(0), _tileHOffset(0),
-	_tileDir(TILE_HORIZ), _ptex(nullptr)
-{
-#if _DEBUG
-    _dbgName = img._dbgName;
-#endif
-    *this = img;
-    setTileCount(img.tileCount(), img.tileDir());
-}
+//Image::Image(const Image &img) :
+//	_init(img._init),
+//	_tileCount(0), _tileW(0), _tileH(0), _tileWOffset(0), _tileHOffset(0),
+//	_tileDir(TILE_HORIZ), _ptex(nullptr)
+//{
+//#if _DEBUG
+//    _dbgName = img._dbgName;
+//#endif
+//    *this = img;
+//    setTileCount(img.tileCount(), img.tileDir());
+//}
 
 //create a texture (Image) from a surface
 Image::Image(Surface &surface, Uint32 nTiles /*=1*/, SDL_Color cAlphaKey /*=ALPHA_COLOUR*/, Uint8 iAlpha /* = 255 */ ) :
@@ -103,11 +103,12 @@ void Image::cleanUp()
 
 //	_clip = 0;	//use whole image (used in blit(Image*) )
 
-    if (_ptex != nullptr)
-    {
-        SDL_DestroyTexture(_ptex);
-        _ptex = nullptr;
-    }
+//    if (_ptex != nullptr)
+//    {
+//        SDL_DestroyTexture(_ptex);
+//        _ptex = nullptr;
+//    }
+    _ptex.reset();
 
 	_tileCount = _tileW = _tileH = _tileWOffset = _tileHOffset = 0;
 	_tileDir = TILE_HORIZ;
@@ -117,18 +118,20 @@ void Image::cleanUp()
 
 Uint32 Image::width() const
 {
-    Uint32 format;
-    int access, w, h;
-    SDL_QueryTexture(_ptex, &format, &access, &w, &h);
-    return w;
+    return _ptex ? _ptex->width() : 0;
+//    Uint32 format;
+//    int access, w, h;
+//    SDL_QueryTexture(_ptex, &format, &access, &w, &h);
+//    return w;
 }
 
 Uint32 Image::height() const
 {
-    Uint32 format;
-    int access, w, h;
-    SDL_QueryTexture(_ptex, &format, &access, &w, &h);
-    return h;
+    return _ptex ? _ptex->height() : 0;
+//    Uint32 format;
+//    int access, w, h;
+//    SDL_QueryTexture(_ptex, &format, &access, &w, &h);
+//    return h;
 }
 
 bool Image::create(unsigned int w, unsigned int h, Uint32 nTiles /*=1*/, SDL_Color cAlphaKey /*=ALPHA_COLOUR*/, Uint8 iAlpha /* = 255 */ )
@@ -267,15 +270,17 @@ bool Image::initImage(Surface *newSurface, Uint32 nTiles, SDL_Color cAlphaKey, U
 
 bool Image::createTexFromSurface(Surface *s)
 {
-    if (_ptex)
-    {
-        SDL_DestroyTexture(_ptex);
-        _ptex = nullptr;
-    }
+//    if (_ptex)
+//    {
+//        SDL_DestroyTexture(_ptex);
+//        _ptex = nullptr;
+//    }
+//
+//    _ptex = SDL_CreateTextureFromSurface(Locator::screen().renderer(), s->surface());
 
-    _ptex = SDL_CreateTextureFromSurface(Locator::screen().renderer(), s->surface());
+//    SDL_SetSurfaceBlendMode(s->surface(), SDL_BLENDMODE_BLEND);  //this is default anyway
 
-    SDL_SetSurfaceBlendMode(s->surface(), SDL_BLENDMODE_BLEND);  //this is default anyway
+    _ptex = std::unique_ptr<Texture>(new Texture(*s));
 
     return (_ptex != nullptr);
 }

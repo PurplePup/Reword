@@ -245,6 +245,8 @@ private:
 
     std::string _endWorDefExit, _endWorDefExitMore, _endWorDefNext, _endWorDefNextMore;
 
+    tTextureMap     _texMap;
+
     int _debugTotalLetters, _debugNeededAll, _debugNeededNow;
 };
 

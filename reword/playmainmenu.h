@@ -19,6 +19,9 @@ public:
     virtual void choose(MenuItem i);
     virtual void chooseDone();
     virtual void render(Screen *s);
+
+private:
+    Uint32 _itxt_ver;
 };
 
 #endif //_PlayMainMenu_H

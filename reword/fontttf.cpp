@@ -37,14 +37,15 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "fontttf.h"
 
 #include <iostream>
+#include <assert.h>
 
 
-FontTTF::FontTTF() : _font(0), _init(false), _height(0)
+FontTTF::FontTTF() : _font(nullptr), _size(0), _init(false), _height(0)
 {
 	_shadowColour = BLACK_COLOUR;
 }
 
-FontTTF::FontTTF(std::string fileName, int size) : _font(0), _init(false), _height(0)
+FontTTF::FontTTF(std::string fileName, int size) : _font(nullptr), _size(0), _init(false), _height(0)
 {
 	load(fileName, size);
 	memset(&_shadowColour, 0, sizeof(SDL_Color));	//black {0x00,0x00,0x00,0},
@@ -58,7 +59,10 @@ FontTTF::~FontTTF()
 void FontTTF::cleanUp()
 {
 	if (_font) TTF_CloseFont(_font);
-	_font = 0;
+	_font = nullptr;
+
+//    _texmap.clear();
+
 	_init = false;
 }
 
@@ -124,6 +128,52 @@ int FontTTF::height() const	//helper to quickly return font height in pixels
 	return _height;
 }
 
+Uint32 FontTTF::add_cache(const char *textstr, const SDL_Color &textColour, bool bShadow /*= false*/)
+{
+    return 0;
+//    if (!_init) return 0;
+//
+//    Rect r = calc_text_metrics(textstr, bShadow);
+//    Surface s;
+//    s.create(r.width()+(bShadow?1:0), r.height()+(bShadow?1:0));
+//
+//    if (bShadow)
+//    {
+//        SDL_Surface *text = TTF_RenderText_Blended( _font, textstr, _shadowColour );
+//        if (text)
+//        {
+//			ppg::blit_surface(text, nullptr, s.surface(), 1, 1);
+//            SDL_FreeSurface(text);
+//        }
+//    }
+//
+//    SDL_Surface *text = TTF_RenderText_Blended( _font, textstr, textColour );
+//    if (text)
+//    {
+//        ppg::blit_surface(text, nullptr, s.surface(), 0, 0);
+//        SDL_FreeSurface(text);
+//    }
+//
+//    //add to cache
+//    const int index = (int)_texmap.size()+1;    //start at 1 (return 0 for error)
+//    _texmap[index] = tAutoTexture(new Texture(s));
+//
+//	return index;   //up to caller to remember cache position
+}
+
+
+void FontTTF::put_cache(Screen *s, Uint32 index, int x, int y)
+{
+//    assert(index > 0 && index < (Uint32)_texmap.size()+1);
+//    s->blit(_texmap[index].get()->texture(), nullptr, x, y);
+}
+
+void FontTTF::put_cache_right(Screen *s, Uint32 index, int xDelta, int y)
+{
+//    assert(index > 0 && index < (Uint32)_texmap.size()+1);
+//    Texture *t = _texmap[index].get();
+//    s->blit(t->texture(), nullptr, s->width() - t->width() - xDelta, y);
+}
 
 //output a text string to the destination surface
 //If shadow selected, then draw in the shadow colour first offset by 1, then the text in the actual position
@@ -352,4 +402,55 @@ Rect FontTTF::put_number_mid(Surface *s, int y, int xMid, int number, const char
 
 // end surface render functions /////////////////////////////
 
+//Helper for FontCache to return a font rendered surface
+Surface * FontTTF::make_surface(const char *textstr, const SDL_Color &textColour, bool bShadow)
+{
+    if (!_init) return nullptr;  //fail
+
+    Rect r = calc_text_metrics(textstr, bShadow);
+    Surface * s = new Surface();
+    s->create(r.width()+(bShadow?1:0), r.height()+(bShadow?1:0));
+
+    if (bShadow)
+    {
+        SDL_Surface *text = TTF_RenderText_Blended( _font, textstr, _shadowColour );
+        if (text)
+        {
+			ppg::blit_surface(text, nullptr, s->surface(), 1, 1);
+            SDL_FreeSurface(text);
+        }
+    }
+
+    SDL_Surface *text = TTF_RenderText_Blended( _font, textstr, textColour );
+    if (text)
+    {
+        ppg::blit_surface(text, nullptr, s->surface(), 0, 0);
+        SDL_FreeSurface(text);
+    }
+
+    return s;
+}
+
+//pass in index 0 to allocate new index or a valid number > 0 to set that index explicitly
+Uint32 FontCache::add(FontTTF &ttf, Uint32 index, const char *textstr, const SDL_Color &textColour, bool bShadow /*= false*/)
+{
+    Surface * s = ttf.make_surface(textstr, textColour, bShadow);
+    if (s == nullptr) return 0; //fail
+
+    //add to cache
+    const Uint32 idxNew = (index == 0) ? (Uint32)_imageMap.size()+1 : index;    //start at 1 (return 0 for error)
+    _imageMap[idxNew] = tUniqueImage(new Image(*s));
+    delete s;
+
+	return idxNew;   //up to caller to remember cache position
+}
+
+Image * FontCache::get(Uint32 index)
+{
+    auto it = _imageMap.find(index);
+    if (it == _imageMap.end())
+        return nullptr; //not found
+
+    return it->second.get();
+}
 

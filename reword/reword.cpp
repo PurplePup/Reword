@@ -114,7 +114,7 @@ int main(int argc, char* argv[]) // <- this must match exactly, since SDL rewrit
     options.load(); //defaults
 
 	//v. simple loop to load cmd line args - in any order,
-	//but must be seperately 'dashed' ie. -l -f not -lf
+	//but must be separately 'dashed' ie. -l -f not -lf
 	for (int i = 1; i< argc; ++i)
 	{
 		std::string arg = argv[i];

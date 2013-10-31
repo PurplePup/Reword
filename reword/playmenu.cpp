@@ -144,7 +144,7 @@ void PlayMenu::render(Screen *s)
 	if (!_init) return;
 
 	//ppg::blit_surface(_menubg->surface(), nullptr, s->surface(), 0, 0);
-	s->blit(_menubg->tex(), nullptr, 0, 0);
+	s->blit(_menubg->texture(), nullptr, 0, 0);
 
 	_title.render(s);
 	_beta.render(s);

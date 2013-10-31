@@ -429,7 +429,7 @@ void ImageAnim::blitTo(Screen* dest, int destX, int destY, int tileNum /*= -1*/)
 //	ppg::blit_surface(
 //        _image->surface(), (tileNum<0)?nullptr:&rect,			//source
 //		dest->surface(), destX, destY);					//dest
-	dest->blit(_image->tex(), &rect, destX, destY);
+	dest->blit(_image->texture(), &rect, destX, destY);
 }
 
 //blit a whole image into this Image

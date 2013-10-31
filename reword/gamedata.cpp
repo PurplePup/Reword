@@ -15,7 +15,7 @@ History:		Version	Date		Change
 				-------	----------	--------------------------------
 				0.4.0	25.02.2008	Added game modes - "reword" "speeder" and "time trial"
  				0.5.0	18.06.2008	Added touch support and some animated touch icons
- 				0.5.1	07.10.2008	seperate some gfx to allow diff screen sizes
+ 				0.5.1	07.10.2008	separate some gfx to allow diff screen sizes
 
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by

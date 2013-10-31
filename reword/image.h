@@ -19,7 +19,7 @@ public:
     enum eTileDir { TILE_HORIZ, TILE_VERT };
 
 	Image();
-	Image(const Image &img);
+//	Image(const Image &img);
 	Image(unsigned int w, unsigned int h, Uint32 nTiles = 1, SDL_Color cAlphaKey = ALPHA_COLOUR, Uint8 iAlpha = 255);
 	Image(const std::string &fileName, Uint32 nTiles = 1, SDL_Color cAlphaKey = ALPHA_COLOUR, Uint8 iAlpha = 255);
     Image(Surface &surface, Uint32 nTiles = 1, SDL_Color cAlphaKey = ALPHA_COLOUR, Uint8 iAlpha = 255);
@@ -36,7 +36,7 @@ public:
 
     bool create(unsigned int w, unsigned int h, Uint32 nTiles = 1, SDL_Color cAlphaKey = ALPHA_COLOUR, Uint8 iAlpha = 255);
 	bool initDone() const { return _init; }	//has Image been initialised properly
-    SDL_Texture * tex() const { return _ptex; }
+    Texture * texture() const { return _ptex.get(); }
 
     void cloneFrom(Image &image, int iAlpha = -1);
     void cloneFrom(Image &image, Rect &r, int iAlpha = -1);
@@ -72,9 +72,13 @@ private:
 	Uint32  _tileCount, _tileW, _tileH, _tileWOffset, _tileHOffset;
     eTileDir _tileDir;
 
-    SDL_Texture * _ptex;
+    std::unique_ptr<Texture> _ptex;
 };
 
 typedef std::shared_ptr<Image> tSharedImage;
+
+typedef std::unique_ptr<Image> tUniqueImage;
+typedef std::map<Uint32, tUniqueImage> tImageMap;
+
 
 #endif //IMAGE_H

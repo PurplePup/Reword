@@ -29,6 +29,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 */
 ////////////////////////////////////////////////////////////////////
 
+#include <SDL_image.h>	//for IMG_ functions
+
 #include "global.h"
 #include "screen.h"
 #include "platform.h"
@@ -182,5 +184,61 @@ void Screen::blit(SDL_Texture* srcTex, SDL_Rect* srcRect, int destX, int destY)
     }
 	SDL_RenderCopy(_renderer, srcTex, srcRect, &destRect);
 }
+//
+////blit texture using deltaX to center texture on
+//void Screen::blit_mid(SDL_Texture* srcTex, SDL_Rect* srcRect, int destX, int destY, bool bAbsolute)
+//{
+//	SDL_Rect destRect = { bAbsolute ? //center on absolute x position given, else use screen mid point
+//                            destX - (srcTex->w/2) : (width()/2) - destX - (srcTex->w/2),
+//                            destY, 0, 0 };
+//	SDL_RenderCopy(_renderer, srcTex, srcRect, &destRect);
+//}
+//
+////blit texture to right side of screen using deltaX as rightmost edge, so texture blitted
+////back from that point not from that point forward.
+//void Screen::blit_right(SDL_Texture* srcTex, SDL_Rect* srcRect, int deltaX, int destY)
+//{
+//	SDL_Rect destRect = { width() - deltaX - srcTex->w, destY, 0, 0 };
+//	SDL_RenderCopy(_renderer, srcTex, srcRect, &destRect);
+//}
 
+void Screen::blit(Texture* srcTex, SDL_Rect* srcRect, int destX, int destY)
+{
+//	SDL_Rect destRect = { destX, destY, srcTex->width(), srcTex->height() };
+//	SDL_RenderCopy(_renderer, srcTex->texture(), srcRect, &destRect);
+//    blit(srcTex->texture(), srcRect, destX, destY);
+
+    SDL_Rect destRect;
+    destRect.x = destX;
+    destRect.y = destY;
+    if (srcRect == nullptr)
+    {
+        destRect.w = srcTex->width();
+        destRect.h = srcTex->height();
+    }
+    else
+    {
+        destRect.w = srcRect->w;
+        destRect.h = srcRect->h;
+    }
+	SDL_RenderCopy(_renderer, srcTex->texture(), srcRect, &destRect);
+
+}
+
+//blit texture using deltaX to center texture on
+void Screen::blit_mid(Texture* srcTex, SDL_Rect* srcRect, int destX, int destY, bool bAbsolute)
+{
+	SDL_Rect destRect = { bAbsolute ? //center on absolute x position given, else use screen mid point
+                            destX - (srcTex->width()/2) : (width()/2) - destX - (srcTex->width()/2),
+                            destY, 0, 0 };
+	SDL_RenderCopy(_renderer, srcTex->texture(), srcRect, &destRect);
+}
+
+//blit texture to right side of screen using deltaX as rightmost edge, so texture blitted
+//back from that point not from that point forward.
+void Screen::blit_right(Texture* srcTex, SDL_Rect* srcRect, int deltaX, int destY)
+{
+	SDL_Rect destRect = { width() - deltaX - srcTex->width(), destY, 0, 0 };
+	SDL_RenderCopy(_renderer, srcTex->texture(), srcRect, &destRect);
+}
 

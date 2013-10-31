@@ -45,6 +45,9 @@ Licence:		This program is free software; you can redistribute it and/or modify
 void PlayMainMenu::init(Input *input)
 {
 	setTitle("REWORD");
+
+	_itxt_ver = _gd._fntClean.add_cache(VERSION_STRING, BLACK_COLOUR);
+
 	std::string msg = "Press " + input->keyDescription(ppkey::B) + " to select item";
 	setHelp(msg, GREY_COLOUR);
 	addItem(MenuItem(0, GREEN_COLOUR, "Play", "Go for it"));
@@ -90,5 +93,7 @@ void PlayMainMenu::render(Screen *s)
     PlayMenu::render(s);
 
     //add version no - specific to main menu screen
-	_gd._fntClean.put_text_right(s, 5, 0, VERSION_STRING, BLACK_COLOUR); //display vN.N at top right
+	//_gd._fntClean.put_text_right(s, 5, 0, VERSION_STRING, BLACK_COLOUR); //display vN.N at top right
+	_gd._fntClean.put_cache_right(s, _itxt_ver, 5, 0); //display vN.N at top right
+
 }

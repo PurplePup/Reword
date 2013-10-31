@@ -7,6 +7,8 @@
 #include <SDL_surface.h>
 
 #include <string>
+#include <memory>
+#include <map>
 
 //#include "utils.h"
 
@@ -52,6 +54,28 @@ protected:
 	SDL_Surface *_surface;
 
 };
+
+
+class Texture
+{
+public:
+    Texture();
+    Texture(Surface &surface);
+    void createFrom(Surface &surface);
+    virtual ~Texture();
+    void cleanup();
+
+    SDL_Texture * texture() const { return _texture; }
+    Uint32 width() const { return _width; }
+    Uint32 height() const { return _height; }
+
+private:
+    SDL_Texture *   _texture;
+    Uint32          _width, _height;
+};
+
+typedef std::unique_ptr<Texture> tAutoTexture;
+typedef std::map<Uint32, tAutoTexture> tTextureMap;
 
 #endif //_SURFACE_H
 

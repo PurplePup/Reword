@@ -21,7 +21,7 @@ History:		Version	Date		Change
 										also added scroll arrows to indicate more text to see
 									Added popup menu for quick exit/save/move-on
 									Changed to stack for various major states in-play and added
-										seperate functions for each render/work state.
+										separate functions for each render/work state.
 									Added pinger sound when in popup menu, to warn user
 				0.5		28.05.08	Added touchscreen support
 				0.5.1	02.10.08	Add Pandora and other device screen layout/sizes
@@ -169,7 +169,7 @@ void PlayOptions::ControlEvent(int event, int ctrl_id)
 void PlayGame::init(Input *input)
 {
 	//fade out any menu music (but only if no game music still playing)
-	//Game music handled seperately froim in-game music (mp3 dir etc ?)
+	//Game music handled separately froim in-game music (mp3 dir etc ?)
     if (Locator::audio().isPlayingMusic()==false)   //no user music
 		Mix_FadeOutMusic(3000);                     //fade out any menu music
 
@@ -379,7 +379,7 @@ void PlayGame::render_play(Screen* s)
 
 	//draw background
 	//ppg::blit_surface(_gamebg->surface(), nullptr, s->surface(), 0, 0);
-	s->blit(_gamebg->tex(), nullptr, 0, 0);
+	s->blit(_gamebg->texture(), nullptr, 0, 0);
 
  	//draw scores and coloured seconds countdown
 	_gd._fntSmall.put_number(s, _score0_x, _score0_y, _gd._score.currScore(), "%08d", BLACK_COLOUR);	//SCORE:
@@ -1578,7 +1578,7 @@ void PlayGame::doDictionary()
 			++it;
 		}
 
-		//display current highlighted word on seperate 'screen'
+		//display current highlighted word on separate 'screen'
 		statePush(PG_DICT); //_state = PG_DICT;
 	}
 }
@@ -1909,7 +1909,7 @@ void PlayGame::showSuccess(eSuccess newSuccess, int newBonus)
 // Submit the current word
 void PlayGame::tryWord()
 {
-	int wordlen = tryWordAgainstDict();
+	int wordlen = tryWordAgainstDict();	    //0=already found, -1=not a 6 or in sub word list
 
 	 //speeder and timetrial only need a 6 to continue
 	if (GM_TIMETRIAL == _gd._mode || GM_SPEEDER == _gd._mode)
@@ -1945,7 +1945,7 @@ void PlayGame::tryWord()
 
 		calcArcadeNeededWords();
 	}
-	else	//0=already found, -1=not a 6 or in sub word list
+	else
 	{
         Locator::audio().playSfx((0 == wordlen)?AUDIO_SFX_ALREADYDONE:AUDIO_SFX_NOTINDICT);
 		_round.clearAllToTop(false);	//remove bad word - dont move cursor

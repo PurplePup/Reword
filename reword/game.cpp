@@ -111,7 +111,7 @@ void Game::splash()
 	SDL_Colour c = {0x00,0x00,0x00,0};	//black
 	_screen->drawSolidRect(0, 0, Screen::width(), Screen::height(), c);
 	//center it - if needed
-	_screen->blit(img.tex(), nullptr, (Screen::width()-img.width())/2, (Screen::height()-img.height())/2);
+	_screen->blit(img.texture(), nullptr, (Screen::width()-img.width())/2, (Screen::height()-img.height())/2);
 	_screen->update();	//flip
 //	sleep(2);	//so we can see it (POSIX)
 }

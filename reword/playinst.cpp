@@ -132,7 +132,7 @@ void PlayInst::render(Screen *s)
 	if (!_init) return;
 
 	//ppg::blit_surface(_menubg->surface(), nullptr, s->surface(), 0, 0);
-	s->blit(_menubg->tex(), nullptr, 0, 0);
+	s->blit(_menubg->texture(), nullptr, 0, 0);
 
 	//draw screen title
 	_title.render(s);
@@ -337,7 +337,7 @@ bool PlayInst::tap(const Point &pt)
 }
 void PlayInst::buildPage(int page)
 {
-	//now build the scrolling instructions strings to display (on seperate lines)
+	//now build the scrolling instructions strings to display (on separate lines)
 	_instLine = 0;	//init start of scrollable text, start on first line
 
 	std::stringstream strstr;
