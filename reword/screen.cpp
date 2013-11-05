@@ -228,10 +228,9 @@ void Screen::blit(Texture* srcTex, SDL_Rect* srcRect, int destX, int destY)
 //blit texture using deltaX to center texture on
 void Screen::blit_mid(Texture* srcTex, SDL_Rect* srcRect, int destX, int destY, bool bAbsolute)
 {
-	SDL_Rect destRect = { bAbsolute ? //center on absolute x position given, else use screen mid point
-                            destX - (srcTex->width()/2) : (width()/2) - destX - (srcTex->width()/2),
-                            destY, 0, 0 };
-	SDL_RenderCopy(_renderer, srcTex->texture(), srcRect, &destRect);
+	int newX = bAbsolute ? //center on absolute x position given, else use screen mid point
+               destX - (srcTex->width()/2) : (width()/2) - destX - (srcTex->width()/2);
+    blit(srcTex, srcRect, newX, destY);
 }
 
 //blit texture to right side of screen using deltaX as rightmost edge, so texture blitted

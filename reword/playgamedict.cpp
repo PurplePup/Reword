@@ -100,8 +100,7 @@ void PlayGameDict::init(Input *input)
     for (; it != tmpDictDef.end(); ++it)
     {
         //convert each tmp string to a texture in texture cache
-        std::string str = (*it);
-        const Uint32 item = _fontCache.add(_gd._fntClean, 1, str.c_str(), BLACK_COLOUR, false);
+        const Uint32 item = _fontCache.add(_gd._fntClean, 0, (*it).c_str(), BLACK_COLOUR, false);
         _dictDef.push_back(item);
     }
 
@@ -149,10 +148,8 @@ void PlayGameDict::render(Screen* s)
 	int lines = 0;
 	while (it != _dictDef.cend())
 	{
-		s->blit(_fontCache.get(*it)->texture(), nullptr, 0, 20);  //0 ignored, use screen
-//	_gd._fntClean.put_number(s, 0, 20, _fontCache.get(*it)->height(), "%d", GREY_COLOUR);
-
-        break;  //DEBUG#### - single line for now
+//s->blit(_fontCache.get(*it)->texture(), nullptr, 0, yy);  //0 ignored, use screen
+//break;  //DEBUG#### - single line for now
 
 		//_gd._fntClean.put_text(s, yy, (*it).c_str(), BLACK_COLOUR, false);
 		s->blit_mid(_fontCache.get(*it)->texture(), nullptr, 0, yy);  //0 ignored, use screen
