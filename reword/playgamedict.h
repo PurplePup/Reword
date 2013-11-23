@@ -55,6 +55,7 @@ private:
     std::string             _helpMsg;
 
     FontCache               _fontCache;
+    int                     _indexHelpMsg;
 };
 
 #endif // PLAYGAMEDICT_H

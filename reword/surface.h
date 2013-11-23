@@ -65,7 +65,7 @@ public:
     virtual ~Texture();
     void cleanup();
 
-    SDL_Texture * texture() const { return _texture; }
+    SDL_Texture * texture_sdl() const { return _texture; }
     Uint32 width() const { return _width; }
     Uint32 height() const { return _height; }
 

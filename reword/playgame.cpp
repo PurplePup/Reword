@@ -378,7 +378,6 @@ void PlayGame::render_play(Screen* s)
 	int xx, yy;
 
 	//draw background
-	//ppg::blit_surface(_gamebg->surface(), nullptr, s->surface(), 0, 0);
 	s->blit(_gamebg->texture(), nullptr, 0, 0);
 
  	//draw scores and coloured seconds countdown

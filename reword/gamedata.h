@@ -72,11 +72,11 @@ public:
 
 	//fonts
 	FontTTF _fntTiny;
+	FontTTF _fntClean;
+
 	FontTTF _fntSmall;
 	FontTTF _fntMed;
 	FontTTF _fntBig;
-	FontTTF _fntClean;
-	FontTTF _fontTiny;
 
 	//sound effectes etc
 	Mix_Chunk *_fxCountdown;	//countdown ping noise

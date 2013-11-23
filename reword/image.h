@@ -34,6 +34,15 @@ public:
 //		return *this;
 //	};
 
+//    Image(Image&& other)    //move ctor
+//    {
+//        if (this != &other)
+//        {
+//            *(this->_ptex) = std::move(other._ptex);
+//        }
+//        return *this;
+//    }
+
     bool create(unsigned int w, unsigned int h, Uint32 nTiles = 1, SDL_Color cAlphaKey = ALPHA_COLOUR, Uint8 iAlpha = 255);
 	bool initDone() const { return _init; }	//has Image been initialised properly
     Texture * texture() const { return _ptex.get(); }
@@ -72,13 +81,13 @@ private:
 	Uint32  _tileCount, _tileW, _tileH, _tileWOffset, _tileHOffset;
     eTileDir _tileDir;
 
-    std::unique_ptr<Texture> _ptex;
+    std::shared_ptr<Texture> _ptex;
 };
 
 typedef std::shared_ptr<Image> tSharedImage;
 
-typedef std::unique_ptr<Image> tUniqueImage;
-typedef std::map<Uint32, tUniqueImage> tImageMap;
+//typedef std::unique_ptr<Image> tUniqueImage;
+typedef std::map<Uint32, tSharedImage> tImageMap;
 
 
 #endif //IMAGE_H

@@ -21,18 +21,6 @@ public:
 					SPR_DOWN = 8
 				};
 
-//    struct Ease
-//    {
-//        Ease() : t(0), b(0), c(0), d(0), s(0) {}
-//        float t;  //time ms (usually 0)
-//        float b;  //start pos
-//        float c;  //total change? ie start pos + dist to end pos
-//        float d;  //duration ms
-//        float s;
-//    };
-//
-//    enum eEaseType { EASE_LINEAR, EASE_OUTBOUNCE };
-
 	Sprite();
 	Sprite(std::string fileName, bool bAlpha, Uint32 nFrames);
 	Sprite(tSharedImage &img);

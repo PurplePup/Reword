@@ -56,10 +56,10 @@
 #define MENU_HI_Y		55
 #define MENU_HI_GAP		30
 #define MENU_HI_OFF		7
-#define FONT_TINY		11
 #define FONT_SMALL		14
 #define FONT_MEDIUM		16
 #define FONT_BIG		20
+#define FONT_TINY		11
 #define FONT_CLEAN		14
 #define FONT_CLEAN_MAX	40
 #define ROUNDEL_VEL		12
@@ -139,11 +139,11 @@
 #define MENU_HI_Y		(LETTERH + 40)
 #define MENU_HI_GAP		55
 #define MENU_HI_OFF		20
-#define FONT_SMALL		20
+#define FONT_SMALL		16
 #define FONT_MEDIUM		26
 #define FONT_BIG		34
 #define FONT_TINY		14
-#define FONT_CLEAN		22
+#define FONT_CLEAN		16
 #define FONT_CLEAN_MAX	75
 #define ROUNDEL_VEL		20
 #define BG_LINE_TOP		85

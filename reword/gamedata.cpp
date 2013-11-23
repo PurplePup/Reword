@@ -63,11 +63,12 @@ void GameData::init()
 	bErr |= !_words.load(RES_WORDS + _options._defaultWordFile, hash + SDL_GetTicks());
 
 	//FONTS
-	bErr |= !_fntTiny.load(RES_FONTS + "FreeSansBold.ttf", FONT_TINY);
-	bErr |= !_fntClean.load(RES_FONTS + "FreeSansBold.ttf", FONT_SMALL);
-	bErr |= !_fntSmall.load(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_SMALL);
-	bErr |= !_fntMed.load(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_MEDIUM);
-	bErr |= !_fntBig.load(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_BIG);
+	bErr |= !_fntSmall.load(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_SMALL, "Cartoon small");
+	bErr |= !_fntMed.load(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_MEDIUM, "Cartoon med");
+	bErr |= !_fntBig.load(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_BIG, "Cartoon big");
+
+	bErr |= !_fntTiny.load(RES_FONTS + "FreeSansBold.ttf", FONT_TINY, "Sans tiny");
+	bErr |= !_fntClean.load(RES_FONTS + "FreeSansBold.ttf", FONT_CLEAN, "Sans clean");
 
     if (!bErr)
     {

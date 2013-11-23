@@ -5,7 +5,6 @@
 #include <SDL_video.h>
 
 #include "error.h"
-//#include "surface.h"
 #include "utils.h"
 
 class Screen : public Error //, public Surface
@@ -28,13 +27,10 @@ public:
     void drawSolidRectA(int x, int y, int w, int h, const SDL_Color& c, int iAlpha);
     void putPixel(int x, int y, Uint32 colour);
 
-    void blit(SDL_Texture* source, SDL_Rect* srcRect, int destX, int destY);
-//    void blit_mid(SDL_Texture* srcTex, SDL_Rect* srcRect, int destX, int destY, bool bAbsolute = false);
-//    void blit_right(SDL_Texture* srcTex, SDL_Rect* srcRect, int destX, int destY);
-
-    void blit(Texture* srcTex, SDL_Rect* srcRect, int destX, int destY);
-    void blit_mid(Texture* srcTex, SDL_Rect* srcRect, int destX, int destY, bool bAbsolute = false);
-    void blit_right(Texture* srcTex, SDL_Rect* srcRect, int destX, int destY);
+    Rect blit(SDL_Texture* source, SDL_Rect* srcRect, int destX, int destY);
+    Rect blit(Texture* srcTex, SDL_Rect* srcRect, int destX, int destY);
+    Rect blit_mid(Texture* srcTex, SDL_Rect* srcRect, int destDeltaX, int destY, bool bAbsolute = false);
+    Rect blit_right(Texture* srcTex, SDL_Rect* srcRect, int destX, int destY);
 
     // Accessor Methods
 	bool initDone() const { return _init; }

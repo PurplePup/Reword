@@ -89,8 +89,8 @@ void PlayOptions::init(Input *input)
     std::string msg = "Press " + input->keyDescription(ppkey::B) + " to select option";
 	setHelp(msg, GREY_COLOUR);
 
-    setFont( MENU_FONT_SMALL, MENU_FONT_CLEAN );
-	setLayout(MENU_LAYOUT_LEFT, SCREEN_WIDTH/8);
+    //setFont( MenuItem::MENU_FONT_SMALL, MenuItem::MENU_FONT_CLEAN );
+	setLayout(PlayMenu::LAYOUT_LEFT, SCREEN_WIDTH/8);
 	addItem(MenuItem(0, BLACK_COLOUR, "Preferred wordfile :", "Change language or dictionary file"));
 	addItem(MenuItem(1, BLACK_COLOUR, "Single touch menus :", "Single or double tap menus"));
 	addItem(MenuItem(2, BLACK_COLOUR, "Default difficulty :", "Use this difficulty at startup"));
@@ -172,7 +172,7 @@ void PlayOptions::work(Input *input, float speedFactor)
 void PlayOptions::choose(MenuItem i)
 {
     //make buttons flash/fade when menu items selected to show selection
-	switch (i._id) {
+	switch (i.id()) {
 	    case -1:    //exit (using kbd Y)
                 _gd._state = ST_MENU;		//back to menu
                 _running = false;

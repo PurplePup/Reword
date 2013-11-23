@@ -105,7 +105,7 @@ void Image::cleanUp()
 
 //    if (_ptex != nullptr)
 //    {
-//        SDL_DestroyTexture(_ptex);
+//        delete _ptex;
 //        _ptex = nullptr;
 //    }
     _ptex.reset();
@@ -272,16 +272,12 @@ bool Image::createTexFromSurface(Surface *s)
 {
 //    if (_ptex)
 //    {
-//        SDL_DestroyTexture(_ptex);
+//        delete _ptex;
 //        _ptex = nullptr;
 //    }
-//
-//    _ptex = SDL_CreateTextureFromSurface(Locator::screen().renderer(), s->surface());
+//    _ptex = new Texture(*s);
 
-//    SDL_SetSurfaceBlendMode(s->surface(), SDL_BLENDMODE_BLEND);  //this is default anyway
-
-    _ptex = std::unique_ptr<Texture>(new Texture(*s));
-
+    _ptex = std::shared_ptr<Texture>(new Texture(*s));
     return (_ptex != nullptr);
 }
 
@@ -335,13 +331,13 @@ bool Image::setTileSize(Uint32 w /*= 0*/, Uint32 h /*= 0*/, eTileDir tileDirecti
     {
         _tileHOffset = 0;
         _tileWOffset = _tileW;
-        _tileCount = (Uint32)width() / w;  //for a sanity check in tileRect() fn
+        _tileCount = (w==0) ? 0 : (Uint32)width() / w;  //for a sanity check in tileRect() fn
     }
     else
     {
         _tileHOffset = _tileH;
         _tileWOffset  = 0;
-        _tileCount = (Uint32)height() / h;  //for a sanity check in tileRect() fn
+        _tileCount = (h==0) ? 0 : (Uint32)height() / h;  //for a sanity check in tileRect() fn
     }
 
 	return true;

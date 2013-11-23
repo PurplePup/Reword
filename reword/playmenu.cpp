@@ -46,17 +46,51 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include <string>
 
+
+void MenuItem::setTitle(const std::string &title, eItemFont font)
+{
+    FontTTF * ttf = &Locator::data()._fntMed;  //default
+    switch (font)
+    {
+        case MENU_FONT_SMALL: ttf = &Locator::data()._fntSmall; break;
+        case MENU_FONT_BIG: ttf = &Locator::data()._fntBig; break;
+        default: break;
+        //case MENU_FONT_MED: ttf = &Locator::data()._fntMed; break;
+    }
+    _itemCache.add(*ttf, (int)eTitleGrey, title.c_str(), GREY_COLOUR);
+    _itemCache.add(*ttf, (int)eTitleHoverOff, title.c_str(), _hoverOff);
+    _itemCache.add(*ttf, (int)eTitleHoverOn, title.c_str(), _hoverOn, true);
+}
+
+void MenuItem::setComment(const std::string &comment, eItemFont font)
+{
+    FontTTF * ttf = &Locator::data()._fntClean;  //default
+    switch (font)
+    {
+        case MENU_FONT_SMALL: ttf = &Locator::data()._fntSmall; break;
+        case MENU_FONT_MED: ttf = &Locator::data()._fntMed; break;
+        case MENU_FONT_BIG: ttf = &Locator::data()._fntBig; break;
+        default: break;
+    }
+    _itemCache.add(*ttf, (int)eCommentGrey, comment.c_str(), GREY_COLOUR);
+    _itemCache.add(*ttf, (int)eCommentHoverOff, comment.c_str(), _hoverOff);
+    _itemCache.add(*ttf, (int)eCommentHoverOn, comment.c_str(), _hoverOn);
+}
+
+#define FONTCACHE_HELP  300
+#define DELAY_HELP      600
+
 PlayMenu::PlayMenu(GameData &gd)  : _gd(gd)
 {
 	_init = false;
 	_running = false;
+
+	_fadeX = 0;
 	_item = 0;
 	_nextYpos = 0;
 	_menuRect = Rect(0, BG_LINE_TOP, SCREEN_WIDTH, BG_LINE_BOT);
-	_layoutType = MENU_LAYOUT_CENTER;
+	_layoutType = LAYOUT_CENTER;
 	_layoutOffset = 0;
-	_font = &_gd._fntMed;
-    _fontHelp = &_gd._fntClean;
 	_bSetStarPos = true;
 }
 
@@ -95,27 +129,14 @@ void PlayMenu::init(Input *input)
 	_beta.setWord("BETA", let, Screen::width() - ((let->tileW()+2)*4), Screen::height() - let->tileH(), 2);
 	_beta.easeMoveFrom( 0, Screen::height(), 800, -500, Easing::EASE_OUTQUART);
 
+    _fadeEase.setup(Easing::EASE_INOUTSINE, 0, 0, 255, 500);
+    _fadeX = 0;
+
+    _delayHelp.start(DELAY_HELP);  //wait before help line displayed
+
 	//need to set the _init and _running flags
 	_init = true;
 	_running = true;
-}
-
-void PlayMenu::setFont(eMenuFont mainFont, eMenuFont helpFont)
-{
-    switch (mainFont)
-    {
-        case MENU_FONT_SMALL: _font = &_gd._fntSmall; break;
-        case MENU_FONT_MED: _font = &_gd._fntMed; break;
-        case MENU_FONT_BIG: _font = &_gd._fntBig; break;
-        default: _font = &_gd._fntMed; break;
-    }
-    switch (helpFont)
-    {
-        case MENU_FONT_SMALL: _fontHelp = &_gd._fntSmall; break;
-        case MENU_FONT_MED: _fontHelp = &_gd._fntMed; break;
-        case MENU_FONT_BIG: _fontHelp = &_gd._fntBig; break;
-        default: _fontHelp = &_gd._fntClean; break;
-    }
 }
 
 void PlayMenu::setMenuArea(const Rect &r)
@@ -143,20 +164,21 @@ void PlayMenu::render(Screen *s)
 {
 	if (!_init) return;
 
-	//ppg::blit_surface(_menubg->surface(), nullptr, s->surface(), 0, 0);
 	s->blit(_menubg->texture(), nullptr, 0, 0);
 
 	_title.render(s);
 	_beta.render(s);
 
-	int selected = getSelected()._id;
+	int selected = getSelected().id();
 	int nextY = 0;
 	Rect r;
-	for (tMenuItems::iterator p = _itemList.begin(); p != _itemList.end(); p++)
+	for (auto p = _itemList.begin(); p != _itemList.end(); p++)
 	{
-		if (p->_id == selected)
+		if (p->id() == selected)
 		{
-            _font->put_text(s, p->_r.left(), p->_r.top(), p->_title.c_str(), p->_hoverOn, true);
+            SDL_SetTextureColorMod(p->item(MenuItem::eTitleHoverOn)->texture()->texture_sdl(), (Uint8)_fadeX, (Uint8)_fadeX, (Uint8)_fadeX);
+
+            s->blit(p->item(MenuItem::eTitleHoverOn)->texture(), nullptr, p->_r.left(), p->_r.top());
             if (_bSetStarPos)
             {
                 r = p->_r.addpt(Point(-30,0));
@@ -167,14 +189,14 @@ void PlayMenu::render(Screen *s)
 			//show comment for selected item - might be blank
             if (_delayHelp.done())
             {
-                _fontHelp->put_text(s,
-                        BG_LINE_BOT + (((SCREEN_HEIGHT-BG_LINE_BOT-(_fontHelp->height()*2))/4)),
-                        p->_comment.c_str(), p->_hoverOn, false);
+                auto pTex = p->item(MenuItem::eCommentHoverOn)->texture();
+                s->blit_mid(pTex, nullptr, 0, BG_LINE_BOT + (((SCREEN_HEIGHT-BG_LINE_BOT-(pTex->height()*2))/4)));
             }
 		}
 		else
 		{
-            _font->put_text(s, p->_r.left(), p->_r.top(), p->_title.c_str(), p->_hoverOff, false);
+            s->blit(p->item(MenuItem::eTitleHoverOff)->texture(), nullptr, p->_r.left(), p->_r.top());
+
 		}
         nextY = p->_r.bottom();
 	}
@@ -183,9 +205,12 @@ void PlayMenu::render(Screen *s)
 	_star.draw(s);
     _controlsMenu.render(s);
 
-    int helpYpos = BG_LINE_BOT + (2*( (SCREEN_HEIGHT-BG_LINE_BOT-_fontHelp->height())/2.5 ));
-    _fontHelp->put_text(s, helpYpos, _help.c_str(), _helpColor, true);
-
+    auto pTex = _fontCache.get(FONTCACHE_HELP)->texture();
+    if (pTex)
+    {
+        const int helpYpos = BG_LINE_BOT + (2*( (SCREEN_HEIGHT-BG_LINE_BOT-pTex->height())/2.5 ));
+        s->blit_mid(pTex, nullptr, 0, helpYpos);
+    }
 }
 
 void PlayMenu::work(Input *input, float speedFactor)
@@ -194,6 +219,18 @@ void PlayMenu::work(Input *input, float speedFactor)
 
 	_title.work(input, speedFactor);
 	_star.work();
+
+    if (!_fadeEase.done())
+    {
+        _fadeX = (int)_fadeEase.work();
+    }
+    else
+    {
+        if (_fadeX >= 250)
+            _fadeEase.setup(Easing::EASE_INOUTSINE, 0, 255, -255, 500);
+        else
+            _fadeEase.setup(Easing::EASE_INOUTSINE, 0, 0, 255, 500);
+    }
 
 	_beta.work(input, speedFactor);
 
@@ -229,6 +266,7 @@ bool PlayMenu::button(Input *input, ppkey::eButtonType b)
 				_item=_itemList.size()-1;	//down to bottom
 			else
 				_item--;
+            _delayHelp.start(DELAY_HELP);  //wait before help line displayed
 		}
 		break;
 	case ppkey::DOWN:
@@ -239,6 +277,7 @@ bool PlayMenu::button(Input *input, ppkey::eButtonType b)
 				_item=0;	//back to top
 			else
 				_item++;
+            _delayHelp.start(DELAY_HELP);  //wait before help line displayed
 		}
 		break;
 	case ppkey::SELECT:
@@ -276,7 +315,7 @@ bool PlayMenu::touch(const Point &pt)
             {
                 _saveTouchPt = pt;      //so test if release pos is in same menu item
                 _item = item;	        //highlight the touched item
-                _delayHelp.start(500);  //wait before help line displayed
+                _delayHelp.start(DELAY_HELP);  //wait before help line displayed
                 return true;
             }
             else
@@ -343,16 +382,17 @@ void PlayMenu::handleEvent(SDL_Event &sdlevent)
 	}
 }
 
+//create roundel anim images for screen title
 void PlayMenu::setTitle(const std::string &title)
 {
     tSharedImage &letters = Resource::image("roundel_letters.png");
 	_title.setWordCenterHoriz(title, letters, (BG_LINE_TOP-letters->height())/2, 2);
 }
 
+//set help text displayed under menu items
 void PlayMenu::setHelp(const std::string &help, SDL_Color c)
 {
-	_help = help;
-	_helpColor = c;
+    _fontCache.add(_gd._fntClean, FONTCACHE_HELP, help.c_str(), c);
 }
 
 //calc each item pos based on number of curr loaded items and
@@ -360,27 +400,31 @@ void PlayMenu::setHelp(const std::string &help, SDL_Color c)
 void PlayMenu::recalcItemPositions()
 {
     const int items = (int)_itemList.size();
-    const int freeHeight = (_menuRect.height()) - (items * _font->height());
+    //must first find the item height
+    if (items == 0) return;
+    const int fontHeight = _itemList[0].item(MenuItem::eTitleHoverOn)->height();
+    //now use height in calculations
+    const int freeHeight = (_menuRect.height()) - (items * fontHeight);
     const int gapHeight = freeHeight / (items + 1);
     int y = _menuRect.top() + gapHeight;
 	for (int i=0; i<items; i++)
     {
-        const int len = _font->calc_text_length(_itemList[i]._title.c_str(), false);
+        const int len = _itemList[i].item(MenuItem::eTitleHoverOn)->width();
         int x;
-        if (_layoutType == MENU_LAYOUT_LEFT)
+        if (_layoutType == LAYOUT_LEFT)
         {
             x = _layoutOffset;
         }
-        else if (_layoutType == MENU_LAYOUT_RIGHT)
+        else if (_layoutType == LAYOUT_RIGHT)
         {
             x = (SCREEN_WIDTH-len) + _layoutOffset;
         }
         else
             x = (SCREEN_WIDTH-len) / 2;   //CENTER
 
-        _itemList[i]._r = Rect(x, y, x+len, y+_font->height());
+        _itemList[i]._r = Rect(x, y, x+len, y+fontHeight);
         _itemList[i]._rBox = _itemList[i]._r.inset(-5);
-        y += gapHeight + _font->height();
+        y += gapHeight + fontHeight;
     }
 }
 
@@ -394,14 +438,14 @@ Uint32 PlayMenu::addItem(MenuItem mi)
 void PlayMenu::setItem(int item)
 {
 	for (unsigned int i=0; i<_itemList.size(); i++)
-		if (_itemList[i]._id == item)
+		if (_itemList[i].id() == item)
 			_item = i;
 }
 
 MenuItem PlayMenu::getItem(int item)
 {
 	for (unsigned int i=0; i<_itemList.size(); i++)
-		if (_itemList[i]._id == item)
+		if (_itemList[i].id() == item)
 			return _itemList[i];
 	return MenuItem();
 }

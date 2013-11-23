@@ -38,6 +38,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include <iostream>
 #include <assert.h>
+#include <memory>
 
 
 FontTTF::FontTTF() : _font(nullptr), _size(0), _init(false), _height(0)
@@ -45,9 +46,10 @@ FontTTF::FontTTF() : _font(nullptr), _size(0), _init(false), _height(0)
 	_shadowColour = BLACK_COLOUR;
 }
 
-FontTTF::FontTTF(std::string fileName, int size) : _font(nullptr), _size(0), _init(false), _height(0)
+FontTTF::FontTTF(const std::string &fileName, int size, const std::string &desc) :
+    _font(nullptr), _size(size), _init(false), _height(0)
 {
-	load(fileName, size);
+	load(fileName, size, desc);
 	memset(&_shadowColour, 0, sizeof(SDL_Color));	//black {0x00,0x00,0x00,0},
 }
 
@@ -63,26 +65,38 @@ void FontTTF::cleanUp()
 
 //    _texmap.clear();
 
+    _size = 0;
+    _height = 0;
 	_init = false;
 }
 
-bool FontTTF::load(std::string fileName, int size)
+bool FontTTF::load(std::string fileName, int size, const std::string &desc)
 {
 	cleanUp();
+	_size = size;
+	_description += desc;   //APPEND
+
+std::cerr << "Font::load (" << fileName << ", size:" << size << ") desc:" << desc << std::endl;
+
 	_font = TTF_OpenFont( fileName.c_str(), size );
 	if (nullptr == _font)
 		std::cerr << "Failed to load font " << fileName << ". Cannot start." << std::endl;
 	else
+    {
 //		_height = size;	//calc_text_metrics("X")._y;
 //		_height = calc_text_metrics("A")._max.y;
 //		_height = TTF_FontHeight(_font);
 		_height = TTF_FontAscent(_font);
-	/*
+        /*
 		int minx,maxx,miny,maxy,advance;
 		if(TTF_GlyphMetrics(_font,'A',&minx,&maxx,&miny,&maxy,&advance)==-1)
 			return 0;
 		_height =  maxy;// - miny;
-	*/
+        */
+    }
+
+	_filename = fileName;
+
 	_init = (_font != nullptr);
 	return _init;
 }
@@ -97,23 +111,17 @@ void FontTTF::setShadowColour(SDL_Color &c)
 Rect FontTTF::calc_text_metrics(const char *textstr, bool bShadow /*= false*/, int xOffset, int yOffset) const
 {
 	Rect r(0, 0, 0, 0);
-
-	SDL_Surface *text = TTF_RenderText_Solid( _font, textstr, BLACK_COLOUR );
-	if (text)
-	{
-		r._min = Point(xOffset, yOffset);   //start from x,y
-		r._max = r._min.add(Point(text->w+(bShadow?1:0), height()+(bShadow?1:0)));
-		SDL_FreeSurface(text);
-	}
+    if (textstr != nullptr)
+    {
+        int w, h;
+        int result = TTF_SizeText(_font, textstr, &w, &h);
+        if (result != -1)
+        {
+            r._min = Point(xOffset, yOffset);
+            r._max = r._min.add(Point(w+(bShadow?1:0), h+(bShadow?1:0)));
+        }
+    }
 	return r;
-
-/*
-	int w, h;
-	TTF_SizeText(_font, textstr, &w, &h);
-	r._min = Point(x, y);
-	r._max = r._min.add(Point(w+(bShadow?1:0), h+(bShadow?1:0)));
-	return r;
-*/
 }
 
 //simpler fn to just return length of string in pixels
@@ -121,58 +129,6 @@ int FontTTF::calc_text_length(const char *textstr, bool bShadow /*= false*/) con
 {
 	Rect r = calc_text_metrics(textstr, bShadow, 0, 0);
 	return r._max.x;
-}
-
-int FontTTF::height() const	//helper to quickly return font height in pixels
-{
-	return _height;
-}
-
-Uint32 FontTTF::add_cache(const char *textstr, const SDL_Color &textColour, bool bShadow /*= false*/)
-{
-    return 0;
-//    if (!_init) return 0;
-//
-//    Rect r = calc_text_metrics(textstr, bShadow);
-//    Surface s;
-//    s.create(r.width()+(bShadow?1:0), r.height()+(bShadow?1:0));
-//
-//    if (bShadow)
-//    {
-//        SDL_Surface *text = TTF_RenderText_Blended( _font, textstr, _shadowColour );
-//        if (text)
-//        {
-//			ppg::blit_surface(text, nullptr, s.surface(), 1, 1);
-//            SDL_FreeSurface(text);
-//        }
-//    }
-//
-//    SDL_Surface *text = TTF_RenderText_Blended( _font, textstr, textColour );
-//    if (text)
-//    {
-//        ppg::blit_surface(text, nullptr, s.surface(), 0, 0);
-//        SDL_FreeSurface(text);
-//    }
-//
-//    //add to cache
-//    const int index = (int)_texmap.size()+1;    //start at 1 (return 0 for error)
-//    _texmap[index] = tAutoTexture(new Texture(s));
-//
-//	return index;   //up to caller to remember cache position
-}
-
-
-void FontTTF::put_cache(Screen *s, Uint32 index, int x, int y)
-{
-//    assert(index > 0 && index < (Uint32)_texmap.size()+1);
-//    s->blit(_texmap[index].get()->texture(), nullptr, x, y);
-}
-
-void FontTTF::put_cache_right(Screen *s, Uint32 index, int xDelta, int y)
-{
-//    assert(index > 0 && index < (Uint32)_texmap.size()+1);
-//    Texture *t = _texmap[index].get();
-//    s->blit(t->texture(), nullptr, s->width() - t->width() - xDelta, y);
 }
 
 //output a text string to the destination surface
@@ -435,14 +391,33 @@ Surface * FontTTF::make_surface(const char *textstr, const SDL_Color &textColour
 Uint32 FontCache::add(FontTTF &ttf, Uint32 index, const char *textstr, const SDL_Color &textColour, bool bShadow /*= false*/)
 {
     Surface * s = ttf.make_surface(textstr, textColour, bShadow);
-    if (s == nullptr) return 0; //fail
+    if (s == nullptr)
+    {
+        std::cerr << "FontCache add(" << textstr << ") failed to create surface" << std::endl;
+        return 0; //fail
+    }
 
     //add to cache
     const Uint32 idxNew = (index == 0) ? (Uint32)_imageMap.size()+1 : index;    //start at 1 (return 0 for error)
-    _imageMap[idxNew] = tUniqueImage(new Image(*s));
+
+    auto prev = get(idxNew);
+    if (prev != nullptr)
+    {
+        std::cerr << "FontCache add(" << idxNew << ") already exists !!" << std::endl;
+        return 0;
+    }
+
+    _imageMap[idxNew] = tSharedImage(new Image(*s));    // = std::move(tUniqueImage(new Image(*s)));
+
+#ifdef DEBUG
+//    std::cout << "FontCache::add ( idx:" << idxNew << " fontname:" << ttf.filename() <<
+//        " fontsize:" << ttf.size() << " text:" << textstr << " size:" <<
+//        s->width() << "x" << s->height() << " )" << std::endl;
+#endif
+
     delete s;
 
-	return idxNew;   //up to caller to remember cache position
+	return idxNew;   //up to caller to remember cache position if pass in index=0
 }
 
 Image * FontCache::get(Uint32 index)

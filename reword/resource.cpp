@@ -34,6 +34,9 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <iostream>
 #include <cassert>
 
+#include "locator.h"    //##DEBUG##
+
+
 ResourceImg::ResourceImg() : _alpha(255), _alphaKey(ALPHA_COLOUR)
 {
     //ctor
@@ -137,10 +140,22 @@ tSharedImage& Resource::image(const std::string &imgFile)
 }
 void Resource::registerImage(ResourceImg* img)
 {
+    if (Locator::data()._fntTiny.description() != "Sans tiny")
+    {   //]##DEBUG##
+        std::cerr << "2 tiny: not == Sans tiny" << std::endl;
+    };
+
+
     if (img == nullptr)
         _img = &_nullimg;   // revert to null service
     else
         _img = img;
+
+    if (Locator::data()._fntTiny.description() != "Sans tiny")
+    {   //]##DEBUG##
+        std::cerr << "3 tiny: not == Sans tiny" << std::endl;
+    };
+
 }
 
 

@@ -8,7 +8,7 @@
 #include "gamedata.h"	//also holds constants and stuff
 #include "roundels.h"
 #include "playmenu.h"
-
+#include "fontttf.h"
 
 class PlayMainMenu : public PlayMenu
 {
@@ -20,8 +20,10 @@ public:
     virtual void chooseDone();
     virtual void render(Screen *s);
 
-private:
-    Uint32 _itxt_ver;
+protected:
+    int _verId;
+//private:
+//    FontCache  _fontCache;
 };
 
 #endif //_PlayMainMenu_H

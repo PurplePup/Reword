@@ -18,10 +18,10 @@ class FontTTF
 {
 public:
 	FontTTF();
-	FontTTF(std::string fileName, int size);
+	FontTTF(const std::string &fileName, int size, const std::string &desc = "");
 	~FontTTF();
 
-	bool load(std::string fontName, int size);
+	bool load(std::string fontName, int size, const std::string &desc = "");
 
     //render font to the screen
 	Rect put_text(Screen *s, int x, int y, const char *textstr, const SDL_Color &textColour, bool bShadow = false);
@@ -46,19 +46,16 @@ public:
     Rect put_number_mid(Surface *s, int y, int xMid, int number, const char *format, const SDL_Color &textColour, bool bShadow = false);
 
     Texture * make_texture(const char *textstr, bool bShadow = false);
+    Surface * make_surface(const char *textstr, const SDL_Color &textColour, bool bShadow = false);
 
 	void setShadowColour(SDL_Color &c);
 	Rect calc_text_metrics(const char *textstr, bool bShadow = false, int xOffset=0, int yOffset=0) const;	//slow as it needs to render internally first
 	int calc_text_length(const char *textstr, bool bShadow = false) const;	//slow as it needs to render internally first
 
-	int height() const; //helper to quickly return font height in pixels
-
-    //font texture cache
-    Uint32 add_cache(const char *textstr, const SDL_Color &textColour, bool bShadow = false);
-    void put_cache(Screen *s, Uint32 index, int x, int y);
-    void put_cache_right(Screen *s, Uint32 index, int xDelta, int y);
-
-    Surface * make_surface(const char *textstr, const SDL_Color &textColour, bool bShadow = false);
+    const int size() const { return _size; }        //font size, quick helper fn
+    const int height() const { return _height; }    //font height in pixels, quick helper fn
+    const std::string & filename() const { return _filename; }  //debug helper
+    const std::string & description() const { return _description; }
 
 protected:
 	void cleanUp();
@@ -70,6 +67,8 @@ private:
 	SDL_Color	_shadowColour;
 	char		_buffer[400];	//general purpose char buffer (for number formatting etc)
 	int 		_height;
+	std::string _filename;
+	std::string _description;
 };
 
 class FontCache

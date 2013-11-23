@@ -120,8 +120,20 @@ bool Game::loadResources()
 {
     bool bErr = false;
 
+    if (Locator::data()._fntTiny.description() != "Sans tiny")
+    {   //]##DEBUG##
+        std::cerr << "4 tiny: not == Sans tiny" << std::endl;
+    };
+
+
     //register the actual concrete data member holding the resources
 	Resource::registerImage(&_images);
+
+    if (Locator::data()._fntTiny.description() != "Sans tiny")
+    {   //]##DEBUG##
+        std::cerr << "1 tiny: not == Sans tiny" << std::endl;
+    };
+
 
     bErr |= !Resource::image().add("roundel_letters.png", 26);
     bErr |= !Resource::image().add("roundel_kbd_letters.png", 26);
@@ -173,7 +185,6 @@ bool Game::loadResources()
     bErr |= !Resource::image().add("btn_round_fx.png", 9);
 
 	bErr |= !Resource::image().add("star.png", 7);
-
 
     //sound resources
     bErr |= Locator::audio().addSfx("ping.wav", AUDIO_SFX_PING) == -1;
@@ -284,7 +295,7 @@ bool Game::init(GameOptions &options)
 	_gd->setOptions(options);
 	_gd->_current_w = _screen->width();
 	_gd->_current_h = _screen->height();
-	_gd->init(); //load other resources
+	_gd->init(); //load main resources
     Locator::registerData(_gd);
 
 #if defined(_USE_OGG)
@@ -309,6 +320,13 @@ bool Game::init(GameOptions &options)
 		setLastError("Unable to load resources");
 		return false;
 	}
+
+
+    if (Locator::data()._fntTiny.description() != "Sans tiny")
+    {   //]##DEBUG##
+        std::cerr << "6 tiny: not == Sans tiny" << std::endl;
+    };
+
 
 	return (_init = (_gd && _gd->isLoaded()));
 }
