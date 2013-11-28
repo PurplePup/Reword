@@ -22,6 +22,7 @@ public:
 	~FontTTF();
 
 	bool load(std::string fontName, int size, const std::string &desc = "");
+    bool convertToFastTexture(Screen *s);
 
     //render font to the screen
 	Rect put_text(Screen *s, int x, int y, const char *textstr, const SDL_Color &textColour, bool bShadow = false);
@@ -64,11 +65,21 @@ private:
 	TTF_Font *	_font;
 	int			_size;
 	bool		_init;
+	SDL_Color	_fontColour;
 	SDL_Color	_shadowColour;
 	char		_buffer[400];	//general purpose char buffer (for number formatting etc)
 	int 		_height;
 	std::string _filename;
 	std::string _description;
+
+	std::unique_ptr<Texture> _fastTex;
+	struct SFastWidths
+	{
+	    int start;
+	    int width;
+	};
+	std::vector<SFastWidths> _fastWidths;
+    bool _bFastTex;
 };
 
 class FontCache

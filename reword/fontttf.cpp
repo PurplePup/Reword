@@ -41,13 +41,14 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <memory>
 
 
-FontTTF::FontTTF() : _font(nullptr), _size(0), _init(false), _height(0)
+FontTTF::FontTTF() : _font(nullptr), _size(0), _init(false), _height(0), _bFastTex(false)
 {
-	_shadowColour = BLACK_COLOUR;
+	_fontColour = BLACK_COLOUR;
+	_shadowColour = WHITE_COLOUR;
 }
 
 FontTTF::FontTTF(const std::string &fileName, int size, const std::string &desc) :
-    _font(nullptr), _size(size), _init(false), _height(0)
+    _font(nullptr), _size(size), _init(false), _height(0), _bFastTex(false)
 {
 	load(fileName, size, desc);
 	memset(&_shadowColour, 0, sizeof(SDL_Color));	//black {0x00,0x00,0x00,0},
@@ -62,9 +63,6 @@ void FontTTF::cleanUp()
 {
 	if (_font) TTF_CloseFont(_font);
 	_font = nullptr;
-
-//    _texmap.clear();
-
     _size = 0;
     _height = 0;
 	_init = false;
@@ -76,17 +74,13 @@ bool FontTTF::load(std::string fileName, int size, const std::string &desc)
 	_size = size;
 	_description += desc;   //APPEND
 
-std::cerr << "Font::load (" << fileName << ", size:" << size << ") desc:" << desc << std::endl;
-
 	_font = TTF_OpenFont( fileName.c_str(), size );
 	if (nullptr == _font)
 		std::cerr << "Failed to load font " << fileName << ". Cannot start." << std::endl;
 	else
     {
-//		_height = size;	//calc_text_metrics("X")._y;
-//		_height = calc_text_metrics("A")._max.y;
-//		_height = TTF_FontHeight(_font);
-		_height = TTF_FontAscent(_font);
+        //_height = TTF_FontAscent(_font);    //height above baseline
+		_height = TTF_FontHeight(_font);    //full height of font
         /*
 		int minx,maxx,miny,maxy,advance;
 		if(TTF_GlyphMetrics(_font,'A',&minx,&maxx,&miny,&maxy,&advance)==-1)
@@ -101,6 +95,56 @@ std::cerr << "Font::load (" << fileName << ", size:" << size << ") desc:" << des
 	return _init;
 }
 
+bool FontTTF::convertToFastTexture(Screen *s)
+{
+    TTF_SetFontHinting(_font, TTF_HINTING_NONE);    //reduces glitching
+
+    //create a texture containing each char
+    std::vector<char> chrs;
+    int prevStart(0);
+    for (int i = 0; i < 255; ++i)
+    {
+        const char c = (i<32 ||     //unprintable below space
+                         (i==92) || (i==94) || (i==95)  //cause glitches in glyphs
+                        || i>122)   //more glitches
+                        ? 'X' : (char)i;  //make duff chars ok, else actual char
+
+        //save for conversion into texture
+        chrs.push_back(c);
+
+        //get individual char width and create width and offset for rendering
+        std::string character;
+        character += c;
+
+        int w, h;
+        int result = TTF_SizeText(_font, character.c_str(), &w, &h);
+
+        const int len = calc_text_length(character.c_str());
+        SFastWidths widths = {prevStart, len};
+        _fastWidths.push_back(widths);
+        prevStart += len;
+    }
+    chrs.push_back(0);
+
+    SDL_Surface *text = TTF_RenderText_Blended( _font, &chrs[0], _fontColour );
+    if (text)
+    {
+//        if (-999 == x) x = (s->width() - text->w ) / 2;
+//
+//        if(!bShadow){
+//            r._min = Point(x, y);
+//            r._max = r._min.add(Point(text->w, text->h));
+//        }
+
+        Surface surface(text);
+        _fastTex = std::unique_ptr<Texture>(new Texture(surface));
+
+        SDL_FreeSurface(text);
+    }
+
+    //set flag to indicate use of in put_text() functions
+    return _bFastTex = true;
+}
 
 //set the font shadow (to something other than the default black)
 void FontTTF::setShadowColour(SDL_Color &c)
@@ -135,7 +179,27 @@ int FontTTF::calc_text_length(const char *textstr, bool bShadow /*= false*/) con
 //If shadow selected, then draw in the shadow colour first offset by 1, then the text in the actual position
 Rect FontTTF::put_text(Screen *s, int x, int y, const char *textstr, const SDL_Color &textColour, bool bShadow /*= false*/)
 {
+	if (_bFastTex && textstr != nullptr)
+    {
+        int nextX = x;
+        char * pos = const_cast<char*>(textstr);
+        while (*pos)
+        {
+            assert(*pos > 0 && *pos < 255);
+            //blit each char
+            const int start = _fastWidths[(*pos)].start;
+            const int width = _fastWidths[(*pos)].width;
+            SDL_Rect r2 = {start, 0, width, height()};
+			s->blit(_fastTex->texture_sdl(), &r2, nextX, y);
+			nextX += width;
+			++pos;
+        }
+        Rect r(x, y, x + nextX, y + height());
+        return r;
+    }
+
 	Rect r(0, 0, 0, 0);
+
 	if (bShadow)
 	{
 		SDL_Surface *text = TTF_RenderText_Blended( _font, textstr, _shadowColour );

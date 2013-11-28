@@ -166,6 +166,12 @@ void PlayMenu::render(Screen *s)
 
 	s->blit(_menubg->texture(), nullptr, 0, 0);
 
+//_gd._fntClean.put_text(s, 5,80,"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",BLACK_COLOUR);
+//_gd._fntClean.put_text(s, 5,80,"f g",BLACK_COLOUR);
+_gd._fntClean.put_text(s, 0,80, " !\"#$%&'()*+,-./  :;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ",BLACK_COLOUR);
+_gd._fntClean.put_text(s, 0,100, "`{}|~abcdefghijklmnopqrstuvwxyz",BLACK_COLOUR);
+
+
 	_title.render(s);
 	_beta.render(s);
 
