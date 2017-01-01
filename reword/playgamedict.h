@@ -19,7 +19,7 @@ public:
     PlayGameDict(GameData& gd, const std::string &strDictWord);
     virtual ~PlayGameDict();
 
-    virtual void init(Input *input);
+    virtual void init(Input *input, Screen * scr);
     virtual void render(Screen* s);
     virtual void work(Input* input, float speedFactor);
     virtual bool button(Input* input, ppkey::eButtonType b);
@@ -46,7 +46,7 @@ private:
 
 	Waiting		            _doubleClick;
     std::string             _dictWord;
-	std::vector<Uint32>     _dictDef;
+	std::vector<std::string> _dictDef;
 //	tImageMap               _imageMap;
 	int	_dictLine;			//offset into _dictDef (ie start at _dictDef.begin+_dictLine)
 	int _lines;				//number of lines we can display dictionary entry without scrolling
@@ -54,8 +54,8 @@ private:
 	tAutoRoundels           _roundDict;		//"xxxxx" word highlighted for dictionary display
     std::string             _helpMsg;
 
-    FontCache               _fontCache;
-    int                     _indexHelpMsg;
+//    FontCache               _fontCache;
+//    int                     _indexHelpMsg;
 };
 
 #endif // PLAYGAMEDICT_H

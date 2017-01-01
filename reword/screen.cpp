@@ -68,6 +68,12 @@ Screen::Screen(int w, int h, const std::string &strTitle) :
 
         //create screen renderer
         _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED);
+        if (_renderer == nullptr)
+		{
+			setLastError("Unable to create accelerated renderer - trying software renderer");
+	        _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_SOFTWARE);
+		}
+
         if (_renderer != nullptr)
         {
             //create texture (in GPU mem) to use as screen to 'flip'
@@ -163,7 +169,7 @@ void Screen::putPixel(int x, int y, Uint32 colour)
 //    }
 }
 
-//function to blit a texture to screen
+//function to blit a SDL_Texture to screen
 Rect Screen::blit(SDL_Texture* srcTex, SDL_Rect* srcRect, int destX, int destY)
 {
     SDL_Rect destRect;
@@ -186,6 +192,7 @@ Rect Screen::blit(SDL_Texture* srcTex, SDL_Rect* srcRect, int destX, int destY)
 	return Rect(destRect);
 }
 
+//function to blit a Texture to screen
 Rect Screen::blit(Texture* srcTex, SDL_Rect* srcRect, int destX, int destY)
 {
 //	SDL_Rect destRect = { destX, destY, srcTex->width(), srcTex->height() };

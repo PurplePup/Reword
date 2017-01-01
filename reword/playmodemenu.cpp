@@ -38,9 +38,9 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "global.h"
 #include "playmodemenu.h"
 
-void PlayModeMenu::init(Input *input)
+void PlayModeMenu::init(Input *input, Screen * scr)
 {
-	setTitle("MODE");
+	setName("MODE");
 	std::string msg = "Press " + input->keyDescription(ppkey::B) + " to select mode";
 	setHelp(msg, GREY_COLOUR);
 
@@ -51,8 +51,8 @@ void PlayModeMenu::init(Input *input)
     if (bQSExists)
         addItem(MenuItem(99, ORANGE_COLOUR, "Resume game...", "Continue playing a quick saved game"));
 
-	addItem(MenuItem(0, GREEN_COLOUR, "Arcade", "Get enough words to continue"));
-	addItem(MenuItem(1, PURPLE_COLOUR, "Classic", "Get at least one all-letter word"));
+	addItem(MenuItem(0, GREEN_COLOUR, "Arcade", "Just get enough words to continue"));
+	addItem(MenuItem(1, PURPLE_COLOUR, "Classic", "Must get at least one all-letter word"));
 	addItem(MenuItem(2, GOLD_COLOUR, "SpeedWord", "Get the all-letter words quickly to continue"));
 	addItem(MenuItem(3, BLUE_COLOUR, "TimeTrial", "Get the most all-letter words in the time limit"));
 
@@ -63,7 +63,7 @@ void PlayModeMenu::init(Input *input)
     else
        	setItem((int)_gd._mode);
 
-	PlayMenu::init(input);
+	PlayMenu::init(input, scr);
 }
 
 

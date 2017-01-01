@@ -404,7 +404,7 @@ bool QuickState::quickStateLoad()
 //return true if .quickState.save file exists
 bool QuickState::quickStateExists()
 {
-	return std::ifstream(_quickstatefile.c_str());
+	return std::ifstream(_quickstatefile.c_str()).good();
 }
 
 //delete the quick state save file -once reload has been selected, so user

@@ -104,7 +104,8 @@ bool Surface::load(const std::string &fileName)
     if (bHasPath)
         _surface = IMG_Load(fileName.c_str());		//using SDL_Image dll (png, jpg etc)
     else
-        _surface = IMG_Load((RES_IMAGES + fileName).c_str());		//using SDL_Image dll (png, jpg etc)	if (nullptr == _surface)
+        _surface = IMG_Load((RES_IMAGES + fileName).c_str());		//using SDL_Image dll (png, jpg etc)
+	if (nullptr == _surface)
 	{
 		std::cerr << "Failed to load image " << (bHasPath?"":(RES_IMAGES).c_str()) << fileName << ". Cannot start." << std::endl;
 		std::cerr << "SDL_Error = " << SDL_GetError() << std::endl;

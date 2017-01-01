@@ -43,9 +43,9 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "utils.h"
 #include <sstream>
 
-void PlayDiff::init(Input *input)
+void PlayDiff::init(Input *input, Screen * scr)
 {
-	setTitle("LEVEL");
+	setName("LEVEL");
 	std::string msg = "Press " + input->keyDescription(ppkey::B) + " to select difficulty";
 	setHelp(msg, GREY_COLOUR);
 	addItem(MenuItem(DIF_EASY, GREEN_COLOUR,  "Easy", ""));
@@ -58,13 +58,13 @@ void PlayDiff::init(Input *input)
     //load EXIT/NEXT buttons
     {
     t_pSharedSpr p(new Sprite(Resource::image("btn_square_exit_small.png")));
-    p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
+    p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - static_cast<float>(p->tileH())) /2));
 //    p->_sigEvent2.Connect(this, &PlayDiff::ControlEvent);
     Control c(p, CTRLID_EXIT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsDiff.add(c);
     }
 
-	PlayMenu::init(input);
+	PlayMenu::init(input, scr);
 }
 
 void PlayDiff::choose(MenuItem i)

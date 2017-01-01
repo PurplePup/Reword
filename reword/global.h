@@ -8,7 +8,7 @@
 #include <SDL.h>
 
 
-#define VERSION_STRING		"v0.7 "	//only displayed on menu (playmenu)
+#define VERSION_STRING		"v0.8 "	//move to SDL2.0 - only displayed on menu (playmenu)
 
 
 const SDL_Color NORMAL_COLOUR	= {0xDD,0xDD,0xDD,0};
@@ -20,7 +20,7 @@ const SDL_Color GREEN_COLOUR	= {0x22,0xAA,0x22,0};
 const SDL_Color BLUE_COLOUR		= {0x40,0x40,0xB0,0};
 const SDL_Color YELLOW_COLOUR	= {0xFF,0xFF,0x50,0};
 const SDL_Color ORANGE_COLOUR	= {0xF0,0x84,0x00,0};
-//const SDL_Color BG_COLOUR		= {0xdb,0xdb,0xb7,0};	//same as loaded bg png's
+const SDL_Color BG_COLOUR		= {0xdb,0xdb,0xb7,0};	//same as loaded bg png's
 const SDL_Color GOLD_COLOUR		= {0xba,0xa4,0x05,0};
 const SDL_Color PURPLE_COLOUR	= {0xcb,0x73,0xc8,0};	//my colour
 const SDL_Color GAMEBG_COLOUR	= {0xF6,0xF6,0xBD,0};	//same as bg on word_btn_xxx.png etc

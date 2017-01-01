@@ -1,9 +1,14 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winreword", "winreword.vcxproj", "{4F8D2C19-08D1-4B4C-B768-E96DD7CDB0DD}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winrewordlist", "winrewordlist.vcxproj", "{B8E2863B-4E08-4770-8D8C-B2C4305B0038}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4F8D2C19-08D1-4B4C-B768-E96DD7CDB0DD} = {4F8D2C19-08D1-4B4C-B768-E96DD7CDB0DD}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

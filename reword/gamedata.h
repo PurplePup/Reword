@@ -73,7 +73,6 @@ public:
 	//fonts
 	FontTTF _fntTiny;
 	FontTTF _fntClean;
-
 	FontTTF _fntSmall;
 	FontTTF _fntMed;
 	FontTTF _fntBig;

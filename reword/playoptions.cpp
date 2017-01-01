@@ -83,14 +83,14 @@ PlayOptions::~PlayOptions()
     _gd._options.save();
 }
 
-void PlayOptions::init(Input *input)
+void PlayOptions::init(Input *input, Screen * scr)
 {
-	setTitle("OPTIONS");
+	setName("OPTIONS");
     std::string msg = "Press " + input->keyDescription(ppkey::B) + " to select option";
 	setHelp(msg, GREY_COLOUR);
 
-    //setFont( MenuItem::MENU_FONT_SMALL, MenuItem::MENU_FONT_CLEAN );
 	setLayout(PlayMenu::LAYOUT_LEFT, SCREEN_WIDTH/8);
+    //setFont( MenuItem::MENU_FONT_SMALL, MenuItem::MENU_FONT_CLEAN );
 	addItem(MenuItem(0, BLACK_COLOUR, "Preferred wordfile :", "Change language or dictionary file"));
 	addItem(MenuItem(1, BLACK_COLOUR, "Single touch menus :", "Single or double tap menus"));
 	addItem(MenuItem(2, BLACK_COLOUR, "Default difficulty :", "Use this difficulty at startup"));
@@ -102,12 +102,12 @@ void PlayOptions::init(Input *input)
     _xxStartCtrls = getItemWidest().right() + 20;
 
     MenuItem wordItem = getItem(0);
-    _yyWordFile = wordItem._rBox.top();
+    _yyWordFile = wordItem._rBox.top() + (wordItem._r.height()/4);
 
     {
     t_pSharedSpr p(new Sprite(Resource::image("btn_square_yes_no_small.png")));
     MenuItem i = getItem(1);
-    p->setPos(_xxStartCtrls, i._rBox.top());
+    p->setPos((float)_xxStartCtrls, (float)i._rBox.top());
     p->_sigEvent2.Connect(this, &PlayOptions::ControlEvent);
     Control c(p, CTRLID_YES_NO, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, _gd._options._bSingleTapMenus?1:2);
     _controlsOptn.add(c);
@@ -115,7 +115,7 @@ void PlayOptions::init(Input *input)
     {
     t_pSharedSpr p(new Sprite(Resource::image("btn_square_diff.png")));
     MenuItem i = getItem(2);
-    p->setPos(_xxStartCtrls, i._rBox.top());
+    p->setPos((float)_xxStartCtrls, (float)i._rBox.top());
     p->_sigEvent2.Connect(this, &PlayOptions::ControlEvent);
     Control c(p, CTRLID_DIFF, 0, Control::CAM_DIS_HIT_IDLE_TRIPPLE, (unsigned int)_gd._options._defaultDifficulty);
     _controlsOptn.add(c);
@@ -123,7 +123,7 @@ void PlayOptions::init(Input *input)
     {
     t_pSharedSpr p(new Sprite(Resource::image("btn_square_yes_no_small.png")));
     MenuItem i = getItem(3);
-    p->setPos(_xxStartCtrls, i._rBox.top());
+    p->setPos((float)_xxStartCtrls, (float)i._rBox.top());
     p->_sigEvent2.Connect(this, &PlayOptions::ControlEvent);
     Control c(p, CTRLID_SFX, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, _gd._options._bDefaultSfxOn?1:2);
     _controlsOptn.add(c);
@@ -131,7 +131,7 @@ void PlayOptions::init(Input *input)
     {
     t_pSharedSpr p(new Sprite(Resource::image("btn_square_yes_no_small.png")));
     MenuItem i = getItem(4);
-    p->setPos(_xxStartCtrls, i._rBox.top());
+    p->setPos((float)_xxStartCtrls, (float)i._rBox.top());
     p->_sigEvent2.Connect(this, &PlayOptions::ControlEvent);
     Control c(p, CTRLID_MUSIC, 0, Control::CAM_DIS_HIT_IDLE_DOUBLE, _gd._options._bDefaultMusicOn?1:2);
     _controlsOptn.add(c);
@@ -139,7 +139,7 @@ void PlayOptions::init(Input *input)
 
     {//load EXIT/NEXT buttons
     t_pSharedSpr p(new Sprite(Resource::image("btn_square_exit_small.png")));
-    p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
+    p->setPos(8.0, (float)(BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2)));
     p->_sigEvent2.Connect(this, &PlayOptions::ControlEvent);
     Control c(p, CTRLID_EXIT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsOptn.add(c);
@@ -147,7 +147,7 @@ void PlayOptions::init(Input *input)
 
     setupWordFile();
 
-	PlayMenu::init(input);
+	PlayMenu::init(input, scr);
 }
 
 void PlayOptions::render(Screen *s)

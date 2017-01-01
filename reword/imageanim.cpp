@@ -36,6 +36,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 */
 ////////////////////////////////////////////////////////////////////
 
+#include "platform.h"
 #include "global.h"
 #include "screen.h"
 #include "imageanim.h"
@@ -43,6 +44,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include <cmath>
 #include <cassert>
+#include <algorithm>    // std::max
 
 ImageAnim::ImageAnim() :
 	//_image(),
@@ -379,7 +381,7 @@ void ImageAnim::setBounds(int inflateBy)
 //always size of the image tile in its current position with inflate amount prev set
 Rect ImageAnim::bounds() const
 {
-    Rect r(_x, _y, _x+tileW(), _y+tileH());
+    Rect r((int)_x, (int)_y, _x+tileW(), _y+tileH());
     if (_inflateBy)
         return r.inset(_inflateBy);
     return r;

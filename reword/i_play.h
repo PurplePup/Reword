@@ -43,7 +43,7 @@ public:
     virtual ~IPlay() {}
 
     //init the level/screen
-    virtual void init(Input * /*input*/) = 0;
+    virtual void init(Input * /*input*/, Screen * /*s*/) = 0;
     // drawing operation
     virtual void render(Screen* /*s*/) = 0;
     // other processing

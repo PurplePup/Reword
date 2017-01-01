@@ -63,12 +63,11 @@ void GameData::init()
 	bErr |= !_words.load(RES_WORDS + _options._defaultWordFile, hash + SDL_GetTicks());
 
 	//FONTS
-	bErr |= !_fntSmall.load(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_SMALL, "Cartoon small");
-	bErr |= !_fntMed.load(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_MEDIUM, "Cartoon med");
-	bErr |= !_fntBig.load(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_BIG, "Cartoon big");
-
-	bErr |= !_fntTiny.load(RES_FONTS + "FreeSansBold.ttf", FONT_TINY, "Sans tiny");
-	bErr |= !_fntClean.load(RES_FONTS + "FreeSansBold.ttf", FONT_CLEAN, "Sans clean");
+	bErr |= !_fntTiny.loadBMP(RES_FONTS + "arial_14.fnt", "Tiny");					//14 for under found words
+	bErr |= !_fntSmall.loadBMP(RES_FONTS + "arial_16.fnt", "small");				//18 for under menu etc
+	bErr |= !_fntMed.loadBMP(RES_FONTS + "BD_Cartoon_Shout_26.fnt", "medium font");	//used for main menu text etc
+	bErr |= !_fntBig.loadBMP(RES_FONTS + "BD_Cartoon_Shout_34.fnt", "Cartoon big");	// main menu 
+	bErr |= !_fntClean.loadBMP(RES_FONTS + "arial_22.fnt", "small clean");
 
     if (!bErr)
     {
@@ -216,11 +215,11 @@ bool GameOptions::load()
 		{
 			pptxt::splitKeyValuePair(line, key, value);
 			if (key == "singletap")
-				_bSingleTapMenus = atoi(value.c_str());
+				_bSingleTapMenus = atoi(value.c_str()) != 0;
 			else if (key == "defaultsfx")
-				_bDefaultSfxOn = atoi(value.c_str());
+				_bDefaultSfxOn = atoi(value.c_str()) != 0;
 			else if (key == "defaultmusic")
-				_bDefaultMusicOn = atoi(value.c_str());
+				_bDefaultMusicOn = atoi(value.c_str()) != 0;
 			else if (key == "defaultdiff")
 			{
 			    int diff = atoi(value.c_str());

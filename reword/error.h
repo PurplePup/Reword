@@ -11,7 +11,7 @@ class Error
 public:
 	Error();
 	std::string lastError(bool bClear = true);	//return last error set
-	bool hasError() { return _lastErr.length(); }
+	bool hasError() { return _lastErr.length() > 0; }
 
 protected:
 	void setLastError(std::string, bool bAddSDLError = true);

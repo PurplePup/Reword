@@ -79,7 +79,7 @@ Roundels::~Roundels()
 }
 
 //init the level/screen
-void Roundels::init(Input * /*input*/)
+void Roundels::init(Input * /*input*/, Screen * /*scr*/)
 {
     cleanUp();
 }
@@ -421,9 +421,9 @@ void Roundels::startMoveFrom(int deltaX, int deltaY,
 		{
 			oldX = (int)((*it)->_spr->getXPos());
 			oldY = (int)((*it)->_spr->getYPos());
-			(*it)->_spr->setPos(deltaX+oldX, deltaY+oldY);
+			(*it)->_spr->setPos((float)(deltaX+oldX), (float)(deltaY+oldY));
 			//if delay negative (random up to abs(delay)) don't compound the amount
-			(*it)->_spr->startMoveTo(oldX, oldY, rate, (delay>0)?delay*i:delay, xVel, yVel, type);
+			(*it)->_spr->startMoveTo(oldX, oldY, rate, (delay>0)?delay*i:delay,(float)xVel, (float)yVel, type);
 		}
 		++i;
 	}
@@ -444,7 +444,7 @@ void Roundels::easeMoveFrom(int deltaX, int deltaY,
 		{
 			oldX = (int)((*it)->_spr->getXPos());
 			oldY = (int)((*it)->_spr->getYPos());
-			(*it)->_spr->setPos(deltaX+oldX, deltaY+oldY);
+			(*it)->_spr->setPos((float)(deltaX+oldX), (float)(deltaY+oldY));
 			//if delay negative (random up to abs(delay)) don't compound the amount
             (*it)->_spr->easeMoveTo(oldX, oldY, duration, (delay>0)?delay*i:delay, ease);    //ease over Nms
 		}
@@ -585,7 +585,7 @@ bool Roundels::unJumbleWord(bool bAnimate /*=true*/)
 //_pos value within the list of letters making up the word
 void Roundels::recalcXYPosition(Roundel *r)
 {
-	r->_spr->setPos( calcXPos(r), calcYPos(r) );
+	r->_spr->setPos( (float)(calcXPos(r)), (float)(calcYPos(r)) );
 }
 int Roundels::calcXPos(Roundel *r)
 {
@@ -688,7 +688,7 @@ bool Roundels::moveLetterDown(bool bEffect /*=true*/)
         {
             int nextx = _bot[xx+1]->_spr->getXEnd();
             int nexty = _bot[xx+1]->_spr->getYEnd();
-	        _bot[xx+1]->_spr->setPos(posx, posy);
+	        _bot[xx+1]->_spr->setPos((float)posx, (float)posy);
             _bot[xx]= _bot[xx+1];
             posx = nextx;
             posy = nexty;

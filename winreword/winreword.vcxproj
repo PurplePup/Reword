@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -54,6 +54,8 @@
     <ClInclude Include="..\reword\spritemgr.h" />
     <ClInclude Include="..\reword\states.h" />
     <ClInclude Include="..\reword\surface.h" />
+    <ClInclude Include="..\reword\tinyxml\tinystr.h" />
+    <ClInclude Include="..\reword\tinyxml\tinyxml.h" />
     <ClInclude Include="..\reword\utils.h" />
     <ClInclude Include="..\reword\waiting.h" />
     <ClInclude Include="..\reword\words.h" />
@@ -95,6 +97,10 @@
     <ClCompile Include="..\reword\sprite.cpp" />
     <ClCompile Include="..\reword\spritemgr.cpp" />
     <ClCompile Include="..\reword\surface.cpp" />
+    <ClCompile Include="..\reword\tinyxml\tinystr.cpp" />
+    <ClCompile Include="..\reword\tinyxml\tinyxml.cpp" />
+    <ClCompile Include="..\reword\tinyxml\tinyxmlerror.cpp" />
+    <ClCompile Include="..\reword\tinyxml\tinyxmlparser.cpp" />
     <ClCompile Include="..\reword\utils.cpp" />
     <ClCompile Include="..\reword\waiting.cpp" />
     <ClCompile Include="..\reword\words.cpp" />
@@ -108,12 +114,14 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -130,15 +138,17 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>C:\boost\boost_1_47;C:\ajm\SDL-1.2.15\include;C:\ajm\SDL_ttf-2.0.11\include;C:\ajm\SDL_mixer-1.2.12\include;C:\ajm\SDL_image-1.2.12\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;DEBUG;BOOST_ALL_DYN_LINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\libs\boost\boost_1_62_0;C:\libs\sdl\SDL2-2.0.4\include;C:\libs\sdl\SDL2_ttf-2.0.14\include;C:\libs\sdl\SDL2_mixer-2.0.1\include;C:\libs\sdl\SDL2_image-2.0.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;DEBUG;BOOST_ALL_NO_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion)$(TargetName).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\ajm\SDL-1.2.15\lib\x86;C:\ajm\SDL_ttf-2.0.11\lib\x86;C:\ajm\SDL_mixer-1.2.12\lib\x86;C:\ajm\SDL_image-1.2.12\lib\x86;C:\boost\boost_1_47\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL.lib;SDLmain.lib;SDL_image.lib;SDL_mixer.lib;SDL_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\libs\sdl\SDL2-2.0.4\lib\x86;C:\libs\sdl\SDL2_ttf-2.0.14\lib\x86;C:\libs\sdl\SDL2_mixer-2.0.1\lib\x86;C:\libs\sdl\SDL2_image-2.0.1\lib\x86;C:\libs\boost\boost_1_62_0\lib32-msvc-14.0;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_mixer.lib;SDL2_ttf.lib;libboost_filesystem-vc140-mt-gd-1_62.lib;libboost_system-vc140-mt-gd-1_62.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -147,16 +157,19 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>C:\boost\boost_1_47;C:\ajm\SDL-1.2.15\include;C:\ajm\SDL_ttf-2.0.11\include;C:\ajm\SDL_mixer-1.2.12\include;C:\ajm\SDL_image-1.2.12\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;BOOST_ALL_DYN_LINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\libs\boost\boost_1_62_0;C:\libs\sdl\SDL2-2.0.4\include;C:\libs\sdl\SDL2_ttf-2.0.14\include;C:\libs\sdl\SDL2_mixer-2.0.1\include;C:\libs\sdl\SDL2_image-2.0.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;BOOST_ALL_NO_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion)$(TargetName).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>C:\ajm\SDL-1.2.15\lib\x86;C:\ajm\SDL_ttf-2.0.11\lib\x86;C:\ajm\SDL_mixer-1.2.12\lib\x86;C:\ajm\SDL_image-1.2.12\lib\x86;C:\boost\boost_1_47\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL.lib;SDLmain.lib;SDL_image.lib;SDL_mixer.lib;SDL_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\libs\sdl\SDL2-2.0.4\lib\x86;C:\libs\sdl\SDL2_ttf-2.0.14\lib\x86;C:\libs\sdl\SDL2_mixer-2.0.1\lib\x86;C:\libs\sdl\SDL2_image-2.0.1\lib\x86;C:\libs\boost\boost_1_62_0\lib32-msvc-14.0;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_mixer.lib;SDL2_ttf.lib;libboost_filesystem-vc140-mt-1_62.lib;libboost_system-vc140-mt-1_62.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

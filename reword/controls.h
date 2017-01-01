@@ -6,7 +6,7 @@
 #include <vector>
 #include <cassert>
 
-class Controls : IPlay
+class Controls : public IPlay
 {
 public:
     typedef std::vector<Control> t_controls;
@@ -23,9 +23,9 @@ public:
     bool forceFade(int id, bool bFlip = true); //manual 'press'
 
     //init the level/screen
-    virtual void init(Input * input);
+    virtual void init(Input * input, Screen * scr);
     // drawing operation
-    virtual void render(Screen * s);
+    virtual void render(Screen * scr);
     // other processing
     virtual void work(Input * input, float speedFactor);
     // notification of button/input state change

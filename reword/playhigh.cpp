@@ -46,6 +46,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include <cassert>
 #include <memory>
+#include <algorithm>    // std::min
 
 PlayHigh::PlayHigh(GameData &gd)  : _gd(gd)
 {
@@ -54,7 +55,7 @@ PlayHigh::PlayHigh(GameData &gd)  : _gd(gd)
 	_init = false;
 }
 
-void PlayHigh::init(Input *input)
+void PlayHigh::init(Input *input, Screen * /*scr*/)
 {
 	//once the class is initialised, init and running are set true
 

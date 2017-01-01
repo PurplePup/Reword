@@ -6,7 +6,7 @@
 
 #include <memory>
 
-class Control : IPlay
+class Control : public IPlay
 {
 public:
     typedef std::shared_ptr<Sprite> t_pControl;
@@ -42,7 +42,7 @@ public:
     void setActiveFrame();
 
     //init the level/screen
-    virtual void init(Input * /*input*/);
+    virtual void init(Input * input, Screen * scr);
     // drawing operation
     virtual void render(Screen* s);
     // other processing

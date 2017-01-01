@@ -17,7 +17,7 @@ class PlayDiff : public PlayMenu
 public:
 	PlayDiff(GameData& gd) : PlayMenu(gd) {}
 
-    virtual void init(Input *input);
+    virtual void init(Input *input, Screen * scr);
     virtual void choose(MenuItem i);
     virtual void render(Screen *s);
     virtual void work(Input* input, float speedFactor);

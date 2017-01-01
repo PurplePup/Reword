@@ -69,7 +69,7 @@ Sprite * Controls::getControlSprite(int id)
 }
 
 //init the level/screen
-void Controls::init(Input * /*input*/)
+void Controls::init(Input * /*input*/, Screen * /*scr*/)
 {
 }
 // drawing operation

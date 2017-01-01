@@ -37,6 +37,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 ////////////////////////////////////////////////////////////////////
 
 
+#include "platform.h"
 #include "global.h"
 #include "sprite.h"
 #include "screen.h"

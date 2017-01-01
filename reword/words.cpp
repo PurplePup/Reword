@@ -139,7 +139,7 @@ bool Words::splitDictLine(std::string text, DictWord &dictword)
 	return dictword._description.length() > 0;
 }
 
-//return true if word passed in is not useable in the game due to size or content
+//return true if word passed in is not usable in the game due to size or content
 bool Words::rejectWord(const std::string &strWord)
 {
     const size_t found=strWord.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZ");

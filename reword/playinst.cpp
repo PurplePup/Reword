@@ -52,7 +52,7 @@ PlayInst::PlayInst(GameData &gd)  : _gd(gd)
 	_init = false;
 }
 
-void PlayInst::init(Input *input)
+void PlayInst::init(Input *input, Screen * /*scr*/)
 {
 	//once the class is initialised, init and running are set true
 
@@ -347,8 +347,8 @@ void PlayInst::buildPage(int page)
 	{
 	case 1:strstr <<
 			"\n\n"
-			"Written by : Alistair McLuckie (PurplePup)\n\n"
-			"Ideas & testing by : Annette Odom\n\n"
+			"Written by : Al McLuckie (PurplePup)\n\n"
+			"Ideas & testing by : A. Odom\n\n"
 			"Title music by : unknown MOD artist\n\n"
 			;
 			_txtColour = BLACK_COLOUR;
@@ -377,34 +377,34 @@ void PlayInst::buildPage(int page)
 			"Query - Try selected letters (or double tap screen)\n"
 			"Up    - move selected letter to top\n"
 			"Down  - move last word to selection area\n"
-			"[MENU] - displays save and move on early options (if re-word found)\n"
+			"[MENU] - options to save or move on early (if a Re-word found)\n"
 			;
 			_txtColour = BLACK_COLOUR;
 			break;
 	case 3:	strstr <<	//instructions
 			"There are four game modes to play, with three difficulty levels "
 			"each. Time allowed and bonuses depend on the difficulty. "
-			"You must find at least one of the maximum length words (a Re-word) "
+			"You must find at least one of the all-letter words (a Re-word) "
 			"to progress or get to the next level in each mode. Other, shorter words "
 			"found are a bonus. Pausing causes time penalty, and not available "
 			"on hardest difficulty.\n\n"
 			"1) Arcade\n"
-			"A quick game, allowing you to progress even if you can't get the "
-			"re-word (longest) word, as long as you get enough shorter length words shown "
+			"A quick game, allowing you to progress even if you can't get the Re-word "
+			"(all-letter) word, as long as you get enough shorter length words shown "
 			"by the decreasing highlighted boxes. Get longer words for quicker progress."
 			"\n\n"
 			"2) Classic (Original Reword)\n"
 			"Make as many words from the letters given, aiming to use all letters. "
-			"You must make at least one re-word (longest) word in each "
+			"You must make at least one Re-word (all-letter) word in each "
 			"round to move on to the next round. If all words are found, "
 			"a bonus is given for each second remaining."
 			"\n\n"
 			"3) SpeedWord\n"
-			"You must get a single re-word (longest) word to continue to the "
+			"You must get a single Re-word (all-letter) word to continue to the "
 			"next round.\nA bonus is given each time a fastest word is achieved."
 			"\n\n"
 			"4) TimeTrial\n"
-			"You must get as many re-word (long) words as you can in the time "
+			"You must get as many Re-word (all-letter) words as you can in the time "
 			"allowed.\nA bonus is given each time a fastest word is achieved.\n"
 			"Note that the timer will continue to count down even after a word has been "
 			"found. You must move on as quickly as possible for a good score!"
@@ -422,18 +422,18 @@ void PlayInst::buildPage(int page)
             SCORE_ARCADE << "pts for enough words to get next level\n" <<
             "25% in Easy, 35% in Med, 45% in Hard mode to continue.\n" <<
 			SCORE_SECONDS << "pts * seconds left, if ALL words found\n" <<
-			SCORE_WORD6 << "pts for each re-word (longest) word found\n" <<
+			SCORE_WORD6 << "pts for each Re-word (all-letter) word found\n" <<
 			SCORE_WORD << "pts for each smaller letter words\n" <<
 			"\nIn Reword:\n" <<
 			SCORE_BONUS <<"pts for each level passed\n" <<
 			SCORE_SECONDS << "pts * seconds left, if ALL words found\n" <<
-			SCORE_WORD6 << "pts for each re-word (longest) word found\n" <<
+			SCORE_WORD6 << "pts for each Re-word (all-letter) word found\n" <<
 			SCORE_WORD << "pts for each smaller letter words\n" <<
 			"\nIn SpeedWord:\n" <<
-			SCORE_WORD6 << "pts * for each re-word (longest) word found\n" <<
+			SCORE_WORD6 << "pts * for each Re-word (all-letter) word found\n" <<
 			SCORE_FASTEST << "pts * remainder seconds for each fastest\n" <<
 			"\nIn TimeTrial:\n" <<
-			SCORE_WORD6 << "pts for each re-word (longest) word found\n" <<
+			SCORE_WORD6 << "pts for each Re-word (all-letter) word found\n" <<
 			SCORE_FASTEST << "pts * remainder seconds for each fastest\n"
 			;
 			_txtColour = BLACK_COLOUR;
