@@ -17,6 +17,7 @@ History:		Version	Date		Change
 				0.3.1	07.06.2007	Speed up menu movement a little
 				0.4		17.03.2008	Changed description to use score consts
 				0.5		16.05.2008	Implement PlayMenu base class and touch screen
+				0.7		02.01.17	Moved to SDL2
 
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by

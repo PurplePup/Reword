@@ -16,6 +16,7 @@ History:		Version	Date		Change
 				-------	----------	--------------------------------
 				0.4.0	11.02.2008	implemented
 				0.5		16.05.2008	Implement PlayMenu base class and touch screen
+				0.7		02.01.17	Moved to SDL2
 
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by

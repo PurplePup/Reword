@@ -25,6 +25,7 @@ History:		Version	Date		Change
 									Added pinger sound when in popup menu, to warn user
 				0.5		28.05.08	Added touchscreen support
 				0.5.1	02.10.08	Add Pandora and other device screen layout/sizes
+				0.7		02.01.17	Moved to SDL2
 
 
 Licence:		This program is free software; you can redistribute it and/or modify

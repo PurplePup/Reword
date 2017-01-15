@@ -119,9 +119,6 @@ protected:
 	tSharedImage    _menubg;
 	Sprite          _star;
     Roundels        _beta;
-//    FontCache     _fontCache;
-    int             _fadeX;
-    Easing          _fadeEase;
 
 	float			_fadeAmt;
 	float			_fadeF;

@@ -18,6 +18,7 @@ History:		Version	Date		Change
 				-------	----------	--------------------------------
 				0.3.1	09.06.2007	set _xEnd to x and _yEnd to y in setPos(), was not clearing isMoving test
 				0.5.0	18.06.2008	Added touch screen support
+				0.7		02.01.17	Moved to SDL2
 
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by

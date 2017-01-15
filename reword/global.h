@@ -8,7 +8,7 @@
 #include <SDL.h>
 
 
-#define VERSION_STRING		"v0.8 "	//move to SDL2.0 - only displayed on menu (playmenu)
+#define VERSION_STRING		"v0.7 "	//move to SDL2.0 - only displayed on menu (playmenu)
 
 
 const SDL_Color NORMAL_COLOUR	= {0xDD,0xDD,0xDD,0};

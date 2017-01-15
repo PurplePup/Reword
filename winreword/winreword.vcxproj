@@ -167,7 +167,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>C:\libs\sdl\SDL2-2.0.4\lib\x86;C:\libs\sdl\SDL2_ttf-2.0.14\lib\x86;C:\libs\sdl\SDL2_mixer-2.0.1\lib\x86;C:\libs\sdl\SDL2_image-2.0.1\lib\x86;C:\libs\boost\boost_1_62_0\lib32-msvc-14.0;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_mixer.lib;SDL2_ttf.lib;libboost_filesystem-vc140-mt-1_62.lib;libboost_system-vc140-mt-1_62.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>

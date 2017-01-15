@@ -20,6 +20,7 @@ History:		Version	Date		Change
 						11.08.2008	Build and render menu like PlayMenu class
 										but use map instead of seq container.
                 0.6     20.06.2011  Fix Yes/No menu exit
+				0.7		02.01.17	Moved to SDL2
 
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by
@@ -90,15 +91,15 @@ void PlayGamePopup::init(Input *input, Screen * /*scr*/)
 	if (_bIsInGame)
         _itemList[++i] = MenuItem(POP_SKIP, ORANGE_COLOUR, "Next word/Level",
                             (_hasMaxWord)?"Move on to next word/level":"You must have a Re-word first!", _hasMaxWord);
-    if (Locator::audio().musicEnabled())
-    {
-        bool bIsPlaying = Locator::audio().isPlayingMusic();	//may be playing/fading menu music so uses isPlaying... rather than isActuallyPl...
-        bool bHasMusic = Locator::audio().hasMusicTracks();
+    //if (Locator::audio().musicEnabled())
+    //{
+    //    bool bIsPlaying = Locator::audio().isPlayingMusic();	//may be playing/fading menu music so uses isPlaying... rather than isActuallyPl...
+    //    bool bHasMusic = Locator::audio().hasMusicTracks();
 
-        _itemList[++i] = MenuItem(POP_TOGGLEMUSIC, BLUE_COLOUR, bIsPlaying?"Music Stop":"Music Start", bIsPlaying?"Stop current track":"Start a song", bHasMusic);
-        _itemList[++i] = MenuItem(POP_NEXTTRACK, BLUE_COLOUR, "Next Track", "Play next song", bHasMusic);
-        _itemList[++i] = MenuItem(POP_PREVTRACK, BLUE_COLOUR, "Prev Track", "Play previous song", bHasMusic);
-    }
+    //    _itemList[++i] = MenuItem(POP_TOGGLEMUSIC, BLUE_COLOUR, bIsPlaying?"Music Stop":"Music Start", bIsPlaying?"Stop current track":"Start a song", bHasMusic);
+    //    _itemList[++i] = MenuItem(POP_NEXTTRACK, BLUE_COLOUR, "Next Track", "Play next song", bHasMusic);
+    //    _itemList[++i] = MenuItem(POP_PREVTRACK, BLUE_COLOUR, "Prev Track", "Play previous song", bHasMusic);
+    //}
 	if (_hasMaxWord)
 		_itemList[++i] = MenuItem(POP_SAVE, BLUE_COLOUR, "Save & Exit", "Allows exit and restart at same place", true);
 	_itemList[++i] = MenuItem(POP_QUIT, RED_COLOUR, "Quit Game !", "Exit (save highscore)", true);

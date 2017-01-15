@@ -16,6 +16,8 @@ Date:			21 Jan 2012
 History:		Version	Date		Change
 				-------	----------	--------------------------------
 				0.6		21.01.12	created
+				0.7		02.01.17	Moved to SDL2
+				0.7		02.01.17	Moved to SDL2
 
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by
@@ -92,10 +94,10 @@ void PlayOptions::init(Input *input, Screen * scr)
 	setLayout(PlayMenu::LAYOUT_LEFT, SCREEN_WIDTH/8);
     //setFont( MenuItem::MENU_FONT_SMALL, MenuItem::MENU_FONT_CLEAN );
 	addItem(MenuItem(0, BLACK_COLOUR, "Preferred wordfile :", "Change language or dictionary file"));
-	addItem(MenuItem(1, BLACK_COLOUR, "Single touch menus :", "Single or double tap menus"));
+	addItem(MenuItem(1, BLACK_COLOUR, "Single touch menus :", "Single (else double) tap menus"));
 	addItem(MenuItem(2, BLACK_COLOUR, "Default difficulty :", "Use this difficulty at startup"));
-	addItem(MenuItem(3, BLACK_COLOUR, "Sound effects :", "Turn on/off in-game effects at startup"));
-	addItem(MenuItem(4, BLACK_COLOUR, "Menu Music :", "Turn on/off menu music at startup"));
+	addItem(MenuItem(3, BLACK_COLOUR, "Default Sound FX :", "Turn on in-game effects at startup"));
+	addItem(MenuItem(4, BLACK_COLOUR, "Default Menu Music :", "Turn on menu music at startup"));
 //	addItem(MenuItem(5, BLACK_COLOUR, "In-game music files :", "Directory where your music is stored"));
 	setItem(0);
 
@@ -196,7 +198,8 @@ void PlayOptions::choose(MenuItem i)
                     if (p)
                     {
                         p->fade();
-                        Locator::audio().setSfxEnabled(p->isFirstState());
+						const auto bOn = p->isFirstState();
+                        Locator::audio().setSfxEnabled(bOn);
                     }
                 }
                 break;
@@ -206,7 +209,8 @@ void PlayOptions::choose(MenuItem i)
                     if (p)
                     {
                         p->fade();
-                        Locator::audio().setMusicEnabled(p->isFirstState());
+						const auto bOn = p->isFirstState();
+						Locator::audio().setMusicEnabled(bOn);
                     }
                 }
                 break;

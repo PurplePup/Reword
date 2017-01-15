@@ -18,6 +18,7 @@ History:		Version	Date		Change
 				0.5		18.06.2008	Changed volume control to use /dev/mixer as SDL_mixer
 									not altering .mod volume, just wav/mp3/ogg and fx.
 									Code from "Senor Quack"
+				0.7		02.01.17	Moved to SDL2
 
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by

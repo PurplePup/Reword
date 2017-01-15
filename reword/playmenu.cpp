@@ -18,6 +18,7 @@ History:		Version	Date		Change
 				0.5.0	18.06.2008	Added code to create menu items dynamically
 										and support touchscreen
                 0.6.0   02.07.2011  Make single touch menu operation (not double click/tap)
+				0.7		02.01.17	Moved to SDL2
 
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by
@@ -93,7 +94,6 @@ PlayMenu::PlayMenu(GameData &gd) :
 	_init = false;
 	_running = false;
 
-	_fadeX = 0;
 	_item = 0;
 	_nextYpos = 0;
 	_menuRect = Rect(0, BG_LINE_TOP, SCREEN_WIDTH, BG_LINE_BOT);
@@ -141,12 +141,8 @@ void PlayMenu::init(Input *input, Screen * /*scr*/)
 	_beta.setWord("BETA", let, Screen::width() - ((let->tileW()+2)*4), Screen::height() - let->tileH(), 2);
 	_beta.easeMoveFrom( 0, Screen::height(), 800, -500, Easing::EASE_OUTQUART);
 
-	//_fadeEase.setup(Easing::EASE_INOUTSINE, 0, 0, 255, 500);
-	_fadeEase.setup(Easing::EASE_INOUTSINE, 0, 0, .5, 1000);
-	_fadeX = 0;
-
 	_fadeF = 0;
-	_fadeAmt = 0.05f;
+	_fadeAmt = 0.1f;
 	_fadeWait.start(75);
 
     _delayComment.start(DELAY_HELP);  //wait before comment line displayed
@@ -253,7 +249,7 @@ void PlayMenu::render(Screen *s)
 	{
 		if (pItem->id() == selected)
 		{
-			const SDL_Color hi = TransformLerp(pItem->_hoverOff, BG_COLOUR, _fadeF);
+			const SDL_Color hi = TransformLerp(pItem->_hoverOff, WHITE_COLOUR, _fadeF);
 			_fontItem->put_text(s, pItem->_r.left(), pItem->_r.top(), pItem->item().c_str(), hi);
             if (_bSetStarPos)
             {
@@ -300,37 +296,20 @@ void PlayMenu::work(Input *input, float speedFactor)
 	_name.work(input, speedFactor);
 	_star.work();
 
-	   if (!_fadeEase.done())
-	   {
-	       //_fadeX = (int)_fadeEase.work();
-		   _fadeF = _fadeEase.work();;
-	   }
-	   else
-	   {
-		   //if (_fadeX >= 255)
-			  // _fadeEase.setup(Easing::EASE_INOUTSINE, 0, 255, -255, 500);
-		   //else
-			  // _fadeEase.setup(Easing::EASE_INOUTSINE, 0, 0, 255, 500);
-		   if (_fadeF >= 1)
-			   _fadeEase.setup(Easing::EASE_INOUTSINE, 0, 1, -.5, 1000);
-		   else
-			   _fadeEase.setup(Easing::EASE_INOUTSINE, 0, 0, .5, 1000);
-	   }
-
-	//if (_fadeWait.done(true))
-	//{
-	//	_fadeF += _fadeAmt;
-	//	if (_fadeF <= 0)
-	//	{
-	//		_fadeF = 0;
-	//		_fadeAmt = -_fadeAmt;
-	//	}
-	//	else if (_fadeF >= 1)
-	//	{
-	//		_fadeF = 1;
-	//		_fadeAmt = -_fadeAmt;
-	//	}
-	//}
+	if (_fadeWait.done(true))
+	{
+		_fadeF += _fadeAmt;
+		if (_fadeF <= 0)
+		{
+			_fadeF = 0;
+			_fadeAmt = -_fadeAmt;
+		}
+		else if (_fadeF >= 1)
+		{
+			_fadeF = 0.99;
+			_fadeAmt = -_fadeAmt;
+		}
+	}
 
 	_beta.work(input, speedFactor);
 
@@ -415,7 +394,8 @@ bool PlayMenu::touch(const Point &pt)
             {
                 _saveTouchPt = pt;      //so test if release pos is in same menu item
                 _item = item;	        //highlight the touched item
-                _delayComment.start(DELAY_HELP);  //wait before help line displayed
+				choose(*it);
+				_delayComment.start(DELAY_HELP);  //wait before help line displayed
                 return true;
             }
             else

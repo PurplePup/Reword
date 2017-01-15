@@ -16,6 +16,10 @@ Description:	A class based on the Surface class that encapulates image
 Author:			Al McLuckie (al-at-purplepup-dot-org)
 
 Date:			06 April 2007
+				
+History:		Version	Date		Change
+				-------	----------	--------------------------------
+				0.7		02.01.17	Moved to SDL2
 
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by
