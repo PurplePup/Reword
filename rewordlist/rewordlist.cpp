@@ -65,7 +65,6 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <iterator>
 
 #include "words2.h"
-//#include "../reword/words.h"
 
 using namespace std;
 
@@ -270,6 +269,10 @@ int main(int argc, char* argv[])
             //now all list and xdxf words added internally, filter out words
             //not needed due to not found in bigger words etc
             finalWords.filterGameWords();
+
+			// discover and prepare for saving, any prematch words
+			// so game doesn't have to find the list of match words on the fly
+			finalWords.prematch();
 
 			//save it
 			if (finalWords.save(outFile))

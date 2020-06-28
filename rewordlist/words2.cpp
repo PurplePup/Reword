@@ -295,6 +295,16 @@ bool Words2::filterGameWords()    //const std::string &dictFile, bool bUpdateDef
 	return true;
 }
 
+bool Words2::prematch()
+{
+	std::cout << "Calculating prematch lists..." << std::endl;
+
+
+
+	return true;
+}
+
+
 //Determine a 1,2,3 (easy/med/hard) score for the word passed in.
 //Using the scrabble letter scoring system, each word is ranked and
 //then given a 1,2,3 score.
