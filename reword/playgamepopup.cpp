@@ -86,27 +86,27 @@ void PlayGamePopup::init(Input *input)
 	int i(0);
 	//main (in-game) menu options
 	_itemList.clear();
-	_itemList[i=0] = MenuItem(POP_CANCEL, GREEN_COLOUR, "Resume Game", "Continue game", true, MenuItem::MENU_FONT_SMALL);
+	_itemList[i=0] = MenuItem(POP_CANCEL, GREEN_COLOUR, "Resume Game", "Continue game", true);
 	if (_bIsInGame)
         _itemList[++i] = MenuItem(POP_SKIP, ORANGE_COLOUR, "Next word/Level",
-                            (_hasMaxWord)?"Move on to next word/level":"You must have a Re-word first!", _hasMaxWord, MenuItem::MENU_FONT_SMALL);
+                            (_hasMaxWord)?"Move on to next word/level":"You must have a Re-word first!", _hasMaxWord);
     if (Locator::audio().musicEnabled())
     {
         bool bIsPlaying = Locator::audio().isPlayingMusic();	//may be playing/fading menu music so uses isPlaying... rather than isActuallyPl...
         bool bHasMusic = Locator::audio().hasMusicTracks();
 
-        _itemList[++i] = MenuItem(POP_TOGGLEMUSIC, BLUE_COLOUR, bIsPlaying?"Music Stop":"Music Start", bIsPlaying?"Stop current track":"Start a song", bHasMusic, MenuItem::MENU_FONT_SMALL);
-        _itemList[++i] = MenuItem(POP_NEXTTRACK, BLUE_COLOUR, "Next Track", "Play next song", bHasMusic, MenuItem::MENU_FONT_SMALL);
-        _itemList[++i] = MenuItem(POP_PREVTRACK, BLUE_COLOUR, "Prev Track", "Play previous song", bHasMusic, MenuItem::MENU_FONT_SMALL);
+        _itemList[++i] = MenuItem(POP_TOGGLEMUSIC, BLUE_COLOUR, bIsPlaying?"Music Stop":"Music Start", bIsPlaying?"Stop current track":"Start a song", bHasMusic);
+        _itemList[++i] = MenuItem(POP_NEXTTRACK, BLUE_COLOUR, "Next Track", "Play next song", bHasMusic);
+        _itemList[++i] = MenuItem(POP_PREVTRACK, BLUE_COLOUR, "Prev Track", "Play previous song", bHasMusic);
     }
 	if (_hasMaxWord)
-		_itemList[++i] = MenuItem(POP_SAVE, BLUE_COLOUR, "Save & Exit", "Allows exit and restart at same place", true, MenuItem::MENU_FONT_SMALL);
-	_itemList[++i] = MenuItem(POP_QUIT, RED_COLOUR, "Quit Game !", "Exit (save highscore)", true, MenuItem::MENU_FONT_SMALL);
+		_itemList[++i] = MenuItem(POP_SAVE, BLUE_COLOUR, "Save & Exit", "Allows exit and restart at same place", true);
+	_itemList[++i] = MenuItem(POP_QUIT, RED_COLOUR, "Quit Game !", "Exit (save highscore)", true);
 
     //confirmation options
 	_itemYNList.clear();
-	_itemYNList[i=0] = MenuItem(POP_NO, GREEN_COLOUR, "No", "Back to menu", true, MenuItem::MENU_FONT_SMALL);
-	_itemYNList[++i] = MenuItem(POP_YES, RED_COLOUR, "Yes", "Quit the game", true, MenuItem::MENU_FONT_SMALL);
+	_itemYNList[i=0] = MenuItem(POP_NO, GREEN_COLOUR, "No", "Back to menu", true);
+	_itemYNList[++i] = MenuItem(POP_YES, RED_COLOUR, "Yes", "Quit the game", true);
 
 	_pItems = &_itemList;
 	//need to set the _init and _running flags
@@ -140,18 +140,18 @@ void PlayGamePopup::render(Screen *s)
 	{
 		if (it->first == _menuoption)
 		{
-			//r = _gd._fntSmall.put_text(s, yy, it->second._title.c_str(), (it->second._enabled)?it->second._hoverOn:GREY_COLOUR, true);
-			r = s->blit_mid(it->second.item(it->second._enabled?MenuItem::eTitleHoverOn:MenuItem::eTitleGrey)->texture(), nullptr, 0, yy);
+			r = _gd._fntSmall.put_text(s, yy, it->second.item().c_str(), (it->second._enabled)?it->second._hoverOn:GREY_COLOUR, true);
+            ///r = s->blit_mid(it->second.item(it->second._enabled?MenuItem::eTitleHoverOn:MenuItem::eTitleGrey)->texture(), nullptr, 0, yy);
 			r._min.x -= _star.tileW()+5;
 			_star.setPos(r._min.x, yy);
 			//help/comment str
-			//_gd._fntClean.put_text(s, (y+_menubg->height())-(_gd._fntSmall.height()*2), it->second._comment.c_str(), GREY_COLOUR, true);
-			s->blit_mid(it->second.item(MenuItem::eCommentGrey)->texture(), nullptr, 0, (y+_menubg->height())-(_gd._fntSmall.height()*2));
+			_gd._fntClean.put_text(s, (y+_menubg->height())-(_gd._fntSmall.height()*2), it->second.comment().c_str(), GREY_COLOUR, true);
+			///s->blit_mid(it->second.item(MenuItem::eCommentGrey)->texture(), nullptr, 0, (y+_menubg->height())-(_gd._fntSmall.height()*2));
 		}
 		else
 		{
-			//r = _gd._fntSmall.put_text(s, yy, it->second._title.c_str(), (it->second._enabled)?it->second._hoverOff:GREY_COLOUR, false);
-			r = s->blit_mid(it->second.item(it->second._enabled?MenuItem::eTitleHoverOff:MenuItem::eTitleGrey)->texture(), nullptr, 0, yy);
+			r = _gd._fntSmall.put_text(s, yy, it->second.item().c_str(), (it->second._enabled)?it->second._hoverOff:GREY_COLOUR, false);
+			///r = s->blit_mid(it->second.item(it->second._enabled?MenuItem::eTitleHoverOff:MenuItem::eTitleGrey)->texture(), nullptr, 0, yy);
 		}
 		// Make the touch area bigger
 		it->second._r = r.inset(-5);

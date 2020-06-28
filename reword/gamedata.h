@@ -17,7 +17,7 @@
 #include "score.h"
 #include "spritemgr.h"
 
-#pragma message("defining GameOptions\n")
+//#pragma message("defining GameOptions\n")
 
 //loadable game options and set using the options screen
 struct GameOptions

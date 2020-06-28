@@ -86,14 +86,14 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include <stdio.h>  /* defines FILENAME_MAX */
 #ifdef WIN32
-    #pragma message("include WIN32 files\n")
+//    #pragma message("include WIN32 files\n")
     #include <direct.h>
     #define GetCurrentDir _getcwd
 #else
-    #pragma message("include Linux files\n")
+//    #pragma message("include Linux files\n")
     #include <unistd.h>
     #define GetCurrentDir getcwd
- #endif
+#endif
 
 #include <string>
 #include <iostream>

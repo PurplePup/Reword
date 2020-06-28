@@ -40,7 +40,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 void PlayModeMenu::init(Input *input)
 {
-	setTitle("MODE");
+	setName("MODE");
 	std::string msg = "Press " + input->keyDescription(ppkey::B) + " to select mode";
 	setHelp(msg, GREY_COLOUR);
 

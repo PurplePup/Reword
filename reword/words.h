@@ -8,6 +8,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <cstring>
 
 #include <ios>
 #include <iostream>
@@ -19,7 +20,7 @@
 
 //SDL header for ticks - now NOT included here so we can use with or without SDL libraries
 //include SDL.h in your own code before including words.h if you want to use SDL_GetTicks()
-#include <SDL.h>
+//#include <SDL.h>
 
 //define the shortest word we handle
 #define SHORTW_MIN	((int)3)

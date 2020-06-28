@@ -298,8 +298,6 @@ bool Game::init(GameOptions &options)
 	_gd->init(); //load main resources
     Locator::registerData(_gd);
 
-    _gd->_fntClean.convertToFastTexture(_screen);
-
 #if defined(_USE_OGG)
 	//load mp3/ogg menu music
 	std::cout << "Loading menu.ogg music" << std::endl;

@@ -45,7 +45,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 void PlayDiff::init(Input *input)
 {
-	setTitle("LEVEL");
+	setName("LEVEL");
 	std::string msg = "Press " + input->keyDescription(ppkey::B) + " to select difficulty";
 	setHelp(msg, GREY_COLOUR);
 	addItem(MenuItem(DIF_EASY, GREEN_COLOUR,  "Easy", ""));

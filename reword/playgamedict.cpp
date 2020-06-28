@@ -94,15 +94,7 @@ void PlayGameDict::init(Input *input)
     if (!dictDefinition.length()) dictDefinition = "** sorry, not defined **";	//blank word - no dictionary entry
     //now build definition strings to display (on separate lines)
     _dictLine = 0;	//start on first line
-    std::vector<std::string> tmpDictDef;
-    pptxt::buildTextPage(dictDefinition, FONT_CLEAN_MAX, tmpDictDef);
-    auto it = tmpDictDef.begin();
-    for (; it != tmpDictDef.end(); ++it)
-    {
-        //convert each tmp string to a texture in texture cache
-        const Uint32 item = _fontCache.add(_gd._fntClean, 0, (*it).c_str(), BLACK_COLOUR, false);
-        _dictDef.push_back(item);
-    }
+    pptxt::buildTextPage(dictDefinition, FONT_CLEAN_MAX, _dictDef);
 
     //prepare roundel class ready for a dictionary display
     tSharedImage &letters = Resource::image("roundel_letters.png");
@@ -123,7 +115,6 @@ void PlayGameDict::init(Input *input)
 	_lines = ((BG_LINE_BOT - BG_LINE_TOP - _gd._fntMed.height()) / _gd._fntClean.height()) - 1;
 
     _helpMsg = "Press " + Locator::input().keyDescription(ppkey::Y) + " to go back";
-    _indexHelpMsg = _fontCache.add(_gd._fntClean, 0, _helpMsg.c_str(), GREY_COLOUR, true);
 
     updateScrollButtons();
 
@@ -147,8 +138,8 @@ void PlayGameDict::render(Screen* s)
 	int lines = 0;
 	while (it != _dictDef.cend())
 	{
-		//_gd._fntClean.put_text(s, yy, (*it).c_str(), BLACK_COLOUR, false);
-		s->blit_mid(_fontCache.get(*it)->texture(), nullptr, 0, yy);  //0 ignored, use screen
+		_gd._fntClean.put_text(s, yy, (*it).c_str(), BLACK_COLOUR, false);
+		//s->blit_mid(_fontCache.get(*it)->texture(), nullptr, 0, yy);  //0 ignored, use screen
 
 		lines++;
 		yy+=_gd._fntClean.height();
@@ -157,7 +148,8 @@ void PlayGameDict::render(Screen* s)
 	}
 
 	int helpYpos = BG_LINE_BOT+((SCREEN_HEIGHT-BG_LINE_BOT-_gd._fntClean.height())/2);
-	s->blit_mid(_fontCache.get(_indexHelpMsg)->texture(), nullptr, 0, helpYpos);
+	_gd._fntClean.put_text(s, helpYpos, _helpMsg.c_str(), GREY_COLOUR, true);
+
 
 	_controlsDict.render(s);
 }

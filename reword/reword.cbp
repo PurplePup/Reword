@@ -30,8 +30,8 @@
 					<Add option="-DDEBUG" />
 				</Compiler>
 				<Linker>
-					<Add library="/usr/lib/libboost_filesystem.so" />
-					<Add library="/usr/lib/libboost_system.so" />
+					<Add library="/usr/lib/i386-linux-gnu/libboost_filesystem.so" />
+					<Add library="/usr/lib/i386-linux-gnu/libboost_system.so" />
 				</Linker>
 				<MakeCommands>
 					<Build command="$make -f $makefile pc" />
@@ -49,6 +49,8 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add option="-pedantic" />
+					<Add option="-std=c++11" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -148,6 +150,12 @@
 		<Unit filename="states.h" />
 		<Unit filename="surface.cpp" />
 		<Unit filename="surface.h" />
+		<Unit filename="tinyxml/tinystr.cpp" />
+		<Unit filename="tinyxml/tinystr.h" />
+		<Unit filename="tinyxml/tinyxml.cpp" />
+		<Unit filename="tinyxml/tinyxml.h" />
+		<Unit filename="tinyxml/tinyxmlerror.cpp" />
+		<Unit filename="tinyxml/tinyxmlparser.cpp" />
 		<Unit filename="utils.cpp" />
 		<Unit filename="utils.h" />
 		<Unit filename="waiting.cpp" />
@@ -162,7 +170,7 @@
 			<debugger />
 			<envvars />
 			<DoxyBlocks>
-				<comment_style block="0" line="0" />
+				<comment_style block="2" line="2" />
 				<doxyfile_project />
 				<doxyfile_build />
 				<doxyfile_warnings />

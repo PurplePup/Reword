@@ -19,11 +19,6 @@ public:
     virtual void choose(MenuItem i);
     virtual void chooseDone();
     virtual void render(Screen *s);
-
-protected:
-    int _verId;
-//private:
-//    FontCache  _fontCache;
 };
 
 #endif //_PlayMainMenu_H

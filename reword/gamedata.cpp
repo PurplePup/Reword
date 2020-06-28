@@ -63,12 +63,18 @@ void GameData::init()
 	bErr |= !_words.load(RES_WORDS + _options._defaultWordFile, hash + SDL_GetTicks());
 
 	//FONTS
-	bErr |= !_fntSmall.load(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_SMALL, "Cartoon small");
-	bErr |= !_fntMed.load(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_MEDIUM, "Cartoon med");
-	bErr |= !_fntBig.load(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_BIG, "Cartoon big");
+//	bErr |= !_fntSmall.loadTTF(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_SMALL, "Cartoon small");
+//	bErr |= !_fntMed.loadTTF(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_MEDIUM, "Cartoon med");
+//	bErr |= !_fntBig.loadTTF(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_BIG, "Cartoon big");
+	bErr |= !_fntSmall.loadBMP(RES_FONTS + "freesans.fnt", "small");    //18
+//	bErr |= !_fntMed.loadBMP(RES_FONTS + "BD_Cartoon_Shout_26.fnt", "Cartoon med");
+	bErr |= !_fntMed.loadBMP(RES_FONTS + "font.fnt", "test xml font");
+	bErr |= !_fntBig.loadBMP(RES_FONTS + "BD_Cartoon_Shout_34.fnt", "Cartoon big");
 
-	bErr |= !_fntTiny.load(RES_FONTS + "FreeSansBold.ttf", FONT_TINY, "Sans tiny");
-	bErr |= !_fntClean.load(RES_FONTS + "FreeSansBold.ttf", FONT_CLEAN, "Sans clean");
+//	bErr |= !_fntTiny.loadTTF(RES_FONTS + "FreeSansBold.ttf", FONT_TINY, "Sans tiny");
+//	bErr |= !_fntClean.loadBMP(RES_FONTS + "font.fnt", "test xml font");
+	bErr |= !_fntTiny.loadBMP(RES_FONTS + "FreeSansBold_14.fnt", "Sans Tiny");
+	bErr |= !_fntClean.loadBMP(RES_FONTS + "FreeSansBold_16.fnt", "Sans Clean");
 
     if (!bErr)
     {

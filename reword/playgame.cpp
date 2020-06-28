@@ -391,7 +391,7 @@ void PlayGame::render_play(Screen* s)
 	if (PG_PLAY == _state)
 	{
         //center the countdown text in the scorebar countdown [area]
-        _gd._fntBig.put_number_mid(s, _countdown0_y, _countdown0_x, //s->surface()->w - 54,
+        _gd._fntBig.put_number_mid(s, _countdown0_x, _countdown0_y, //s->surface()->w - 54,
             _countdown, "%d", (_countdown > 10)?YELLOW_COLOUR:RED_COLOUR, true);	//TIME:
 
 		//draw the tile background before any lower letters placed
@@ -2161,7 +2161,7 @@ void PlayGame::prepareBackground()
 
 	//draw difficulty level in bot right corner
 	std::string strDiff = strMode + " (" + _gd._diffName + ")";
-	_gd._fntTiny.put_text_right(&tmpSurface, SCREEN_HEIGHT - _gd._fntTiny.height() - 4, 4, strDiff.c_str(), _gd._diffColour);
+	_gd._fntTiny.put_text_right(&tmpSurface, 4, SCREEN_HEIGHT - _gd._fntTiny.height() - 4, strDiff.c_str(), _gd._diffColour);
 
     //now make texture to be rendered as background during actual play/update
 	_gamebg = tSharedImage(new Image(tmpSurface));

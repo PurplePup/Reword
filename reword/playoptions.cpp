@@ -85,7 +85,7 @@ PlayOptions::~PlayOptions()
 
 void PlayOptions::init(Input *input)
 {
-	setTitle("OPTIONS");
+	setName("OPTIONS");
     std::string msg = "Press " + input->keyDescription(ppkey::B) + " to select option";
 	setHelp(msg, GREY_COLOUR);
 
