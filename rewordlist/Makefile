@@ -12,14 +12,21 @@ SOURCES = rewordlist.cpp \
 OBJECTS = $(SOURCES:.cpp=.o)
 BIN = $(PROG_NAME)
 
+## compile
 CXX = g++
-CXXFLAGS = -c -Wall -ggdb -D_DEBUG -I/usr/include
-# CXXFLAGS = -v -std=c++11 -m64 -ggdb -D_DEBUG -I/home/ajm/boost/boost_1_73_0
+CXXFLAGS = -std=c++11 -c -Wall -ggdb -D_DEBUG -I/usr/include
 # -std=c++11  -m64
 
- LDFLAGS = -Wall -L/usr/lib -L/usr/lib/x86_64-linux-gnu  -lboost_thread -lboost_regex 
+## link
+# working using std regex
+LDFLAGS = -Wall -L/usr/lib -L/usr/lib/x86_64-linux-gnu
+# working if using boost regex: 
+#LDFLAGS = -Wall -L/usr/lib -L/usr/lib/x86_64-linux-gnu  -lboost_thread -lboost_regex 
+
+# older attempts:
 # LDFLAGS = -L/usr/lib/x86_64-linux-gnu -lpthread -lboost_thread -lboost_regex
 # LDFLAGS = -L/home/ajm/boost/boost_1_73_0/stage/lib -lboost_thread -lboost_regex
+
 
 all: $(SOURCES) $(BIN)
 #	make pcversion pc=1

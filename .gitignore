@@ -41,5 +41,5 @@ hiscore.dat
 .quickstate.save
 .vscode
 reword.layout
-reword
-rewordlist
+#reword
+#rewordlist

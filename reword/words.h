@@ -36,16 +36,27 @@ struct DictWord
 	std::string _word;
 	int			_level;			//1=easy, 2=med, 3=hard (0=undefined/easy)
 	std::string _description;
+	std::vector<std::vector<int> > _prematch;	// a vector, of vectors pointing to matches, for each word length
+
 	bool		_personal;		//a personally entered word (not in dict)
 	bool 		_found;
 
-    DictWord() { clear(); }
+    DictWord() {
+		clear(); 
+	}
 
 	void clear()
 	{
-		_word = "";
+		_word.clear();
 		_level = 0;
-		_description = "";
+		_description.clear();
+
+		_prematch.clear();
+		// create a vector for each word length, so _prematch[3] contains a 
+		// vect of 3 letter word indexes matched in the current word
+		for (int i = 0; i<TARGET_MAX+1; ++i)
+			_prematch.push_back(std::vector<int>());
+
 		_personal = false;
 		_found = false;
 	};
@@ -57,6 +68,7 @@ struct DictWord
 			this->_word = dw._word;
 			this->_level = dw._level;
 			this->_description = dw._description;
+			this->_prematch = dw._prematch;
 			this->_personal = dw._personal;
 			this->_found = dw._found;
 		}
@@ -80,7 +92,7 @@ struct DictWord
 };
 
 typedef std::map<std::string, DictWord> tWordMap;	//map of random numbers and the (same length) words available
-typedef std::map<std::string, bool> tWordsInTarget;	//map of words during a level and if its been found by the player
+typedef std::map<std::string, bool> tWordsInTarget;	//map of words during a level and if it's been found by the player
 typedef std::set<std::string> tWordSet;				//for unique set of words
 typedef std::vector<std::string> tWordVect;
 
@@ -91,15 +103,12 @@ struct Stats
     void clear() { _total = _ignored = 0;
                     memset(_countLevels, 0, sizeof(_countLevels));
                     memset(_countScore, 0, sizeof(_countScore));
-//                  memset(_countWords, 0, sizeof(_countWords));
                 }
 	int		_total;					//total words loaded
 	int		_ignored;				//number of words ignored
 
 	int     _countLevels[3];                //number or easy words, med words and hard words
 	int     _countScore[100];               //number of words for each score (to help define thresholds)
-//	int     _countWords[TARGET_MAX+1];      //number of 6, 7, 8 're-word' words
-
 };
 
 
