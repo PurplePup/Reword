@@ -81,7 +81,7 @@ void Input::initJoy(void)
 		SDL_JoystickEventState (SDL_ENABLE);
     }
 
-	_init = (joy!=NULL);
+	_init = (joy!=nullptr);
 }
 
 // Button pressed

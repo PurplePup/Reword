@@ -44,25 +44,28 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 void PlayMainMenu::init(Input *input)
 {
-	setTitle("REWORD");
-	std::string msg = "Press " + input->keyDescription(ppkey::B) + " to select item";
-	setHelp(msg, GREY_COLOUR);
-	addItem(MenuItem(0, GREEN_COLOUR, "Play", "Go for it"));
+	setName("REWORD");
+
+	addItem(MenuItem(0, GREEN_COLOUR, "Play", "Go for it", true));
 	std::string s = "Difficulty ";
 	s += (_gd._diffLevel==DIF_EASY)?"(easy)":(_gd._diffLevel==DIF_MED)?"(med)":"(hard)";
-	addItem(MenuItem(1, ORANGE_COLOUR, s, "How brave are you feeling?"));
-	addItem(MenuItem(2, BLUE_COLOUR, "Highscores", "Past Heroes"));
-	addItem(MenuItem(3, PURPLE_COLOUR, "Instructions", "How to play"));
-	addItem(MenuItem(4, GOLD_COLOUR, "Options", "Settings and preferences"));
-	addItem(MenuItem(5, RED_COLOUR, "Exit !", "Quit game"));
+	addItem(MenuItem(1, ORANGE_COLOUR, s, "How brave are you feeling?", true));
+	addItem(MenuItem(2, BLUE_COLOUR, "Highscores", "Past Heroes", true));
+	addItem(MenuItem(3, PURPLE_COLOUR, "Instructions", "How to play", true));
+	addItem(MenuItem(4, GOLD_COLOUR, "Options", "Settings and preferences", true));
+	addItem(MenuItem(5, RED_COLOUR, "Exit !", "Quit game", true));
 	setItem(_gd._mainmenuoption);
+
+	std::string msg = "Press " + input->keyDescription(ppkey::B) + " to select item";
+	setHelp(msg, GREY_COLOUR);
+
 	PlayMenu::init(input);
 }
 
 void PlayMainMenu::choose(MenuItem i)
 {
-	_gd._mainmenuoption = i._id;
-	switch (i._id) {
+	_gd._mainmenuoption = i.id();
+	switch (i.id()) {
 		case 0: _gd._state = ST_MODE; break;
 		case 1: _gd._state = ST_DIFF; break;
 		case 2: _gd._state = ST_HIGH; break;
@@ -90,5 +93,5 @@ void PlayMainMenu::render(Screen *s)
     PlayMenu::render(s);
 
     //add version no - specific to main menu screen
-	_gd._fntClean.put_text_right(s, 5, 0, VERSION_STRING, BLACK_COLOUR); //display vN.N at top right
+    _gd._fntClean.put_text_right(s, 0, 5, VERSION_STRING, BLACK_COLOUR);
 }

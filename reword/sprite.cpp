@@ -43,6 +43,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "utils.h"
 #include <math.h>
 
+//extern static RandInt g_randInt;
 
 Sprite::Sprite() :
 	ImageAnim(),

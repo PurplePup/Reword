@@ -1,6 +1,6 @@
 //words.h
 
-#ifndef _WORDS_H
+#if !defined _WORDS_H
 #define _WORDS_H
 
 #include <deque>
@@ -8,18 +8,19 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <cstring>
 
 #include <ios>
 #include <iostream>
 
-#include "stdio.h"
-#include "memory.h"
+#include <stdio.h>
+#include <memory>
 
 #include "states.h"
 
 //SDL header for ticks - now NOT included here so we can use with or without SDL libraries
 //include SDL.h in your own code before including words.h if you want to use SDL_GetTicks()
-//#include "SDL.h"
+//#include <SDL.h>
 
 //define the shortest word we handle
 #define SHORTW_MIN	((int)3)

@@ -15,54 +15,54 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\reword\rewordlist\words2.h">
+    <ClInclude Include="..\rewordlist\words2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\helpers.h">
+    <ClInclude Include="..\rewordlist\tinyxml\tinystr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\random.h">
+    <ClInclude Include="..\rewordlist\tinyxml\tinyxml.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\states.h">
+    <ClInclude Include="..\reword\helpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\reword\words.h">
+    <ClInclude Include="..\reword\random.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\rewordlist\tinyxml\tinystr.h">
+    <ClInclude Include="..\reword\states.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\reword\rewordlist\tinyxml\tinyxml.h">
+    <ClInclude Include="..\reword\words.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\reword\rewordlist\rewordlist.cpp">
+    <ClCompile Include="..\reword\helpers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\rewordlist\words2.cpp">
+    <ClCompile Include="..\reword\random.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\helpers.cpp">
+    <ClCompile Include="..\reword\words.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\random.cpp">
+    <ClCompile Include="..\rewordlist\rewordlist.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\reword\words.cpp">
+    <ClCompile Include="..\rewordlist\words2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\rewordlist\tinyxml\tinystr.cpp">
+    <ClCompile Include="..\rewordlist\tinyxml\tinystr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\rewordlist\tinyxml\tinyxml.cpp">
+    <ClCompile Include="..\rewordlist\tinyxml\tinyxml.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\rewordlist\tinyxml\tinyxmlerror.cpp">
+    <ClCompile Include="..\rewordlist\tinyxml\tinyxmlerror.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\reword\rewordlist\tinyxml\tinyxmlparser.cpp">
+    <ClCompile Include="..\rewordlist\tinyxml\tinyxmlparser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

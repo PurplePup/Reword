@@ -1,9 +1,9 @@
 //framerate.h
 
-#ifndef _FRAMERATE_H
+#if !defined _FRAMERATE_H
 #define _FRAMERATE_H
 
-#include "SDL.h"
+#include <SDL.h>
 
 class Framerate
 {
@@ -25,7 +25,7 @@ private:
 	Uint32		_ticksPerSecond;
 	Uint32		_currentTicks;
 	Uint32		_frameDelay;
-	float		_speedFactor;	
+	float		_speedFactor;
 
 	Uint32		fps_last;
 	Uint32		fps_count;

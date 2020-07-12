@@ -21,7 +21,7 @@ History:		Version	Date		Change
 										also added scroll arrows to indicate more text to see
 									Added popup menu for quick exit/save/move-on
 									Changed to stack for various major states in-play and added
-										seperate functions for each render/work state.
+										separate functions for each render/work state.
 									Added pinger sound when in popup menu, to warn user
 				0.5		28.05.08	Added touchscreen support
 				0.5.1	02.10.08	Add Pandora and other device screen layout/sizes
@@ -50,6 +50,9 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "helpers.h"
 #include "audio.h"
 #include "platform.h"
+#include "screen.h"
+#include "locator.h"
+#include "utils.h"
 
 #include "playgamedict.h"
 
@@ -59,6 +62,9 @@ Licence:		This program is free software; you can redistribute it and/or modify
 //#include <SDL_gfxPrimitives.h>
 
 static	int _countdown;				//seconds remaining
+
+//extern static RandInt g_randInt;
+
 
 //function called when timer reaches interval set
 Uint32 countdown_callback(Uint32 interval, void *param)
@@ -80,7 +86,7 @@ Uint32 countdown_callback(Uint32 interval, void *param)
 Uint32 PlayGame::next_time = 0;
 
 PlayGame::PlayGame(GameData& gd) :
-    _gd(gd), _pPopup(NULL), _play(NULL)
+    _gd(gd), _pPopup(nullptr), _play(nullptr)
 {
 #ifdef _DEBUG
 	_dbg_display = false;
@@ -163,11 +169,11 @@ void PlayOptions::ControlEvent(int event, int ctrl_id)
 void PlayGame::init(Input *input)
 {
 	//fade out any menu music (but only if no game music still playing)
-	//Game music handled seperately froim in-game music (mp3 dir etc ?)
+	//Game music handled separately froim in-game music (mp3 dir etc ?)
     if (Locator::audio().isPlayingMusic()==false)   //no user music
 		Mix_FadeOutMusic(3000);                     //fade out any menu music
 
-	_scorebar = Resource::image("scorebar.png");
+	_scorebar.load("scorebar.png");
 	_cursor.setImage(Resource::image("cursors.png"));
 	_scratch.setImage(Resource::image("scratch.png"));
 	_boxes.setImage(Resource::image("boxes.png"));
@@ -288,7 +294,7 @@ void PlayGame::stateFn(eState state)
     if (_play)
     {
         delete _play;
-        _play = NULL;
+        _play = nullptr;
     }
 
 	switch (state)
@@ -372,8 +378,7 @@ void PlayGame::render_play(Screen* s)
 	int xx, yy;
 
 	//draw background
-//	_gamebg->blitTo(s);
-	ppg::blit_surface(_gamebg->surface(), NULL, s->surface(), 0, 0);
+	s->blit(_gamebg->texture(), nullptr, 0, 0);
 
  	//draw scores and coloured seconds countdown
 	_gd._fntSmall.put_number(s, _score0_x, _score0_y, _gd._score.currScore(), "%08d", BLACK_COLOUR);	//SCORE:
@@ -386,7 +391,7 @@ void PlayGame::render_play(Screen* s)
 	if (PG_PLAY == _state)
 	{
         //center the countdown text in the scorebar countdown [area]
-        _gd._fntBig.put_number_mid(s, _countdown0_y, _countdown0_x, //s->surface()->w - 54,
+        _gd._fntBig.put_number_mid(s, _countdown0_x, _countdown0_y, //s->surface()->w - 54,
             _countdown, "%d", (_countdown > 10)?YELLOW_COLOUR:RED_COLOUR, true);	//TIME:
 
 		//draw the tile background before any lower letters placed
@@ -550,7 +555,7 @@ void PlayGame::render_end(Screen* s)
 
 	//finished level so show success type and bonus etc
 	const int minGap = _gd._fntSmall.height();	//useful distance based on small font
-	const int yyTitle = _scorebar->height() + minGap;
+	const int yyTitle = _scorebar.height() + minGap;
 	const int yyReward = yyTitle +_gd._fntBig.height() + minGap;
 	const int yyBonus = (_yScratchBot+CURSORH+_boxOffsetY) + (2*_gd._fntBig.height());
 	switch (_success)
@@ -665,7 +670,8 @@ void PlayGame::render_end(Screen* s)
 void PlayGame::render_pause(Screen* s)
 {
 	const SDL_Colour c = BLACK_COLOUR;
-	ppg::drawSolidRect(s->surface(), 0,0,s->width(), s->height(), c);
+	//ppg::drawSolidRect(s->surface(), 0,0,s->width(), s->height(), c);
+	s->drawSolidRect( 0, 0, s->width(), s->height(), c);
 	_roundPaused->render(s);
     _gd._fntClean.put_text(s, (SCREEN_HEIGHT/2) + 30,
                         "10 second penalty", WHITE_COLOUR, false);
@@ -769,7 +775,7 @@ void PlayGame::startPopup(Input *input)
 void PlayGame::stopPopup()
 {
 	delete _pPopup;
-	_pPopup = NULL;
+	_pPopup = nullptr;
 
     slideRoundButtonsIn();
 }
@@ -1185,7 +1191,7 @@ bool PlayGame::touch_end(const Point &pt)
 	for (xx=_shortestWordLen; xx<=_longestWordLen; ++xx)	//accross the screen
 	{
 		//check if click even in this column (speed up)
-		if (pt._x < _boxOffset[xx] || pt._x > _boxOffset[xx]+_boxLength[xx]) continue;
+		if (pt.x < _boxOffset[xx] || pt.x > _boxOffset[xx]+_boxLength[xx]) continue;
 
 		int nWords = _gd._words.wordsOfLength(xx);
 		if (nWords)	//column has words
@@ -1224,7 +1230,7 @@ bool PlayGame::touch_end(const Point &pt)
 //releasing 'touch' press
 bool PlayGame::tap(const Point &pt)
 {
-    if (_play != NULL)
+    if (_play != nullptr)
     {
         return _play->tap(pt);
     }
@@ -1571,7 +1577,7 @@ void PlayGame::doDictionary()
 			++it;
 		}
 
-		//display current highlighted word on seperate 'screen'
+		//display current highlighted word on separate 'screen'
 		statePush(PG_DICT); //_state = PG_DICT;
 	}
 }
@@ -1622,7 +1628,7 @@ void PlayGame::newGame()
 	//   (X pos depends on number of letters in word so calculated in newLevel()
 	//scratch letter area _yScratchTop (6 roundels on top)
 	//scratch box area _yScratchBot (6 boxes below roundels)
-	_yScratchTop = _scorebar->height() + GAME_GAP1;
+	_yScratchTop = _scorebar.height() + GAME_GAP1;
 	_yScratchBot = _yScratchTop + CURSORH + GAME_GAP1;
 
 	_gd._score.resetCurr();
@@ -1652,7 +1658,7 @@ void PlayGame::startCountdown()
 
 	Uint32 rate = 1000; //1 second
 	stopCountdown();	//make sure its stopped first
-	_countdownID = SDL_AddTimer(rate, countdown_callback, NULL);
+	_countdownID = SDL_AddTimer(rate, countdown_callback, nullptr);
 }
 
 //stop the countdown timer redrawing the screen
@@ -1902,7 +1908,7 @@ void PlayGame::showSuccess(eSuccess newSuccess, int newBonus)
 // Submit the current word
 void PlayGame::tryWord()
 {
-	int wordlen = tryWordAgainstDict();
+	int wordlen = tryWordAgainstDict();	    //0=already found, -1=not a 6 or in sub word list
 
 	 //speeder and timetrial only need a 6 to continue
 	if (GM_TIMETRIAL == _gd._mode || GM_SPEEDER == _gd._mode)
@@ -1938,7 +1944,7 @@ void PlayGame::tryWord()
 
 		calcArcadeNeededWords();
 	}
-	else	//0=already found, -1=not a 6 or in sub word list
+	else
 	{
         Locator::audio().playSfx((0 == wordlen)?AUDIO_SFX_ALREADYDONE:AUDIO_SFX_NOTINDICT);
 		_round.clearAllToTop(false);	//remove bad word - dont move cursor
@@ -2052,15 +2058,16 @@ void PlayGame::prepareBackground()
 	//create the background to be used for this level,
 	//pre drawing so we dont need to do it each frame.
 	//...
-	_gamebg = tSharedImage(new Image(SCREEN_WIDTH, SCREEN_HEIGHT));
-	ppg::drawSolidRect(_gamebg->surface(), 0, 0, Screen::width(), Screen::height(), GAMEBG_COLOUR);
+
+    Surface tmpSurface; //to build background before convert to texture (at end)
+	tmpSurface.create(Screen::width(), Screen::height());
+    ppg::drawSolidRect (&tmpSurface, 0, 0, Screen::width(), Screen::height(), GAMEBG_COLOUR);
 
 	//place score bar centered - in case screen bigger than graphic
-	int sb_x = (SCREEN_WIDTH - _scorebar->width())/2;  //in case sb w < screen w
-	int sb_w = _scorebar->width();
-	int sb_h = _scorebar->height();
-	//_gamebg->blitFrom(&_gd._scorebar, sb_x, 0);
-	ppg::blit_surface(_scorebar->surface(), NULL, _gamebg->surface(), sb_x, 0);
+	int sb_x = (SCREEN_WIDTH - _scorebar.width())/2;  //in case sb w < screen w
+	int sb_w = _scorebar.width();
+	int sb_h = _scorebar.height();
+	ppg::blit_surface(_scorebar.surface(), nullptr, tmpSurface.surface(), sb_x, 0);
 
 	//prerender the score and words titles
 	//find out sizes and calc reasonable positions
@@ -2070,13 +2077,13 @@ void PlayGame::prepareBackground()
 	Rect r(0, 0, 0, 0);
 	int score_len(0), score0_len(0), words_len(0), words0_len(0);
 	r = fontText.calc_text_metrics("SCORE: ");		//note gap to look better
-	score_len = r._max._x;
+	score_len = r._max.x;
 	r = fontNumbers.calc_text_metrics("00000000");	//8 0's not drawn here
-	score0_len = r._max._x;
+	score0_len = r._max.x;
 	r = fontText.calc_text_metrics("WORDS: ");		//note gap to look better
-	words_len = r._max._x;
+	words_len = r._max.x;
 	r = fontNumbers.calc_text_metrics("0000");	//4 0's not drawn here
-	words0_len = r._max._x;
+	words0_len = r._max.x;
 
 	//now calc where we can place these and the gap between each
     //
@@ -2131,27 +2138,31 @@ void PlayGame::prepareBackground()
 	_countdown0_x = (sb_x + sb_w) - (edge_pad / 2);
 	_countdown0_y = (sb_h - fontCounter.height()) / 2;
 
-	fontText.put_text(_gamebg.get(), score_x, titles_y, "SCORE:", WHITE_COLOUR);
-	fontText.put_text(_gamebg.get(), words_x, titles_y, "WORDS:", WHITE_COLOUR);
+	fontText.put_text(&tmpSurface, score_x, titles_y, "SCORE:", WHITE_COLOUR);
+	fontText.put_text(&tmpSurface, words_x, titles_y, "WORDS:", WHITE_COLOUR);
 
-	//draw mode in bot right corner (before/under word boxes so if 8 6-letter words, it doesnt cover anything up)
+	//draw mode and difficulty in bot right corner
+	//(before/under word boxes so if 8 6-letter words, it doesnt cover boxes up)
 	std::string strMode;
-	Image *pImage = 0;
+	Surface modeSurface;
 	switch (_gd._mode)
 	{
-	case GM_ARCADE:		pImage = Resource::image("game_arcade.png").get();	strMode = "ARCADE";break;
-	case GM_REWORD:		pImage = Resource::image("game_reword.png").get();	strMode = "REWORD";break;
-	case GM_SPEEDER:	pImage = Resource::image("game_speeder.png").get(); strMode = "SPEEDWORD";break;
-	case GM_TIMETRIAL:	pImage = Resource::image("game_timetrial.png").get(); strMode = "TIMETRIAL";break;
+	case GM_ARCADE:		modeSurface.load("game_arcade.png");	strMode = "ARCADE";    break;
+	case GM_REWORD:		modeSurface.load("game_reword.png");	strMode = "REWORD";    break;
+	case GM_SPEEDER:	modeSurface.load("game_speeder.png");   strMode = "SPEEDWORD"; break;
+	case GM_TIMETRIAL:	modeSurface.load("game_timetrial.png"); strMode = "TIMETRIAL"; break;
 	default:break;
 	}
-	assert(pImage);
-	int mode_x = SCREEN_WIDTH - pImage->width() + 25; 	//slightly off screen
-	int mode_y = SCREEN_HEIGHT - pImage->height() + 25;	//ditto
-//	_gamebg->blitFrom(pImage, -1, mode_x, mode_y);
-	ppg::blit_surface(pImage->surface(), NULL, _gamebg->surface(), mode_x, mode_y);
+	assert(modeSurface.surface());
+	modeSurface.setAlphaTransparency(100);
+	int mode_x = SCREEN_WIDTH - modeSurface.width() + 25; 	//slightly off screen
+	int mode_y = SCREEN_HEIGHT - modeSurface.height() + 25;	//ditto
+	ppg::blit_surface(modeSurface.surface(), nullptr, tmpSurface.surface(), mode_x, mode_y);
 
-	//draw difficulty level in bot right corner (before/under word boxes so if 8 6-letter words, it doesnt cover anything up)
+	//draw difficulty level in bot right corner
 	std::string strDiff = strMode + " (" + _gd._diffName + ")";
-	_gd._fntTiny.put_text_right(_gamebg.get(), SCREEN_HEIGHT - _gd._fntTiny.height(), 0, strDiff.c_str(), _gd._diffColour);
+	_gd._fntTiny.put_text_right(&tmpSurface, 4, SCREEN_HEIGHT - _gd._fntTiny.height() - 4, strDiff.c_str(), _gd._diffColour);
+
+    //now make texture to be rendered as background during actual play/update
+	_gamebg = tSharedImage(new Image(tmpSurface));
 }

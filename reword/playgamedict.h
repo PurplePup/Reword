@@ -1,4 +1,4 @@
-#ifndef PLAYGAMEDICT_H
+#if !defined PLAYGAMEDICT_H
 #define PLAYGAMEDICT_H
 
 #include "i_play.h"
@@ -7,7 +7,8 @@
 #include "gamedata.h"	//also holds constants and stuff
 #include "controls.h"
 #include "roundels.h"
-#include "utils.h"
+#include "fontttf.h"
+//#include "utils.h"
 
 //#include <memory>
 
@@ -39,18 +40,22 @@ private:
 
 private:
 
-	GameData &	_gd;			//shared data between screens (play classes)
-    Controls    _controlsDict;
-	tSharedImage _menubg;
+	GameData &	            _gd;			//shared data between screens (play classes)
+    Controls                _controlsDict;
+	tSharedImage            _menubg;
 
-	Waiting		_doubleClick;
-    std::string _dictWord;
+	Waiting		            _doubleClick;
+    std::string             _dictWord;
 	std::vector<std::string> _dictDef;
-	int	_dictLine;				//offset into _dictDef (ie start at _dictDef.begin+_dictLine)
-	int _lines;					//number of lines we can display dictionary entry without scrolling
+//	tImageMap               _imageMap;
+	int	_dictLine;			//offset into _dictDef (ie start at _dictDef.begin+_dictLine)
+	int _lines;				//number of lines we can display dictionary entry without scrolling
 
-	tAutoRoundels   _roundDict;		//"xxxxx" word highlighted for dictionary display
-    std::string     _helpMsg;
+	tAutoRoundels           _roundDict;		//"xxxxx" word highlighted for dictionary display
+    std::string             _helpMsg;
+
+//    FontCache               _fontCache;
+//    int                     _indexHelpMsg;
 };
 
 #endif // PLAYGAMEDICT_H

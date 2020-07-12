@@ -1,9 +1,9 @@
 //score.h
 
-#ifndef _SCORE_H
+#if !defined _SCORE_H
 #define _SCORE_H
 
-#include "SDL.h"
+#include <SDL.h>
 #include <string>
 #include <fstream>
 #include <ios>

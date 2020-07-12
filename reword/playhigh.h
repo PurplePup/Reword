@@ -1,6 +1,6 @@
 //playhigh.h
 
-#ifndef _PLAYHIGH_H
+#if !defined _PLAYHIGH_H
 #define _PLAYHIGH_H
 
 #include "i_play.h"		//IPlay interface

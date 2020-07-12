@@ -42,6 +42,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "resource.h"
 #include "utils.h"
 #include "signal.h"
+#include "locator.h"
 
 #include <cassert>
 #include <memory>
@@ -85,7 +86,7 @@ void PlayHigh::init(Input *input)
 
 	_xInitsLen = _gd._fntClean.calc_text_length("WWW");
 	_xScoreLen = _gd._fntClean.calc_text_length("00000000");
-	_xWordsLen = _gd._fntClean.calc_text_length("0000w");
+	_xWordsLen = _gd._fntClean.calc_text_length("0000");
 	_xTimesLen = _gd._fntClean.calc_text_length("000s");
 	_maxGap    = _gd._fntClean.calc_text_length("XXXXX");
 
@@ -173,8 +174,8 @@ void PlayHigh::init(Input *input)
     //[NEXT] for ending inits input
     {
     t_pSharedSpr p(new Sprite(Resource::image("btn_square_next_small.png")));
-    int x = _kbd.getBottomPos()._x + ((Screen::width() - _kbd.getBottomPos()._x) /2);    //(Screen::width() - p->tileW()) / 2; //center
-    int y = _kbd.getBottomPos()._y;   //BG_LINE_BOT - _yyGap - p->tileH();
+    int x = _kbd.getBottomPos().x + ((Screen::width() - _kbd.getBottomPos().x) /2);    //(Screen::width() - p->tileW()) / 2; //center
+    int y = _kbd.getBottomPos().y;   //BG_LINE_BOT - _yyGap - p->tileH();
     p->setPos(x, y);
     p->_sigEvent2.Connect(this, &PlayHigh::ControlEvent);
     Control c(p, CTRLID_NEXT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
@@ -210,7 +211,8 @@ void PlayHigh::render(Screen *s)
 	//
 
 	//_menubg->blitTo( s );
-	ppg::blit_surface(_menubg->surface(), 0, s->surface(), 0,0);
+	//ppg::blit_surface(_menubg->surface(), 0, s->surface(), 0,0);
+	s->blit(_menubg->texture(), nullptr, 0, 0);
 
 	//draw screen title roundals
 	_title.render(s);
@@ -229,7 +231,7 @@ void PlayHigh::render(Screen *s)
     else
     {
         const int xUsed = _xDiffLen + _xInitsLen + _xScoreLen + _xWordsLen;
-        _xxGap = (Screen::width() - xUsed) / 5; //between "DIFF WWW 00000000 0000w"
+        _xxGap = (Screen::width() - xUsed) / 5; //between "DIFF WWW 00000000 0000
         if (_xxGap > _maxGap) _xxGap = _maxGap;	//for smaller screens (GP2X)
         const int xDiffTrail = (Screen::width() - xUsed - (_xxGap*5) ) / 2;
         _xxStart = _xxGap + _xDiffLen + xDiffTrail;
@@ -243,7 +245,7 @@ void PlayHigh::render(Screen *s)
     {
         _gd._fntClean.put_number(s, xx, yy, _curr.score, "SCORE: %08d", BLUE_COLOUR);
         xx += _xScoreLen*1.5 + _xxGap;
-        _gd._fntClean.put_number(s, xx, yy, _curr.words, "WORDS: %04dw", BLUE_COLOUR);
+        _gd._fntClean.put_number(s, xx, yy, _curr.words, "WORDS: %04d", BLUE_COLOUR);
         xx += _xWordsLen*1.5 + _xxGap;
         if (_mode > GM_REWORD)  //speed or timetrial show speed
             _gd._fntClean.put_number(s, xx, yy, _curr.fastest, "SPEED: %03ds", BLUE_COLOUR);
@@ -264,10 +266,10 @@ void PlayHigh::render(Screen *s)
             xx += _xInitsLen + _xxGap;
             _gd._fntClean.put_number(s, xx, yy, _gd._score.score(_mode, _diff, yyLine), "%08d", lineColour);
             xx += _xScoreLen + _xxGap;
-            _gd._fntClean.put_number(s, xx, yy, _gd._score.words(_mode, _diff, yyLine), "%04dw", lineColour);
+            _gd._fntClean.put_number(s, xx, yy, _gd._score.words(_mode, _diff, yyLine), "(w:%04d)", lineColour);
             xx += _xWordsLen + _xxGap;
             if (_mode > GM_REWORD)  //speed or timetrial show speed
-                _gd._fntClean.put_number(s, xx, yy, _gd._score.fastest(_mode, _diff, yyLine), "%03ds", lineColour);
+                _gd._fntClean.put_number(s, xx, yy, _gd._score.fastest(_mode, _diff, yyLine), "(t:%03ds)", lineColour);
 
             ++yyLine;
             yy += _gd._fntClean.height() + _yyGap;
@@ -480,8 +482,8 @@ void PlayHigh::updateKbdCursor()
         Point pt = _kbd.getCurrSelPt();
 
         //create a cursor around curr kbd letter
-        const int x = pt._x - (( _cursorSpr->tileW() - _kbd.getRoundelW()) / 2);
-        const int y = pt._y - (( _cursorSpr->tileH() - _kbd.getRoundelH()) / 2);
+        const int x = pt.x - (( _cursorSpr->tileW() - _kbd.getRoundelW()) / 2);
+        const int y = pt.y - (( _cursorSpr->tileH() - _kbd.getRoundelH()) / 2);
         _cursorSpr->setPos(x, y);
         _cursorSpr->setVisible(true);
     }
@@ -653,29 +655,26 @@ void PlayHigh::prepareBackground()
 	//create the background to be used for this level,
 	//pre drawing so we dont need to do it each frame.
 	//...
-	_menubg = tSharedImage(new Image());
-	_menubg->cloneFrom(*Resource::image("menubg_plain.png"));	//copy of basic menubg without roundel
 
-    tSharedImage &img = Resource::image("menu_arcade.png");
-	int x = - (img->width() /6);	//slightly off screen
-	int y = ((SCREEN_HEIGHT - img->height()) / 2) + 2;	//center (+2 for gp2x too high)
+    Surface tmpSurface; //to build background before convert to texture (at end)
+    tmpSurface.load("menubg_plain.png");
 
+    Surface modeSurface;
 	switch (_mode)
 	{
-	case GM_ARCADE:		//_menubg->blitFrom(&_gd._menu_arcade, -1, x, y);
-                        ppg::blit_surface(Resource::image("menu_arcade.png")->surface(), NULL, _menubg->surface(), x, y);
-						break;
-	case GM_REWORD:		//_menubg->blitFrom(&_gd._menu_reword, -1, x, y);
-                        ppg::blit_surface(Resource::image("menu_reword.png")->surface(), NULL, _menubg->surface(), x, y);
-						break;
-	case GM_SPEEDER:	//_menubg->blitFrom(&_gd._menu_speeder, -1, x, y);
-                        ppg::blit_surface(Resource::image("menu_speeder.png")->surface(), NULL, _menubg->surface(), x, y);
-						break;
-	case GM_TIMETRIAL:	//_menubg->blitFrom(&_gd._menu_timetrial, -1, x, y);
-                        ppg::blit_surface(Resource::image("menu_timetrial.png")->surface(), NULL, _menubg->surface(), x, y);
-						break;
-	default:break;
+	case GM_ARCADE: modeSurface.load("menu_arcade.png"); break;
+	case GM_REWORD: modeSurface.load("menu_reword.png"); break;
+	case GM_SPEEDER: modeSurface.load("menu_speeder.png"); break;
+	case GM_TIMETRIAL: modeSurface.load("menu_timetrial.png"); break;
+	default: break;
 	}
+	modeSurface.setAlphaTransparency(100);
+	int x = - (modeSurface.width() /6);	//slightly off screen
+	int y = ((SCREEN_HEIGHT - modeSurface.height()) / 2) + 2;	//center (+2 for gp2x too high)
+    ppg::blit_surface(modeSurface.surface(), nullptr, tmpSurface.surface(), x, y);
+
+    //now make texture to be rendered as background during actual play/update
+	_menubg = tSharedImage(new Image(tmpSurface));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

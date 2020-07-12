@@ -1,12 +1,16 @@
 //surface.h
 
-#ifndef _SURFACE_H
+#if !defined _SURFACE_H
 #define _SURFACE_H
 
 #include <SDL.h>
-#include <SDL_image.h>	//for IMG_ functions
+#include <SDL_surface.h>
 
-#include "utils.h"
+#include <string>
+#include <memory>
+#include <map>
+
+//#include "utils.h"
 
 class Surface
 {
@@ -27,7 +31,12 @@ public:
 	}
 
 	bool create(Uint32 w, Uint32 h, int iAlpha = -1);	//create a surface of specific size
+    bool load(const std::string &fileName);
 	void copy(Surface &s);
+
+    void setTransparentColour(SDL_Color cAlphaKey);
+    void setTransparentColour();    //use first pixel
+    void setAlphaTransparency(Uint8 iAlpha);
 
 	//accessors
 	Uint32 width() const;
@@ -38,13 +47,35 @@ public:
 
 protected:
 	void cleanUp();
-	bool initSurface(SDL_Surface *newSurface, int iAlpha);
+	bool initSurface(int iAlpha);
 	void setSurface(SDL_Surface *s);
 
 protected:
 	SDL_Surface *_surface;
 
 };
+
+
+class Texture
+{
+public:
+    Texture();
+    Texture(Surface &surface);
+    void createFrom(Surface &surface);
+    virtual ~Texture();
+    void cleanup();
+
+    SDL_Texture * texture_sdl() const { return _texture; }
+    Uint32 width() const { return _width; }
+    Uint32 height() const { return _height; }
+
+private:
+    SDL_Texture *   _texture;
+    Uint32          _width, _height;
+};
+
+typedef std::unique_ptr<Texture> tAutoTexture;
+typedef std::map<Uint32, tAutoTexture> tTextureMap;
 
 #endif //_SURFACE_H
 

@@ -37,10 +37,12 @@ Licence:		This program is free software; you can redistribute it and/or modify
 ////////////////////////////////////////////////////////////////////
 
 #include "global.h"
+#include "screen.h"
 #include "imageanim.h"
 #include "utils.h"
-#include <math.h>
 
+#include <cmath>
+#include <cassert>
 
 ImageAnim::ImageAnim() :
 	//_image(),
@@ -360,7 +362,7 @@ void ImageAnim::workCUSTOM(void)
     _frame = _animCustom[_frameCustom++];
 }
 
-void ImageAnim::draw(Surface *s)
+void ImageAnim::draw(Screen *s)
 {
 	if (_visible)
 		blitTo(s, (int)round(_x), (int)round(_y), _frame);	//blit current frame to s at x, y
@@ -420,32 +422,33 @@ Rect ImageAnim::bounds() const
 //helper blit functions specifically for the Image class
 //
 //blit this (tile) image into another Image (or screen)
-void ImageAnim::blitTo(Surface* dest, int destX, int destY, int tileNum /*= -1*/)
+void ImageAnim::blitTo(Screen* dest, int destX, int destY, int tileNum /*= -1*/)
 {
 	//Image class objects default to clip = 0 unless explicitly set
 	SDL_Rect rect = _image->tileRect(tileNum);
-	ppg::blit_surface(
-        _image->surface(), (tileNum<0)?NULL:&rect,			//source
-		dest->surface(), destX, destY);					//dest
+//	ppg::blit_surface(
+//        _image->surface(), (tileNum<0)?nullptr:&rect,			//source
+//		dest->surface(), destX, destY);					//dest
+	dest->blit(_image->texture(), &rect, destX, destY);
 }
 
 //blit a whole image into this Image
 void ImageAnim::blitFrom(Image* source, int destX, int destY )
 {
 	//Image class objects default to clip = 0 unless explicitly set
-	ppg::blit_surface(
-        source->surface(), NULL,           	    //source
-		_image->surface(), destX, destY);		//dest
+//	ppg::blit_surface(
+//        source->surface(), nullptr,           	    //source
+//		_image->surface(), destX, destY);		//dest
 }
 
 //blit a (tile) image into this Image
 void ImageAnim::blitFrom(ImageAnim* source, int tileNum /*= -1*/, int destX, int destY )
 {
 	//Image class objects default to clip = 0 unless explicitly set
-	SDL_Rect rect = source->tileRect(tileNum);
-	ppg::blit_surface(
-        source->surface(), (tileNum<0)?NULL:&rect,	    //source
-		_image->surface(), destX, destY);					//dest
+//	SDL_Rect rect = source->tileRect(tileNum);
+//	ppg::blit_surface(
+//        source->surface(), (tileNum<0)?nullptr:&rect,	    //source
+//		_image->surface(), destX, destY);					//dest
 }
 
 

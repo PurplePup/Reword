@@ -1,4 +1,4 @@
-#ifndef RESOURCE_H
+#if !defined RESOURCE_H
 #define RESOURCE_H
 
 #include "image.h"	//defines tSharedImage
@@ -13,16 +13,20 @@ public:
     ~ResourceImg();
     void clear();
 
-    void setAlpha(int iAlpha);
+    //void setAlpha(SDL_Color cAlphaKey = ALPHA_COLOUR, int iAlpha = 255);
 
-    bool add(const std::string & imageFile, int iAlpha =-1,
-                    Uint32 nTiles =1, Image::eTileDir tileDir = Image::TILE_HORIZ);
+    bool add(const std::string & imageFile, Uint32 nTiles = 1,
+                        SDL_Color cAlphaKey = ALPHA_COLOUR, Uint8 iAlpha = 255,
+                        Image::eTileDir tileDir = Image::TILE_HORIZ);
     tSharedImage &get(const std::string & imageFile);
 
 protected:
-    int             _alpha;
-    tResourceMap    _cache;
+    Uint32          _tiles;
+    Uint8           _alpha;
+    SDL_Color       _alphaKey;
+    Image::eTileDir _tileDir;
 
+    tResourceMap    _cache;
 };
 
 
@@ -30,10 +34,10 @@ protected:
 class Resource
 {
 public:
-    static void     initImage();
-    static ResourceImg& image();
-    static tSharedImage& image(const std::string &imgFile);
-    static void     registerImage(ResourceImg* res);
+//  static void             initImage();
+    static ResourceImg&     image();
+    static tSharedImage&    image(const std::string &imgFile);
+    static void             registerImage(ResourceImg* res);
 };
 
 #endif // RESOURCE_H

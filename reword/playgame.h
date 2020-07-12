@@ -1,6 +1,6 @@
 //playgame.h
 
-#ifndef _PLAYGAME_H
+#if !defined _PLAYGAME_H
 #define _PLAYGAME_H
 
 #include "i_play.h"		//IPlay interface
@@ -90,7 +90,7 @@ public:
     virtual bool touch(const Point &pt);   //press
     virtual bool tap(const Point &pt);     //release
 
-//	static 	void pushSDL_Event(int code, void *data1 = NULL, void *data2 = NULL);
+//	static 	void pushSDL_Event(int code, void *data1 = nullptr, void *data2 = nullptr);
 
 	virtual void handleEvent(SDL_Event &sdlevent);
 
@@ -162,7 +162,7 @@ protected:
 private:
 	GameData &	_gd;			//shared data between screens (play classes)
 	tSharedImage _gamebg;
-	tSharedImage _scorebar;
+	Surface     _scorebar;
 	ImageAnim	_scratch;
 	ImageAnim	_boxes;
 	ImageAnim	_cursor;
@@ -244,6 +244,8 @@ private:
     IPlay           *_play;
 
     std::string _endWorDefExit, _endWorDefExitMore, _endWorDefNext, _endWorDefNextMore;
+
+    tTextureMap     _texMap;
 
     int _debugTotalLetters, _debugNeededAll, _debugNeededNow;
 };

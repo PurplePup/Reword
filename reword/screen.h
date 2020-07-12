@@ -1,43 +1,36 @@
-//based on Dave Parkers code
-
-/***************************************************************************
- *   Copyright (C) 2006 by Dave Parker                                     *
- *   drparker@freenet.co.uk                                                *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- *   This program is distributed in the hope that it will be useful,       *
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
- *   GNU General Public License for more details.                          *
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the                         *
- *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
-
-#ifndef SCREEN_H
+#if !defined SCREEN_H
 #define SCREEN_H
 
 #include <SDL.h>
+#include <SDL_video.h>
 
 #include "error.h"
-#include "surface.h"
+#include "utils.h"
 
-class Screen : public Error, public Surface
+class Screen : public Error //, public Surface
 {
 public:
     // Construct 16 bit colour screen of given size
-    Screen (int w, int h);
+    Screen ();
+    Screen (int w, int h, const std::string &strTitle);
     ~Screen();
+
+    SDL_Texture * texture() { return _texture; }
+    SDL_Renderer * renderer() { return _renderer; }
 
 	void lock(void);		// Lock screen
     void unlock(void);		// Unlock screen
     void update(void);		// Update whole screen (flip)
+
+    void clear();
+    void drawSolidRect (int x, int y, int w, int h, const SDL_Color& c);
+    void drawSolidRectA(int x, int y, int w, int h, const SDL_Color& c, int iAlpha);
+    void putPixel(int x, int y, Uint32 colour);
+
+    Rect blit(SDL_Texture* source, SDL_Rect* srcRect, int destX, int destY);
+    Rect blit(Texture* srcTex, SDL_Rect* srcRect, int destX, int destY);
+    Rect blit_mid(Texture* srcTex, SDL_Rect* srcRect, int destDeltaX, int destY, bool bAbsolute = false);
+    Rect blit_right(Texture* srcTex, SDL_Rect* srcRect, int destX, int destY);
 
     // Accessor Methods
 	bool initDone() const { return _init; }
@@ -48,11 +41,12 @@ public:
 	static int width() { return _width; }
 	static int height() { return _height; }
 
-
 private:
-    //Screen surface
-	bool	_init;
+	SDL_Window      * _window;
+	SDL_Renderer    * _renderer;
+	SDL_Texture     * _texture;
 
+	bool    	    _init;
 };
 
 #endif //SCREEN_H

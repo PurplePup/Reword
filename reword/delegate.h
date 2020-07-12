@@ -67,14 +67,15 @@
 // * Bundled with Signals.h for signals and slots library
 // * Changed namespace to "gallant"
 
-#ifndef _Delegate_H_
+#if !defined _Delegate_H_
 #define _Delegate_H_
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include <memory.h> // to allow <,> comparisons
+//#include <memory.h> // to allow <,> comparisons
+#include <memory>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Configuration options
@@ -849,7 +850,7 @@ else return funcptr==reinterpret_cast<StaticFuncPtr>(GetStaticFunction());
 // Delegate3<int, char *, double>
 // They can cope with any combination of parameters. The max number of parameters
 // allowed is 8, but it is trivial to increase this limit.
-// Note that we need to treat const member functions seperately.
+// Note that we need to treat const member functions separately.
 // All this class does is to enforce type safety, and invoke the delegate with
 // the correct list of parameters.
 
@@ -2012,7 +2013,7 @@ R (X::* function_to_bind)( Param1 p1, Param2 p2, Param3 p3, Param4 p4, Param5 p5
 
 // Also declare overloads of a MakeDelegate() global function to
 // reduce the need for typedefs.
-// We need seperate overloads for const and non-const member functions.
+// We need separate overloads for const and non-const member functions.
 // Also, because of the weird rule about the class of derived member function pointers,
 // implicit downcasts may need to be applied later to the 'this' pointer.
 // That's why two classes (X and Y) appear in the definitions. Y must be implicitly

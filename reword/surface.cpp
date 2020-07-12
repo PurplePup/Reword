@@ -29,21 +29,26 @@ Licence:		This program is free software; you can redistribute it and/or modify
 */
 ////////////////////////////////////////////////////////////////////
 
+
+#include <SDL_image.h>	//for IMG_ functions
+
+#include <iostream>
+
 #include "global.h"
 #include "surface.h"
 #include "utils.h"
+#include "platform.h"
+#include "locator.h"
 
-// #include <SDL_gfxPrimitives.h>
-
-Surface::Surface() : _surface(0)
+Surface::Surface() : _surface(nullptr)
 {
 }
 
-Surface::Surface(SDL_Surface *s) : _surface(0)
+Surface::Surface(SDL_Surface *s) : _surface(nullptr)
 {
     setSurface(s);
-//	_surface = s;
-//	s->refcount++;
+	_surface = s;
+	s->refcount++;
 }
 
 Surface::~Surface()
@@ -55,48 +60,134 @@ Surface::~Surface()
 bool Surface::create(Uint32 w, Uint32 h, int iAlpha /*=-1*/)
 {
 	cleanUp();	//destroy any existing surface
-	SDL_Surface *s;
-	s = SDL_CreateRGBSurface(SCREEN_SURFACE|(iAlpha>=0)?SDL_SRCALPHA:SDL_SRCCOLORKEY, w, h, SCREEN_BPP,
-//		0, 0, 0, 0);
+
+    Uint32 rmask, gmask, bmask, amask;
+
+    /* SDL interprets each pixel as a 32-bit number, so our masks must depend
+       on the endianness (byte order) of the machine */
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-		0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff);
+    rmask = 0xff000000;
+    gmask = 0x00ff0000;
+    bmask = 0x0000ff00;
+    amask = 0x000000ff;
 #else
-		0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+    rmask = 0x000000ff;
+    gmask = 0x0000ff00;
+    bmask = 0x00ff0000;
+    amask = 0xff000000;
 #endif
-	bool b = initSurface(s, iAlpha);
-	return (b && _surface != NULL);
+
+	_surface = SDL_CreateRGBSurface(
+                          0,            //unused in SDL2
+                          w, h,
+                          SCREEN_BPP,   //from platform.h
+                          rmask, gmask, bmask, amask);  //used if > 8 bits
+
+    /* or using the default masks for the depth: */
+    //_surface = SDL_CreateRGBSurface(0,w,h,32,0,0,0,0);
+
+    SDL_SetSurfaceBlendMode(_surface, SDL_BLENDMODE_BLEND);  //this is default anyway
+
+	return _surface != nullptr;
 }
 
-bool Surface::initSurface(SDL_Surface *newSurface, int iAlpha)
+//just load the image named
+bool Surface::load(const std::string &fileName)
 {
-	if( newSurface != NULL )
-	{
-		//Create an optimized image
-		if (newSurface->format->Amask && iAlpha >= 0)
-		{
-			 //per pixel - iAlpha: 0=transparent, 255 = full opacity
-			SDL_SetAlpha(newSurface, SDL_SRCALPHA, iAlpha);
-			_surface = SDL_DisplayFormatAlpha( newSurface );
-		}
-		else
-		{
-			//set the transparent pixel - doesnt affect per pixel alpha surfaces
-			Uint32 key = SDL_MapRGB(newSurface->format, 255,0,255); //putrid purple
-			SDL_SetColorKey(newSurface, SDL_RLEACCEL | SDL_SRCCOLORKEY, key);
-			if (iAlpha >= 0)
-				SDL_SetAlpha(newSurface, SDL_SRCALPHA, iAlpha); //per surface transparency only
-			else
-				SDL_SetAlpha(newSurface, 0, 0); //no transparency
-			_surface = SDL_DisplayFormat( newSurface );
-		}
+    cleanUp();
+    //_surface = SDL_LoadBMP( fileName.c_str() );	//using SDL dll
 
-		//Free the old image
-		SDL_FreeSurface( newSurface );
+    //if fileName does not include a path prefix (has / or \ included in filename)
+    //then add RES_IMAGES prefix automatically. So callers can just use base filename or
+    //add own explicit path.
+    const bool bHasPath = (fileName.find_first_of("\\/") != std::string::npos);
+    if (bHasPath)
+        _surface = IMG_Load(fileName.c_str());		//using SDL_Image dll (png, jpg etc)
+    else
+        _surface = IMG_Load((RES_IMAGES + fileName).c_str());		//using SDL_Image dll (png, jpg etc)	if (nullptr == _surface)
+	{
+		std::cerr << "Failed to load image " << (bHasPath?"":(RES_IMAGES).c_str()) << fileName << ". Cannot start." << std::endl;
+		std::cerr << "SDL_Error = " << SDL_GetError() << std::endl;
+		return false;
+	}
+
+    SDL_SetSurfaceBlendMode(_surface, SDL_BLENDMODE_BLEND);  //this is default anyway
+
+    return true;
+}
+
+void Surface::setTransparentColour(SDL_Color cAlphaKey)
+{
+    if (_surface == nullptr) return;
+
+    Uint32 key = SDL_MapRGB(_surface->format, cAlphaKey.r,cAlphaKey.g,cAlphaKey.b);
+    SDL_SetColorKey(_surface, 1, key);
+}
+
+void Surface::setTransparentColour()
+{
+    if (_surface == nullptr) return;
+
+    /* Set transparent pixel as that of the pixel at (0,0) */
+
+    if (_surface->format->palette) {
+        SDL_SetColorKey(_surface, 1, *(Uint8 *) _surface->pixels);
+    } else {
+        switch (_surface->format->BitsPerPixel) {
+        case 15:
+            SDL_SetColorKey(_surface, 1, (*(Uint16 *) _surface->pixels) & 0x00007FFF);
+            break;
+        case 16:
+            SDL_SetColorKey(_surface, 1, *(Uint16 *) _surface->pixels);
+            break;
+        case 24:
+            SDL_SetColorKey(_surface, 1, (*(Uint32 *) _surface->pixels) & 0x00FFFFFF);
+            break;
+        case 32:
+            SDL_SetColorKey(_surface, 1, *(Uint32 *) _surface->pixels);
+            break;
+        }
+    }
+}
+
+void Surface::setAlphaTransparency(Uint8 iAlpha)
+{
+    if (_surface == nullptr) return;
+    SDL_SetSurfaceAlphaMod(_surface, iAlpha);
+}
+
+/*
+bool Surface::initSurface(int iAlpha)
+{
+//	if( newSurface != nullptr )
+//	{
+//		//Create an optimized image
+//		if (newSurface->format->Amask && iAlpha >= 0)
+//		{
+//			 //per pixel - iAlpha: 0=transparent, 255 = full opacity
+//			SDL_SetAlpha(newSurface, SDL_SRCALPHA, iAlpha);
+//			_surface = SDL_DisplayFormatAlpha( newSurface );
+//		}
+//		else
+//		{
+//			//set the transparent pixel - doesnt affect per pixel alpha surfaces
+//			Uint32 key = SDL_MapRGB(newSurface->format, 255,0,255); //putrid purple
+//			SDL_SetColorKey(newSurface, SDL_TRUE, key);
+//			if (iAlpha >= 0)
+//				SDL_SetAlpha(newSurface, SDL_SRCALPHA, iAlpha); //per surface transparency only
+//			else
+//				SDL_SetAlpha(newSurface, 0, 0); //no transparency
+//			_surface = SDL_DisplayFormat( newSurface );
+//		}
+//
+//		//Free the old image
+//		SDL_FreeSurface( newSurface );
 
 		return true;
-	}
-	return false;
+//	}
+//	return false;
 }
+*/
 
 /*
 //make a deep copy (copy surface pointer etc) as assignment
@@ -112,12 +203,12 @@ void Surface::copy(Surface &s)
 void Surface::cleanUp()
 {
 	if (_surface) SDL_FreeSurface(_surface);
-	_surface = 0;
+	_surface = nullptr;
 }
 
 void Surface::setSurface(SDL_Surface *s)
 {
-	if (s == NULL) return;
+	if (s == nullptr) return;
 	cleanUp();
 	_surface = s;
 	s->refcount++;
@@ -152,39 +243,41 @@ Uint32 Surface::height(void) const
 }
 
 
-
-
-#if 0
-// This is a way of telling whether or not to use hardware surfaces
-Uint32 FastestFlags(Uint32 flags, int width, int height, int bpp)
+Texture::Texture() :
+    _texture(nullptr), _width(0), _height(0)
 {
-   const SDL_VideoInfo *info;
-
-   /* Hardware acceleration is only used in fullscreen mode */
-   flags |= SDL_FULLSCREEN;
-
-   /* Check for various video capabilities */
-   info = SDL_GetVideoInfo();
-   if ( info->blit_hw_CC && info->blit_fill ) {
-      /* We use accelerated colorkeying and color filling */
-      flags |= SDL_HWSURFACE;
-   }
-   /* If we have enough video memory, and will use accelerated
-      blits directly to it, then use page flipping.
-    */
-   if ( (flags & SDL_HWSURFACE) == SDL_HWSURFACE ) {
-      /* Direct hardware blitting without double-buffering
-         causes really bad flickering.
-       */
-      if ( info->video_mem*1024 > (height*width*bpp/8) ) {
-         flags |= SDL_DOUBLEBUF;
-      } else {
-         flags &= ~SDL_HWSURFACE;
-      }
-   }
-
-   /* Return the flags */
-   return(flags);
 }
-#endif
+Texture::Texture(Surface &surface) :
+    _texture(nullptr), _width(0), _height(0)
+{
+    createFrom(surface);
+}
+void Texture::createFrom(Surface &surface)
+{
+//    SDL_SetSurfaceBlendMode(surface.surface(), SDL_BLENDMODE_BLEND);  //this is default anyway
+
+    _texture = SDL_CreateTextureFromSurface(Locator::screen().renderer(), surface.surface());
+
+    SDL_SetSurfaceBlendMode(surface.surface(), SDL_BLENDMODE_BLEND);  //this is default anyway
+
+    Uint32 format;
+    int access, w, h;
+    SDL_QueryTexture(_texture, &format, &access, &w, &h);
+    _width = w;
+    _height = h;
+}
+void Texture::cleanup()
+{
+    if (_texture)
+    {
+        SDL_DestroyTexture(_texture);
+        _texture = nullptr;
+    }
+}
+Texture::~Texture()
+{
+    cleanup();
+}
+
+
 

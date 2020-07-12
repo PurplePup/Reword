@@ -1,7 +1,7 @@
-#ifndef I_AUDIO_H_INCLUDED
+#if !defined I_AUDIO_H_INCLUDED
 #define I_AUDIO_H_INCLUDED
 
-#include <SDL_mixer.h>
+#include <SDL.h>
 #include <string>
 
 class IAudio

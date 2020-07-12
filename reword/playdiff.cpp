@@ -38,21 +38,19 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include "global.h"
 #include "playdiff.h"
+#include "resource.h"
 #include "states.h"
 #include "utils.h"
 #include <sstream>
 
 void PlayDiff::init(Input *input)
 {
-	setTitle("LEVEL");
+	setName("LEVEL");
 	std::string msg = "Press " + input->keyDescription(ppkey::B) + " to select difficulty";
 	setHelp(msg, GREY_COLOUR);
-	addItem(MenuItem(DIF_EASY, GREEN_COLOUR,
-		"Easy", ""));
-	addItem(MenuItem(DIF_MED, ORANGE_COLOUR,
-		"Medium", ""));
-	addItem(MenuItem(DIF_HARD, RED_COLOUR,
-		"Hard", ""));
+	addItem(MenuItem(DIF_EASY, GREEN_COLOUR,  "Easy", ""));
+	addItem(MenuItem(DIF_MED,  ORANGE_COLOUR, "Medium", ""));
+	addItem(MenuItem(DIF_HARD, RED_COLOUR,    "Hard", ""));
 	setItem((int)_gd._diffLevel);
 	//limit items to smaller area
 	setMenuArea(Rect(0, BG_LINE_TOP, SCREEN_WIDTH, (int)(BG_LINE_TOP + ((BG_LINE_BOT - BG_LINE_TOP)*0.85))));
@@ -71,8 +69,8 @@ void PlayDiff::init(Input *input)
 
 void PlayDiff::choose(MenuItem i)
 {
-    if (i._id >= 0)
-        _gd.setDiffLevel((eGameDiff)i._id);
+    if (i.id() >= 0)
+        _gd.setDiffLevel((eGameDiff)i.id());
 
 	_gd._state = ST_MENU;
 	_running = false;	//exit this class running state
@@ -86,25 +84,25 @@ void PlayDiff::render(Screen *s)
 	//now render helpful messages underneath
 	MenuItem i = getSelected();
 	std::stringstream times;
-	times << "Reword " << ((int)DIF_MAX - i._id)*COUNTDOWN_REWORD << " sec, " <<
-			  "Speeder " << ((int)DIF_MAX - i._id)*COUNTDOWN_SPEEDER << ", " <<
-			  "TimeTrial " << ((int)DIF_MAX - i._id)*COUNTDOWN_TIMETRIAL;
+	times << "Reword " << ((int)DIF_MAX - i.id())*COUNTDOWN_REWORD << " sec, " <<
+			  "Speeder " << ((int)DIF_MAX - i.id())*COUNTDOWN_SPEEDER << ", " <<
+			  "TimeTrial " << ((int)DIF_MAX - i.id())*COUNTDOWN_TIMETRIAL;
 
-	int htAndGap = _gd._fntClean.height() + (_gd._fntClean.height()/4);
+	int htAndGap = _gd._fntSmall.height() + (_gd._fntSmall.height()/4);
 	int yy = BG_LINE_BOT - (htAndGap*2);     //(getNextYPos());
-	switch (i._id)
+	switch (i.id())
 	{
 	case DIF_EASY:
-		_gd._fntClean.put_text(s, yy, times.str().c_str(), GREEN_COLOUR, true);     //10 sec pause penalty
-		_gd._fntClean.put_text(s, yy+htAndGap, "Only 'easy' words used. Can pause game.", GREEN_COLOUR, true);
+		_gd._fntSmall.put_text(s, yy, times.str().c_str(), GREEN_COLOUR, true);     //10 sec pause penalty
+		_gd._fntSmall.put_text(s, yy+htAndGap, "Only 'easy' words used. Can pause game.", GREEN_COLOUR, true);
 		break;
 	case DIF_MED:
-		_gd._fntClean.put_text(s, yy, times.str().c_str(), ORANGE_COLOUR, true);    //15 sec pause penalty
-		_gd._fntClean.put_text(s, yy+htAndGap, "Also includes 'easy' words. Can pause game.", ORANGE_COLOUR, true);
+		_gd._fntSmall.put_text(s, yy, times.str().c_str(), ORANGE_COLOUR, true);    //15 sec pause penalty
+		_gd._fntSmall.put_text(s, yy+htAndGap, "Also includes 'easy' words. Can pause game.", ORANGE_COLOUR, true);
 		break;
 	case DIF_HARD:
-		_gd._fntClean.put_text(s, yy, times.str().c_str(), RED_COLOUR, true);
-		_gd._fntClean.put_text(s, yy+htAndGap, "Also 'easy' and 'medium' words. No Pause", RED_COLOUR, true);
+		_gd._fntSmall.put_text(s, yy, times.str().c_str(), RED_COLOUR, true);
+		_gd._fntSmall.put_text(s, yy+htAndGap, "Also 'easy' and 'medium' words. No Pause", RED_COLOUR, true);
 		break;
 	default:break;
 	}

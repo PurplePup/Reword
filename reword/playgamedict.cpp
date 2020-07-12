@@ -39,6 +39,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "helpers.h"
 #include "audio.h"
 #include "platform.h"
+#include "resource.h"
+#include "locator.h"
 
 enum { CTRLGRP_SCROLL = 1, CTRLGRP_BUTTONS = 2 };
 
@@ -90,7 +92,7 @@ void PlayGameDict::init(Input *input)
     pptxt::trimLeft(dictDefinition, " \t\n\r");	//NOTE need \n\r on GP2X
     pptxt::trimRight(dictDefinition, " \t\n\r"); //ditto
     if (!dictDefinition.length()) dictDefinition = "** sorry, not defined **";	//blank word - no dictionary entry
-    //now build definition strings to display (on seperate lines)
+    //now build definition strings to display (on separate lines)
     _dictLine = 0;	//start on first line
     pptxt::buildTextPage(dictDefinition, FONT_CLEAN_MAX, _dictDef);
 
@@ -123,9 +125,7 @@ void PlayGameDict::init(Input *input)
 
 void PlayGameDict::render(Screen* s)
 {
-	//_gd._menubg.blitTo( s );
-	//ppg::blit_surface(_gd._menubg.surface(), NULL, s->surface(), 0, 0);
-	ppg::blit_surface(_menubg->surface(), NULL, s->surface(), 0, 0);
+	s->blit(_menubg->texture(), nullptr, 0, 0);
 
 	_roundDict->render(s);
 
@@ -134,11 +134,13 @@ void PlayGameDict::render(Screen* s)
 	//draw the dictionary text here... previously split into vector string "lines"
 	int yy = BG_LINE_TOP + (_gd._fntClean.height()*2) +
 			(((int)_dictDef.size() > _lines)?0:(((_lines-(int)_dictDef.size())/2)*_gd._fntClean.height()));
-	std::vector<std::string>::const_iterator it = _dictDef.begin() + _dictLine;	//add offset
+	auto it = _dictDef.cbegin() + _dictLine;	//add offset
 	int lines = 0;
-	while (it != _dictDef.end())
+	while (it != _dictDef.cend())
 	{
 		_gd._fntClean.put_text(s, yy, (*it).c_str(), BLACK_COLOUR, false);
+		//s->blit_mid(_fontCache.get(*it)->texture(), nullptr, 0, yy);  //0 ignored, use screen
+
 		lines++;
 		yy+=_gd._fntClean.height();
 		if (lines >= _lines) break;
@@ -147,6 +149,7 @@ void PlayGameDict::render(Screen* s)
 
 	int helpYpos = BG_LINE_BOT+((SCREEN_HEIGHT-BG_LINE_BOT-_gd._fntClean.height())/2);
 	_gd._fntClean.put_text(s, helpYpos, _helpMsg.c_str(), GREY_COLOUR, true);
+
 
 	_controlsDict.render(s);
 }

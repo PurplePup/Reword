@@ -287,7 +287,7 @@ void Roundels::setWord(const std::string &wrd,
 
 		//reuse ptr to build lists for _bot and _last
 		//that currently dont point to anything
-		prnd = (Roundel*)NULL;
+		prnd = (Roundel*)nullptr;
 		_bot.push_back(prnd);	//set to null
 		_last.push_back(prnd);	//set to null
 	}

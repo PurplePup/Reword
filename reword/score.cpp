@@ -36,6 +36,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "global.h"
 #include "score.h"
 #include "helpers.h"
+#include "platform.h"
 
 #include <iostream>
 #include <cerrno>
@@ -91,7 +92,7 @@ Uint32 Score::loadUsingWordfileName(const std::string &wordfile)
 #ifdef WIN32
 	_scorefile = RES_BASE + w.stem().generic_string() + ".score";
 #else
-	_scorefile = RES_BASE + w.stem() + ".score";
+	_scorefile = RES_BASE + w.stem().c_str() + ".score";
 #endif
 #endif
 

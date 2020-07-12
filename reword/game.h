@@ -1,14 +1,14 @@
  //game.h
 
-#ifndef GAME_H
+#if !defined GAME_H
 #define GAME_H
 
-#include <memory> //definition of auto_ptr
+//#include <memory> //definition of unique_ptr
 #include "input.h"
 #include "screen.h"
 #include "audio.h"
 #include "error.h"
-#include "i_play.h"	//IPlay interface decl
+#include "i_play.h"	    //IPlay interface decl
 #include "gamedata.h"
 #include "resource.h"
 

@@ -20,7 +20,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef INPUT_H
+#if !defined INPUT_H
 #define INPUT_H
 
 #include <SDL.h>

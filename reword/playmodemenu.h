@@ -1,6 +1,6 @@
 //PlayModeMenu.h
 
-#ifndef _PlayModeMenu_H
+#if !defined _PlayModeMenu_H
 #define _PlayModeMenu_H
 
 #include "i_play.h"		//IPlay interface

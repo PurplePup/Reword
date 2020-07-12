@@ -40,7 +40,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 void PlayModeMenu::init(Input *input)
 {
-	setTitle("MODE");
+	setName("MODE");
 	std::string msg = "Press " + input->keyDescription(ppkey::B) + " to select mode";
 	setHelp(msg, GREY_COLOUR);
 
@@ -69,12 +69,12 @@ void PlayModeMenu::init(Input *input)
 
 void PlayModeMenu::choose(MenuItem i)
 {
-	if (i._id == -1 || i._id == 255)	// exit & leave mode as-is
+	if (i.id() == -1 || i.id() == 255)	// exit & leave mode as-is
 		_gd._state = ST_MENU;
-	else if (i._id == 99)	    	// optional (ie. found file) resume available
+	else if (i.id() == 99)	    	// optional (ie. found file) resume available
 		_gd._state = ST_RESUME;
-	else if (i._id < 4) {			// 0..3, so play
-		_gd._mode = (eGameMode)i._id;
+	else if (i.id() < 4) {			// 0..3, so play
+		_gd._mode = (eGameMode)i.id();
 		_gd._state = ST_GAME;
 	}
 

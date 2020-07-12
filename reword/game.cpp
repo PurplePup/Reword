@@ -39,7 +39,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include <SDL.h>
 #include <SDL_image.h>	//for IMG_ functions
-#include <SDL_ttf.h>	//for TTF_ functions
+//#include <SDL_ttf.h>	//for TTF_ functions
 #ifdef GP2X
 #include <SDL_gp2x.h>
 #endif
@@ -52,6 +52,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include "audio.h"
 #include "framerate.h"
+#include "locator.h"
 
 #include "playmenu.h"
 #include "playmainmenu.h"
@@ -79,8 +80,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 
 Game::Game() :
-	_init(false), _screen(0), _input(0), _audio(0),
-	_gd(0)
+	_init(false),
+	_screen(nullptr), _input(nullptr), _audio(nullptr), _gd(nullptr)
 {
 }
 
@@ -98,7 +99,7 @@ Game::~Game()
 #if (defined(GP2X) || defined(PANDORA))
         SDL_FreeCursor(hiddenCursor);
 #endif
-
+        IMG_Quit();
 		TTF_Quit();
 	}
 }
@@ -108,9 +109,9 @@ void Game::splash()
 	if (!_screen) return;
 	Image img(RES_IMAGES + "splash.png");	//solid black background
 	SDL_Colour c = {0x00,0x00,0x00,0};	//black
-	ppg::drawSolidRect(_screen->surface(), 0, 0, Screen::width(), Screen::height(), c);
+	_screen->drawSolidRect(0, 0, Screen::width(), Screen::height(), c);
 	//center it - if needed
-	ppg::blit_surface(img.surface(), 0, _screen->surface(), (Screen::width()-img.width())/2, (Screen::height()-img.height())/2);
+	_screen->blit(img.texture(), nullptr, (Screen::width()-img.width())/2, (Screen::height()-img.height())/2);
 	_screen->update();	//flip
 //	sleep(2);	//so we can see it (POSIX)
 }
@@ -119,11 +120,23 @@ bool Game::loadResources()
 {
     bool bErr = false;
 
+    if (Locator::data()._fntTiny.description() != "Sans tiny")
+    {   //]##DEBUG##
+        std::cerr << "4 tiny: not == Sans tiny" << std::endl;
+    };
+
+
     //register the actual concrete data member holding the resources
 	Resource::registerImage(&_images);
 
-    bErr |= !Resource::image().add("roundel_letters.png", 255, 26);
-    bErr |= !Resource::image().add("roundel_kbd_letters.png", 255, 26);
+    if (Locator::data()._fntTiny.description() != "Sans tiny")
+    {   //]##DEBUG##
+        std::cerr << "1 tiny: not == Sans tiny" << std::endl;
+    };
+
+
+    bErr |= !Resource::image().add("roundel_letters.png", 26);
+    bErr |= !Resource::image().add("roundel_kbd_letters.png", 26);
 
 	//SINGLE FRAME BACKGROUNDS & IMAGES
 	bErr |= !Resource::image().add("menubg.png");		//solid background (no alpha)
@@ -137,42 +150,41 @@ bool Game::loadResources()
 	bErr |= !Resource::image().add("game_reword.png");
 	bErr |= !Resource::image().add("game_speeder.png");
 	bErr |= !Resource::image().add("game_timetrial.png");
-	bErr |= !Resource::image().add("popup_menu.png", 255);
+	bErr |= !Resource::image().add("popup_menu.png");
 
 	//IMAGE TILES (MULTIPLE TILE IMAGES)
-    bErr |= !Resource::image().add("cursors.png", -1, 3);
-    bErr |= !Resource::image().add("ping_small.png", 255, 6);
+    bErr |= !Resource::image().add("cursors.png", 3);
+    bErr |= !Resource::image().add("ping_small.png", 6);
 
-	bErr |= !Resource::image().add("boxes.png", -1, 24, Image::TILE_VERT);
-	bErr |= !Resource::image().add("scratch.png", -1, 7);
+	bErr |= !Resource::image().add("boxes.png", 24, ALPHA_COLOUR, 255, Image::TILE_VERT);
+	bErr |= !Resource::image().add("scratch.png", 7);
 
     //BUTTONS
-	bErr |= !Resource::image().add("btn_round_scroll_up.png", 0, 5);
-	bErr |= !Resource::image().add("btn_round_scroll_down.png", 0, 5);
-	bErr |= !Resource::image().add("btn_round_scroll_left.png", 0, 5);
-	bErr |= !Resource::image().add("btn_round_scroll_right.png", 0, 5);
-	bErr |= !Resource::image().add("btn_round_scroll_up_small.png", 0, 5);
-	bErr |= !Resource::image().add("btn_round_scroll_down_small.png", 0, 5);
+	bErr |= !Resource::image().add("btn_round_scroll_up.png", 5);
+	bErr |= !Resource::image().add("btn_round_scroll_down.png", 5);
+	bErr |= !Resource::image().add("btn_round_scroll_left.png", 5);
+	bErr |= !Resource::image().add("btn_round_scroll_right.png", 5);
+	bErr |= !Resource::image().add("btn_round_scroll_up_small.png", 5);
+	bErr |= !Resource::image().add("btn_round_scroll_down_small.png", 5);
 
-	bErr |= !Resource::image().add("btn_round_word_shuffle.png", 0, 5);
-	bErr |= !Resource::image().add("btn_round_word_try.png", 0, 5);
-	bErr |= !Resource::image().add("btn_round_word_totop.png", 0, 5);
-	bErr |= !Resource::image().add("btn_round_word_last.png", 0, 5);
+	bErr |= !Resource::image().add("btn_round_word_shuffle.png", 5);
+	bErr |= !Resource::image().add("btn_round_word_try.png", 5);
+	bErr |= !Resource::image().add("btn_round_word_totop.png", 5);
+	bErr |= !Resource::image().add("btn_round_word_last.png", 5);
 
-    bErr |= !Resource::image().add("btn_square_menu.png", 0, 5);
-    bErr |= !Resource::image().add("btn_square_exit.png", 0, 5);
-    bErr |= !Resource::image().add("btn_square_next.png", 0, 5);
-    bErr |= !Resource::image().add("btn_square_back_small.png", 0, 5);
-    bErr |= !Resource::image().add("btn_square_exit_small.png", 0, 5);
-    bErr |= !Resource::image().add("btn_square_next_small.png", 0, 5);
-    bErr |= !Resource::image().add("btn_square_yes_no_small.png", 0, 9);
-    bErr |= !Resource::image().add("btn_square_diff.png", 0, 13);
+    bErr |= !Resource::image().add("btn_square_menu.png", 5);
+    bErr |= !Resource::image().add("btn_square_exit.png", 5);
+    bErr |= !Resource::image().add("btn_square_next.png", 5);
+    bErr |= !Resource::image().add("btn_square_back_small.png", 5);
+    bErr |= !Resource::image().add("btn_square_exit_small.png", 5);
+    bErr |= !Resource::image().add("btn_square_next_small.png", 5);
+    bErr |= !Resource::image().add("btn_square_yes_no_small.png", 9);
+    bErr |= !Resource::image().add("btn_square_diff.png", 13);
 
-    bErr |= !Resource::image().add("btn_round_music.png", 0, 9);
-    bErr |= !Resource::image().add("btn_round_fx.png", 0, 9);
+    bErr |= !Resource::image().add("btn_round_music.png", 9);
+    bErr |= !Resource::image().add("btn_round_fx.png", 9);
 
-	bErr |= !Resource::image().add("star.png", 255, 7);
-
+	bErr |= !Resource::image().add("star.png", 7);
 
     //sound resources
     bErr |= Locator::audio().addSfx("ping.wav", AUDIO_SFX_PING) == -1;
@@ -212,6 +224,12 @@ bool Game::init(GameOptions &options)
 
 	atexit(SDL_Quit);	//auto cleanup, just in case
 
+    //Set texture filtering to linear
+    if( !SDL_SetHint( SDL_HINT_RENDER_SCALE_QUALITY, "1" ) )
+    {
+        std::cout << "Warning: Linear texture filtering not enabled!";
+    }
+
     if ((init_flags & SDL_INIT_AUDIO) == 0)
         Locator::initAudio();   //NullAudio in logs window
     else
@@ -219,12 +237,23 @@ bool Game::init(GameOptions &options)
     IAudio &audio = Locator::audio();
     audio.setup(options._bDefaultSfxOn, options._bDefaultMusicOn, options._defaultMusicDir, options._bMute);
 
-	_screen  = new Screen(SCREEN_WIDTH, SCREEN_HEIGHT);
+	_screen  = new Screen(SCREEN_WIDTH, SCREEN_HEIGHT, "REWORD");
 	if (!_screen->initDone())
 	{
 		setLastError(_screen->lastError());
 		return false;
 	}
+	Locator::registerScreen(_screen);
+
+    //Initialize PNG loading
+    int imgFlags = IMG_INIT_PNG;
+    if( !( IMG_Init( imgFlags ) & imgFlags ) )
+    {
+        std::string s = "SDL_image could not initialize! SDL_image Error: ";
+        s += IMG_GetError();
+        setLastError(s, false);
+        return false;
+    }
 
 #if (defined(GP2X) || defined(PANDORA))
     uint8_t hiddenCursorData = 0;
@@ -259,9 +288,6 @@ bool Game::init(GameOptions &options)
 #if ((defined(GP2X) || defined(PANDORA)))
 	//SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_VIDEO);
 //	joystick = SDL_JoystickOpen(0);
-#else
-    SDL_WM_SetCaption("REWORD", 0);		//windowed caption
-	std::cout << "Using window, Caption REWORD" << std::endl;
 #endif
 
 	//load all game data (images, fonts, etc, etc)
@@ -269,7 +295,7 @@ bool Game::init(GameOptions &options)
 	_gd->setOptions(options);
 	_gd->_current_w = _screen->width();
 	_gd->_current_h = _screen->height();
-	_gd->init(); //load other resources
+	_gd->init(); //load main resources
     Locator::registerData(_gd);
 
 #if defined(_USE_OGG)
@@ -294,6 +320,13 @@ bool Game::init(GameOptions &options)
 		setLastError("Unable to load resources");
 		return false;
 	}
+
+
+    if (Locator::data()._fntTiny.description() != "Sans tiny")
+    {   //]##DEBUG##
+        std::cerr << "6 tiny: not == Sans tiny" << std::endl;
+    };
+
 
 	return (_init = (_gd && _gd->isLoaded()));
 }
@@ -348,7 +381,7 @@ bool Game::run(void)
 
 bool Game::play(IPlay *p)
 {
-    if (NULL == p) return false;    //invalid IPlay object
+    if (nullptr == p) return false;    //invalid IPlay object
 
 	bool bCap = true;
 #ifdef GP2X
@@ -365,9 +398,9 @@ bool Game::play(IPlay *p)
 	SDL_Event event;
 
 #ifndef WIN32
-	int fbdev = open("/dev/fb0", O_RDONLY);
-//	void *buffer =
-        mmap(0, SCREEN_WIDTH*SCREEN_HEIGHT*2, PROT_WRITE, MAP_SHARED, fbdev, 0);
+//	int fbdev = open("/dev/fb0", O_RDONLY);
+//  //void *buffer =
+//      mmap(0, SCREEN_WIDTH*SCREEN_HEIGHT*2, PROT_WRITE, MAP_SHARED, fbdev, 0);
 #endif
 	// Initialise play/level specific stuff
 	p->init(_input);
@@ -554,13 +587,15 @@ bool Game::play(IPlay *p)
 		lastFrameTime = currentTime;
 */
 		_screen->lock();
+		_screen->clear();
+
 		p->render(_screen);	//screen render
 
         //render short term effects over any other renders
         _gd->_effects.draw(_screen);
 
 #ifdef _DEBUG	//overlay the framerate and any other debug info required
-//		_gd->_fntSmall.put_number(_screen,0,60,fr.fps(),"%d", BLACK_COLOUR);
+		_gd->_fntSmall.put_number(_screen,0,60,fr.fps(),"%d", BLACK_COLOUR);
 #endif
 
 
@@ -572,8 +607,8 @@ bool Game::play(IPlay *p)
 		#ifndef FBIO_WAITFORVSYNC
 		  #define FBIO_WAITFORVSYNC _IOW('F', 0x20, __u32)
 		#endif
-		int arg = 0;
-		ioctl(fbdev, FBIO_WAITFORVSYNC, &arg);
+//		int arg = 0;
+//		ioctl(fbdev, FBIO_WAITFORVSYNC, &arg);
 #endif
 
 		_screen->unlock();

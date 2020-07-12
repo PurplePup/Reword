@@ -38,8 +38,9 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "global.h"
 
 #include <SDL.h>
-#include <SDL_image.h>	//for IMG_ functions
-
+#include <SDL_keyboard.h>
+//#include <SDL_image.h>	//for IMG_ functions
+#include <SDL_events.h>
 
 
 RandInt::RandInt()
@@ -98,11 +99,11 @@ int Utils::RandomInt(unsigned int limit)
 }
 */
 
-namespace ppg	//pp game functions
-{
+//namespace ppg	//pp game functions
+//{
 
 //push a user event into the SDL event queue
-void pushSDL_Event(int code, void *data1, void *data2)
+void ppg::pushSDL_Event(int code, void *data1, void *data2)
 {
 	//push event (e.g. "end of level" or other user defined event)
     SDL_Event event;
@@ -116,7 +117,7 @@ void pushSDL_Event(int code, void *data1, void *data2)
 
 // push a key to the event queue -
 // note this requires a untranslated key, not one of the Input::XXXX keys
-void pushSDL_EventKey(int key)
+void ppg::pushSDL_EventKey(int key)
 {
 	//push keyboard event instead of user pressing the key
 	//allows us to automate some things
@@ -124,63 +125,44 @@ void pushSDL_EventKey(int key)
     //event.type = SDL_KEYDOWN;
     event.key.type = SDL_KEYDOWN;
     event.key.state = SDL_PRESSED;
-    event.key.keysym.sym = (SDLKey)key;
+    event.key.keysym.sym = (SDL_Keycode)key;
 
     SDL_PushEvent(&event);
 }
 
-//public draw functions
-/*
-//draw an outline rectangle, useful for debug
-void Surface::drawRect(const Rect& r, const SDL_Color& c)
-{
-	const Uint32 colour = SDL_MapRGB(_surface->format, c.r, c.g, c.b);
-	rectangleColor(_surface, r.left(), r.top(), r.right(), r.bottom(), colour);
-}
 
-//draw an outline rectangle, useful for debug
-void Surface::drawRect(const SDL_Rect& r, const SDL_Color& c)
-{
-	const Uint32 colour = SDL_MapRGB(_surface->format, c.r, c.g, c.b);
-	rectangleColor(_surface, r.x, r.y, r.x + r.w, r.y + r.h, colour);
-}
-
-//draw an outline rectangle, useful for debug
-void Surface::drawRect(int x, int y, int w, int h, const SDL_Color& c)
-{
-	const Uint32 colour = SDL_MapRGB(_surface->format, c.r, c.g, c.b);
-	rectangleColor(_surface, x, y, x+w, y+h, colour);
-}
-*/
 // Draw a filled/solid rectangle
-void drawSolidRect (SDL_Surface* s, int x, int y, int w, int h, const SDL_Color& c)
+void ppg::drawSolidRect (Surface* s, int x, int y, int w, int h, const SDL_Color& c)
 {
+    if (!s->surface()) return;
     SDL_Rect r = { x, y, w, h };
-    const Uint32 colour = SDL_MapRGB(s->format, c.r, c.g, c.b);
-    SDL_FillRect(s, &r, colour);
+    const Uint32 colour = SDL_MapRGB(s->surface()->format, c.r, c.g, c.b);
+    SDL_FillRect(s->surface(), &r, colour);
 }
 
 // Draw a filled/solid alpha blended (transparent) rectangle
-void drawSolidRectA(SDL_Surface* s, int x, int y, int w, int h, const SDL_Color& c, int iAlpha)
+void ppg::drawSolidRectA(Surface* s, int x, int y, int w, int h, const SDL_Color& c, int iAlpha)
 {
+    if (!s->surface()) return;
     SDL_Rect r = { x, y, w, h };
-    const Uint32 colour = SDL_MapRGBA(s->format, c.r, c.g, c.b, iAlpha);
-    SDL_FillRect(s, &r, colour);
+    const Uint32 colour = SDL_MapRGBA(s->surface()->format, c.r, c.g, c.b, iAlpha);
+    SDL_FillRect(s->surface(), &r, colour);
 }
 
-void putPixel(SDL_Surface* s, int x, int y, Uint32 colour)
+// Put pixel of colour c at x,y
+void ppg::putPixel(Surface* s, int x, int y, Uint32 colour)
 {
-	// Put pixel of colour c at x,y
+    if (!s->surface()) return;
 	// If colour is NONE - no pixel is ploted
-    if (x >=0 && x < s->w && y >=0 && y < s->h) // && c != Colour::NONE)
+    if (x >=0 && x < s->width() && y >=0 && y < s->height()) // && c != Colour::NONE)
     {
-		unsigned short* dst = static_cast<unsigned short*>(s->pixels);
-		dst[y * s->pitch/sizeof(unsigned short) + x] = (unsigned short)colour;	//##fudge!!
+		unsigned short* dst = static_cast<unsigned short*>(s->surface()->pixels);
+		dst[y * s->surface()->pitch/sizeof(unsigned short) + x] = (unsigned short)colour;	//##fudge!!
     }
 }
 
 //function to blit, but not just to _screen - both source and destination surface needed
-void blit_surface(SDL_Surface* source, SDL_Rect* srcRect, SDL_Surface* dest, int destX, int destY)
+void ppg::blit_surface(SDL_Surface* source, SDL_Rect* srcRect, SDL_Surface* dest, int destX, int destY)
 {
 	SDL_Rect destRect = { destX, destY, 0, 0 };
 	SDL_BlitSurface( source, srcRect, dest, &destRect );
@@ -199,6 +181,5 @@ void blit_surface(SDL_Surface* source, SDL_Rect* srcRect, SDL_Surface* dest, int
 //}
 
 
-
-}	//namespace ppg
+//}	//namespace ppg
 

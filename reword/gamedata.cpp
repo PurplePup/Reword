@@ -15,7 +15,7 @@ History:		Version	Date		Change
 				-------	----------	--------------------------------
 				0.4.0	25.02.2008	Added game modes - "reword" "speeder" and "time trial"
  				0.5.0	18.06.2008	Added touch support and some animated touch icons
- 				0.5.1	07.10.2008	seperate some gfx to allow diff screen sizes
+ 				0.5.1	07.10.2008	separate some gfx to allow diff screen sizes
 
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by
@@ -34,8 +34,9 @@ Licence:		This program is free software; you can redistribute it and/or modify
 */
 ////////////////////////////////////////////////////////////////////
 
-#include "global.h"
 #include "gamedata.h"
+
+#include "global.h"
 #include "platform.h"
 #include "score.h"
 #include "helpers.h"
@@ -62,11 +63,18 @@ void GameData::init()
 	bErr |= !_words.load(RES_WORDS + _options._defaultWordFile, hash + SDL_GetTicks());
 
 	//FONTS
-	bErr |= !_fntTiny.load(RES_FONTS + "FreeSansBold.ttf", FONT_TINY);
-	bErr |= !_fntClean.load(RES_FONTS + "FreeSansBold.ttf", FONT_SMALL);
-	bErr |= !_fntSmall.load(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_SMALL);
-	bErr |= !_fntMed.load(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_MEDIUM);
-	bErr |= !_fntBig.load(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_BIG);
+//	bErr |= !_fntSmall.loadTTF(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_SMALL, "Cartoon small");
+//	bErr |= !_fntMed.loadTTF(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_MEDIUM, "Cartoon med");
+//	bErr |= !_fntBig.loadTTF(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_BIG, "Cartoon big");
+	bErr |= !_fntSmall.loadBMP(RES_FONTS + "freesans.fnt", "small");    //18
+//	bErr |= !_fntMed.loadBMP(RES_FONTS + "BD_Cartoon_Shout_26.fnt", "Cartoon med");
+	bErr |= !_fntMed.loadBMP(RES_FONTS + "font.fnt", "test xml font");
+	bErr |= !_fntBig.loadBMP(RES_FONTS + "BD_Cartoon_Shout_34.fnt", "Cartoon big");
+
+//	bErr |= !_fntTiny.loadTTF(RES_FONTS + "FreeSansBold.ttf", FONT_TINY, "Sans tiny");
+//	bErr |= !_fntClean.loadBMP(RES_FONTS + "font.fnt", "test xml font");
+	bErr |= !_fntTiny.loadBMP(RES_FONTS + "FreeSansBold_14.fnt", "Sans Tiny");
+	bErr |= !_fntClean.loadBMP(RES_FONTS + "FreeSansBold_16.fnt", "Sans Clean");
 
     if (!bErr)
     {

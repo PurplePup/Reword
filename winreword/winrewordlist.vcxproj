@@ -11,24 +11,24 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\reword\rewordlist\tinyxml\tinystr.h" />
-    <ClInclude Include="..\reword\rewordlist\tinyxml\tinyxml.h" />
-    <ClInclude Include="..\reword\rewordlist\words2.h" />
-    <ClInclude Include="..\reword\reword\helpers.h" />
-    <ClInclude Include="..\reword\reword\random.h" />
-    <ClInclude Include="..\reword\reword\states.h" />
-    <ClInclude Include="..\reword\reword\words.h" />
+    <ClInclude Include="..\rewordlist\tinyxml\tinystr.h" />
+    <ClInclude Include="..\rewordlist\tinyxml\tinyxml.h" />
+    <ClInclude Include="..\rewordlist\words2.h" />
+    <ClInclude Include="..\reword\helpers.h" />
+    <ClInclude Include="..\reword\random.h" />
+    <ClInclude Include="..\reword\states.h" />
+    <ClInclude Include="..\reword\words.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\reword\rewordlist\rewordlist.cpp" />
-    <ClCompile Include="..\reword\rewordlist\tinyxml\tinystr.cpp" />
-    <ClCompile Include="..\reword\rewordlist\tinyxml\tinyxml.cpp" />
-    <ClCompile Include="..\reword\rewordlist\tinyxml\tinyxmlerror.cpp" />
-    <ClCompile Include="..\reword\rewordlist\tinyxml\tinyxmlparser.cpp" />
-    <ClCompile Include="..\reword\rewordlist\words2.cpp" />
-    <ClCompile Include="..\reword\reword\helpers.cpp" />
-    <ClCompile Include="..\reword\reword\random.cpp" />
-    <ClCompile Include="..\reword\reword\words.cpp" />
+    <ClCompile Include="..\rewordlist\rewordlist.cpp" />
+    <ClCompile Include="..\rewordlist\tinyxml\tinystr.cpp" />
+    <ClCompile Include="..\rewordlist\tinyxml\tinyxml.cpp" />
+    <ClCompile Include="..\rewordlist\tinyxml\tinyxmlerror.cpp" />
+    <ClCompile Include="..\rewordlist\tinyxml\tinyxmlparser.cpp" />
+    <ClCompile Include="..\rewordlist\words2.cpp" />
+    <ClCompile Include="..\reword\helpers.cpp" />
+    <ClCompile Include="..\reword\random.cpp" />
+    <ClCompile Include="..\reword\words.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B8E2863B-4E08-4770-8D8C-B2C4305B0038}</ProjectGuid>
@@ -80,17 +80,19 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;BOOST_ALL_DYN_LINK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\boost\boost_1_47;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>C:\boost\boost_1_47\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

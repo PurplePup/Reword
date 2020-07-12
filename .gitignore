@@ -40,4 +40,7 @@ config.py
 .svn
 hiscore.dat
 .quickstate.save
+.vscode
 reword.layout
+reword
+rewordlist

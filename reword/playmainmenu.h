@@ -1,6 +1,6 @@
 //PlayMainMenu.h
 
-#ifndef _PlayMainMenu_H
+#if !defined _PlayMainMenu_H
 #define _PlayMainMenu_H
 
 #include "screen.h"
@@ -8,7 +8,7 @@
 #include "gamedata.h"	//also holds constants and stuff
 #include "roundels.h"
 #include "playmenu.h"
-
+#include "fontttf.h"
 
 class PlayMainMenu : public PlayMenu
 {

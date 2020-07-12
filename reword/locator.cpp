@@ -32,12 +32,13 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 
 #include "locator.h"
-
 #include "gamedata.h"
+
+#include <cassert>
 
 //////////////////////////////// AUDIO /////////////////////////////
 
-static IAudio * _audio = 0;
+static IAudio * _audio = nullptr;
 static NullAudio _nullaudio;
 
 void Locator::initAudio()
@@ -46,21 +47,44 @@ void Locator::initAudio()
 }
 IAudio& Locator::audio()
 {
-    assert(_audio != NULL);
+    assert(_audio != nullptr);
     return *_audio;
 }
 void Locator::registerAudio(IAudio* audio)
 {
-    if (audio == NULL)
+    if (audio == nullptr)
         _audio = &_nullaudio;   // revert to null service
     else
         _audio = audio;
 }
 
 
+//////////////////////////////// SCREEN /////////////////////////////
+
+static Screen * _screen = nullptr;
+static Screen _nullscreen;
+
+void Locator::initScreen()
+{
+    _screen = &_nullscreen;
+}
+Screen& Locator::screen()
+{
+    assert(_screen != nullptr);
+    return *_screen;
+}
+void Locator::registerScreen(Screen* screen)
+{
+    if (screen == nullptr)
+        _screen = &_nullscreen;   // revert to null service
+    else
+        _screen = screen;
+}
+
+
 //////////////////////////////// INPUT /////////////////////////////
 
-static IInput * _input = 0;
+static IInput * _input = nullptr;
 static NullInput _nullinput;
 
 void Locator::initInput()
@@ -69,12 +93,12 @@ void Locator::initInput()
 }
 IInput& Locator::input()
 {
-    assert(_input != NULL);
+    assert(_input != nullptr);
     return *_input;
 }
 void Locator::registerInput(IInput* input)
 {
-    if (input == NULL)
+    if (input == nullptr)
         _input = &_nullinput;   // revert to null service
     else
         _input = input;
@@ -83,7 +107,7 @@ void Locator::registerInput(IInput* input)
 
 //////////////////////////////// DATA /////////////////////////////
 
-static GameData * _data = 0;
+static GameData * _data = nullptr;
 static GameData _nulldata;
 
 void Locator::initData()
@@ -92,12 +116,12 @@ void Locator::initData()
 }
 GameData& Locator::data()
 {
-    assert(_data != NULL);
+    assert(_data != nullptr);
     return *_data;
 }
 void Locator::registerData(GameData* data)
 {
-    if (data == NULL)
+    if (data == nullptr)
         _data = &_nulldata;   // revert to null service
     else
         _data = data;

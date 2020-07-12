@@ -44,6 +44,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "audio.h"
 #include "platform.h"
 #include "score.h"
+#include "resource.h"
+#include "locator.h"
 
 #include <string>
 #include <cassert>
@@ -51,7 +53,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 PlayGamePopup::PlayGamePopup(GameData &gd, bool bIsInGame, bool bMaxWordFound)  : _gd(gd)
 {
-	_pItems = 0;
+	_pItems = nullptr;
 	_running = false;
 	_init = false;
 	_bIsInGame = bIsInGame;
@@ -84,9 +86,10 @@ void PlayGamePopup::init(Input *input)
 	int i(0);
 	//main (in-game) menu options
 	_itemList.clear();
-	_itemList[i=0] = MenuItem(POP_CANCEL, GREEN_COLOUR, "Resume Game", "Continue game");
+	_itemList[i=0] = MenuItem(POP_CANCEL, GREEN_COLOUR, "Resume Game", "Continue game", true);
 	if (_bIsInGame)
-        _itemList[++i] = MenuItem(POP_SKIP, ORANGE_COLOUR, "Next word/Level", (_hasMaxWord)?"Move on to next word/level":"You must have a Re-word first!", _hasMaxWord);
+        _itemList[++i] = MenuItem(POP_SKIP, ORANGE_COLOUR, "Next word/Level",
+                            (_hasMaxWord)?"Move on to next word/level":"You must have a Re-word first!", _hasMaxWord);
     if (Locator::audio().musicEnabled())
     {
         bool bIsPlaying = Locator::audio().isPlayingMusic();	//may be playing/fading menu music so uses isPlaying... rather than isActuallyPl...
@@ -97,13 +100,13 @@ void PlayGamePopup::init(Input *input)
         _itemList[++i] = MenuItem(POP_PREVTRACK, BLUE_COLOUR, "Prev Track", "Play previous song", bHasMusic);
     }
 	if (_hasMaxWord)
-		_itemList[++i] = MenuItem(POP_SAVE, BLUE_COLOUR, "Save & Exit", "Allows exit and restart at same place");
-	_itemList[++i] = MenuItem(POP_QUIT, RED_COLOUR, "Quit Game !", "Exit (save highscore)");
+		_itemList[++i] = MenuItem(POP_SAVE, BLUE_COLOUR, "Save & Exit", "Allows exit and restart at same place", true);
+	_itemList[++i] = MenuItem(POP_QUIT, RED_COLOUR, "Quit Game !", "Exit (save highscore)", true);
 
     //confirmation options
 	_itemYNList.clear();
-	_itemYNList[i=0] = MenuItem(POP_NO, GREEN_COLOUR, "No", "Back to menu");
-	_itemYNList[++i] = MenuItem(POP_YES, RED_COLOUR, "Yes", "Quit the game");
+	_itemYNList[i=0] = MenuItem(POP_NO, GREEN_COLOUR, "No", "Back to menu", true);
+	_itemYNList[++i] = MenuItem(POP_YES, RED_COLOUR, "Yes", "Quit the game", true);
 
 	_pItems = &_itemList;
 	//need to set the _init and _running flags
@@ -116,8 +119,8 @@ void PlayGamePopup::render(Screen *s)
 	//draw menu overlay
 	const int x = (s->_width - _menubg->width()) / 2;
 	const int y = (s->_height - _menubg->height()) / 2;
-//	_menubg->blitTo(s, x, y, 0);
-	ppg::blit_surface(_menubg->surface(), NULL, s->surface(), x, y);
+	//ppg::blit_surface(_menubg->surface(), nullptr, s->surface(), x, y);
+	s->blit(_menubg->texture(), nullptr, x, y);
 
 	//calculate best text gap
 	const int maxGap = _gd._fntSmall.height()*2; //max gap
@@ -137,15 +140,18 @@ void PlayGamePopup::render(Screen *s)
 	{
 		if (it->first == _menuoption)
 		{
-			r = _gd._fntSmall.put_text(s, yy, it->second._title.c_str(), (it->second._enabled)?it->second._hoverOn:GREY_COLOUR, true);
-			r._min._x -= _star.tileW()+5;
-			_star.setPos(r._min._x, yy);
+			r = _gd._fntSmall.put_text(s, yy, it->second.item().c_str(), (it->second._enabled)?it->second._hoverOn:GREY_COLOUR, true);
+            ///r = s->blit_mid(it->second.item(it->second._enabled?MenuItem::eTitleHoverOn:MenuItem::eTitleGrey)->texture(), nullptr, 0, yy);
+			r._min.x -= _star.tileW()+5;
+			_star.setPos(r._min.x, yy);
 			//help/comment str
-			_gd._fntClean.put_text(s, (y+_menubg->height())-(_gd._fntSmall.height()*2), it->second._comment.c_str(), GREY_COLOUR, true);
+			_gd._fntClean.put_text(s, (y+_menubg->height())-(_gd._fntSmall.height()*2), it->second.comment().c_str(), GREY_COLOUR, true);
+			///s->blit_mid(it->second.item(MenuItem::eCommentGrey)->texture(), nullptr, 0, (y+_menubg->height())-(_gd._fntSmall.height()*2));
 		}
 		else
 		{
-			r = _gd._fntSmall.put_text(s, yy, it->second._title.c_str(), (it->second._enabled)?it->second._hoverOff:GREY_COLOUR, false);
+			r = _gd._fntSmall.put_text(s, yy, it->second.item().c_str(), (it->second._enabled)?it->second._hoverOff:GREY_COLOUR, false);
+			///r = s->blit_mid(it->second.item(it->second._enabled?MenuItem::eTitleHoverOff:MenuItem::eTitleGrey)->texture(), nullptr, 0, yy);
 		}
 		// Make the touch area bigger
 		it->second._r = r.inset(-5);
@@ -258,7 +264,7 @@ void PlayGamePopup::choose()
 	if (_bDoYesNoMenu)
 	{
 		//already showing YES/NO confirm options, so process...
-		if (pItem->_id == POP_NO)
+		if (pItem->id() == POP_NO)
 		{
 			_pItems = &_itemList;		//point back to first menu, then
 			_menuoption = ItemFromId(POP_QUIT); 	//NO selected, back to POP_QUIT
@@ -279,12 +285,12 @@ void PlayGamePopup::choose()
 		//first check if (and ignore) disabled menu items
 		if ( !pItem->_enabled )
 			return;
-		if (pItem->_id == POP_SAVE)	//for later RESUME
+		if (pItem->id() == POP_SAVE)	//for later RESUME
 		{
 			_menuoption = ItemFromId(POP_QUIT);	//auto (force) exit
 		}
 		//if on exit option, go to yes/no options and wait for yes or no
-		if (pItem->_id == POP_QUIT)
+		if (pItem->id() == POP_QUIT)
 		{
 			//setup Yes/No sub menu - to check user actually want to exit
 			_pItems = &_itemYNList;		//point to new menu, then
@@ -292,24 +298,24 @@ void PlayGamePopup::choose()
 			_bDoYesNoMenu = true;
 			return;
 		}
-		if (pItem->_id == POP_TOGGLEMUSIC)
+		if (pItem->id() == POP_TOGGLEMUSIC)
 		{
             if (Mix_PlayingMusic())
                 Locator::audio().stopTrack();
             else
                 Locator::audio().startNextTrack();
 		}
-		if (pItem->_id == POP_NEXTTRACK)
+		if (pItem->id() == POP_NEXTTRACK)
 		{
             Locator::audio().startNextTrack();
 		}
-		if (pItem->_id == POP_PREVTRACK)
+		if (pItem->id() == POP_PREVTRACK)
 		{
             Locator::audio().startPrevTrack();
 		}
 	}
 	_bSelected = true;
-	_selectedId = pItem->_id;
+	_selectedId = pItem->id();
 }
 
 void PlayGamePopup::prepareBackground()
@@ -323,7 +329,7 @@ int PlayGamePopup::ItemFromId(int id)
 {
 	for (tMenuMap::iterator it = _pItems->begin(); it != _pItems->end(); ++it)
 	{
-		if (it->second._id == id) return it->first;
+		if (it->second.id() == id) return it->first;
 	}
 	return 0;
 }

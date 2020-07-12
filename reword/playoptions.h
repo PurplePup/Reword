@@ -1,6 +1,6 @@
 //playoptions.h
 
-#ifndef _PLAYOPTIONS_H
+#if !defined _PLAYOPTIONS_H
 #define _PLAYOPTIONS_H
 
 #include "screen.h"

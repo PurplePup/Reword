@@ -36,8 +36,9 @@ Licence:		This program is free software; you can redistribute it and/or modify
 */
 ////////////////////////////////////////////////////////////////////
 
-#include "global.h"
 #include "audio.h"
+
+#include "global.h"
 #include "helpers.h"
 #include "utils.h"
 #include "platform.h"
@@ -48,12 +49,14 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <stdio.h>
 #include <iostream>
 
-#ifndef WIN32
+#if !defined WIN32
 #include <sys/ioctl.h>
+#include <unistd.h> //for close()
 #include <linux/soundcard.h>
 #include <dirent.h>		//for dir search for songs...
 #endif
 
+#include <SDL_mixer.h>
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -144,7 +147,7 @@ void Audio::closedown()
     for ( ; it!=end; ++it)
     {
         Mix_FreeChunk((*it));
-        (*it) = NULL;
+        (*it) = nullptr;
     }
     _sfxList.clear();
 
@@ -438,7 +441,7 @@ void Audio::loadTracks(const std::string &baseDir)
 	DIR *d = opendir(baseDir.c_str());
 	if (d)
 	{
-		while ((dir = readdir(d)) != NULL)
+		while ((dir = readdir(d)) != nullptr)
 		{
 			std::string sTrack = dir->d_name;
 			if (sTrack.length()>0 && sTrack[0] != '.')

@@ -5,7 +5,7 @@
 #ifndef _BUTTON_H
 #define _BUTTON_H
 
-#include "SDL.h"
+#include <SDL.h>
 
 class Button
 {

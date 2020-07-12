@@ -39,8 +39,10 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include "screen.h"
 #include "global.h"
+#include "resource.h"
 
 //#include <iostream> //for debug msgs
+#include <cassert>
 
 SpriteMgr::SpriteMgr() :
 	_handle(0)
@@ -67,7 +69,7 @@ void SpriteMgr::clear()
 Sprite * SpriteMgr::get(Uint32 handle)
 {
 	_it = _sprmap.find(handle);
-	if (_it == _sprmap.end()) return NULL;
+	if (_it == _sprmap.end()) return nullptr;
 	return (*_it).second._spr.get();
 }
 
