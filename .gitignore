@@ -17,6 +17,7 @@
 *.depend
 *.layout
 .vs/
+.kde4/
 build/
 bin/
 obj/
@@ -40,4 +41,7 @@ config.py
 .svn
 hiscore.dat
 .quickstate.save
+.vscode
 reword.layout
+reword
+rewordlist
