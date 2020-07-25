@@ -16,6 +16,7 @@
 *.plg
 *.depend
 *.layout
+.vs/
 build/
 bin/
 obj/

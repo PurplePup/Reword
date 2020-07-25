@@ -300,7 +300,8 @@ int Words::findWordsInWordTarget(tWordMap &shortwords, const char *wordTarget)
 
 		if (wordInWord( (*shtwrd).first.c_str(), wordTarget ))
 		{
-			if (_bDebug) std::cout << (*shtwrd).first.c_str() << ", ";
+			if (_bDebug) 
+				std::cout << (*shtwrd).first.c_str() << ", ";
 
 			_wordsInTarget.insert(tWordsInTarget::value_type( (*shtwrd).first.c_str(), false ));	//false = each word not "found" yet
 			_nWords[(*shtwrd).first.length()]++;		//ignore 0,1,2 and start at 3 as min word len is 3

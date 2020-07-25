@@ -41,7 +41,9 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <fstream>
 #include <ios>
 #include <iostream>
-#include <boost/regex.hpp>
+
+//#include <boost/regex.hpp>
+#include <regex>
 
 #include "words2.h"
 #include "../reword/helpers.h"	//string helpers etc
@@ -247,14 +249,14 @@ bool Words2::xdxfBuildDict(const std::string& dictFile, bool bUpdateDef, bool bX
 void Words2::addWordsToSets()
 {
     int iCount = _vecTarget.size(),
-        iMod = _vecTarget.size() / 100;
+        iDisplayMod = _vecTarget.size() / 100;
 
     std::cout << std::endl << std::unitbuf; // enable automatic flushing
 
 	tWordVect::const_iterator target_it = _vecTarget.begin();
 	while (target_it != _vecTarget.end())
 	{
-	    if (!(iCount-- % iMod))
+	    if (!(iCount-- % iDisplayMod))
             std::cout << "\r" << "Adding words... " << iCount << "       ";
 
 		//make sure its a word length we support (say 3..8)
@@ -294,6 +296,23 @@ bool Words2::filterGameWords()    //const std::string &dictFile, bool bUpdateDef
 
 	return true;
 }
+
+
+bool Words2::prematch() 
+{
+	std::cout << "Calculating prematch lists..." << std::endl;
+
+	for(auto t : _vecTarget)
+	{
+		if (t.length() < TARGET_MIN)
+			continue;
+
+		
+	}
+
+	return true;
+}
+
 
 //Determine a 1,2,3 (easy/med/hard) score for the word passed in.
 //Using the scrabble letter scoring system, each word is ranked and
@@ -335,8 +354,10 @@ int Words2::calcScrabbleSkillLevel(const std::string &word)
         return 0;   //only 6...8 currently scored
 
     //remove digraphs and trigraphs
-    boost::regex re( "(BLE|CH|CK|CI|IGH|ING|OUS|QU|RH|SH|SCH|SC|TH|WH|WR|BB|CC|DD|EE|FF|GG|LL|MM|NN|OO|PP|RR|SS|TT|UU|WW|ZZ)*" );
-    std::string out = boost::regex_replace(word, re, "");
+    std::regex re( R"((BLE|CH|CK|CI|IGH|ING|OUS|QU|RH|SH|SCH|SC|TH|WH|WR|BB|CC|DD|EE|FF|GG|LL|MM|NN|OO|PP|RR|SS|TT|UU|WW|ZZ)*)" );
+    std::string out = std::regex_replace(word, re, "");
+//    boost::regex re( "(BLE|CH|CK|CI|IGH|ING|OUS|QU|RH|SH|SCH|SC|TH|WH|WR|BB|CC|DD|EE|FF|GG|LL|MM|NN|OO|PP|RR|SS|TT|UU|WW|ZZ)*" );
+//    std::string out = boost::regex_replace(word, re, "");
 
     //**English** language Scrabble letter scoring
     const int scores[] = { 1,3,3,2,1,4,2,4,1,8,5,1,3,1,1,3,10,1,1,1,1,4,4,8,4,10 };

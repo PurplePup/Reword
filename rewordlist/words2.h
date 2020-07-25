@@ -28,6 +28,9 @@ public:
 	//build the output dictionary from all loaded words
 	bool filterGameWords();   //const std::string &dictFile = "", bool bUpdateDef = false);
 
+	// iterate over the current dictionary and assign all match words to each 'reword' word 
+	bool prematch();
+	
 	virtual bool load(const std::string &wordFile = "", 		//load a wordlist and exclude
 				unsigned int rndSeed = 0,				//duplicates, too many etc
 				unsigned int startAtWord = 0);
