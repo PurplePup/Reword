@@ -46,6 +46,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include <cassert>
 #include <memory>
+#include <algorithm>
 
 PlayHigh::PlayHigh(GameData &gd)  : _gd(gd)
 {
@@ -97,7 +98,7 @@ void PlayHigh::init(Input *input)
 
     tSharedImage &letters = Resource::image("roundel_letters.png");
 	_title.setWordCenterHoriz(std::string("HISCORE"), letters, (BG_LINE_TOP-letters.get()->height())/2, 2);
-	_title.easeMoveFrom( 0, -(letters.get()->height()*2), 800, -400);   //up to 400ms individual roundel delay
+	_title.easeMoveFrom( 0, -((int)letters.get()->height()*2), 800, -400);   //up to 400ms individual roundel delay
 	_titleW.start(3000, 1000);  //jumble wait/delay
 	_title.setRoundelsId(1);
 
@@ -126,28 +127,28 @@ void PlayHigh::init(Input *input)
 	//set arrow controls (scroll positions)
     {
     t_pSharedSpr p(new Sprite(Resource::image("btn_round_scroll_up.png")));
-    p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2);
+    p->setPos((float)(SCREEN_WIDTH-p->tileW()), (float)(BG_LINE_TOP+2));
     p->_sigEvent2.Connect(this, &PlayHigh::ControlEvent);
     Control c(p, CTRLID_SCROLL_UP, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
     {
     t_pSharedSpr p(new Sprite(Resource::image("btn_round_scroll_down.png")));
-    p->setPos(SCREEN_WIDTH-p->tileW(), BG_LINE_TOP+2+p->tileH()+6);
+    p->setPos((float)(SCREEN_WIDTH-p->tileW()), (float)(BG_LINE_TOP+2+p->tileH()+6));
     p->_sigEvent2.Connect(this, &PlayHigh::ControlEvent);
     Control c(p, CTRLID_SCROLL_DOWN, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
     {
     t_pSharedSpr p(new Sprite(Resource::image("btn_round_scroll_left.png")));
-    p->setPos(SCREEN_WIDTH-(p->tileW()*2)-8, BG_LINE_BOT-p->tileH()-2);
+    p->setPos((float)(SCREEN_WIDTH-(p->tileW()*2)-8), (float)(BG_LINE_BOT-p->tileH()-2));
     p->_sigEvent2.Connect(this, &PlayHigh::ControlEvent);
     Control c(p, CTRLID_SCROLL_LEFT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
     }
     {
     t_pSharedSpr p(new Sprite(Resource::image("btn_round_scroll_right.png")));
-    p->setPos(SCREEN_WIDTH-(p->tileW())-2, BG_LINE_BOT-p->tileH()-2);
+    p->setPos((float)(SCREEN_WIDTH-(p->tileW())-2), (float)(BG_LINE_BOT-p->tileH()-2));
     p->_sigEvent2.Connect(this, &PlayHigh::ControlEvent);
     Control c(p, CTRLID_SCROLL_RIGHT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
@@ -166,7 +167,7 @@ void PlayHigh::init(Input *input)
     //[EXIT] hi score screen buttons
     {
     t_pSharedSpr p(new Sprite(Resource::image("btn_square_exit_small.png")));
-    p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
+    p->setPos(8, (float)(BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2)));
     p->_sigEvent2.Connect(this, &PlayHigh::ControlEvent);
     Control c(p, CTRLID_EXIT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
@@ -176,7 +177,7 @@ void PlayHigh::init(Input *input)
     t_pSharedSpr p(new Sprite(Resource::image("btn_square_next_small.png")));
     int x = _kbd.getBottomPos().x + ((Screen::width() - _kbd.getBottomPos().x) /2);    //(Screen::width() - p->tileW()) / 2; //center
     int y = _kbd.getBottomPos().y;   //BG_LINE_BOT - _yyGap - p->tileH();
-    p->setPos(x, y);
+    p->setPos((float)x, (float)y);
     p->_sigEvent2.Connect(this, &PlayHigh::ControlEvent);
     Control c(p, CTRLID_NEXT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsHigh.add(c);
@@ -244,9 +245,9 @@ void PlayHigh::render(Screen *s)
     if (isEditing())
     {
         _gd._fntClean.put_number(s, xx, yy, _curr.score, "SCORE: %08d", BLUE_COLOUR);
-        xx += _xScoreLen*1.5 + _xxGap;
+        xx += (int)(_xScoreLen*1.5 + _xxGap);
         _gd._fntClean.put_number(s, xx, yy, _curr.words, "WORDS: %04d", BLUE_COLOUR);
-        xx += _xWordsLen*1.5 + _xxGap;
+        xx += (int)(_xWordsLen*1.5 + _xxGap);
         if (_mode > GM_REWORD)  //speed or timetrial show speed
             _gd._fntClean.put_number(s, xx, yy, _curr.fastest, "SPEED: %03ds", BLUE_COLOUR);
 
@@ -482,8 +483,8 @@ void PlayHigh::updateKbdCursor()
         Point pt = _kbd.getCurrSelPt();
 
         //create a cursor around curr kbd letter
-        const int x = pt.x - (( _cursorSpr->tileW() - _kbd.getRoundelW()) / 2);
-        const int y = pt.y - (( _cursorSpr->tileH() - _kbd.getRoundelH()) / 2);
+        const float x = (float)(pt.x - (( _cursorSpr->tileW() - _kbd.getRoundelW()) / 2));
+        const float y = (float)(pt.y - (( _cursorSpr->tileH() - _kbd.getRoundelH()) / 2));
         _cursorSpr->setPos(x, y);
         _cursorSpr->setVisible(true);
     }
@@ -669,7 +670,7 @@ void PlayHigh::prepareBackground()
 	default: break;
 	}
 	modeSurface.setAlphaTransparency(100);
-	int x = - (modeSurface.width() /6);	//slightly off screen
+	int x = -(int)(modeSurface.width() /6);	//slightly off screen
 	int y = ((SCREEN_HEIGHT - modeSurface.height()) / 2) + 2;	//center (+2 for gp2x too high)
     ppg::blit_surface(modeSurface.surface(), nullptr, tmpSurface.surface(), x, y);
 
@@ -702,8 +703,8 @@ void RoundelsKbd::setKbdLetters(tSharedImage &letters, int x, int y, int gap)
 	{
         if (!*it) continue;
 
-        const int xPos = x + (column*((*it)->_spr->tileW()+gap));
-        (*it)->_spr->setPos(xPos, y);
+        const float xPos = (float)(x + (column*((*it)->_spr->tileW()+gap)));
+        (*it)->_spr->setPos(xPos, (float)y);
 
         column++;
         if (tile == 9 || tile == 18)        //break on P(9) or L(18)

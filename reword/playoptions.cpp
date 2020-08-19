@@ -45,7 +45,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "locator.h"
 
 #include <sstream>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 
 PlayOptions::PlayOptions(GameData &gd)  :
@@ -270,11 +270,11 @@ void PlayOptions::setupWordFile()
     _wordFileList.clear();
     _wordFileIdx = 0;
 
-    boost::filesystem::path dir( RES_WORDS );
+    std::filesystem::path dir( RES_WORDS );
 
-    boost::filesystem::directory_iterator end;
+    std::filesystem::directory_iterator end;
     int idx = 0;
-    for (boost::filesystem::directory_iterator pos(dir); pos!=end; ++pos, ++idx)
+    for (std::filesystem::directory_iterator pos(dir); pos!=end; ++pos, ++idx)
     {
         if ( is_regular_file( *pos ) )
         {
@@ -287,7 +287,7 @@ void PlayOptions::setupWordFile()
 #else
             _wordFileList.push_back(pos->path().filename().c_str());
 #endif
-//            std::cout << pos->path().filename() << " : " << boost::filesystem::file_size( pos->path() ) << "\n";
+//            std::cout << pos->path().filename() << " : " << STD::filesystem::file_size( pos->path() ) << "\n";
         }
     }
     if (_wordFileList.empty())

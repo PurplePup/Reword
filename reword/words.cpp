@@ -60,9 +60,9 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <ctime>
 #include <cstdlib>
 #include <iterator>
+#include <random>
 
 #include <string.h>	//for strchr etc
-
 
 
 //using namespace std;
@@ -232,8 +232,16 @@ bool Words::load(const std::string &wordFile, unsigned int rndSeed, unsigned int
 
         //using restartable rnd function to try re-generate same
         //random sequence if given same seed again (for resume games)
-		if (rndSeed) srand(rndSeed);
-		std::random_shuffle(_vecTarget.begin(), _vecTarget.end());
+		if (rndSeed)
+		{
+			std::mt19937 engine1(rndSeed);
+			std::shuffle(_vecTarget.begin(), _vecTarget.end(), engine1);
+		}
+		else
+		{
+			std::random_device rd;
+			std::shuffle(_vecTarget.begin(), _vecTarget.end(), rd);
+		}
 
         if (_bDebug)
         {

@@ -42,7 +42,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <cmath>
 
 
-#define PI 3.14159265
+#define PI 3.14159265f
 
 Easing::Easing() : _prevTicks(0), _pEasingFn(0)
 {
@@ -104,14 +104,14 @@ float Easing::easeOutBounce(Ease e)
 {
 //Where t: time, b: begining position, c: total change in position, d: duration.
 
-    if ((e.t/=e.d) < (1/2.75)) {
-        return e.c*(7.5625*e.t*e.t) + e.b;
-    } else if (e.t < (2/2.75)) {
-        return e.c*(7.5625*(e.t-=(1.5/2.75))*e.t + .75) + e.b;
-    } else if (e.t < (2.5/2.75)) {
-        return e.c*(7.5625*(e.t-=(2.25/2.75))*e.t + .9375) + e.b;
+    if ((e.t/=e.d) < (1/2.75f)) {
+        return e.c* (7.5625f*e.t*e.t) + e.b;
+    } else if (e.t < (2 / 2.75f)) {
+        return e.c* (7.5625f*(e.t-=(1.5f/ 2.75f))*e.t + .75f) + e.b;
+    } else if (e.t < (2.5f/2.75f)) {
+        return e.c* (7.5625f*(e.t-=(2.25f/2.75f))*e.t + .9375f) + e.b;
     } else {
-        return e.c*(7.5625*(e.t-=(2.625/2.75))*e.t + .984375) + e.b;
+        return e.c* (7.5625f*(e.t-=(2.625f/2.75f))*e.t + .984375f) + e.b;
     }
 }
 
@@ -128,17 +128,17 @@ float Easing::easeOutQuart(Ease e)
 
 float Easing::easeOutElastic(Ease e)
 {
-    e.s=1.70158;
+    e.s=1.70158f;
     float p=0;
     float a=e.c;
     if (e.t==0) return e.b;
     if ((e.t/=e.d)==1) return e.b+e.c;
-    if (!p) p=e.d*.3;
+    if (!p) p=e.d*.3f;
     if (a < abs(e.c))
         { a=e.c; e.s=p/4; }
     else
         e.s = p/(2*PI) * asin(e.c/a);
-    return a*pow(2,-10*e.t) * sin( (e.t*e.d-e.s)*(2*PI)/p ) + e.c + e.b;
+    return a*(float)pow(2,-10*e.t) * sin( (e.t*e.d-e.s)*(2*PI)/p ) + e.c + e.b;
 }
 
 

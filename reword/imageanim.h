@@ -39,9 +39,6 @@ public:
 	void setBounds(int inflateBy);
     Rect bounds() const;
 
-    //boost signal/slot events
-    //typedef boost::signal<void (int, int)> EventSignal;
-
     //inline sig/slot code
     typedef Gallant::Signal2<int, int> EventSignal2;
     EventSignal2 _sigEvent2;

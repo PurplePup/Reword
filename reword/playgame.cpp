@@ -139,33 +139,6 @@ PlayGame::~PlayGame()
     delete _play;
 }
 
-
-/*
-#include <boost/signal.hpp>
-    //boost signal/slot events
-    typedef boost::signal<void (int, int)> EventSignal;
-    EventSignal _sigEvent;
-
-_sigEvent(USER_EV_END_ANIMATION, _objectId);
-
-
-#include <boost/bind.hpp>
-//    p->_sigEvent.connect(boost::bind(&PlayOptions::ControlEvent, this, _1, _2));
-//event signal from imageanim indicating end of animation
-void PlayOptions::ControlEvent(int event, int ctrl_id)
-{
-    if (event == USER_EV_END_ANIMATION)
-    {
-//        if (ctrl_id == CTRLID_EXIT)
-//        {
-//            _gd._state = ST_MENU;		//back to menu
-//            _running = false;
-//        }
-    }
-}
-
-*/
-
 void PlayGame::init(Input *input)
 {
 	//fade out any menu music (but only if no game music still playing)

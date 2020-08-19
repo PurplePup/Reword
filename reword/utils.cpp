@@ -154,7 +154,7 @@ void ppg::putPixel(Surface* s, int x, int y, Uint32 colour)
 {
     if (!s->surface()) return;
 	// If colour is NONE - no pixel is ploted
-    if (x >=0 && x < s->width() && y >=0 && y < s->height()) // && c != Colour::NONE)
+    if (x >=0 && x < (int)s->width() && y >=0 && y < (int)s->height()) // && c != Colour::NONE)
     {
 		unsigned short* dst = static_cast<unsigned short*>(s->surface()->pixels);
 		dst[y * s->surface()->pitch/sizeof(unsigned short) + x] = (unsigned short)colour;	//##fudge!!

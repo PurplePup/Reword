@@ -40,7 +40,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include <iostream>
 #include <cerrno>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 
 Score::Score()
@@ -81,7 +81,7 @@ void Score::init()
 //score file name to reflect the wordfile name.
 Uint32 Score::loadUsingWordfileName(const std::string &wordfile)
 {
-    boost::filesystem::path w( wordfile );
+    std::filesystem::path w( wordfile );
 
     std::string scorefile;
 #ifdef PANDORA
@@ -191,29 +191,44 @@ void Score::save(const std::string &scorefile)
 
 	std::cout << "Saving score file: " << _scorefile << std::endl;
 
-	std::ofstream out(_scorefile.c_str(), std::ios::out|std::ifstream::binary);
-	if (out)
+	try
 	{
-        out.put( 0x00 );	//format: 0x00 byte first denotes >= v0.4 score file
-        out.put( 0x02 );	//version: 0x02 denotes 2nd generation format
+		std::ofstream out(_scorefile.c_str(), std::ios::out | std::ifstream::binary);
 
-        int diff;
-        for (diff=0; diff<3; ++diff)	//3 levels easy, med, hard
-            out.write(reinterpret_cast<char*>(&_hiScore[diff]), sizeof(_hiScore[0]));		//Reword
+		if (!out) 
+		{
+			char err[1024] = { 0 };
+#ifdef _WIN32
+			strerror_s(err, errno);
+#else
+			strerror_r(errno, err, 1024);
+#endif
+			throw std::exception(err);
+		}
 
-        //from v0.4, speeder and TimeTrial included in scores
-        for (diff=0; diff<3; ++diff)
-            out.write(reinterpret_cast<char*>(&_hiScoreS6[diff]), sizeof(_hiScoreS6[0]));	//Speeder
-        for (diff=0; diff<3; ++diff)
-            out.write(reinterpret_cast<char*>(&_hiScoreTT[diff]), sizeof(_hiScoreTT[0]));	//TimeTrial
+		if (out)
+		{
+			out.put(0x00);	//format: 0x00 byte first denotes >= v0.4 score file
+			out.put(0x02);	//version: 0x02 denotes 2nd generation format
 
-        //from v0.6, arcade mode
-        for (diff=0; diff<3; ++diff)
-            out.write(reinterpret_cast<char*>(&_hiScoreRA[diff]), sizeof(_hiScoreRA[0]));	//Arcade
+			int diff;
+			for (diff = 0; diff < 3; ++diff)	//3 levels easy, med, hard
+				out.write(reinterpret_cast<char*>(&_hiScore[diff]), sizeof(_hiScore[0]));		//Reword
+
+			//from v0.4, speeder and TimeTrial included in scores
+			for (diff = 0; diff < 3; ++diff)
+				out.write(reinterpret_cast<char*>(&_hiScoreS6[diff]), sizeof(_hiScoreS6[0]));	//Speeder
+			for (diff = 0; diff < 3; ++diff)
+				out.write(reinterpret_cast<char*>(&_hiScoreTT[diff]), sizeof(_hiScoreTT[0]));	//TimeTrial
+
+			//from v0.6, arcade mode
+			for (diff = 0; diff < 3; ++diff)
+				out.write(reinterpret_cast<char*>(&_hiScoreRA[diff]), sizeof(_hiScoreRA[0]));	//Arcade
+		}
 	}
-	else
+	catch (std::exception & e)
 	{
-		std::cerr << "Cannot save score file: " << _scorefile << " - error: " << strerror(errno) << std::endl;
+		std::cerr << "Cannot save score file: " << _scorefile << " - error: " << e.what() << std::endl;
 	}
 }
 
@@ -404,7 +419,7 @@ bool QuickState::quickStateLoad()
 //return true if .quickState.save file exists
 bool QuickState::quickStateExists()
 {
-	return std::ifstream(_quickstatefile.c_str());
+	return std::filesystem::exists(_quickstatefile.c_str());
 }
 
 //delete the quick state save file -once reload has been selected, so user
@@ -414,11 +429,10 @@ void QuickState::quickStateDelete()
 {
     try
     {
-        boost::filesystem::path p(_quickstatefile);
-        boost::filesystem::remove(p);
+        std::filesystem::path p(_quickstatefile);
+        std::filesystem::remove(p);
     }
-//    catch (const boost::filesystem::basic_filesystem_error<boost::filesystem::path> &e)
-    catch (const boost::filesystem::filesystem_error &e)
+    catch (const std::filesystem::filesystem_error &e)
     {
         std::cerr << "Error deleting quick save file " << _quickstatefile << " - " << e.what() << std::endl;
     }

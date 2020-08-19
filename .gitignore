@@ -23,6 +23,7 @@ work/
 data/
 [Dd]ebug/
 [Rr]elease/
+.vs/
 debug-arm
 depend
 depend.bak

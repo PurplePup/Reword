@@ -43,6 +43,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include <cmath>
 #include <cassert>
+#include <algorithm>
 
 ImageAnim::ImageAnim() :
 	//_image(),

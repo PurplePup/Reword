@@ -65,6 +65,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <iterator>
 
 #include "words2.h"
+#include "..\reword\platform.h"
 
 using namespace std;
 

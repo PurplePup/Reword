@@ -42,7 +42,6 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <ios>
 #include <iostream>
 
-//#include <boost/regex.hpp>
 #include <regex>
 
 #include "words2.h"
@@ -355,8 +354,6 @@ int Words2::calcScrabbleSkillLevel(const std::string &word)
     //remove digraphs and trigraphs
     std::regex re( R"((BLE|CH|CK|CI|IGH|ING|OUS|QU|RH|SH|SCH|SC|TH|WH|WR|BB|CC|DD|EE|FF|GG|LL|MM|NN|OO|PP|RR|SS|TT|UU|WW|ZZ)*)" );
     std::string out = std::regex_replace(word, re, "");
-//    boost::regex re( "(BLE|CH|CK|CI|IGH|ING|OUS|QU|RH|SH|SCH|SC|TH|WH|WR|BB|CC|DD|EE|FF|GG|LL|MM|NN|OO|PP|RR|SS|TT|UU|WW|ZZ)*" );
-//    std::string out = boost::regex_replace(word, re, "");
 
     //**English** language Scrabble letter scoring
     const int scores[] = { 1,3,3,2,1,4,2,4,1,8,5,1,3,1,1,3,10,1,1,1,1,4,4,8,4,10 };
