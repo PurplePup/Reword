@@ -43,6 +43,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <iostream>
 
 #include <regex>
+#include <algorithm>
 
 #include "words2.h"
 #include "../reword/helpers.h"	//string helpers etc
@@ -252,33 +253,30 @@ void Words2::addWordsToSets()
 
     std::cout << std::endl << std::unitbuf; // enable automatic flushing
 
-	tWordVect::const_iterator target_it = _vecTarget.begin();
-	while (target_it != _vecTarget.end())
+	for (auto const & target : _vecTarget)
 	{
 	    if (!(iCount-- % iDisplayMod))
             std::cout << "\r" << "Adding words... " << iCount << "       ";
 
 		//make sure its a word length we support (say 3..8)
-		if ((*target_it).length() >= SHORTW_MIN && (*target_it).length() <= TARGET_MAX)
+		if (target.length() >= SHORTW_MIN && target.length() <= TARGET_MAX)
 		{
 			clearCurrentWord();
-			if (checkCurrentWordTarget(*target_it))	//return shorter words in target word
+			if (checkCurrentWordTarget(target))	//finds shorter words in target word
 			{
 				//add to valid words - if within word length size required
-				tWordsInTarget::iterator wordsIn_it = _wordsInTarget.begin();
-				while (wordsIn_it != _wordsInTarget.end())
+				for (auto const & word : _wordsInTarget)
 				{
-					const int wordLen = (*wordsIn_it).first.length();
+					const int wordLen = word.first.length();
 					if (wordLen >= SHORTW_MIN && wordLen <= TARGET_MAX)
 					{
-						_wordSet[wordLen].insert((*wordsIn_it).first);
+						_wordSet[wordLen].insert(word.first);
 					}
-					++wordsIn_it;
 				}
 			}
 		}
-		++target_it;
 	}
+	std::cout << "\r" << "Adding words... done";
 	std::cout << std::endl << std::nounitbuf << std::endl;
 }
 
@@ -296,16 +294,52 @@ bool Words2::filterGameWords()    //const std::string &dictFile, bool bUpdateDef
 	return true;
 }
 
+// Previously findWordsInWordTarget() was called per target word during play, but due to 
+// some platforms limited processing power, we will call it on all target words and output 
+// these found words in the loadable dictionary itself rather than calculate live.
+// new dict line format:
+// TARGET | level { WORD[,WORD,WORD,...] } | description
 bool Words2::prematch() 
 {
 	std::cout << "Calculating prematch lists..." << std::endl;
 
-	for(auto t : _vecTarget)
+	for(auto target : _vecTarget)
 	{
-		if (t.length() < TARGET_MIN)
+		if (target.length() < TARGET_MIN)
 			continue;
+		clearCurrentWord();
+		findWordsInWordTarget(_mapAll, target.c_str());	//side effect - fills _nWords[] & _wordsInTarget
 
-		
+		if (_bDebug)
+			std::cout << "Words in target : " << target << std::endl;
+
+		// copy map of found words into sorted vector of shortest to longest (ascending)
+		std::vector<std::string> found_words;
+		found_words.reserve(_wordsInTarget.size());
+		std::transform(_wordsInTarget.begin(), _wordsInTarget.end(), back_inserter(found_words), 
+			[](std::pair<std::string, int> const& pair) 
+			{ 
+				return pair.first; 
+			});
+		auto proj = [](const std::string& s) { return std::make_tuple(s.size(), std::ref(s)); };
+		std::sort(found_words.begin(), found_words.end(), 
+			[proj](const std::string& s1, const std::string& s2) -> bool
+			{
+				//return (s1.length() < s2.length()) || (s1 < s2);
+				return proj(s1) < proj(s2);
+			});
+		auto wrd = _mapAll.find(target);
+		if (wrd != _mapAll.end())
+		{
+			wrd->second._prematch = found_words;
+		}
+
+		if (_bDebug)
+		{
+			std::copy(found_words.begin(), found_words.end(), std::ostream_iterator< std::string >( std::cout, "," ) );
+			std::cout << std::endl;
+		}
+
 	}
 
 	return true;
@@ -399,21 +433,45 @@ bool Words2::load(const std::string &wordFile, 		//load a wordlist and exclude
 int Words2::saveWordMap(FILE *& fp, tWordMap &wmOrig, tWordSet &wsFilt)
 {
 	int count = 0;
-	for (tWordMap::iterator wrd = wmOrig.begin (); wrd != wmOrig.end (); ++wrd)
+
+	//for (auto& wrd : wmOrig)
+	//{
+	//	if (wsFilt.find(wrd.second._word) != wsFilt.end())
+	//	{
+
+	for (auto const & filt : wsFilt)
 	{
-		if (wsFilt.find((*wrd).second._word) != wsFilt.end())
+		auto w = wmOrig.find(filt);
+		if (w != wmOrig.end())
 		{
+			auto const & wrd = (*w).second;
 			//found dictionary word in filtered set, so save it
-			//build word line "word|level|description"
+			//build word line "word|level{prematch}|description"
+			// e.g. "BAMBOO|0{BOB,BOOB,...}|n. 1 a mainly tropical giant woody grass of the subfamily Bambusidae..."
 			//level may be 0 if not explicitly specified in originally loaded word list file
 			//description may be blank, in which case the pipe (|) divider need not be added
 
             //level only defined in .txt files, not .xdxf, unles -s used to auto scrabble score
-            (*wrd).second._level = (_bAutoSkillUpd)?calcScrabbleSkillLevel((*wrd).second._word):0;
+            const int level = (_bAutoSkillUpd)?calcScrabbleSkillLevel(wrd._word) : wrd._level;
 
-			fprintf(fp, "%s|%d", (*wrd).second._word.c_str(), (*wrd).second._level);
-			if ((*wrd).second._description.length())
-				fprintf(fp, "|%s",(*wrd).second._description.c_str());
+			fprintf(fp, "%s|%d", wrd._word.c_str(), level);
+			
+			if (wrd._prematch.size())
+			{
+				//const char* const delim = ",";
+				//std::ostringstream prematch;
+				//std::copy(wrd._prematch.begin(), wrd._prematch.end(), std::ostream_iterator<std::string>(prematch, delim));
+				//fprintf(fp, "{%s}", prematch.str().c_str());
+				std::string prematch;
+				for (auto & word : wrd._prematch)
+				{
+					if (word != wrd._word)
+						prematch += (prematch.length()?",":"") + word;
+				}
+				fprintf(fp, "{%s}", prematch.c_str());
+			}
+			if (wrd._description.length())
+				fprintf(fp, "|%s",wrd._description.c_str());
 			fprintf(fp, "\n");
 			++count;
 		}
@@ -423,11 +481,12 @@ int Words2::saveWordMap(FILE *& fp, tWordMap &wmOrig, tWordSet &wsFilt)
 
 bool Words2::save(std::string outFile)
 {
-	FILE *fp;
+	FILE *fp = nullptr;
 	if (!outFile.length()) outFile = _wordFile;	//save back out to same file loaded
 
 	int iout=0, itotal=0;
-	if ((fp = fopen(outFile.c_str(), "w+")))  //create output file even if exists
+	const int ret = fopen_s(&fp, outFile.c_str(), "w+"); //create output file even if exists
+	if (ret == 0)
 	{
 		//now save filtered dictionary...
 		if (_bList) std::cout << "Writing..." << outFile <<std::endl;
@@ -462,7 +521,7 @@ bool Words2::save(std::string outFile)
 	}
 	else
 	{
-		std::cout << "Failed to open shortwordlist output file: " << outFile << std::endl;
+		std::cout << "Failed to open '" << outFile << "' shortwordlist output file - err:" << ret << std::endl;
 		return false;
 	}
 	return true;

@@ -501,7 +501,7 @@ void PlayGame::render_play(Screen* s)
     if (_dbg_display)
     {
 
-        _gd._fntClean.put_text(s, 0, SCREEN_HEIGHT - _gd._fntClean.height(), _gd._words.getWord6().c_str(), BLUE_COLOUR);	//##DEBUG## shows first target word
+        _gd._fntClean.put_text(s, 0, SCREEN_HEIGHT - _gd._fntClean.height(), _gd._words.getWordTarget().c_str(), BLUE_COLOUR);	//##DEBUG## shows first target word
 
         _gd._fntClean.put_number(s, 0, SCREEN_HEIGHT-88, _debugTotalLetters, "%d", BLUE_COLOUR);
         _gd._fntClean.put_number(s, 0, SCREEN_HEIGHT-66, _debugNeededAll, "%d", BLUE_COLOUR);

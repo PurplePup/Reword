@@ -265,13 +265,12 @@ bool Words::load(const std::string &wordFile, unsigned int rndSeed, unsigned int
 }
 
 //determine if the letters in wordShort are in wordTarget
-//i.e. do all the chars in short word xyz exist in long word xaybzc
+//i.e. do all the chars in short word 'xyz' exist in long word 'xaybzc'
 //ShortWord can be made up from some or all letters in longWord (without using letters twice)
 bool Words::wordInWord(const char * wordShort, const char * wordTarget)
 {
-	int ilongLen = strlen(wordTarget);
-	int ishortLen = strlen(wordShort);
-
+	const int ilongLen = strlen(wordTarget);
+	const int ishortLen = strlen(wordShort);
 	if (!ilongLen || !ishortLen) return false;	//invalid word
 
 	int il, is;		//longword and shortword counters
@@ -297,23 +296,23 @@ bool Words::wordInWord(const char * wordShort, const char * wordTarget)
 	return found == ishortLen;
 }
 
-//return all the (short word) shortwords that are in (longer word) wordTarget
+//Fill a collection with all the (short word) shortwords that are in (longer word) wordTarget
 //Also updates _nWords[] with count of words of each length, used in checkCurrentwordTarget()
 int Words::findWordsInWordTarget(tWordMap &shortwords, const char *wordTarget)
 {
 	int count = 0;
 	if (_bDebug) std::cout << wordTarget << ": ";
-	for (tWordMap::const_iterator shtwrd = shortwords.begin (); shtwrd != shortwords.end (); ++shtwrd)
+	for (auto shtwrd : shortwords)
 	{
-//		if (strcmp((*shtwrd).second.c_str(), wordTarget) == 0) continue;	//exclude same word?
+//		if (strcmp(shtwrd.second.c_str(), wordTarget) == 0) continue;	//exclude same word?
 
-		if (wordInWord( (*shtwrd).first.c_str(), wordTarget ))
+		if (wordInWord( shtwrd.first.c_str(), wordTarget ))
 		{
 			if (_bDebug) 
-				std::cout << (*shtwrd).first.c_str() << ", ";
+				std::cout << shtwrd.first.c_str() << ", ";
 
-			_wordsInTarget.insert(tWordsInTarget::value_type( (*shtwrd).first.c_str(), false ));	//false = each word not "found" yet
-			_nWords[(*shtwrd).first.length()]++;		//ignore 0,1,2 and start at 3 as min word len is 3
+			_wordsInTarget.insert(tWordsInTarget::value_type( shtwrd.first.c_str(), false ));	//false = each word not "found" yet
+			_nWords[shtwrd.first.length()]++;		//ignore 0,1,2 and start at 3 as min word len is 3
 			count++;
 		}
 	}

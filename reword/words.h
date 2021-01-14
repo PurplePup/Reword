@@ -36,7 +36,7 @@ struct DictWord
 	std::string _word;
 	int			_level;			//1=easy, 2=med, 3=hard (0=undefined/easy)
 	std::string _description;
-	std::vector<std::vector<int> > _prematch;	// a vector, of vectors pointing to matches, for each word length
+	std::vector<std::string> _prematch;	// a vector of strings found
 
 	bool		_personal;		//a personally entered word (not in dict)
 	bool 		_found;
@@ -50,13 +50,7 @@ struct DictWord
 		_word.clear();
 		_level = 0;
 		_description.clear();
-
 		_prematch.clear();
-		// create a vector for each word length, so _prematch[3] contains a 
-		// vect of 3 letter word indexes matched in the current word
-		for (int i = 0; i<TARGET_MAX+1; ++i)
-			_prematch.push_back(std::vector<int>());
-
 		_personal = false;
 		_found = false;
 	};
@@ -134,7 +128,7 @@ public:
 	DictWord getDictForWord(std::string &wrd);
 //	unsigned int wordsInLevel(unsigned int i) { if (i >= DIF_MAX) return 0; else return _nInLevel[i]; };
 
-	std::string getWord6() { return _word._word; };			//curr word
+	std::string getWordTarget() { return _word._word; };		//curr word target
 	int			getWordLevel() { return _word._level; };		//curr word level
 	std::string getWordDesc() { return _word._description; };	//curr word description
 

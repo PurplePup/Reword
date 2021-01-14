@@ -76,7 +76,7 @@ using namespace std;
 #endif
 int main(int argc, char* argv[])
 {
-	bool bList(false), bDebug(false), bForceDef(false), bXdxfDefOnly(false), bAutoSkillUpd(false);
+	bool bList(false), bDebug(false), bForceDef(false), bXdxfDefOnly(false), bAutoSkillUpd(false), bPrematch(false);
 	bool bHelp(true), bHelpForce(false);
 	std::string::size_type pos;
 	tWordSet xdxfFiles;
@@ -120,6 +120,11 @@ int main(int argc, char* argv[])
             bAutoSkillUpd = true;    //update word scrabble skill value on any word list input
             continue;
         }
+		if ("-p" == arg)		// prematch words and add to output 
+		{
+			bPrematch = true;
+			continue;
+		}
 		if ("-o" == arg.substr(0,2))    //e.g. "-oOutputFile.txt"
         {
             outFile = arg.substr(2);
@@ -273,7 +278,10 @@ int main(int argc, char* argv[])
 
 			// discover and prepare for saving, any prematch words
 			// so game doesn't have to find the list of match words on the fly
-			finalWords.prematch();
+			if (bPrematch)
+			{
+				finalWords.prematch();
+			}
 
 			//save it
 			if (finalWords.save(outFile))
@@ -292,7 +300,7 @@ int main(int argc, char* argv[])
 	{
 		std::cout << "Utility (version 0.6) to generate rewordlist.txt for the reword game." << std::endl
 				<< "Useage:" << std::endl
-				<< "rewordlist [words.txt] [words.include] [words.exclude] [dictionary.xdxf|...] [-f] [-l] [-d] [-x]" << std::endl
+				<< "rewordlist [words.txt] [words.include] [words.exclude] [dictionary.xdxf|...] [-f] [-l] [-d] [-x] [-s] [-p] [-o<outputfile>]" << std::endl
 				<< std::endl
 				<< "  Params:  " << std::endl
 				<< "  words.txt is a simple one word per line wordlist, which may include |diff|def " << std::endl
@@ -307,7 +315,9 @@ int main(int argc, char* argv[])
 				<< "  -d to force debug listing (messages) mode" << std::endl
 				<< "  -x to use .xdxf files for definitions only, else used to create .txt words" << std::endl
 				<< "  -s to auto generate scrabble scored words and place into easy/med/hard categories" << std::endl
-				<< std::endl
+				<< "  -p to generate prematched words in the output dictionary" << std::endl
+				<< "  -o to name an output file e.g. -oNewDict.txt" << std::endl
+			<< std::endl
 				<< "e.g." << std::endl
 				<< "If just a xdxf file given, use that to create rewordlist.txt with definitions" << std::endl
 				<< "If just a wordlist txt file given, create just a filtered rewordlist.txt" << std::endl
