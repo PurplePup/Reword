@@ -14,7 +14,8 @@ BIN = $(PROG_NAME)
 
 ## compile
 CXX = g++
-CXXFLAGS = -std=c++11 -c -Wall -ggdb -D_DEBUG -I/usr/include
+CXXFLAGS = -std=c++17 -c -Wall -ggdb -D_DEBUG -I/usr/include
+#CXXFLAGS = -std=c++17 -c -Wall -I/usr/include
 # -std=c++11  -m64
 
 ## link
@@ -46,5 +47,5 @@ cleanobjs:
 	rm -f $(OBJECTS)
 
 clean:
-	rm -f $(BIN) *~ *.o *.bak
-	rm -f ../reword/*.o
+	rm -f -r $(BIN) *~ *.o *.bak
+	rm -f -r ../reword/*.o
