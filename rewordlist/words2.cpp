@@ -321,12 +321,12 @@ bool Words2::prematch()
 			{ 
 				return pair.first; 
 			});
-		auto proj = [](const std::string& s) { return std::make_tuple(s.size(), std::ref(s)); };
+		// Use comparator tuple to test size first then string content
+		auto comp = [](const std::string& s) { return std::make_tuple(s.size(), std::ref(s)); };
 		std::sort(found_words.begin(), found_words.end(), 
-			[proj](const std::string& s1, const std::string& s2) -> bool
+			[comp](const std::string& s1, const std::string& s2) -> bool
 			{
-				//return (s1.length() < s2.length()) || (s1 < s2);
-				return proj(s1) < proj(s2);
+				return comp(s1) < comp(s2);
 			});
 		auto wrd = _mapAll.find(target);
 		if (wrd != _mapAll.end())
