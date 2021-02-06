@@ -41,6 +41,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <fstream>
 #include <ios>
 #include <iostream>
+#include <stdio.h>
 
 #include <regex>
 #include <algorithm>
@@ -481,12 +482,11 @@ int Words2::saveWordMap(FILE *& fp, tWordMap &wmOrig, tWordSet &wsFilt)
 
 bool Words2::save(std::string outFile)
 {
-	FILE *fp = nullptr;
 	if (!outFile.length()) outFile = _wordFile;	//save back out to same file loaded
 
 	int iout=0, itotal=0;
-	const int ret = fopen_s(&fp, outFile.c_str(), "w+"); //create output file even if exists
-	if (ret == 0)
+	FILE *fp = fopen(outFile.c_str(), "w+"); //create output file even if exists
+	if (fp)
 	{
 		//now save filtered dictionary...
 		if (_bList) std::cout << "Writing..." << outFile <<std::endl;
@@ -521,7 +521,7 @@ bool Words2::save(std::string outFile)
 	}
 	else
 	{
-		std::cout << "Failed to open '" << outFile << "' shortwordlist output file - err:" << ret << std::endl;
+		std::cout << "Failed to open '" << outFile << "' shortwordlist output file - err:" << errno << std::endl;
 		return false;
 	}
 	return true;
