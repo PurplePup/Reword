@@ -1,3 +1,3 @@
-#REWORD
+# REWORD
 
 A word guessing game
