@@ -69,11 +69,6 @@ struct DictWord
 		return *this;
 	};
 
-//	bool operator < (const DictWord &rhs)	//for sorting
-//	{
-//		return this->_word < rhs._word;
-//	}
-
 	bool operator () (const DictWord &dw1, const DictWord &dw2) const
 	{
 		return dw1._word < dw2._word;
@@ -85,10 +80,10 @@ struct DictWord
 	}
 };
 
-typedef std::map<std::string, DictWord> tWordMap;	//map of random numbers and the (same length) words available
-typedef std::map<std::string, bool> tWordsInTarget;	//map of words during a level and if it's been found by the player
-typedef std::set<std::string> tWordSet;				//for unique set of words
-typedef std::vector<std::string> tWordVect;
+using tWordMap = std::map<std::string, DictWord, std::less<>>;		//map of random numbers and the (same length) words available
+using tWordsInTarget = std::map<std::string, bool, std::less<>>;	//map of words during a level and if it's been found by the player
+using tWordSet = std::set<std::string, std::less<>>;				//for unique set of words
+using tWordVect = std::vector<std::string>;
 
 
 struct Stats
@@ -110,7 +105,8 @@ class Words
 {
 public:
 	Words();
-	Words(const std::string &wordFile);
+	virtual ~Words() = default;
+	explicit Words(const std::string &wordFile);
 	void setList(bool bOn = true) { _bList = bOn; }
 	void setDebug(bool bOn = true) { _bDebug = bOn; }
 
@@ -118,19 +114,18 @@ public:
 	virtual bool load(const std::string &wordFile = "", 		//load a wordlist and exclude
 				unsigned int rndSeed = 0,				//duplicates, too many etc
 				unsigned int startAtWord = 0);
-	unsigned int wordsLoaded() { return _stats._total; };		//before exclusions, duff words etc
-	unsigned int size() { return (unsigned int)_mapAll.size(); }	//current size
+	unsigned int wordsLoaded() const { return _stats._total; };		//before exclusions, duff words etc
+	unsigned int size() const { return _mapAll.size(); }	//current size
 
 	bool nextWord(std::string &retln, eGameDiff level, eGameMode mode, bool reloadAtEnd=true);
-	const tWordsInTarget getWordsInTarget() { return _wordsInTarget; };
-	int wordsOfLength(unsigned int i) { if (i > TARGET_MAX) return 0; else return _nWords[i]; };
+	tWordsInTarget getWordsInTarget() const { return _wordsInTarget; };
+	int wordsOfLength(unsigned int i) const { if (i > TARGET_MAX) return 0; else return _nWords[i]; };
 	int checkWordsInTarget(std::string &testWord);
 	DictWord getDictForWord(std::string &wrd);
-//	unsigned int wordsInLevel(unsigned int i) { if (i >= DIF_MAX) return 0; else return _nInLevel[i]; };
 
-	std::string getWordTarget() { return _word._word; };		//curr word target
-	int			getWordLevel() { return _word._level; };		//curr word level
-	std::string getWordDesc() { return _word._description; };	//curr word description
+	std::string getWordTarget() const { return _word._word; };		//curr word target
+	int			getWordLevel() const { return _word._level; };		//curr word level
+	std::string getWordDesc() const { return _word._description; };	//curr word description
 
 	Words & operator+=(const Words &w)
 	{
@@ -162,7 +157,7 @@ public:
 		}
 		return *this;
 	}
-	const Words operator+(const Words &other) const
+	Words operator+(const Words &other) const
 	{
 		return Words(*this) += other;	//call += operator overload (as it's already there)
 	}
@@ -193,7 +188,7 @@ public:
 		}
 		return *this;
 	}
-	const Words operator-(const Words &other) const
+	Words operator-(const Words &other) const
 	{
 		return Words(*this) -= other;	//call -= operator overload (as it's already there)
 	}

@@ -19,21 +19,21 @@ class Words2 : public Words
 {
 public:
 	Words2();
-	Words2(const std::string &wordFile);
-	~Words2();
+	explicit Words2(const std::string &wordFile);
+	~Words2() override;
 
 	//Add words from the xdxf dictionary to the internal lists
 	bool xdxfBuildDict(const std::string &dictFile, bool bUpdateDef, bool bXdxfDefOnly);
 
 	//build the output dictionary from all loaded words
-	bool filterGameWords();   //const std::string &dictFile = "", bool bUpdateDef = false);
+	bool filterGameWords();
 
 	// iterate over the current dictionary and assign all match words to each 'reword' word 
 	bool prematch();
 
-	virtual bool load(const std::string &wordFile = "", 		//load a wordlist and exclude
+	bool load(const std::string &wordFile = "", 		//load a wordlist and exclude
 				unsigned int rndSeed = 0,				//duplicates, too many etc
-				unsigned int startAtWord = 0);
+				unsigned int startAtWord = 0) override;
 
 	bool save(std::string outFile);
 
@@ -72,7 +72,7 @@ public:
 		}
 		return *this;
 	}
-	const Words2 operator+(const Words2 &other) const
+	Words2 operator+(const Words2 &other) const
 	{
 		return Words2(*this) += other;	//call += operator overload (as it's already there)
 	}
@@ -85,7 +85,6 @@ public:
 			this->Words::operator-=(w2);	//call Words overload first
 			for (int i = TARGET_MAX; i >= SHORTW_MIN; --i)
 			{
-//				_wordSet[i].erase(w2._wordSet[i].begin(), w2._wordSet[i].end());
 				tWordSet temp;
 				std::set_difference( _wordSet[i].begin(), _wordSet[i].end(),
 									 w2._wordSet[i].begin(),w2._wordSet[i].end(),
@@ -96,15 +95,12 @@ public:
 		}
 		return *this;
 	}
-	const Words2 operator-(const Words2 &other) const
+	Words2 operator-(const Words2 &other) const
 	{
 		return Words2(*this) -= other;	//call -= operator overload (as it's already there)
 	}
 
 	void setAutoSkillUpd(bool bOn = true) { _bAutoSkillUpd = bOn; }
-
-//	int wordSetCount() { int c(0); for(int i=SHORTW_MIN; i<=TARGET_MAX; c+=_wordSet[i++].size()); return c; }
-//	int mapAllCount() { return _mapAll.size(); }
 
 protected:
 
@@ -115,7 +111,9 @@ protected:
 
     int calcScrabbleSkillLevel(const std::string &word);
 	void addWordsToSets();	//add to valid sets (one set per word length)
-	int saveWordMap(FILE *& fp, tWordMap &wmOrig, tWordSet &wsFilt);
+	int saveWordMap(FILE *& fp, tWordMap &wmOrig, const tWordSet &wsFilt);
+
+private:
 
 	TiXmlDocument * _doc;
 	int		_countXdxfWords;
