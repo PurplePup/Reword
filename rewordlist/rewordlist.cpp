@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
 	tWordSet txtExclude;
 	const std::string default_outfile("rewordlist.txt");
 	const std::string default_outfile_rw2("rewordlist.rw2");
-	std::string outFile(default_output);  //default
+	std::string outFile(default_outfile);
 
 	//v. simple loop to load cmd line args - in any order,
 	//but must be seperately 'dashed' ie. -l -f not -lf
@@ -303,7 +303,7 @@ int main(int argc, char* argv[])
 			}
 
 			//save it
-			if (finalWords.save(outFile, bPrematch ? Words2::saveFormat::eReword2 : Words2::saveFormat::eReword))
+			if (finalWords.save(outFile))
 			{
 				std::cout << std::endl << "Created '" << outFile << "'";
 				//std::copy( txtFiles.begin(), txtFiles.end(), std::ostream_iterator< std::string >( std::cout, "," ) );

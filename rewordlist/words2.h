@@ -115,15 +115,15 @@ protected:
 
 private:
 
-	TiXmlDocument * _doc;
-	int		_countXdxfWords;
-	int		_countXdxfSkipped;
-	int		_countXdxfMatched;
-	int		_countXdxfMissing;
+	TiXmlDocument * _doc = nullptr;
+	int		_countXdxfWords = 0;
+	int		_countXdxfSkipped = 0;
+	int		_countXdxfMatched = 0;
+	int		_countXdxfMissing = 0;
 
 	tWordSet _wordSet[TARGET_MAX+1];	//use 1..n for actual word length (as index) during rewordlist.txt build
 
-    bool    _bAutoSkillUpd;             //update the word skill level with any non 0 value from any list
+    bool    _bAutoSkillUpd = false;     //update the word skill level with any non 0 value from any list
 };
 
 #endif //_WORDS2_H

@@ -51,12 +51,12 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "../reword/helpers.h"	//string helpers etc
 
 
-Words2::Words2() : _doc(0), _bAutoSkillUpd(false)
+Words2::Words2()
 {
 	_countXdxfWords = _countXdxfSkipped = _countXdxfMatched = _countXdxfMissing = 0;
 }
 
-Words2::Words2(const std::string& wordFile) : _doc(0), _bAutoSkillUpd(false)
+Words2::Words2(const std::string& wordFile)
 {
 	load(wordFile);	//calls reset() etc
 }
@@ -471,7 +471,7 @@ int Words2::saveWordMap(FILE *& fp, tWordMap &wmOrig, const tWordSet &wsFilt)
 	return count;
 }
 
-bool Words2::save(std::string outFile, saveFormat format)
+bool Words2::save(std::string outFile)
 {
 	if (!outFile.length()) outFile = _wordFile;	//save back out to same file loaded
 
@@ -487,7 +487,7 @@ bool Words2::save(std::string outFile, saveFormat format)
 		//with full description and level value.
 		for (int i = TARGET_MAX; i >= SHORTW_MIN; --i)
 		{
-			iout = saveWordMap(format, fp, _mapAll, _wordSet[i]);
+			iout = saveWordMap(fp, _mapAll, _wordSet[i]);
 			itotal += iout;
 			if (_bList) std::cout << "Saved: " << iout << " " << i << " letter filtered words " << std::endl;
 		}
