@@ -34,8 +34,8 @@ public:
 	virtual bool load(const std::string &wordFile = "", 		//load a wordlist and exclude
 				unsigned int rndSeed = 0,				//duplicates, too many etc
 				unsigned int startAtWord = 0);
-
-	bool save(std::string outFile);
+	enum class saveFormat { eReword, eReword2 };
+	bool save(std::string outFile, saveFormat format);
 
 	Words2 & operator = (const Words2 &w2)
 	{
@@ -72,7 +72,7 @@ public:
 		}
 		return *this;
 	}
-	const Words2 operator+(const Words2 &other) const
+	Words2 operator+(const Words2 &other) const
 	{
 		return Words2(*this) += other;	//call += operator overload (as it's already there)
 	}
@@ -85,7 +85,6 @@ public:
 			this->Words::operator-=(w2);	//call Words overload first
 			for (int i = TARGET_MAX; i >= SHORTW_MIN; --i)
 			{
-//				_wordSet[i].erase(w2._wordSet[i].begin(), w2._wordSet[i].end());
 				tWordSet temp;
 				std::set_difference( _wordSet[i].begin(), _wordSet[i].end(),
 									 w2._wordSet[i].begin(),w2._wordSet[i].end(),
@@ -103,9 +102,6 @@ public:
 
 	void setAutoSkillUpd(bool bOn = true) { _bAutoSkillUpd = bOn; }
 
-//	int wordSetCount() { int c(0); for(int i=SHORTW_MIN; i<=TARGET_MAX; c+=_wordSet[i++].size()); return c; }
-//	int mapAllCount() { return _mapAll.size(); }
-
 protected:
 
 	bool 			xdxfOpenDict(const std::string &dictFile);	//open generic xml file
@@ -115,7 +111,7 @@ protected:
 
     int calcScrabbleSkillLevel(const std::string &word);
 	void addWordsToSets();	//add to valid sets (one set per word length)
-	int saveWordMap(FILE *& fp, tWordMap &wmOrig, tWordSet &wsFilt);
+	int saveWordMap(saveFormat format, FILE *& fp, tWordMap &wmOrig, const tWordSet &wsFilt);
 
 	TiXmlDocument * _doc;
 	int		_countXdxfWords;

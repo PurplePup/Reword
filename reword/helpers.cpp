@@ -39,9 +39,6 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <cstring> 		//for strcasecmp/stricmp etc
 #include <vector>
 
-//#include <iostream>
-//#include <cerrno>
-
 namespace pptxt
 {
 
@@ -71,12 +68,14 @@ void trim(std::string &s, const std::string &tokens)
 	trimRight(s, tokens);
 }
 
-//strip any non alpha (A-Z) letters from the string passed in
+//strip any non alpha (A-Za-z) letters from the string passed in
 void makeAlpha(std::string &s)
 {
 	std::stringstream sOut;
-	for (int i=0; i<(int)s.length(); ++i)
-		if (isalpha(s[i])) sOut << s[i];
+	for (auto c : s)
+	{
+		if (isalpha(c)) sOut << c;
+	}
 	s = sOut.str();
 }
 
@@ -102,15 +101,15 @@ void buildTextPage(std::string &inStr,unsigned int nCharsPerLine, std::vector<st
 	//split string up into lines displayable on screen...
 	unsigned int start = 0, lastBreak = 0, curr = 0;
 	std::string line;
-	while (1)
+	while (true)
 	{
-		if (curr-start > nCharsPerLine || curr == (unsigned int)inStr.length()-1  || '\n' == inStr[curr])
+		if (curr-start > nCharsPerLine || curr == inStr.length()-1  || '\n' == inStr[curr])
 		{
 			//if no break found, just copy up to the MAX chars and cut off
 			if (lastBreak == start)	lastBreak = start+nCharsPerLine;
 			//if we are at end of string, make sure its all added
-			if (curr == (unsigned int)inStr.length()-1)
-				lastBreak = (unsigned int)inStr.length();
+			if (curr == inStr.length()-1)
+				lastBreak = inStr.length();
 			if ('\n' == inStr[curr])
 				lastBreak = curr;
 
@@ -122,13 +121,13 @@ void buildTextPage(std::string &inStr,unsigned int nCharsPerLine, std::vector<st
 		//find next break
 		if (' ' == inStr[curr] || '\n' == inStr[curr]) lastBreak = curr;
 		//are we completely done?
-		if (++curr >= (unsigned int)inStr.length()) break;
+		if (++curr >= inStr.length()) break;
 	}
 }
 
+//split a config file type entry "key=value" into its "key"/"value" parts
 bool splitKeyValuePair(const std::string &line, std::string &key, std::string &value)
 {
-	//split a config file type entry "key=value" into its "key"/"value" parts
 	std::string::size_type pos = line.find("=");
 	if (pos != std::string::npos)
 	{

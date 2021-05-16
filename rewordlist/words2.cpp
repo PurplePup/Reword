@@ -55,7 +55,7 @@ Words2::Words2() : _doc(0), _bAutoSkillUpd(false)
 	_countXdxfWords = _countXdxfSkipped = _countXdxfMatched = _countXdxfMissing = 0;
 }
 
-Words2::Words2(const std::string &wordFile) : _doc(0), _bAutoSkillUpd(false)
+Words2::Words2(const std::string& wordFile) : _doc(0), _bAutoSkillUpd(false)
 {
 	load(wordFile);	//calls reset() etc
 }
@@ -65,7 +65,7 @@ Words2::~Words2()
 	xdxfCloseDict();
 }
 
-bool Words2::xdxfOpenDict(const std::string &dictFile)
+bool Words2::xdxfOpenDict(const std::string& dictFile)
 {
 	if (!dictFile.length()) return false;
 
@@ -91,7 +91,7 @@ TiXmlElement* Words2::xdxfFirstWord()
 {
 	if (!_doc) return 0;
 
-	TiXmlElement *root = _doc->FirstChildElement("xdxf");
+	TiXmlElement* root = _doc->FirstChildElement("xdxf");
 	if (root)
 	{
 		return root->FirstChildElement("ar");
@@ -106,18 +106,18 @@ TiXmlElement* Words2::xdxfFirstWord()
 //definition can be split into several blocks, with nodes embedded with the text.
 //Not the way I'd define a dictionary schema, but hey, its free and comprehensive
 //so I can't really complain.
-TiXmlElement* Words2::xdxfNextWord(TiXmlElement* ar, std::string &word, std::string &def)
+TiXmlElement* Words2::xdxfNextWord(TiXmlElement* ar, std::string& word, std::string& def)
 {
 	if (!_doc) return 0;
 
-	TiXmlElement *tmpElement;
-	TiXmlText *tmpText;
+	TiXmlElement* tmpElement;
+	TiXmlText* tmpText;
 
-	TiXmlNode *child = 0;
-	for( child = ar->FirstChild(); child; child = child->NextSibling() )
+	TiXmlNode* child = 0;
+	for (child = ar->FirstChild(); child; child = child->NextSibling())
 	{
-//		std::string text = child->Value();
-//		std::cout << "<k>" << text.c_str() << "</k> : " << std::endl;
+		//		std::string text = child->Value();
+		//		std::cout << "<k>" << text.c_str() << "</k> : " << std::endl;
 
 		if (child->Type() == TiXmlNode::ELEMENT)
 		{
@@ -141,7 +141,7 @@ TiXmlElement* Words2::xdxfNextWord(TiXmlElement* ar, std::string &word, std::str
 			//where the "abbacy " part is not required for the game,
 			//as it's already shown so try and remove it.
 			std::string::size_type pos = def.find_first_of(" ");
-			std::string prefix = def.substr(0,pos);	//may contain other chars, if so those words will stay
+			std::string prefix = def.substr(0, pos);	//may contain other chars, if so those words will stay
 			pptxt::makeUpper(prefix);
 			if (word == prefix)
 				def = def.substr(pos);
@@ -151,7 +151,7 @@ TiXmlElement* Words2::xdxfNextWord(TiXmlElement* ar, std::string &word, std::str
 				def.erase(MAX_REWORD_DESCRIPTION);
 				def += "...";	//indicate it was cut short
 			}
-//			std::cout << word.c_str() << " - def: " << tmpstr << std::endl;
+			//			std::cout << word.c_str() << " - def: " << tmpstr << std::endl;
 
 			break;	//out of for child loop as we now want next <ar> word and its def
 		}
@@ -172,14 +172,14 @@ bool Words2::xdxfBuildDict(const std::string& dictFile, bool bUpdateDef, bool bX
 	{
 		//first, load all words into memory
 
-        long lDefsUpdated(0);
+		long lDefsUpdated(0);
 		tWordSet dictSet;	//to remove duplicates... discarded after load()
 		std::pair<tWordSet::const_iterator, bool> dictPair;
 		DictWord dictWord;
 
 		std::string word;
 		std::string def;
-		TiXmlElement *ar = xdxfFirstWord();
+		TiXmlElement* ar = xdxfFirstWord();
 		while (ar)
 		{
 			if ((ar = xdxfNextWord(ar, word, def)))
@@ -188,21 +188,21 @@ bool Words2::xdxfBuildDict(const std::string& dictFile, bool bUpdateDef, bool bX
 				pptxt::makeAlpha(word);			//strip any non a-z chars
 				pptxt::makeUpper(word);			//force to UPPER case
 
-                //if we're only updating existing words, with definitions from the xdxf
-                //dictionary, don't add words just find them and poss update the definition.
-                if (bXdxfDefOnly)
-                {
-                    tWordMap::iterator it = _mapAll.find(word);
-                    if (it != _mapAll.end())    //found?
-                    {
-                        if (bUpdateDef || it->second._description.empty())
-                        {
-                            it->second._description = def;
-                            ++lDefsUpdated;
-                        }
-                    }
-                    continue;
-                }
+				//if we're only updating existing words, with definitions from the xdxf
+				//dictionary, don't add words just find them and poss update the definition.
+				if (bXdxfDefOnly)
+				{
+					tWordMap::iterator it = _mapAll.find(word);
+					if (it != _mapAll.end())    //found?
+					{
+						if (bUpdateDef || it->second._description.empty())
+						{
+							it->second._description = def;
+							++lDefsUpdated;
+						}
+					}
+					continue;
+				}
 
 				if (rejectWord(word))
 				{
@@ -225,20 +225,20 @@ bool Words2::xdxfBuildDict(const std::string& dictFile, bool bUpdateDef, bool bX
 
 				dictWord._word = word;
 				dictWord._description = def;
-                dictWord._level = 0;    //level only defined in .txt files, not .xdxf
+				dictWord._level = 0;    //level only defined in .txt files, not .xdxf
 
 				_mapAll[word] = dictWord;			//so insert/amend it in the ALL word map
 				if (!bExists && (word.length() >= TARGET_MIN && word.length() <= TARGET_MAX))
-                {
-                    if (_bDebug) std::cout << "DEBUG: Adding " << word.c_str() << " : def = " << def.c_str() << std::endl;
-                    _vecTarget.push_back(word);		//so also add to valid target word vector used for nextWord()
-                }
+				{
+					if (_bDebug) std::cout << "DEBUG: Adding " << word.c_str() << " : def = " << def.c_str() << std::endl;
+					_vecTarget.push_back(word);		//so also add to valid target word vector used for nextWord()
+				}
 			}
 		}
 
 		if (bXdxfDefOnly)
 		{
-            std::cout << "Updated " << lDefsUpdated << " words from Xdxf file " << dictFile << std::endl;
+			std::cout << "Updated " << lDefsUpdated << " words from Xdxf file " << dictFile << std::endl;
 		}
 
 		return true;
@@ -249,15 +249,15 @@ bool Words2::xdxfBuildDict(const std::string& dictFile, bool bUpdateDef, bool bX
 //build the word sets from the full list using the target list as the source
 void Words2::addWordsToSets()
 {
-    int iCount = _vecTarget.size(),
-        iDisplayMod = _vecTarget.size() / 100;
+	int iCount = _vecTarget.size(),
+		iDisplayMod = _vecTarget.size() / 100;
 
-    std::cout << std::endl << std::unitbuf; // enable automatic flushing
+	std::cout << std::endl << std::unitbuf; // enable automatic flushing
 
-	for (auto const & target : _vecTarget)
+	for (auto const& target : _vecTarget)
 	{
-	    if (!(iCount-- % iDisplayMod))
-            std::cout << "\r" << "Adding words... " << iCount << "       ";
+		if (!(iCount-- % iDisplayMod))
+			std::cout << "\r" << "Adding words... " << iCount << "       ";
 
 		//make sure its a word length we support (say 3..8)
 		if (target.length() >= SHORTW_MIN && target.length() <= TARGET_MAX)
@@ -266,7 +266,7 @@ void Words2::addWordsToSets()
 			if (checkCurrentWordTarget(target))	//finds shorter words in target word
 			{
 				//add to valid words - if within word length size required
-				for (auto const & word : _wordsInTarget)
+				for (auto const& word : _wordsInTarget)
 				{
 					const int wordLen = word.first.length();
 					if (wordLen >= SHORTW_MIN && wordLen <= TARGET_MAX)
@@ -299,12 +299,12 @@ bool Words2::filterGameWords()    //const std::string &dictFile, bool bUpdateDef
 // some platforms limited processing power, we will call it on all target words and output 
 // these found words in the loadable dictionary itself rather than calculate live.
 // new dict line format:
-// TARGET | level { WORD[,WORD,WORD,...] } | description
-bool Words2::prematch() 
+// TARGET | level | WORD[,WORD,WORD,...] | description
+bool Words2::prematch()
 {
 	std::cout << "Calculating prematch lists..." << std::endl;
 
-	for(auto target : _vecTarget)
+	for (auto target : _vecTarget)
 	{
 		if (target.length() < TARGET_MIN)
 			continue;
@@ -317,13 +317,13 @@ bool Words2::prematch()
 		// copy map of found words into sorted vector of shortest to longest (ascending)
 		std::vector<std::string> found_words;
 		found_words.reserve(_wordsInTarget.size());
-		std::transform(_wordsInTarget.begin(), _wordsInTarget.end(), back_inserter(found_words), 
-			[](std::pair<std::string, int> const& pair) 
-			{ 
-				return pair.first; 
+		std::transform(_wordsInTarget.begin(), _wordsInTarget.end(), back_inserter(found_words),
+			[](std::pair<std::string, int> const& pair)
+			{
+				return pair.first;
 			});
 		auto proj = [](const std::string& s) { return std::make_tuple(s.size(), std::ref(s)); };
-		std::sort(found_words.begin(), found_words.end(), 
+		std::sort(found_words.begin(), found_words.end(),
 			[proj](const std::string& s1, const std::string& s2) -> bool
 			{
 				//return (s1.length() < s2.length()) || (s1 < s2);
@@ -337,7 +337,7 @@ bool Words2::prematch()
 
 		if (_bDebug)
 		{
-			std::copy(found_words.begin(), found_words.end(), std::ostream_iterator< std::string >( std::cout, "," ) );
+			std::copy(found_words.begin(), found_words.end(), std::ostream_iterator< std::string >(std::cout, ","));
 			std::cout << std::endl;
 		}
 
@@ -355,14 +355,14 @@ bool Words2::prematch()
 /*
 English-language editions of Scrabble contain 100 letter tiles, in the following distribution:
 
-    2 blank tiles (scoring 0 points)
-    1 point: E ×12, A ×9, I ×9, O ×8, N ×6, R ×6, T ×6, L ×4, S ×4, U ×4
-    2 points: D ×4, G ×3
-    3 points: B ×2, C ×2, M ×2, P ×2
-    4 points: F ×2, H ×2, V ×2, W ×2, Y ×2
-    5 points: K ×1
-    8 points: J ×1, X ×1
-    10 points: Q ×1, Z ×1
+	2 blank tiles (scoring 0 points)
+	1 point: E ×12, A ×9, I ×9, O ×8, N ×6, R ×6, T ×6, L ×4, S ×4, U ×4
+	2 points: D ×4, G ×3
+	3 points: B ×2, C ×2, M ×2, P ×2
+	4 points: F ×2, H ×2, V ×2, W ×2, Y ×2
+	5 points: K ×1
+	8 points: J ×1, X ×1
+	10 points: Q ×1, Z ×1
 
 
 Digraph and Trigraph words to remove and retain stem word:
@@ -381,98 +381,89 @@ EE, OO, NN, SS, ...    any double letter ?
 */
 #define SCORE_EASY_THRESHOLD    7
 #define SCORE_MED_THRESHOLD     12
-int Words2::calcScrabbleSkillLevel(const std::string &word)
+int Words2::calcScrabbleSkillLevel(const std::string& word)
 {
-    if (word.length() < TARGET_MIN || word.length() > TARGET_MAX)
-        return 0;   //only 6...8 currently scored
+	if (word.length() < TARGET_MIN || word.length() > TARGET_MAX)
+		return 0;   //only 6...8 currently scored
 
-    //remove digraphs and trigraphs
-    std::regex re( R"((BLE|CH|CK|CI|IGH|ING|OUS|QU|RH|SH|SCH|SC|TH|WH|WR|BB|CC|DD|EE|FF|GG|LL|MM|NN|OO|PP|RR|SS|TT|UU|WW|ZZ)*)" );
-    std::string out = std::regex_replace(word, re, "");
+	//remove digraphs and trigraphs
+	std::regex re(R"((BLE|CH|CK|CI|IGH|ING|OUS|QU|RH|SH|SCH|SC|TH|WH|WR|BB|CC|DD|EE|FF|GG|LL|MM|NN|OO|PP|RR|SS|TT|UU|WW|ZZ)*)");
+	std::string out = std::regex_replace(word, re, "");
 
-    //**English** language Scrabble letter scoring
-    const int scores[] = { 1,3,3,2,1,4,2,4,1,8,5,1,3,1,1,3,10,1,1,1,1,4,4,8,4,10 };
-    //count up the letter score
-    int iTotal(0);
-    for (int i=0; i<(int)out.length(); ++i) iTotal+=scores[out[i]-65];   //A-Z
-    //gives a score between 6 (smalest re-word of all 1's) and 80 (largest 8 letter re-word of all 10's)
+	//**English** language Scrabble letter scoring
+	const int scores[] = { 1,3,3,2,1,4,2,4,1,8,5,1,3,1,1,3,10,1,1,1,1,4,4,8,4,10 };
+	//count up the letter score
+	int iTotal(0);
+	for (int i = 0; i < (int)out.length(); ++i) iTotal += scores[out[i] - 65];   //A-Z
+	//gives a score between 6 (smalest re-word of all 1's) and 80 (largest 8 letter re-word of all 10's)
 
-    //need to fine tune the distribution and therfore thresholds
-    int score = (iTotal < SCORE_EASY_THRESHOLD)?1:(iTotal < SCORE_MED_THRESHOLD)?2:3;
-    _stats._countScore[iTotal]++;
-    _stats._countLevels[score-1]++;
+	//need to fine tune the distribution and therfore thresholds
+	int score = (iTotal < SCORE_EASY_THRESHOLD) ? 1 : (iTotal < SCORE_MED_THRESHOLD) ? 2 : 3;
+	_stats._countScore[iTotal]++;
+	_stats._countLevels[score - 1]++;
 
-    if (_bDebug)
-        std::cout << "Scrabble: '" << word << "' -> '" << out << "' score : " << iTotal << " = " << score << std::endl;
+	if (_bDebug)
+		std::cout << "Scrabble: '" << word << "' -> '" << out << "' score : " << iTotal << " = " << score << std::endl;
 
-    return score;
+	return score;
 }
 
 
 //load the file using the base class, then check if wee need to generate scrabble type skill
 //level word weighting to work out automatic easy/med/hard difficulty settings for the words
 //loaded.
-bool Words2::load(const std::string &wordFile, 		//load a wordlist and exclude
-				unsigned int rndSeed,		        //duplicates, too many etc
-				unsigned int startAtWord)
+bool Words2::load(const std::string& wordFile, 		//load a wordlist and exclude
+	unsigned int rndSeed,		        //duplicates, too many etc
+	unsigned int startAtWord)
 {
-    const bool bOk = Words::load(wordFile, rndSeed, startAtWord);
-    if (bOk && _bAutoSkillUpd)
-    {
-        std::cout << "Auto skill difficulty using Scrabble letter values ... " << std::endl;
-        for (tWordMap::iterator wrd = _mapAll.begin (); wrd != _mapAll.end (); ++wrd)
-        {
-            (*wrd).second._level = calcScrabbleSkillLevel((*wrd).first);
-        }
-    }
-    return bOk;
+	const bool bOk = Words::load(wordFile, rndSeed, startAtWord);
+	if (bOk && _bAutoSkillUpd)
+	{
+		std::cout << "Auto skill difficulty using Scrabble letter values ... " << std::endl;
+		for (tWordMap::iterator wrd = _mapAll.begin(); wrd != _mapAll.end(); ++wrd)
+		{
+			(*wrd).second._level = calcScrabbleSkillLevel((*wrd).first);
+		}
+	}
+	return bOk;
 }
 
 //output the actual word list to file
 //The wordMap is the original list and the wordSet is the filtered list that
 //is to be output. Called from save() for each set of same length words.
-int Words2::saveWordMap(FILE *& fp, tWordMap &wmOrig, tWordSet &wsFilt)
+int Words2::saveWordMap(saveFormat format, FILE*& fp, tWordMap& wmOrig, const tWordSet& wsFilt)
 {
 	int count = 0;
 
-	//for (auto& wrd : wmOrig)
-	//{
-	//	if (wsFilt.find(wrd.second._word) != wsFilt.end())
-	//	{
-
-	for (auto const & filt : wsFilt)
+	for (auto const& filt : wsFilt)
 	{
 		auto w = wmOrig.find(filt);
 		if (w != wmOrig.end())
 		{
-			auto const & wrd = (*w).second;
 			//found dictionary word in filtered set, so save it
 			//build word line "word|level{prematch}|description"
-			// e.g. "BAMBOO|0{BOB,BOOB,...}|n. 1 a mainly tropical giant woody grass of the subfamily Bambusidae..."
+			// e.g. "BAMBOO|0|BOB,BOOB,...|n. 1 a mainly tropical giant woody grass of the subfamily Bambusidae..."
 			//level may be 0 if not explicitly specified in originally loaded word list file
 			//description may be blank, in which case the pipe (|) divider need not be added
 
-            //level only defined in .txt files, not .xdxf, unles -s used to auto scrabble score
-            const int level = (_bAutoSkillUpd)?calcScrabbleSkillLevel(wrd._word) : wrd._level;
+			auto const& wrd = (*w).second;
+			//level only defined in .txt files, not .xdxf, unless -s used to auto scrabble score
+			const int level = (_bAutoSkillUpd) ? calcScrabbleSkillLevel(wrd._word) : wrd._level;
 
 			fprintf(fp, "%s|%d", wrd._word.c_str(), level);
-			
-			if (wrd._prematch.size())
+
+			if (wrd._prematch.size() && format == saveFormat::eReword2)
 			{
-				//const char* const delim = ",";
-				//std::ostringstream prematch;
-				//std::copy(wrd._prematch.begin(), wrd._prematch.end(), std::ostream_iterator<std::string>(prematch, delim));
-				//fprintf(fp, "{%s}", prematch.str().c_str());
 				std::string prematch;
-				for (auto & word : wrd._prematch)
+				for (auto& word : wrd._prematch)
 				{
 					if (word != wrd._word)
-						prematch += (prematch.length()?",":"") + word;
+						prematch += (prematch.length() ? "," : "") + word;
 				}
-				fprintf(fp, "{%s}", prematch.c_str());
+				fprintf(fp, "|%s", prematch.c_str());
 			}
 			if (wrd._description.length())
-				fprintf(fp, "|%s",wrd._description.c_str());
+				fprintf(fp, "|%s", wrd._description.c_str());
 			fprintf(fp, "\n");
 			++count;
 		}
@@ -480,22 +471,22 @@ int Words2::saveWordMap(FILE *& fp, tWordMap &wmOrig, tWordSet &wsFilt)
 	return count;
 }
 
-bool Words2::save(std::string outFile)
+bool Words2::save(std::string outFile, saveFormat format)
 {
 	if (!outFile.length()) outFile = _wordFile;	//save back out to same file loaded
 
-	int iout=0, itotal=0;
-	FILE *fp = fopen(outFile.c_str(), "w+"); //create output file even if exists
+	int iout = 0, itotal = 0;
+	FILE* fp = fopen(outFile.c_str(), "w+"); //create output file even if exists
 	if (fp)
 	{
 		//now save filtered dictionary...
-		if (_bList) std::cout << "Writing..." << outFile <<std::endl;
+		if (_bList) std::cout << "Writing..." << outFile << std::endl;
 
 		//loop through each word set and use _mapAll to output N.. 6.. 5.. 4.. 3.
 		//with full description and level value.
 		for (int i = TARGET_MAX; i >= SHORTW_MIN; --i)
 		{
-			iout = saveWordMap(fp, _mapAll, _wordSet[i]);
+			iout = saveWordMap(format, fp, _mapAll, _wordSet[i]);
 			itotal += iout;
 			if (_bList) std::cout << "Saved: " << iout << " " << i << " letter filtered words " << std::endl;
 		}
@@ -504,20 +495,20 @@ bool Words2::save(std::string outFile)
 		std::cout << std::endl << "Saved: " << itotal << " total filtered words " << std::endl;
 		std::cout << std::endl << "Rejected: " << _stats._ignored << " total filtered words " << std::endl;
 
-        if (_bAutoSkillUpd)
-        {
-            std::cout << "Auto-skill breakdown:" << std::endl;
-            for (unsigned int as=0; as<(sizeof(_stats._countScore)/sizeof(int)); ++as)
-            {
-                if (_stats._countScore[as])
-                    std::cout << "Score: " << as << " has " << _stats._countScore[as] << " words." << std::endl;
+		if (_bAutoSkillUpd)
+		{
+			std::cout << "Auto-skill breakdown:" << std::endl;
+			for (unsigned int as = 0; as < (sizeof(_stats._countScore) / sizeof(int)); ++as)
+			{
+				if (_stats._countScore[as])
+					std::cout << "Score: " << as << " has " << _stats._countScore[as] << " words." << std::endl;
 
-            }
-            std::cout << std::endl;
-            std::cout << "Level Easy: " << _stats._countLevels[0] << " words, threshold is " << SCORE_EASY_THRESHOLD << std::endl;
-            std::cout << "Level Med : " << _stats._countLevels[1] << " words, threshold is " << SCORE_MED_THRESHOLD << std::endl;
-            std::cout << "Level Hard: " << _stats._countLevels[2] << " words." << std::endl;
-        }
+			}
+			std::cout << std::endl;
+			std::cout << "Level Easy: " << _stats._countLevels[0] << " words, threshold is " << SCORE_EASY_THRESHOLD << std::endl;
+			std::cout << "Level Med : " << _stats._countLevels[1] << " words, threshold is " << SCORE_MED_THRESHOLD << std::endl;
+			std::cout << "Level Hard: " << _stats._countLevels[2] << " words." << std::endl;
+		}
 	}
 	else
 	{
