@@ -45,6 +45,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include <regex>
 #include <algorithm>
+#include <array>
 
 #include "words2.h"
 #include "../reword/helpers.h"	//string helpers etc
@@ -300,7 +301,7 @@ bool Words2::filterGameWords()    //const std::string &dictFile, bool bUpdateDef
 // these found words in the loadable dictionary itself rather than calculate live.
 // new dict line format:
 // TARGET | level | WORD[,WORD,WORD,...] | description
-bool Words2::prematch()
+bool Words2::prematch() 
 {
 	std::cout << "Calculating prematch lists..." << std::endl;
 
@@ -322,12 +323,12 @@ bool Words2::prematch()
 			{
 				return pair.first;
 			});
-		auto proj = [](const std::string& s) { return std::make_tuple(s.size(), std::ref(s)); };
-		std::sort(found_words.begin(), found_words.end(),
-			[proj](const std::string& s1, const std::string& s2) -> bool
+		// Use comparator tuple to test size first then string content
+		auto comp = [](const std::string& s) { return std::make_tuple(s.size(), std::ref(s)); };
+		std::sort(found_words.begin(), found_words.end(), 
+			[comp](const std::string& s1, const std::string& s2) -> bool
 			{
-				//return (s1.length() < s2.length()) || (s1 < s2);
-				return proj(s1) < proj(s2);
+				return comp(s1) < comp(s2);
 			});
 		auto wrd = _mapAll.find(target);
 		if (wrd != _mapAll.end())
@@ -340,7 +341,6 @@ bool Words2::prematch()
 			std::copy(found_words.begin(), found_words.end(), std::ostream_iterator< std::string >(std::cout, ","));
 			std::cout << std::endl;
 		}
-
 	}
 
 	return true;
@@ -390,17 +390,17 @@ int Words2::calcScrabbleSkillLevel(const std::string& word)
 	std::regex re(R"((BLE|CH|CK|CI|IGH|ING|OUS|QU|RH|SH|SCH|SC|TH|WH|WR|BB|CC|DD|EE|FF|GG|LL|MM|NN|OO|PP|RR|SS|TT|UU|WW|ZZ)*)");
 	std::string out = std::regex_replace(word, re, "");
 
-	//**English** language Scrabble letter scoring
-	const int scores[] = { 1,3,3,2,1,4,2,4,1,8,5,1,3,1,1,3,10,1,1,1,1,4,4,8,4,10 };
-	//count up the letter score
-	int iTotal(0);
-	for (int i = 0; i < (int)out.length(); ++i) iTotal += scores[out[i] - 65];   //A-Z
-	//gives a score between 6 (smalest re-word of all 1's) and 80 (largest 8 letter re-word of all 10's)
+    //**English** language Scrabble letter scoring
+	const std::array<int, 26> scores = { 1,3,3,2,1,4,2,4,1,8,5,1,3,1,1,3,10,1,1,1,1,4,4,8,4,10 };
+    //count up the letter score
+    int iTotal(0);
+    for (int i=0; i<(int)out.length(); ++i) iTotal+=scores[out[i]-65];   //A-Z
+    //gives a score between 6 (smalest re-word of all 1's) and 80 (largest 8 letter re-word of all 10's)
 
-	//need to fine tune the distribution and therfore thresholds
-	int score = (iTotal < SCORE_EASY_THRESHOLD) ? 1 : (iTotal < SCORE_MED_THRESHOLD) ? 2 : 3;
-	_stats._countScore[iTotal]++;
-	_stats._countLevels[score - 1]++;
+    //need to fine tune the distribution and therfore thresholds
+    const int score = (iTotal < SCORE_EASY_THRESHOLD)? 1 : (iTotal < SCORE_MED_THRESHOLD) ? 2 : 3;
+    _stats._countScore[iTotal]++;
+    _stats._countLevels[score-1]++;
 
 	if (_bDebug)
 		std::cout << "Scrabble: '" << word << "' -> '" << out << "' score : " << iTotal << " = " << score << std::endl;
@@ -431,42 +431,42 @@ bool Words2::load(const std::string& wordFile, 		//load a wordlist and exclude
 //output the actual word list to file
 //The wordMap is the original list and the wordSet is the filtered list that
 //is to be output. Called from save() for each set of same length words.
-int Words2::saveWordMap(saveFormat format, FILE*& fp, tWordMap& wmOrig, const tWordSet& wsFilt)
+int Words2::saveWordMap(FILE *& fp, tWordMap &wmOrig, const tWordSet &wsFilt)
 {
 	int count = 0;
 
-	for (auto const& filt : wsFilt)
+	for (auto const & filt : wsFilt)
 	{
 		auto w = wmOrig.find(filt);
-		if (w != wmOrig.end())
+		if (w == wmOrig.end())
+			continue;
+
+		auto const & wrd = (*w).second;
+		//found dictionary word in filtered set, so save it
+		//build word line "word|level{prematch}|description"
+		// e.g. "BAMBOO|0|BOB,BOOB,...|n. 1 a mainly tropical giant woody grass of the subfamily Bambusidae..."
+		//level may be 0 if not explicitly specified in originally loaded word list file
+		//description may be blank, in which case the pipe (|) divider need not be added
+
+        //level only defined in .txt files, not .xdxf, unles -s used to auto scrabble score
+        const int level = (_bAutoSkillUpd)?calcScrabbleSkillLevel(wrd._word) : wrd._level;
+
+		fprintf(fp, "%s|%d|", wrd._word.c_str(), level);
+			
+		if (wrd._prematch.size())
 		{
-			//found dictionary word in filtered set, so save it
-			//build word line "word|level{prematch}|description"
-			// e.g. "BAMBOO|0|BOB,BOOB,...|n. 1 a mainly tropical giant woody grass of the subfamily Bambusidae..."
-			//level may be 0 if not explicitly specified in originally loaded word list file
-			//description may be blank, in which case the pipe (|) divider need not be added
-
-			auto const& wrd = (*w).second;
-			//level only defined in .txt files, not .xdxf, unless -s used to auto scrabble score
-			const int level = (_bAutoSkillUpd) ? calcScrabbleSkillLevel(wrd._word) : wrd._level;
-
-			fprintf(fp, "%s|%d", wrd._word.c_str(), level);
-
-			if (wrd._prematch.size() && format == saveFormat::eReword2)
+			std::string prematch;
+			for (auto & word : wrd._prematch)
 			{
-				std::string prematch;
-				for (auto& word : wrd._prematch)
-				{
-					if (word != wrd._word)
-						prematch += (prematch.length() ? "," : "") + word;
-				}
-				fprintf(fp, "|%s", prematch.c_str());
+				if (word != wrd._word)
+					prematch += (prematch.length()?",":"") + word;
 			}
-			if (wrd._description.length())
-				fprintf(fp, "|%s", wrd._description.c_str());
-			fprintf(fp, "\n");
-			++count;
+			fprintf(fp, "%s", prematch.c_str());
 		}
+		if (wrd._description.length())
+			fprintf(fp, "|%s",wrd._description.c_str());
+		fprintf(fp, "\n");
+		++count;
 	}
 	return count;
 }
@@ -475,8 +475,9 @@ bool Words2::save(std::string outFile, saveFormat format)
 {
 	if (!outFile.length()) outFile = _wordFile;	//save back out to same file loaded
 
-	int iout = 0, itotal = 0;
-	FILE* fp = fopen(outFile.c_str(), "w+"); //create output file even if exists
+	int iout = 0;
+	int itotal = 0;
+	FILE *fp = fopen(outFile.c_str(), "w+"); //create output file even if exists
 	if (fp)
 	{
 		//now save filtered dictionary...

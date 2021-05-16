@@ -69,11 +69,6 @@ struct DictWord
 		return *this;
 	};
 
-//	bool operator < (const DictWord &rhs)	//for sorting
-//	{
-//		return this->_word < rhs._word;
-//	}
-
 	bool operator () (const DictWord &dw1, const DictWord &dw2) const
 	{
 		return dw1._word < dw2._word;
@@ -85,10 +80,10 @@ struct DictWord
 	}
 };
 
-typedef std::map<std::string, DictWord> tWordMap;	//map of random numbers and the (same length) words available
-typedef std::map<std::string, bool> tWordsInTarget;	//map of words during a level and if it's been found by the player
-typedef std::set<std::string> tWordSet;				//for unique set of words
-typedef std::vector<std::string> tWordVect;
+using tWordMap = std::map<std::string, DictWord, std::less<>>;		//map of random numbers and the (same length) words available
+using tWordsInTarget = std::map<std::string, bool, std::less<>>;	//map of words during a level and if it's been found by the player
+using tWordSet = std::set<std::string, std::less<>>;				//for unique set of words
+using tWordVect = std::vector<std::string>;
 
 
 struct Stats
@@ -110,7 +105,8 @@ class Words
 {
 public:
 	Words();
-	explicit Words(const std::string& wordFile);
+	virtual ~Words() = default;
+	explicit Words(const std::string &wordFile);
 	void setList(bool bOn = true) { _bList = bOn; }
 	void setDebug(bool bOn = true) { _bDebug = bOn; }
 

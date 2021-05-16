@@ -19,23 +19,23 @@ class Words2 : public Words
 {
 public:
 	Words2();
-	Words2(const std::string &wordFile);
-	~Words2();
+	explicit Words2(const std::string &wordFile);
+	~Words2() override;
 
 	//Add words from the xdxf dictionary to the internal lists
 	bool xdxfBuildDict(const std::string &dictFile, bool bUpdateDef, bool bXdxfDefOnly);
 
 	//build the output dictionary from all loaded words
-	bool filterGameWords();   //const std::string &dictFile = "", bool bUpdateDef = false);
+	bool filterGameWords();
 
 	// iterate over the current dictionary and assign all match words to each 'reword' word 
 	bool prematch();
 
-	virtual bool load(const std::string &wordFile = "", 		//load a wordlist and exclude
+	bool load(const std::string &wordFile = "", 		//load a wordlist and exclude
 				unsigned int rndSeed = 0,				//duplicates, too many etc
-				unsigned int startAtWord = 0);
-	enum class saveFormat { eReword, eReword2 };
-	bool save(std::string outFile, saveFormat format);
+				unsigned int startAtWord = 0) override;
+
+	bool save(std::string outFile);
 
 	Words2 & operator = (const Words2 &w2)
 	{
@@ -95,7 +95,7 @@ public:
 		}
 		return *this;
 	}
-	const Words2 operator-(const Words2 &other) const
+	Words2 operator-(const Words2 &other) const
 	{
 		return Words2(*this) -= other;	//call -= operator overload (as it's already there)
 	}
@@ -111,7 +111,9 @@ protected:
 
     int calcScrabbleSkillLevel(const std::string &word);
 	void addWordsToSets();	//add to valid sets (one set per word length)
-	int saveWordMap(saveFormat format, FILE *& fp, tWordMap &wmOrig, const tWordSet &wsFilt);
+	int saveWordMap(FILE *& fp, tWordMap &wmOrig, const tWordSet &wsFilt);
+
+private:
 
 	TiXmlDocument * _doc;
 	int		_countXdxfWords;
