@@ -14,8 +14,8 @@ BIN = $(PROG_NAME)
 
 ## compile
 CXX = g++
-CXXFLAGS = -std=c++17 -c -Wall -ggdb -D_DEBUG -I/usr/include
-#CXXFLAGS = -std=c++17 -c -Wall -I/usr/include
+#CXXFLAGS = -std=c++17 -c -Wall -ggdb -D_DEBUG -I/usr/include
+CXXFLAGS = -std=c++17 -c -Wall -I/usr/include
 # -std=c++11  -m64
 
 ## link
