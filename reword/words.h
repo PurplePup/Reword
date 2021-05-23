@@ -80,9 +80,9 @@ struct DictWord
 	}
 };
 
-using tWordMap = std::map<std::string, DictWord, std::less<>>;		//map of random numbers and the (same length) words available
-using tWordsInTarget = std::map<std::string, bool, std::less<>>;	//map of words during a level and if it's been found by the player
-using tWordSet = std::set<std::string, std::less<>>;				//for unique set of words
+using tWordMap = std::map<std::string, DictWord>;// , std::less< >> ;		//map of random numbers and the (same length) words available
+using tWordsInTarget = std::map<std::string, bool>;// , std::less< >> ;	//map of words during a level and if it's been found by the player
+using tWordSet = std::set<std::string>;// , std::less< >> ;				//for unique set of words
 using tWordVect = std::vector<std::string>;
 
 
