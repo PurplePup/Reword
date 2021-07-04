@@ -81,14 +81,18 @@ void makeAlpha(std::string &s)
 
 bool endsWith(const std::string &str, const std::string &match, bool caseSensitive /*= false*/)
 {
-	if (str.length() < match.length()) return false;
+	if (str.length() < match.length()) 
+		return false;
+		
 	if (caseSensitive)
 	{
-        if (strcmp(str.substr(str.length()-match.length()).c_str(),match.c_str()) != 0) return false;
+        if (strcmp(str.substr(str.length()-match.length()).c_str(),match.c_str()) != 0) 
+			return false;
 	}
     else
     {
-        if (strcasecmp(str.substr(str.length()-match.length()).c_str(),match.c_str()) != 0) return false;
+        if (strcasecmp(str.substr(str.length()-match.length()).c_str(),match.c_str()) != 0) 
+			return false;
     }
 	return true;
 }

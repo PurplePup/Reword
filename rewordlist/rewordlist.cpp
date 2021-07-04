@@ -182,11 +182,12 @@ int main(int argc, char* argv[])
 	
 	if (bPrematch)
 	{
-		// force prematch output files to end with .rw2 as it breaks the WORD|level|description format
+		// force prematch output files to end with .rw2 as it breaks the old "WORD|level|description" format
+		// Just append it so up to user to rename if required.
 		const std::string ext = ".rw2";
 		if (!pptxt::endsWith(outFile, ext, true) && outFile.size() >= ext.size())
 		{
-			outFile = outFile.substr(0, outFile.size() - ext.size()) + ext;
+			outFile += ext;
 			std::cout << "Prematch selected so forcing output extension to .rw2 (" << outFile << ")" << std::endl;
 		}
 	}

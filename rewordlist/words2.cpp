@@ -304,16 +304,27 @@ bool Words2::filterGameWords()    //const std::string &dictFile, bool bUpdateDef
 bool Words2::prematch() 
 {
 	std::cout << "Calculating prematch lists..." << std::endl;
+	std::cout << std::endl << std::unitbuf; // enable automatic flushing
 
+	int iCount = _vecTarget.size(),
+		iDisplayMod = _vecTarget.size() / 100;
+
+	#pragma omp parallel for
 	for (auto target : _vecTarget)
 	{
 		if (target.length() < TARGET_MIN)
 			continue;
+
 		clearCurrentWord();
 		findWordsInWordTarget(_mapAll, target.c_str());	//side effect - fills _nWords[] & _wordsInTarget
 
 		if (_bDebug)
 			std::cout << "Words in target : " << target << std::endl;
+		else
+		{
+			if (!(iCount-- % iDisplayMod))
+				std::cout << "\r" << "Matching words... " << iCount << "       ";
+		}
 
 		// copy map of found words into sorted vector of shortest to longest (ascending)
 		std::vector<std::string> found_words;
@@ -342,6 +353,8 @@ bool Words2::prematch()
 			std::cout << std::endl;
 		}
 	}
+	std::cout << "\r" << "Prematching words... done";
+	std::cout << std::endl << std::nounitbuf << std::endl;
 
 	return true;
 }
@@ -443,7 +456,7 @@ int Words2::saveWordMap(FILE *& fp, tWordMap &wmOrig, const tWordSet &wsFilt)
 
 		auto const & wrd = (*w).second;
 		//found dictionary word in filtered set, so save it
-		//build word line "word|level{prematch}|description"
+		//build word line "word|level|prematch|description"
 		// e.g. "BAMBOO|0|BOB,BOOB,...|n. 1 a mainly tropical giant woody grass of the subfamily Bambusidae..."
 		//level may be 0 if not explicitly specified in originally loaded word list file
 		//description may be blank, in which case the pipe (|) divider need not be added
