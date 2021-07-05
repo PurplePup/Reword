@@ -12,6 +12,11 @@ Author:			Al McLuckie (al-at-purplepup-dot-org)
 
 Date:			06 April 2007
 
+
+History:		Version	Date		Change
+				-------	----------	--------------------------------
+				0.7		02.01.17	Moved to SDL2
+
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by
 				the Free Software Foundation; either version 2 of the License, or
@@ -104,7 +109,8 @@ bool Surface::load(const std::string &fileName)
     if (bHasPath)
         _surface = IMG_Load(fileName.c_str());		//using SDL_Image dll (png, jpg etc)
     else
-        _surface = IMG_Load((RES_IMAGES + fileName).c_str());		//using SDL_Image dll (png, jpg etc)	if (nullptr == _surface)
+        _surface = IMG_Load((RES_IMAGES + fileName).c_str());		//using SDL_Image dll (png, jpg etc)
+	if (nullptr == _surface)
 	{
 		std::cerr << "Failed to load image " << (bHasPath?"":(RES_IMAGES).c_str()) << fileName << ". Cannot start." << std::endl;
 		std::cerr << "SDL_Error = " << SDL_GetError() << std::endl;

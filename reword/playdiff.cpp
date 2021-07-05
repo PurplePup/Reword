@@ -17,6 +17,7 @@ History:		Version	Date		Change
 				0.3.1	07.06.2007	Speed up menu movement a little
 				0.4		17.03.2008	Changed description to use score consts
 				0.5		16.05.2008	Implement PlayMenu base class and touch screen
+				0.7		02.01.17	Moved to SDL2
 
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by
@@ -43,7 +44,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include "utils.h"
 #include <sstream>
 
-void PlayDiff::init(Input *input)
+void PlayDiff::init(Input *input, Screen * scr)
 {
 	setName("LEVEL");
 	std::string msg = "Press " + input->keyDescription(ppkey::B) + " to select difficulty";
@@ -58,13 +59,13 @@ void PlayDiff::init(Input *input)
     //load EXIT/NEXT buttons
     {
     t_pSharedSpr p(new Sprite(Resource::image("btn_square_exit_small.png")));
-    p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - p->tileH())/2));
+    p->setPos(8, BG_LINE_BOT + ((SCREEN_HEIGHT - BG_LINE_BOT - static_cast<float>(p->tileH())) /2));
 //    p->_sigEvent2.Connect(this, &PlayDiff::ControlEvent);
     Control c(p, CTRLID_EXIT, 0, Control::CAM_DIS_HIT_IDLE_SINGLE);
     _controlsDiff.add(c);
     }
 
-	PlayMenu::init(input);
+	PlayMenu::init(input, scr);
 }
 
 void PlayDiff::choose(MenuItem i)

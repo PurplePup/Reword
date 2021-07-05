@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -54,6 +54,8 @@
     <ClInclude Include="..\reword\spritemgr.h" />
     <ClInclude Include="..\reword\states.h" />
     <ClInclude Include="..\reword\surface.h" />
+    <ClInclude Include="..\reword\tinyxml\tinystr.h" />
+    <ClInclude Include="..\reword\tinyxml\tinyxml.h" />
     <ClInclude Include="..\reword\utils.h" />
     <ClInclude Include="..\reword\waiting.h" />
     <ClInclude Include="..\reword\words.h" />
@@ -95,6 +97,10 @@
     <ClCompile Include="..\reword\sprite.cpp" />
     <ClCompile Include="..\reword\spritemgr.cpp" />
     <ClCompile Include="..\reword\surface.cpp" />
+    <ClCompile Include="..\reword\tinyxml\tinystr.cpp" />
+    <ClCompile Include="..\reword\tinyxml\tinyxml.cpp" />
+    <ClCompile Include="..\reword\tinyxml\tinyxmlerror.cpp" />
+    <ClCompile Include="..\reword\tinyxml\tinyxmlparser.cpp" />
     <ClCompile Include="..\reword\utils.cpp" />
     <ClCompile Include="..\reword\waiting.cpp" />
     <ClCompile Include="..\reword\words.cpp" />
@@ -142,6 +148,7 @@
       <AdditionalLibraryDirectories>C:\libs\sdl\SDL2-2.0.4\lib\x86;C:\libs\sdl\SDL2_ttf-2.0.14\lib\x86;C:\libs\sdl\SDL2_mixer-2.0.1\lib\x86;C:\libs\sdl\SDL2_image-2.0.1\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_mixer.lib;SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

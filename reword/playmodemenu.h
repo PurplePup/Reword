@@ -15,7 +15,7 @@ class PlayModeMenu : public PlayMenu
 public:
 
 	PlayModeMenu(GameData& gd) : PlayMenu(gd) {}
-    virtual void init(Input *input);
+    virtual void init(Input *input, Screen * scr);
     virtual void choose(MenuItem i);
 
 };

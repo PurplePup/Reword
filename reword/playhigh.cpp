@@ -55,7 +55,7 @@ PlayHigh::PlayHigh(GameData &gd)  : _gd(gd)
 	_init = false;
 }
 
-void PlayHigh::init(Input *input)
+void PlayHigh::init(Input *input, Screen * /*scr*/)
 {
 	//once the class is initialised, init and running are set true
 

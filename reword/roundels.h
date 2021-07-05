@@ -25,7 +25,7 @@ public:
     Sprite *	_spr;
 };
 
-class Roundels : IPlay
+class Roundels : public IPlay
 {
 public:
 
@@ -81,7 +81,7 @@ public:
     int getRoundelH() { return _roundelH; }
 
     //init the level/screen
-    virtual void init(Input * /*input*/);
+    virtual void init(Input * input, Screen * scr);
     // drawing operation
     virtual void render(Screen* s);
     // other processing

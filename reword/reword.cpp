@@ -44,6 +44,7 @@ History:		Version	Date		Change
 				0.3.1	09.06.2007	Minor fix point release for v0.3
 				0.4.0	17.03.2008	Added speeder and timetrial modes
 				0.5.0	18.06.2008	Added touch screen support
+				0.7		02.01.17	Moved to SDL2
 
 Description:	A simple word game where you need to find as many words
 				from a 6 letter word as possible in the time allowed.
@@ -76,7 +77,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 
 #include <SDL.h>		//include for SDLMain to be defined (as main)
-//#include <SDL_main.h>
+#include <SDL_main.h>
 
 //#include "utils.h"
 #include "global.h"
@@ -86,14 +87,14 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include <stdio.h>  /* defines FILENAME_MAX */
 #ifdef WIN32
-//    #pragma message("include WIN32 files\n")
+    #pragma message("include WIN32 files\n")
     #include <direct.h>
     #define GetCurrentDir _getcwd
 #else
-//    #pragma message("include Linux files\n")
+    #pragma message("include Linux files\n")
     #include <unistd.h>
     #define GetCurrentDir getcwd
-#endif
+ #endif
 
 #include <string>
 #include <iostream>

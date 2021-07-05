@@ -25,7 +25,7 @@ public:
 	MenuItem() :
 		_id(-1),
 		_hoverOff(WHITE_COLOUR),
-		_hoverOn(BG_COLOUR),
+		_hoverOn(BLACK_COLOUR),
 		_enabled(false), _highlight(false)
 	{
 	};
@@ -35,7 +35,7 @@ public:
           bool enabled=true) :
           //eItemFont font = MENU_FONT_DEFAULT) :
 		_id(id),
-		_hoverOff(WHITE_COLOUR), _hoverOn(colour),
+		_hoverOff(colour), _hoverOn(BLACK_COLOUR),
 		_enabled(enabled), _highlight(false)
     {
 //        setTitle(title, font);
@@ -88,7 +88,7 @@ public:
 	PlayMenu(GameData& gd);
 	virtual ~PlayMenu() {}
 
-    virtual void init(Input *input);
+    virtual void init(Input *input, Screen * scr);
     virtual void setFont(eMenuFont fontItem, eMenuFont fontComment, eMenuFont fontHelp);
     virtual void choose(MenuItem i);
     virtual void chooseDone();
@@ -119,9 +119,10 @@ protected:
 	tSharedImage    _menubg;
 	Sprite          _star;
     Roundels        _beta;
-//    FontCache     _fontCache;
-    int             _fadeX;
-    Easing          _fadeEase;
+
+	float			_fadeAmt;
+	float			_fadeF;
+	Waiting			_fadeWait;
 
 	Roundels	    _name;          //menu name (as roundels)
 	Waiting		    _nameW;	    	//delay between jumbling

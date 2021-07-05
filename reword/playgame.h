@@ -83,16 +83,16 @@ public:
 	PlayGame(GameData& gd);
 	virtual ~PlayGame();
 
-    virtual void init(Input *input);
-    virtual void render(Screen* s);
-    virtual void work(Input* input, float speedFactor);
-    virtual bool button(Input* input, ppkey::eButtonType b);
-    virtual bool touch(const Point &pt);   //press
-    virtual bool tap(const Point &pt);     //release
+    virtual void init(Input *input, Screen * scr) override;
+    virtual void render(Screen* s) override;
+    virtual void work(Input* input, float speedFactor) override;
+    virtual bool button(Input* input, ppkey::eButtonType b) override;
+    virtual bool touch(const Point &pt) override;   //press
+    virtual bool tap(const Point &pt) override;     //release
+	virtual void handleEvent(SDL_Event &sdlevent) override;
+	virtual void quit() override;
 
 //	static 	void pushSDL_Event(int code, void *data1 = nullptr, void *data2 = nullptr);
-
-	virtual void handleEvent(SDL_Event &sdlevent);
 
 protected:
 
@@ -211,8 +211,11 @@ private:
     //round action buttonpositions next to main letters
    	int _posRButtonLeft, _posRButtonRight, _posRButtonTop, _posRButtonBot;
 
+	int _score_x, _words_x;
 	int _score0_x, _words0_x, _countdown0_x;
 	int _score0_y, _words0_y, _countdown0_y;
+
+	std::string _strMode;		//"ARCADE" etc to show in bot right screen
 
 	//timers
 	SDL_TimerID _countdownID;	//timer used to show timer countdown in game

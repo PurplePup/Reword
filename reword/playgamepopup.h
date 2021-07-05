@@ -26,12 +26,13 @@ public:
 	bool isSelected() { return _bSelected; }
 	void setHasMaxWord(bool b) { _hasMaxWord = b; }
 
-    virtual void init(Input *input);
+    virtual void init(Input *input, Screen * scr);
     virtual void render(Screen* s);
     virtual void work(Input* input, float speedFactor);
     virtual bool button(Input* input, ppkey::eButtonType b);
     virtual bool touch(const Point &pt);
     virtual bool tap(const Point &pt);
+	virtual void quit() override;
 
 private:
 	void choose();

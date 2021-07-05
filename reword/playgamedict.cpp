@@ -15,6 +15,7 @@ Date:			11 Oct 2011
 
 History:		Version	Date		Change
 				-------	----------	--------------------------------
+				0.7		02.01.17	Moved to SDL2
 
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by
@@ -55,7 +56,7 @@ PlayGameDict::~PlayGameDict()
     //dtor
 }
 
-void PlayGameDict::init(Input *input)
+void PlayGameDict::init(Input *input, Screen * /*scr*/)
 {
 	//set the repeat of the keys required
 	input->setRepeat(ppkey::UP, 250, 250);		//button, rate, delay

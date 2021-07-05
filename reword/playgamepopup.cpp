@@ -20,6 +20,7 @@ History:		Version	Date		Change
 						11.08.2008	Build and render menu like PlayMenu class
 										but use map instead of seq container.
                 0.6     20.06.2011  Fix Yes/No menu exit
+				0.7		02.01.17	Moved to SDL2
 
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by
@@ -62,7 +63,7 @@ PlayGamePopup::PlayGamePopup(GameData &gd, bool bIsInGame, bool bMaxWordFound)  
 
 //can call setHasMaxWord() first to make sure the menu options are enabled correctly
 //if init() called externally again to reset the menu...
-void PlayGamePopup::init(Input *input)
+void PlayGamePopup::init(Input *input, Screen * /*scr*/)
 {
     (void)(input);
 
@@ -90,15 +91,15 @@ void PlayGamePopup::init(Input *input)
 	if (_bIsInGame)
         _itemList[++i] = MenuItem(POP_SKIP, ORANGE_COLOUR, "Next word/Level",
                             (_hasMaxWord)?"Move on to next word/level":"You must have a Re-word first!", _hasMaxWord);
-    if (Locator::audio().musicEnabled())
-    {
-        bool bIsPlaying = Locator::audio().isPlayingMusic();	//may be playing/fading menu music so uses isPlaying... rather than isActuallyPl...
-        bool bHasMusic = Locator::audio().hasMusicTracks();
+    //if (Locator::audio().musicEnabled())
+    //{
+    //    bool bIsPlaying = Locator::audio().isPlayingMusic();	//may be playing/fading menu music so uses isPlaying... rather than isActuallyPl...
+    //    bool bHasMusic = Locator::audio().hasMusicTracks();
 
-        _itemList[++i] = MenuItem(POP_TOGGLEMUSIC, BLUE_COLOUR, bIsPlaying?"Music Stop":"Music Start", bIsPlaying?"Stop current track":"Start a song", bHasMusic);
-        _itemList[++i] = MenuItem(POP_NEXTTRACK, BLUE_COLOUR, "Next Track", "Play next song", bHasMusic);
-        _itemList[++i] = MenuItem(POP_PREVTRACK, BLUE_COLOUR, "Prev Track", "Play previous song", bHasMusic);
-    }
+    //    _itemList[++i] = MenuItem(POP_TOGGLEMUSIC, BLUE_COLOUR, bIsPlaying?"Music Stop":"Music Start", bIsPlaying?"Stop current track":"Start a song", bHasMusic);
+    //    _itemList[++i] = MenuItem(POP_NEXTTRACK, BLUE_COLOUR, "Next Track", "Play next song", bHasMusic);
+    //    _itemList[++i] = MenuItem(POP_PREVTRACK, BLUE_COLOUR, "Prev Track", "Play previous song", bHasMusic);
+    //}
 	if (_hasMaxWord)
 		_itemList[++i] = MenuItem(POP_SAVE, BLUE_COLOUR, "Save & Exit", "Allows exit and restart at same place", true);
 	_itemList[++i] = MenuItem(POP_QUIT, RED_COLOUR, "Quit Game !", "Exit (save highscore)", true);
@@ -122,11 +123,14 @@ void PlayGamePopup::render(Screen *s)
 	//ppg::blit_surface(_menubg->surface(), nullptr, s->surface(), x, y);
 	s->blit(_menubg->texture(), nullptr, x, y);
 
-	//calculate best text gap
-	const int maxGap = _gd._fntSmall.height()*2; //max gap
-	int topGap = _gd._fntSmall.height();
-	const int h = _menubg->height() - (_gd._fntSmall.height()*3) - 10; //10=5pix*2 border
-	const int texth = _pItems->size() * _gd._fntSmall.height();
+	FontTTF & fontMenu = _gd._fntClean;
+	FontTTF & fontHelp = _gd._fntSmall;
+
+	//calculate best text height gap
+	const int maxGap = static_cast<int>(fontMenu.height()*1.5); //max gap
+	int topGap = fontMenu.height();
+	const int h = _menubg->height() - (fontMenu.height()*3) - 10; //10=5pix*2 border
+	const int texth = _pItems->size() * fontMenu.height();
 	int gap = (h - texth) / (_pItems->size()-1);
 	if (gap > maxGap)
 	{
@@ -140,22 +144,22 @@ void PlayGamePopup::render(Screen *s)
 	{
 		if (it->first == _menuoption)
 		{
-			r = _gd._fntSmall.put_text(s, yy, it->second.item().c_str(), (it->second._enabled)?it->second._hoverOn:GREY_COLOUR, true);
+			r = fontMenu.put_text(s, yy, it->second.item().c_str(), (it->second._enabled)?it->second._hoverOn:GREY_COLOUR, true);
             ///r = s->blit_mid(it->second.item(it->second._enabled?MenuItem::eTitleHoverOn:MenuItem::eTitleGrey)->texture(), nullptr, 0, yy);
 			r._min.x -= _star.tileW()+5;
-			_star.setPos(r._min.x, yy);
+			_star.setPos(static_cast<float>(r._min.x), static_cast<float>(yy));
 			//help/comment str
-			_gd._fntClean.put_text(s, (y+_menubg->height())-(_gd._fntSmall.height()*2), it->second.comment().c_str(), GREY_COLOUR, true);
-			///s->blit_mid(it->second.item(MenuItem::eCommentGrey)->texture(), nullptr, 0, (y+_menubg->height())-(_gd._fntSmall.height()*2));
+			fontHelp.put_text(s, (y+_menubg->height())-(fontMenu.height()*2), it->second.comment().c_str(), GREY_COLOUR, true);
+			///s->blit_mid(it->second.item(MenuItem::eCommentGrey)->texture(), nullptr, 0, (y+_menubg->height())-(fontMenu.height()*2));
 		}
 		else
 		{
-			r = _gd._fntSmall.put_text(s, yy, it->second.item().c_str(), (it->second._enabled)?it->second._hoverOff:GREY_COLOUR, false);
+			r = fontMenu.put_text(s, yy, it->second.item().c_str(), (it->second._enabled)?it->second._hoverOff:GREY_COLOUR, false);
 			///r = s->blit_mid(it->second.item(it->second._enabled?MenuItem::eTitleHoverOff:MenuItem::eTitleGrey)->texture(), nullptr, 0, yy);
 		}
 		// Make the touch area bigger
 		it->second._r = r.inset(-5);
-		yy += gap + _gd._fntSmall.height();
+		yy += gap + fontMenu.height();
 	}
 
 	_star.draw(s);
@@ -334,3 +338,17 @@ int PlayGamePopup::ItemFromId(int id)
 	return 0;
 }
 
+void PlayGamePopup::quit()
+{
+	if (_bDoYesNoMenu)
+	{
+		//already showing YES/NO confirm options, so process...
+		_pItems = &_itemList;		//point back to first menu, then
+		_menuoption = ItemFromId(POP_QUIT); 	//NO selected, back to POP_QUIT
+		_bDoYesNoMenu = false;			//back to POP_CANCEL/SKIP/QUIT menu
+	}
+
+	_bSelected = true;
+	_selectedId = 0;
+	return;
+}

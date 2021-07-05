@@ -25,6 +25,7 @@ History:		Version	Date		Change
 									Added pinger sound when in popup menu, to warn user
 				0.5		28.05.08	Added touchscreen support
 				0.5.1	02.10.08	Add Pandora and other device screen layout/sizes
+				0.7		02.01.17	Moved to SDL2
 
 
 Licence:		This program is free software; you can redistribute it and/or modify
@@ -139,7 +140,7 @@ PlayGame::~PlayGame()
     delete _play;
 }
 
-void PlayGame::init(Input *input)
+void PlayGame::init(Input *input, Screen * scr)
 {
 	//fade out any menu music (but only if no game music still playing)
 	//Game music handled separately froim in-game music (mp3 dir etc ?)
@@ -354,8 +355,10 @@ void PlayGame::render_play(Screen* s)
 	s->blit(_gamebg->texture(), nullptr, 0, 0);
 
  	//draw scores and coloured seconds countdown
-	_gd._fntSmall.put_number(s, _score0_x, _score0_y, _gd._score.currScore(), "%08d", BLACK_COLOUR);	//SCORE:
-	_gd._fntSmall.put_number(s, _words0_x, _words0_y, _gd._score.currWords(), "%04d", BLACK_COLOUR);	//WORDS:
+	_gd._fntClean.put_text(s, _score_x, _score0_y, "SCORE:", BLACK_COLOUR);
+	_gd._fntClean.put_number(s, _score0_x, _score0_y, _gd._score.currScore(), "%08d", GREEN_COLOUR);
+	_gd._fntClean.put_text(s, _words_x, _score0_y, "WORDS:", BLACK_COLOUR);
+	_gd._fntClean.put_number(s, _words0_x, _words0_y, _gd._score.currWords(), "%04d", BLUE_COLOUR);
 	//(>10) normal countdown in "plenty of time" colour
 	//(<=10) countdown in "oh crap" colour (red to denote time running out)
 	//		A warning "ping" is also sounded in the countdown callback fn each second...
@@ -463,7 +466,8 @@ void PlayGame::render_play(Screen* s)
 
 					//Display the word in red (not found) or blue (found)
 					//Only found words populate the container during play, so red only drawn at end of level
-					_gd._fntClean.put_text(s, _boxOffset[xx]+BOXTEXTOFFSETX, boxOffsetY+BOXTEXTOFFSETY,
+					_gd._fntClean.put_text_mid(s, _boxOffset[xx]+(_boxLength[xx]/2), 
+							boxOffsetY + ((BOXH - _gd._fntClean.height()) /2),
 							(*it)._word.c_str(), ((*it)._found)?BLUE_COLOUR:RED_COLOUR);
 
 					++it;   //next found word
@@ -551,7 +555,7 @@ void PlayGame::render_end(Screen* s)
 		case 2:_gd._fntBig.put_text(s, yyTitle, "COOL!", PURPLE_COLOUR, true);break;
 		default:_gd._fntBig.put_text(s, yyTitle, "WELL DONE!", PURPLE_COLOUR, true);break;
 		}
-		_gd._fntMed.put_number(s, yyReward, _bonusScore, "You got a Re-Word, add %d points", PURPLE_COLOUR, false);
+		_gd._fntMed.put_number(s, yyReward, _bonusScore, "You got a Re-word, add %d points", PURPLE_COLOUR, false);
 		break;
 	case SU_BONUS:		//BONUS!! - You got all words
 		switch (_randomTitle)
@@ -742,7 +746,7 @@ void PlayGame::startPopup(Input *input)
 
 	_pPopup = new PlayGamePopup(_gd, _state!=PG_END, foundEnoughWords());
 	if (_pPopup)
-		_pPopup->init(input);
+		_pPopup->init(input, &Locator::screen());
 }
 
 void PlayGame::stopPopup()
@@ -2044,18 +2048,17 @@ void PlayGame::prepareBackground()
 
 	//prerender the score and words titles
 	//find out sizes and calc reasonable positions
-	FontTTF &fontText = _gd._fntSmall;
-	FontTTF &fontNumbers = _gd._fntSmall;
+	FontTTF &fontScore = _gd._fntClean;
 	FontTTF &fontCounter = _gd._fntBig;
 	Rect r(0, 0, 0, 0);
 	int score_len(0), score0_len(0), words_len(0), words0_len(0);
-	r = fontText.calc_text_metrics("SCORE: ");		//note gap to look better
+	r = fontScore.calc_text_metrics("SCORE: ");		//note gap to look better
 	score_len = r._max.x;
-	r = fontNumbers.calc_text_metrics("00000000");	//8 0's not drawn here
+	r = fontScore.calc_text_metrics("00000000");	//8 0's not drawn here
 	score0_len = r._max.x;
-	r = fontText.calc_text_metrics("WORDS: ");		//note gap to look better
+	r = fontScore.calc_text_metrics("WORDS: ");		//note gap to look better
 	words_len = r._max.x;
-	r = fontNumbers.calc_text_metrics("0000");	//4 0's not drawn here
+	r = fontScore.calc_text_metrics("0000");		//4 0's not drawn here
 	words0_len = r._max.x;
 
 	//now calc where we can place these and the gap between each
@@ -2120,10 +2123,10 @@ void PlayGame::prepareBackground()
 	Surface modeSurface;
 	switch (_gd._mode)
 	{
-	case GM_ARCADE:		modeSurface.load("game_arcade.png");	strMode = "ARCADE";    break;
-	case GM_REWORD:		modeSurface.load("game_reword.png");	strMode = "REWORD";    break;
-	case GM_SPEEDER:	modeSurface.load("game_speeder.png");   strMode = "SPEEDWORD"; break;
-	case GM_TIMETRIAL:	modeSurface.load("game_timetrial.png"); strMode = "TIMETRIAL"; break;
+	case GM_ARCADE:		modeSurface.load("game_arcade.png");	_strMode = "ARCADE (" + _gd._diffName + ")";    break;
+	case GM_REWORD:		modeSurface.load("game_reword.png");	_strMode = "REWORD (" + _gd._diffName + ")";    break;
+	case GM_SPEEDER:	modeSurface.load("game_speeder.png");   _strMode = "SPEEDWORD (" + _gd._diffName + ")"; break;
+	case GM_TIMETRIAL:	modeSurface.load("game_timetrial.png"); _strMode = "TIMETRIAL (" + _gd._diffName + ")"; break;
 	default:break;
 	}
 	assert(modeSurface.surface());

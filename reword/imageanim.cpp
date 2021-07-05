@@ -18,6 +18,7 @@ Date:			06 April 2007
 History:		Version	Date		Change
 				-------	----------	--------------------------------
 				0.4.0	18.08.2007	Finally implemented the animation functions & types
+				0.7		02.01.17	Moved to SDL2
 
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by
@@ -36,6 +37,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 */
 ////////////////////////////////////////////////////////////////////
 
+#include "platform.h"
 #include "global.h"
 #include "screen.h"
 #include "imageanim.h"
@@ -43,7 +45,7 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 #include <cmath>
 #include <cassert>
-#include <algorithm>
+#include <algorithm>    // std::max
 
 ImageAnim::ImageAnim() :
 	//_image(),
@@ -380,7 +382,7 @@ void ImageAnim::setBounds(int inflateBy)
 //always size of the image tile in its current position with inflate amount prev set
 Rect ImageAnim::bounds() const
 {
-    Rect r(_x, _y, _x+tileW(), _y+tileH());
+    Rect r((int)_x, (int)_y, _x+tileW(), _y+tileH());
     if (_inflateBy)
         return r.inset(_inflateBy);
     return r;

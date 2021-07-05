@@ -17,6 +17,7 @@ Date:			06 April 2007
 History:		Version	Date		Change
 				-------	----------	--------------------------------
 				0.5		16.05.2008	Added mouse (touch screen) support
+				0.7		02.01.17	Moved to SDL2
 
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by
@@ -108,31 +109,34 @@ void Game::splash()
 {
 	if (!_screen) return;
 	Image img(RES_IMAGES + "splash.png");	//solid black background
-	SDL_Colour c = {0x00,0x00,0x00,0};	//black
-	_screen->drawSolidRect(0, 0, Screen::width(), Screen::height(), c);
-	//center it - if needed
-	_screen->blit(img.texture(), nullptr, (Screen::width()-img.width())/2, (Screen::height()-img.height())/2);
-	_screen->update();	//flip
-//	sleep(2);	//so we can see it (POSIX)
+	if (img.initDone())
+	{
+		SDL_Colour c = {0x00,0x00,0x00,0};	//black
+		_screen->drawSolidRect(0, 0, Screen::width(), Screen::height(), c);
+		//center it - if needed
+		_screen->blit(img.texture(), nullptr, (Screen::width()-img.width())/2, (Screen::height()-img.height())/2);
+		_screen->update();	//flip
+		//sleep(2);	//so we can see it (POSIX)
+	}
 }
 
 bool Game::loadResources()
 {
     bool bErr = false;
 
-    if (Locator::data()._fntTiny.description() != "Sans tiny")
-    {   //]##DEBUG##
-        std::cerr << "4 tiny: not == Sans tiny" << std::endl;
-    };
+    //if (Locator::data()._fntTiny.description() != "Sans tiny")
+    //{   //]##DEBUG##
+    //    std::cerr << "4 tiny: not == Sans tiny" << std::endl;
+    //};
 
 
     //register the actual concrete data member holding the resources
 	Resource::registerImage(&_images);
 
-    if (Locator::data()._fntTiny.description() != "Sans tiny")
-    {   //]##DEBUG##
-        std::cerr << "1 tiny: not == Sans tiny" << std::endl;
-    };
+    //if (Locator::data()._fntTiny.description() != "Sans tiny")
+    //{   //]##DEBUG##
+    //    std::cerr << "1 tiny: not == Sans tiny" << std::endl;
+    //};
 
 
     bErr |= !Resource::image().add("roundel_letters.png", 26);
@@ -403,7 +407,7 @@ bool Game::play(IPlay *p)
 //      mmap(0, SCREEN_WIDTH*SCREEN_HEIGHT*2, PROT_WRITE, MAP_SHARED, fbdev, 0);
 #endif
 	// Initialise play/level specific stuff
-	p->init(_input);
+	p->init(_input, _screen);
 
 	Framerate fr;
 	fr.init(MAXIMUM_FRAME_RATE);
@@ -471,7 +475,7 @@ bool Game::play(IPlay *p)
                                 return true; //exit main menu & game
                             }
 							_gd->_state = ST_MENU;	//back to menu screen
-							p->quit();				//sets _running false
+							p->quit();				//sets _running false (if not overridden)
 							break;
 						}
 

@@ -43,7 +43,6 @@ Licence:		This program is free software; you can redistribute it and/or modify
 */
 ////////////////////////////////////////////////////////////////////
 
-
 #ifdef WIN32
 #define _CRT_RAND_S
 #include <stdlib.h>

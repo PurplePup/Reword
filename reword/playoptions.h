@@ -20,7 +20,7 @@ public:
 	PlayOptions(GameData& gd);
 	virtual ~PlayOptions();
 
-    virtual void init(Input *input);
+    virtual void init(Input *input, Screen * scr);
     virtual void choose(MenuItem i);
     virtual void render(Screen* s);
     virtual void work(Input* input, float speedFactor);

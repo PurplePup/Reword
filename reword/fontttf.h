@@ -36,16 +36,16 @@ public:
 	Rect put_number_right(Screen *s, int xDelta, int y, int number, const char *format, const SDL_Color &textColour, bool bShadow = false);
     Rect put_number_mid(Screen *s, int xMid, int y, int number, const char *format, const SDL_Color &textColour, bool bShadow = false);
 
-    //render font to a surface
-	Rect put_text(Surface *s, int x, int y, const char *textstr, const SDL_Color &textColour, bool bShadow = false);
-	Rect put_text(Surface *s, int y, const char *textstr, const SDL_Color &textColour, bool bShadow = false);
-	Rect put_text_right(Surface *s, int xDelta, int y, const char *textstr, const SDL_Color &textColour, bool bShadow = false);
-    Rect put_text_mid(Surface *s, int xMid, int y, const char *textstr, const SDL_Color &textColour, bool bShadow = false);
-
-	Rect put_number(Surface *s, int x, int y, int number, const char *format, const SDL_Color &textColor, bool bShadow = false);
-	Rect put_number(Surface *s, int y, int number, const char *format, const SDL_Color &textColor, bool bShadow = false);
-	Rect put_number_right(Surface *s, int xDelta, int y, int number, const char *format, const SDL_Color &textColour, bool bShadow = false);
-    Rect put_number_mid(Surface *s, int xMid, int y, int number, const char *format, const SDL_Color &textColour, bool bShadow = false);
+    ////render font to a surface
+	//Rect put_text(Texture *t, int x, int y, const char *textstr, const SDL_Color &textColour, bool bShadow = false);
+	//Rect put_text(Surface *s, int y, const char *textstr, const SDL_Color &textColour, bool bShadow = false);
+	//Rect put_text_right(Surface *s, int xDelta, int y, const char *textstr, const SDL_Color &textColour, bool bShadow = false);
+	//Rect put_text_mid(Surface *s, int xMid, int y, const char *textstr, const SDL_Color &textColour, bool bShadow = false);
+	//
+	//Rect put_number(Surface *s, int x, int y, int number, const char *format, const SDL_Color &textColor, bool bShadow = false);
+	//Rect put_number(Surface *s, int y, int number, const char *format, const SDL_Color &textColor, bool bShadow = false);
+	//Rect put_number_right(Surface *s, int xDelta, int y, int number, const char *format, const SDL_Color &textColour, bool bShadow = false);
+	//Rect put_number_mid(Surface *s, int xMid, int y, int number, const char *format, const SDL_Color &textColour, bool bShadow = false);
 
     Texture * make_texture(const char *textstr, bool bShadow = false);
     Surface * make_surface(const char *textstr, const SDL_Color &textColour, bool bShadow = false);

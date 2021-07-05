@@ -63,7 +63,7 @@ Control::Control(t_pControl &pCtrl, int id, unsigned int group,
 }
 
 // init the control
-void Control::init(Input * /*input*/)
+void Control::init(Input * /*input*/, Screen * /*scr*/)
 {
 }
 

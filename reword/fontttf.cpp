@@ -176,7 +176,7 @@ bool FontTTF::loadBMP(const std::string &fontInfoName, const std::string &desc)
         return false;
     }
 
-    /*
+    /* example angelcode BMFont .fmt file xml format
     <font>
       <info face="FreeSans" size="14" bold="1" italic="0" charset="" unicode="" stretchH="100" smooth="1" aa="1" padding="2,2,2,2" spacing="0,0" outline="0"/>
       <common lineHeight="22" base="16" scaleW="880" scaleH="20" pages="1" packed="0"/>
@@ -272,8 +272,7 @@ Rect FontTTF::calc_text_metrics(const char *textstr, bool bShadow /*= false*/, i
             char * pos = const_cast<char*>(textstr);
             while (*pos)
             {
-                //const SFastWidths *w = &_fastWidths[(*pos)];
-                nextX += _fastWidths[(*pos)].advanceX + 2;
+                nextX += _fastWidths[(*pos)].advanceX;
                 ++pos;
             }
             r._min.x = xOffset;
@@ -312,7 +311,6 @@ Rect FontTTF::put_text(Screen *s, int x, int y, const char *textstr, const SDL_C
     {
         SDL_SetTextureColorMod(_fastTex->texture_sdl(), (Uint8)textColour.r, (Uint8)textColour.g, (Uint8)textColour.b);
 
-        int nextX = x;
 		if (XMIDPOSITION == x)
         {
             int w = 0;
@@ -322,16 +320,17 @@ Rect FontTTF::put_text(Screen *s, int x, int y, const char *textstr, const SDL_C
                 w += _fastWidths[(*pos)].advanceX;
                 ++pos;
             }
-            nextX = (s->width() - w ) / 2;
+            x = (s->width() - w ) / 2;
         }
+        int nextX = x;
         char * pos = const_cast<char*>(textstr);
         while (*pos)
         {
             //blit each char
             const SFastWidths *w = &_fastWidths[(*pos)];
-            SDL_Rect r2 = {w->startX, w->startY, w->width, w->height};
-			s->blit(_fastTex->texture_sdl(), &r2, nextX/*+w->offsetX*/, y+(w->offsetY == 1 ? 0 : w->offsetY));
-			nextX += w->advanceX + 1;
+            SDL_Rect srcLetter = {w->startX, w->startY, w->width, w->height};
+			s->blit(_fastTex->texture_sdl(), &srcLetter, nextX + w->offsetX, y + w->offsetY);
+			nextX += w->advanceX;
 			++pos;
         }
         Rect r(x, y, x + nextX, y + _height);
@@ -449,9 +448,12 @@ Rect FontTTF::put_number_mid(Screen *s, int xMid, int y, int number, const char 
 
 // Surface functions ////////////////////////////
 
+
+#if 0
+
 //output a text string to the destination surface
 //If shadow selected, then draw in the shadow colour first offset by 1, then the text in the actual position
-Rect FontTTF::put_text(Surface *s, int x, int y, const char *textstr, const SDL_Color &textColour, bool bShadow /*= false*/)
+Rect FontTTF::put_text(Texture *t, int x, int y, const char *textstr, const SDL_Color &textColour, bool bShadow /*= false*/)
 {
 
 //	int textW(0);
@@ -462,13 +464,50 @@ Rect FontTTF::put_text(Surface *s, int x, int y, const char *textstr, const SDL_
 //	    SDL_FreeSurface(text);
 //	}
 //
-	Rect r(0, 0, 0, 0);
+
 
     if (_bFastBMP || _bFastTTF)
     {
 //TODO
-        return r;
+
+	//	SDL_SetTextureColorMod(_fastTex->texture_sdl(), (Uint8)textColour.r, (Uint8)textColour.g, (Uint8)textColour.b);
+
+		Uint32 format;
+		int access, txw, txh;
+		SDL_QueryTexture(t->texture_sdl(), &format, &access, &txw, &txh);
+
+		int nextX = x;
+		if (XMIDPOSITION == x)
+		{
+			int w = 0;
+			char * pos = const_cast<char*>(textstr);
+			while (*pos)
+			{
+				w += _fastWidths[(*pos)].advanceX;
+				++pos;
+			}
+			nextX = (txw - w) / 2;
+		}
+		char * pos = const_cast<char*>(textstr);
+		while (*pos)
+		{
+			//blit each char
+			const SFastWidths *w = &_fastWidths[(*pos)];
+			SDL_Rect srcLetter = { w->startX, w->startY, w->width, w->height };
+
+			ppg::blit_surface(_fastTex->texture_sdl(), 
+			s->blit( _fastTex->texture_sdl(), &srcLetter, nextX + w->offsetX, y + w->offsetY);
+			nextX += w->advanceX;
+			++pos;
+		}
+		Rect r(x, y, x + nextX, y + _height);
+		return r;
+
+//		SDL_RenderCopy( _renderer, srcTex, srcRect, &destRect);
+//      return r;
     }
+
+	Rect r(0, 0, 0, 0);
 
 	if (bShadow)
 	{
@@ -503,6 +542,8 @@ Rect FontTTF::put_text(Surface *s, int x, int y, const char *textstr, const SDL_
 
 	return r;
 }
+
+
 
 //centered text on surface dest
 Rect FontTTF::put_text(Surface *s, int y, const char *textstr, const SDL_Color &textColour, bool bShadow /*= false*/)
@@ -551,6 +592,8 @@ Rect FontTTF::put_number_mid(Surface *s, int xMid, int y, int number, const char
 	const int len = calc_text_length(_buffer);
 	return put_text(s, xMid - (len / 2), y, _buffer, textColour, bShadow);
 }
+
+#endif 
 
 // end surface render functions /////////////////////////////
 

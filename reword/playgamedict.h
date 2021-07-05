@@ -19,7 +19,7 @@ public:
     PlayGameDict(GameData& gd, const std::string &strDictWord);
     virtual ~PlayGameDict();
 
-    virtual void init(Input *input);
+    virtual void init(Input *input, Screen * scr);
     virtual void render(Screen* s);
     virtual void work(Input* input, float speedFactor);
     virtual bool button(Input* input, ppkey::eButtonType b);

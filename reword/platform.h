@@ -17,7 +17,7 @@
 //base data location depending on system
 #if defined(WIN32)
     #if defined(DEBUG)
-        #define RES_SYS_BASE	(std::string("../../reword/reword/data/"))
+        #define RES_SYS_BASE	(std::string("../data/"))
     #else
         #define RES_SYS_BASE	(std::string("../data/"))
     #endif
@@ -134,7 +134,7 @@
 #define BOXH			25
 #define BOXHGAP         3
 #define BOXTEXTOFFSETX	6
-#define BOXTEXTOFFSETY	-3
+#define BOXTEXTOFFSETY	0
 #define MENU_HI_X		58
 #define MENU_HI_Y		(LETTERH + 40)
 #define MENU_HI_GAP		55

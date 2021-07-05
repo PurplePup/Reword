@@ -18,6 +18,7 @@ History:		Version	Date		Change
 				0.5.0	18.06.2008	Added code to create menu items dynamically
 										and support touchscreen
                 0.6.0   02.07.2011  Make single touch menu operation (not double click/tap)
+				0.7		02.01.17	Moved to SDL2
 
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by
@@ -93,7 +94,6 @@ PlayMenu::PlayMenu(GameData &gd) :
 	_init = false;
 	_running = false;
 
-	_fadeX = 0;
 	_item = 0;
 	_nextYpos = 0;
 	_menuRect = Rect(0, BG_LINE_TOP, SCREEN_WIDTH, BG_LINE_BOT);
@@ -106,7 +106,7 @@ PlayMenu::PlayMenu(GameData &gd) :
     setFont(MENU_FONT_MED, MENU_FONT_CLEAN, MENU_FONT_CLEAN);
 }
 
-void PlayMenu::init(Input *input)
+void PlayMenu::init(Input *input, Screen * /*scr*/)
 {
 	//once the class is initialised, init and running are set true
 
@@ -117,7 +117,7 @@ void PlayMenu::init(Input *input)
 	input->setRepeat(ppkey::DOWN, 150, 300);
 
     tSharedImage &letters = Resource::image("roundel_letters.png");
-	_name.easeMoveFrom( 0, -(letters->height()*2), 800, -400);   //up to 400ms individual roundel delay
+	_name.easeMoveFrom( 0, -(int)(letters->height()*2), 800, -400);   //up to 400ms individual roundel delay
 	_nameW.start(3000, 1000);
 
     _menubg = Resource::image("menubg.png");
@@ -141,8 +141,9 @@ void PlayMenu::init(Input *input)
 	_beta.setWord("BETA", let, Screen::width() - ((let->tileW()+2)*4), Screen::height() - let->tileH(), 2);
 	_beta.easeMoveFrom( 0, Screen::height(), 800, -500, Easing::EASE_OUTQUART);
 
-    _fadeEase.setup(Easing::EASE_INOUTSINE, 0, 0, 255, 500);
-    _fadeX = 0;
+	_fadeF = 0;
+	_fadeAmt = 0.1f;
+	_fadeWait.start(75);
 
     _delayComment.start(DELAY_HELP);  //wait before comment line displayed
 
@@ -196,6 +197,36 @@ void PlayMenu::chooseDone()
     //state
 }
 
+SDL_Color TransformHue(
+	const SDL_Color &in,  // color to transform
+	float H
+)
+{
+	float U = cos(H*M_PI / 180);
+	float W = sin(H*M_PI / 180);
+
+	SDL_Color ret;
+	ret.r = (.299 + .701*U + .168*W)*in.r
+		+ (.587 - .587*U + .330*W)*in.g
+		+ (.114 - .114*U - .497*W)*in.b;
+	ret.g = (.299 - .299*U - .328*W)*in.r
+		+ (.587 + .413*U + .035*W)*in.g
+		+ (.114 - .114*U + .292*W)*in.b;
+	ret.b = (.299 - .3*U + 1.25*W)*in.r
+		+ (.587 - .588*U - 1.05*W)*in.g
+		+ (.114 + .886*U - .203*W)*in.b;
+	return ret;
+}
+
+SDL_Color TransformLerp(SDL_Color a, SDL_Color b, float t)
+{
+	SDL_Color ret;
+	ret.r = a.r + (b.r - a.r) * t;
+	ret.g = a.g + (b.g - a.g) * t;
+	ret.b = a.b + (b.b - a.b) * t;
+	//ret.a = a.a + (b.a - a.a) * t;
+	return ret;
+}
 void PlayMenu::render(Screen *s)
 {
 	if (!_init) return;
@@ -213,36 +244,34 @@ void PlayMenu::render(Screen *s)
 	int selected = getSelected().id();
 	int nextY = 0;
 	Rect r;
-    SDL_Color itemColour;
-	for (auto p = _itemList.begin(); p != _itemList.end(); p++)
+//    SDL_Color itemColour;
+	for (auto pItem = _itemList.begin(); pItem != _itemList.end(); pItem++)
 	{
-		if (p->id() == selected)
+		if (pItem->id() == selected)
 		{
-            ///SDL_SetTextureColorMod(p->item(MenuItem::eTitleHoverOn)->texture()->texture_sdl(), (Uint8)_fadeX, (Uint8)_fadeX, (Uint8)_fadeX);
-            ///itemColour.r = itemColour.g = itemColour.b = (Uint8)_fadeX;
-            ///s->blit(p->item(MenuItem::eTitleHoverOn)->texture(), nullptr, p->_r.left(), p->_r.top());
-            _fontItem->put_text(s, p->_r.top(), p->item().c_str(), p->_hoverOn);
+			const SDL_Color hi = TransformLerp(pItem->_hoverOff, WHITE_COLOUR, _fadeF);
+			_fontItem->put_text(s, pItem->_r.left(), pItem->_r.top(), pItem->item().c_str(), hi);
             if (_bSetStarPos)
             {
-                r = p->_r.addpt(Point(-30,0));
-                _star.setPos(r.left(), r.top()-2);
+                r = pItem->_r.addpt(Point(-30,0));
+                _star.setPos((float)r.left(), (float)(r.top()-2));
                 _bSetStarPos = false;
             }
 
 			//show comment for selected item - might be blank
             if (_delayComment.done())
             {
-                ///auto pTex = p->item(MenuItem::eCommentHoverOn)->texture();
+                ///auto pTex = pItem->item(MenuItem::eCommentHoverOn)->texture();
                 ///s->blit_mid(pTex, nullptr, 0, BG_LINE_BOT + (((SCREEN_HEIGHT-BG_LINE_BOT-(pTex->height()*2))/4)));
-                _fontComment->put_text(s, _commentY, p->item().c_str(), p->_hoverOn);
+                _fontComment->put_text(s, _commentY, pItem->comment().c_str(), pItem->_hoverOn);
             }
 		}
 		else
 		{
-            ///s->blit(p->item(MenuItem::eTitleHoverOff)->texture(), nullptr, p->_r.left(), p->_r.top());
-            _fontItem->put_text(s, p->_r.top(), p->item().c_str(), p->_hoverOff);
+            ///s->blit(pItem->item(MenuItem::eTitleHoverOff)->texture(), nullptr, pItem->_r.left(), pItem->_r.top());
+            _fontItem->put_text(s, pItem->_r.left(), pItem->_r.top(), pItem->item().c_str(), pItem->_hoverOff);
 		}
-        nextY = p->_r.bottom();
+        nextY = pItem->_r.bottom();
 	}
 	_nextYpos = nextY;	//useful for placing help text after all items drawn
 
@@ -262,22 +291,25 @@ void PlayMenu::render(Screen *s)
 
 void PlayMenu::work(Input *input, float speedFactor)
 {
-    (void)(speedFactor);
+	(void)(speedFactor);
 
 	_name.work(input, speedFactor);
 	_star.work();
 
-    if (!_fadeEase.done())
-    {
-        _fadeX = (int)_fadeEase.work();
-    }
-    else
-    {
-        if (_fadeX >= 250)
-            _fadeEase.setup(Easing::EASE_INOUTSINE, 0, 255, -255, 500);
-        else
-            _fadeEase.setup(Easing::EASE_INOUTSINE, 0, 0, 255, 500);
-    }
+	if (_fadeWait.done(true))
+	{
+		_fadeF += _fadeAmt;
+		if (_fadeF <= 0)
+		{
+			_fadeF = 0;
+			_fadeAmt = -_fadeAmt;
+		}
+		else if (_fadeF >= 1)
+		{
+			_fadeF = 0.99;
+			_fadeAmt = -_fadeAmt;
+		}
+	}
 
 	_beta.work(input, speedFactor);
 
@@ -362,7 +394,8 @@ bool PlayMenu::touch(const Point &pt)
             {
                 _saveTouchPt = pt;      //so test if release pos is in same menu item
                 _item = item;	        //highlight the touched item
-                _delayComment.start(DELAY_HELP);  //wait before help line displayed
+				choose(*it);
+				_delayComment.start(DELAY_HELP);  //wait before help line displayed
                 return true;
             }
             else
@@ -487,7 +520,10 @@ void PlayMenu::setItem(int item)
 {
 	for (unsigned int i=0; i<_itemList.size(); i++)
 		if (_itemList[i].id() == item)
+		{
 			_item = i;
+			return;
+		}
 }
 
 MenuItem PlayMenu::getItem(int item)
@@ -530,7 +566,7 @@ void PlayMenu::exitMenu()
 
     const int ms = 1200;
 	const int btnWidth = _star.tileW();
-    _star.startMoveTo(-btnWidth, _star.getYPos(), ms);
+    _star.startMoveTo(-btnWidth, (int)_star.getYPos(), ms);
 //    _star.startMoveTo(10, 100, 20, 0, 8, 0);
 
 }

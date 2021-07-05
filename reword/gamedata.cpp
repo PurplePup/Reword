@@ -16,6 +16,7 @@ History:		Version	Date		Change
 				0.4.0	25.02.2008	Added game modes - "reword" "speeder" and "time trial"
  				0.5.0	18.06.2008	Added touch support and some animated touch icons
  				0.5.1	07.10.2008	separate some gfx to allow diff screen sizes
+				0.7		02.01.17	Moved to SDL2
 
 Licence:		This program is free software; you can redistribute it and/or modify
 				it under the terms of the GNU General Public License as published by
@@ -63,18 +64,11 @@ void GameData::init()
 	bErr |= !_words.load(RES_WORDS + _options._defaultWordFile, hash + SDL_GetTicks());
 
 	//FONTS
-//	bErr |= !_fntSmall.loadTTF(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_SMALL, "Cartoon small");
-//	bErr |= !_fntMed.loadTTF(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_MEDIUM, "Cartoon med");
-//	bErr |= !_fntBig.loadTTF(RES_FONTS + "BD_Cartoon_Shout.ttf", FONT_BIG, "Cartoon big");
-	bErr |= !_fntSmall.loadBMP(RES_FONTS + "freesans.fnt", "small");    //18
-//	bErr |= !_fntMed.loadBMP(RES_FONTS + "BD_Cartoon_Shout_26.fnt", "Cartoon med");
-	bErr |= !_fntMed.loadBMP(RES_FONTS + "font.fnt", "test xml font");
-	bErr |= !_fntBig.loadBMP(RES_FONTS + "BD_Cartoon_Shout_34.fnt", "Cartoon big");
-
-//	bErr |= !_fntTiny.loadTTF(RES_FONTS + "FreeSansBold.ttf", FONT_TINY, "Sans tiny");
-//	bErr |= !_fntClean.loadBMP(RES_FONTS + "font.fnt", "test xml font");
-	bErr |= !_fntTiny.loadBMP(RES_FONTS + "FreeSansBold_14.fnt", "Sans Tiny");
-	bErr |= !_fntClean.loadBMP(RES_FONTS + "FreeSansBold_16.fnt", "Sans Clean");
+	bErr |= !_fntTiny.loadBMP(RES_FONTS + "arial_14.fnt", "Tiny");					//14 for under found words
+	bErr |= !_fntSmall.loadBMP(RES_FONTS + "arial_16.fnt", "small");				//18 for under menu etc
+	bErr |= !_fntMed.loadBMP(RES_FONTS + "BD_Cartoon_Shout_26.fnt", "medium font");	//used for main menu text etc
+	bErr |= !_fntBig.loadBMP(RES_FONTS + "BD_Cartoon_Shout_34.fnt", "Cartoon big");	// main menu 
+	bErr |= !_fntClean.loadBMP(RES_FONTS + "arial_22.fnt", "small clean");
 
     if (!bErr)
     {
@@ -222,11 +216,11 @@ bool GameOptions::load()
 		{
 			pptxt::splitKeyValuePair(line, key, value);
 			if (key == "singletap")
-				_bSingleTapMenus = atoi(value.c_str());
+				_bSingleTapMenus = atoi(value.c_str()) != 0;
 			else if (key == "defaultsfx")
-				_bDefaultSfxOn = atoi(value.c_str());
+				_bDefaultSfxOn = atoi(value.c_str()) != 0;
 			else if (key == "defaultmusic")
-				_bDefaultMusicOn = atoi(value.c_str());
+				_bDefaultMusicOn = atoi(value.c_str()) != 0;
 			else if (key == "defaultdiff")
 			{
 			    int diff = atoi(value.c_str());

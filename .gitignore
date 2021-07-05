@@ -4,6 +4,7 @@
 *.pyc
 *.pyo
 *.so
+*.suo
 *.sw[a-z]
 *~
 *.obj
@@ -16,6 +17,8 @@
 *.plg
 *.depend
 *.layout
+.vs/
+.kde4/
 build/
 bin/
 obj/
@@ -24,6 +27,7 @@ data/
 [Dd]ebug/
 [Rr]elease/
 .vs/
+/ipch/
 debug-arm
 depend
 depend.bak
