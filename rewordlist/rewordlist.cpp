@@ -64,12 +64,9 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <iostream>
 #include <string>
 #include <set>
-#include <algorithm>
-#include <iterator>
 
 #include "words2.h"
 #include "../reword/helpers.h"
-#include "../reword/platform.h"
 
 using namespace std;
 
@@ -81,7 +78,7 @@ using namespace std;
 int main(int argc, char* argv[])
 {
 	bool bList(false), bDebug(false), bForceDef(false), bXdxfDefOnly(false), bAutoSkillUpd(false), bPrematch(false);
-	bool bHelp(true), bHelpForce(false);
+	bool bHelp(true), bHelpForce(false), bExcludeByDef(false);
 	std::string::size_type pos;
 	tWordSet xdxfFiles;
 	tWordSet txtFiles;
@@ -93,7 +90,7 @@ int main(int argc, char* argv[])
 	std::string outFile(default_outfile);
 
 	//v. simple loop to load cmd line args - in any order,
-	//but must be seperately 'dashed' ie. -l -f not -lf
+	//but must be separately 'dashed' ie. -l -f not -lf
 	for (int i = 1; i < argc; ++i)
 	{
 		std::string arg = argv[i];
@@ -135,9 +132,13 @@ int main(int argc, char* argv[])
 			continue;
 		}
 
-		if ("-e" == arg.substr(0, 2))    //e.g. "-eText"
+		if ("-e" == arg.substr(0, 2))    //exclude word by definition text e.g. "-eText"
 		{
-			txtDefinitionExcl.insert(arg.substr(2));
+			if (arg.length() > 2)
+			{
+				bExcludeByDef = true;
+				txtDefinitionExcl.insert(arg.substr(2));
+			}
 			continue;
 		}
 
@@ -146,11 +147,11 @@ int main(int argc, char* argv[])
 			outFile = arg.substr(2);
 			continue;
 		}
-		pos = arg.find_last_of(".");		//find the last period for file extension
+		pos = arg.find_last_of('.');		//find the last period for file extension
 		if (pos == string::npos) continue;	//unknown (doesnt end in a file extension)
 		std::string ext(arg.substr(pos));
 
-		//allow multiple imput .xdxf files
+		//allow multiple input .xdxf files
 		if (".xdxf" == ext)
 		{
 			xdxfFiles.insert(arg);
@@ -211,30 +212,42 @@ int main(int argc, char* argv[])
 
 		bool bSave = false;
 
+		tWordSet allIncludeWords;
 		if (!txtIncludeFiles.empty())
 		{
 			std::cout << "Adding include list" << std::endl;
-			tWordSet::const_iterator it_txt = txtIncludeFiles.begin();
-			for (; it_txt != txtIncludeFiles.end(); ++it_txt)
+			for (auto const& txt : txtIncludeFiles)
 			{
-				Words2 includeWords(*it_txt);
-				int iOrig = finalWords.size();
+				Words2 includeWords(txt);
+				auto iOrig = finalWords.size();
 				finalWords += includeWords;	//add any forced include words
-				std::cout << "Included " << finalWords.size() - iOrig << " words from '" << *it_txt << "'" << std::endl;
+
+				// save include words lists, for later definition exclusions to ignore
+				tWordSet ws = includeWords.getWordSet();
+				allIncludeWords.insert(ws.begin(), ws.end());
+
+				std::cout << "Included " << finalWords.size() - iOrig << " words from '" << txt << "'" << std::endl;
 			}
 		}
+
 		if (!txtFiles.empty())
 		{
 			//load the named wordlists (with or without level and definition values)
 			//Must be done before xdxf dictionaries as xdxf contain possible definitions
 			//for the words in the wordlist files.
-			int iOrig = finalWords.size();
-			tWordSet::const_iterator it_txt = txtFiles.begin();
-			for (; it_txt != txtFiles.end(); ++it_txt)
+			auto iOrig = finalWords.size();
+			for (auto const& txt : txtFiles)
 			{
-				std::cout << "Adding wordlist .txt file '" << *it_txt << "'" << std::endl;
+				std::cout << "Adding wordlist .txt file '" << txt << "'" << std::endl;
 				Words2 txtWords;
-				if (txtWords.load(*it_txt))
+				if (bExcludeByDef)
+				{
+					// prepare the internal list of definition exclusion text(s) and any
+					// must-include words from the command line
+					txtWords.setDefinitionExcl(txtDefinitionExcl, allIncludeWords);
+				}
+
+				if (txtWords.load(txt))
 				{
 					if (bList) std::cout << "Inserting " << txtWords.size() << " words for processing" << std::endl;
 					finalWords += txtWords;	//insert into main list (no dups)
@@ -242,16 +255,16 @@ int main(int argc, char* argv[])
 			}
 			std::cout << "Added " << finalWords.size() - iOrig << " words using text files" << std::endl;
 		}
+
 		if (!xdxfFiles.empty())
 		{
 			//load all the named xdxf dictionary/definition files
-			int iOrig = finalWords.size();
-			tWordSet::const_iterator it_xdxf = xdxfFiles.begin();
-			for (; it_xdxf != xdxfFiles.end(); ++it_xdxf)
+			auto iOrig = finalWords.size();
+			for (auto const& xdxf : xdxfFiles)
 			{
 				Words2 xdxfWords;
 
-				std::cout << "Adding .xdxf dictionary file '" << *it_xdxf << "' ";
+				std::cout << "Adding .xdxf dictionary file '" << xdxf << "' ";
 				if (bXdxfDefOnly && finalWords.size() > 0)
 				{
 					std::cout << "for definitions only";
@@ -259,7 +272,7 @@ int main(int argc, char* argv[])
 				}
 				std::cout << std::endl;
 
-				if (xdxfWords.xdxfBuildDict(*it_xdxf, bForceDef, bXdxfDefOnly))
+				if (xdxfWords.xdxfBuildDict(xdxf, bForceDef, bXdxfDefOnly))
 				{
 					if (bXdxfDefOnly)
 					{
@@ -274,16 +287,16 @@ int main(int argc, char* argv[])
 			}
 			std::cout << "Added " << finalWords.size() - iOrig << " words using xdxf dictionary files" << std::endl;
 		}
+
 		if (!txtExcludeFiles.empty())
 		{
 			std::cout << "Adding exclude list" << std::endl;
-			tWordSet::const_iterator it_txt = txtExcludeFiles.begin();
-			for (; it_txt != txtExcludeFiles.end(); ++it_txt)
+			for (auto const& txt : txtExcludeFiles)
 			{
-				Words2 includeWords(*it_txt);
-				int iOrig = finalWords.size();
+				Words2 includeWords(txt);
+				auto iOrig = finalWords.size();
 				finalWords -= includeWords;	//remove any forced exclude words
-				std::cout << "Excluded " << iOrig - finalWords.size() << " words from '" << *it_txt << "'" << std::endl;
+				std::cout << "Excluded " << iOrig - finalWords.size() << " words from '" << txt << "'" << std::endl;
 			}
 		}
 

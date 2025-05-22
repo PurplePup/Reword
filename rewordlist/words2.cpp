@@ -84,20 +84,19 @@ bool Words2::xdxfOpenDict(const std::string& dictFile)
 void Words2::xdxfCloseDict()
 {
 	delete _doc;
-	_doc = 0;
+	_doc = nullptr;
 }
 
 //returns pointer to first <ar> node
-TiXmlElement* Words2::xdxfFirstWord()
+TiXmlElement* Words2::xdxfFirstWord() const
 {
-	if (!_doc) return 0;
+	if (!_doc) return nullptr;
 
-	TiXmlElement* root = _doc->FirstChildElement("xdxf");
-	if (root)
+	if (TiXmlElement* root = _doc->FirstChildElement("xdxf"))
 	{
 		return root->FirstChildElement("ar");
 	}
-	return 0;
+	return nullptr;
 }
 
 //takes the current <ar> node pointer and gets the word and definition for it
@@ -109,12 +108,12 @@ TiXmlElement* Words2::xdxfFirstWord()
 //so I can't really complain.
 TiXmlElement* Words2::xdxfNextWord(TiXmlElement* ar, std::string& word, std::string& def)
 {
-	if (!_doc) return 0;
+	if (!_doc) return nullptr;
 
-	TiXmlElement* tmpElement;
-	TiXmlText* tmpText;
+	TiXmlElement* tmpElement = nullptr;
+	TiXmlText* tmpText = nullptr;
 
-	TiXmlNode* child = 0;
+	TiXmlNode* child = nullptr;
 	for (child = ar->FirstChild(); child; child = child->NextSibling())
 	{
 		//		std::string text = child->Value();
@@ -267,6 +266,23 @@ void Words2::addWordsToSets()
 			clearCurrentWord();
 			if (checkCurrentWordTarget(target))	//finds shorter words in target word
 			{
+				// check if any exclusion by definition words also exclude the word
+				if (!_definitionExclSet.empty())
+				{
+					auto p = _mapAll.find(target);
+					if (p != _mapAll.end())
+					{
+						for (auto w : _definitionExclSet)
+						{
+							if (p->second._description.find(w) != std::string::npos)
+							{
+
+							}
+
+						}
+					}
+				}
+
 				//add to valid words - if within word length size required
 				for (auto const& word : _wordsInTarget)
 				{
@@ -402,7 +418,7 @@ int Words2::calcScrabbleSkillLevel(const std::string& word)
 	const std::array<int, 26> scores = { 1,3,3,2,1,4,2,4,1,8,5,1,3,1,1,3,10,1,1,1,1,4,4,8,4,10 };
     //count up the letter score
     int iTotal(0);
-    for (int i=0; i<(int)out.length(); ++i) iTotal+=scores[out[i]-65];   //A-Z
+    for (int i = 0; i < static_cast<int>(out.length()); ++i) iTotal+=scores[out[i]-65];   //A-Z
     //gives a score between 6 (smalest re-word of all 1's) and 80 (largest 8 letter re-word of all 10's)
 
     //need to fine tune the distribution and therfore thresholds
@@ -416,12 +432,37 @@ int Words2::calcScrabbleSkillLevel(const std::string& word)
 	return score;
 }
 
+// called from base class load() as extra exclusion list check as it needs to be
+// before the excluded word is added to the internal maps.
+// Only exists if called from rewordlist and Words2 calls load()
+bool Words2::rejectDefinition(const DictWord& dictWord)
+{
+//	return std::any_of(_definitionExclSet.begin(), _definitionExclSet.end(),
+//		[&strDef](const std::string& text){ return strDef.find(text) != std::string::npos; } );
+
+	for (auto const& text : _definitionExclSet)
+	{
+		if (dictWord._description.find(text) != std::string::npos)
+		{
+			//check if the word is still to be included using the .include files
+			if (_allIncludeWords.find(dictWord._word) != _allIncludeWords.end())
+			{
+				std::cout << "DEBUG Rejected " << dictWord._word << " exclusion - is in .include file" << std::endl;
+				continue;
+			}
+			std::cout << "DEBUG Exclude " << dictWord._word << " for '" << text << "' in : " << dictWord._description << std::endl;
+			return true;
+		}
+	}
+	return false;
+}
 
 //load the file using the base class, then check if wee need to generate scrabble type skill
 //level word weighting to work out automatic easy/med/hard difficulty settings for the words
 //loaded.
-bool Words2::load(const std::string& wordFile, 		//load a wordlist and exclude
-	unsigned int rndSeed,		        //duplicates, too many etc
+bool Words2::load(
+	const std::string& wordFile, 		//load a wordlist and exclude
+	unsigned int rndSeed,			    //duplicates, too many etc
 	unsigned int startAtWord)
 {
 	const bool bOk = Words::load(wordFile, rndSeed, startAtWord);
@@ -487,7 +528,7 @@ int Words2::saveWordMap(FILE *& fp, const tWordMap &wmOrig, const tWordSet &wsFi
 		//description may be blank, in which case the pipe (|) divider need not be added
 
         //level only defined in .txt files, not .xdxf, unles -s used to auto scrabble score
-        const int level = (_bAutoSkillUpd)?calcScrabbleSkillLevel(wrd._word) : wrd._level;
+        const int level = _bAutoSkillUpd ? calcScrabbleSkillLevel(wrd._word) : wrd._level;
 
 		fprintf(fp, "%s|%d|", wrd._word.c_str(), level);
 			
@@ -517,11 +558,11 @@ bool Words2::save(std::string outFile, bool bPrematch)
 {
 	if (!outFile.length()) outFile = _wordFile;	//save back out to same file loaded
 
-	int iout = 0;
-	int itotal = 0;
 	FILE *fp = fopen(outFile.c_str(), "w+"); //create output file even if exists
 	if (fp)
 	{
+		int iout = 0;
+		int itotal = 0;
 		//now save filtered dictionary...
 		if (_bList) std::cout << "Writing..." << outFile << std::endl;
 
@@ -574,4 +615,14 @@ bool Words2::save(std::string outFile, bool bPrematch)
 		return false;
 	}
 	return true;
+}
+
+tWordSet Words2::getWordSet() const
+{
+	tWordSet ws;
+	for (const auto &[fst, snd] : _mapAll)
+	{
+		ws.insert(fst);
+	}
+	return ws;
 }

@@ -197,7 +197,7 @@ bool Words::load(const std::string &wordFile, unsigned int rndSeed, unsigned int
 			lnwrd = dictWord._word;
 			wordLen = lnwrd.length();
 
-			if (rejectWord(lnwrd))
+			if (rejectWord(lnwrd) || rejectDefinition(dictWord))
 			{
 				_stats._ignored++;
 				continue;
@@ -327,6 +327,7 @@ bool Words::checkCurrentWordTarget(const std::string &wordTarget)
 
 	//fill in counters...
 	findWordsInWordTarget(_mapAll, wordTarget.c_str()); //side effect - fills _nWords[]
+
 	const int wordTargetLength = (int)wordTarget.length();
 	const int wordTargetStart = wordTargetLength - 3;	//for max out checking
 

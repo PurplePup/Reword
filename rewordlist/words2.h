@@ -31,6 +31,8 @@ public:
 	// iterate over the current dictionary and assign all match words to each 'reword' word 
 	bool prematch();
 
+	bool rejectDefinition(const DictWord& dictWord) override;
+
 	bool load(const std::string &wordFile = "", 		//load a wordlist and exclude
 				unsigned int rndSeed = 0,				//duplicates, too many etc
 				unsigned int startAtWord = 0) override;
@@ -100,14 +102,17 @@ public:
 		return Words2(*this) -= other;	//call -= operator overload (as it's already there)
 	}
 
+	[[nodiscard]] tWordSet getWordSet() const;
+
 	void setAutoSkillUpd(bool bOn = true) { _bAutoSkillUpd = bOn; }
+	void setDefinitionExcl(const tWordSet& defExcl, const tWordSet& incWords) { _definitionExclSet = defExcl; _allIncludeWords = incWords; };
 
 protected:
 
 	bool 			xdxfOpenDict(const std::string &dictFile);	//open generic xml file
 	void 			xdxfCloseDict();
-	TiXmlElement* 	xdxfFirstWord();
-	TiXmlElement* 	xdxfNextWord(TiXmlElement* ar, std::string &word, std::string &def);
+	[[nodiscard]] TiXmlElement* 	xdxfFirstWord() const;
+	[[nodiscard]] TiXmlElement* 	xdxfNextWord(TiXmlElement* ar, std::string &word, std::string &def);
 
     int calcScrabbleSkillLevel(const std::string &word);
 	void addWordsToSets();	//add to valid sets (one set per word length)
@@ -122,6 +127,9 @@ private:
 	int		_countXdxfMissing = 0;
 
 	tWordSet _wordSet[TARGET_MAX+1];	//use 1..n for actual word length (as index) during rewordlist.txt build
+
+	tWordSet _definitionExclSet;		// list of words to check definitions for and exclude words if found (e.g. abbr.)
+	tWordSet _allIncludeWords;			// list of forced include words (used in definition exclusion tests)
 
     bool    _bAutoSkillUpd = false;     //update the word skill level with any non 0 value from any list
 };

@@ -116,6 +116,8 @@ public:
 	void setDebug(bool bOn = true) { _bDebug = bOn; }
 
 	bool rejectWord(const std::string &strWord);		//true if word loaded not useable
+	virtual bool rejectDefinition(const DictWord& dictWord) { return false; }
+
 	virtual bool load(const std::string &wordFile = "", 		//load a wordlist and exclude
 				unsigned int rndSeed = 0,				//duplicates, too many etc
 				unsigned int startAtWord = 0);

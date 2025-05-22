@@ -23,7 +23,7 @@ DBGDIR = bin/debug
 DBGBIN = $(DBGDIR)/$(BIN)
 DBGOBJS = $(addprefix $(DBGDIR)/, $(OBJECTS))
 #DBGCXXFLAGS = -std=c++17 -I/usr/include -O0 -DDEBUG -Wall -Werror -Wextra
-DBGCXXFLAGS = -std=c++17 -I/usr/include -O0 -DDEBUG -D_DEBUG -Wall
+DBGCXXFLAGS = -std=c++17 -g -I/usr/include -DDEBUG -D_DEBUG -Wall
 
 ## release settings
 ###################
@@ -43,7 +43,7 @@ CXX = g++
 #############
 
 # working using std regex
-LDFLAGS = -Wall -L/usr/lib -L/usr/lib/x86_64-linux-gnu
+LDFLAGS = -L/usr/lib -L/usr/lib/x86_64-linux-gnu
 # working if using boost regex: 
 #LDFLAGS = -Wall -L/usr/lib -L/usr/lib/x86_64-linux-gnu  -lboost_thread -lboost_regex 
 
@@ -66,6 +66,8 @@ $(DBGBIN): $(DBGOBJS) $(EXTOBJECTS)
 	$(CXX) $(CXXFLAGS) $(DBGCXXFLAGS) $(LDFLAGS) -o $(DBGBIN) $^
 
 $(DBGDIR)/%.o: %.cpp
+	$(CXX) -c $(CXXFLAGS) $(DBGCXXFLAGS) -o $@ $<
+%.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) $(DBGCXXFLAGS) -o $@ $<
 
 ## Release rules
