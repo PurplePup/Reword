@@ -268,22 +268,23 @@ bool Words::load(const std::string &wordFile, unsigned int rndSeed, unsigned int
 //ShortWord can be made up from some or all letters in longWord (without using letters twice)
 bool Words::wordInWord(const char * wordShort, const char * wordTarget)
 {
-	const int ilongLen = strlen(wordTarget);
 	const int ishortLen = strlen(wordShort);
-	if (!ilongLen || !ishortLen) return false;	//invalid word
+	const int iTargetLen = strlen(wordTarget);
+	if (!ishortLen || !iTargetLen || ishortLen > iTargetLen ) 
+		return false;	//invalid word
 
-	int il, is;		//longword and shortword counters
+	int it, is;		//longword and shortword counters
 	int mask = 0;	//used to check if letters at specific position already tested for (int is ok as words are only ever 3..8 char long)
 	int found = 0;	//number of letters found
 	for (is = 0; is < ishortLen; is++)
 	{
-		for (il = 0; il < ilongLen; il++)
+		for (it = 0; it < iTargetLen; it++)
 		{
-			if (wordTarget[il] == wordShort[is])	//char match
+			if (wordTarget[it] == wordShort[is])	//char match
 			{
-				if ((mask & (1<<il)) == 0)	//if not already matched
+				if ((mask & (1<<it)) == 0)	//if not already matched
 				{
-					mask |= 1<<il;	//set mask and go for next
+					mask |= 1<<it;	//set mask and go for next
 					++found;
 					break;
 				}

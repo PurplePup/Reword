@@ -34,12 +34,13 @@
 struct DictWord
 {
 	std::string _word;
-	int			_level;			//1=easy, 2=med, 3=hard (0=undefined/easy)
+	int			_level = 0;			// 1=easy, 2=med, 3=hard (0=undefined/easy)
 	std::string _description;
 	std::vector<std::string> _prematch;	// a vector of strings found
+	int			_index = 0;			// final index position of word in rw2 file prematch format 
 
-	bool		_personal;		//a personally entered word (not in dict)
-	bool 		_found;
+	bool		_personal = false;	// a personally entered word (not in dict)
+	bool 		_found = false;		// in-play flag to indicate found/entered by player
 
     DictWord() {
 		clear(); 
@@ -51,6 +52,7 @@ struct DictWord
 		_level = 0;
 		_description.clear();
 		_prematch.clear();
+		_index = 0;
 		_personal = false;
 		_found = false;
 	};
@@ -63,6 +65,7 @@ struct DictWord
 			this->_level = dw._level;
 			this->_description = dw._description;
 			this->_prematch = dw._prematch;
+			this->_index = dw._index;
 			this->_personal = dw._personal;
 			this->_found = dw._found;
 		}
@@ -89,15 +92,17 @@ using tWordVect = std::vector<std::string>;
 struct Stats
 {
     Stats() { clear(); }
-    void clear() { _total = _ignored = 0;
-                    memset(_countLevels, 0, sizeof(_countLevels));
-                    memset(_countScore, 0, sizeof(_countScore));
-                }
-	int		_total;					//total words loaded
-	int		_ignored;				//number of words ignored
+    void clear() 
+	{ 
+		_total = _ignored = 0;
+		_countLevels.resize(3);
+		_countScore.resize(100);
+    }
+	int		_total = 0;					//total words loaded
+	int		_ignored = 0;				//number of words ignored
 
-	int     _countLevels[3];                //number or easy words, med words and hard words
-	int     _countScore[100];               //number of words for each score (to help define thresholds)
+	std::vector<int> _countLevels;      //number or easy words, med words and hard words
+	std::vector<int> _countScore;       //number of words for each score (to help define thresholds)
 };
 
 
@@ -215,7 +220,7 @@ protected:
 
 	std::string 	_wordFile;				//saved when load() called to allow nextWord() to reload
 
-	Stats           _stats;
+	Stats           _stats;					// stats to display by rewordlist on completion
 };
 
 

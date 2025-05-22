@@ -35,7 +35,7 @@ public:
 				unsigned int rndSeed = 0,				//duplicates, too many etc
 				unsigned int startAtWord = 0) override;
 
-	bool save(std::string outFile);
+	bool save(std::string outFile, bool bPrematch);
 
 	Words2 & operator = (const Words2 &w2)
 	{
@@ -111,7 +111,7 @@ protected:
 
     int calcScrabbleSkillLevel(const std::string &word);
 	void addWordsToSets();	//add to valid sets (one set per word length)
-	int saveWordMap(FILE *& fp, tWordMap &wmOrig, const tWordSet &wsFilt);
+	int saveWordMap(FILE *& fp, const tWordMap &wmOrig, const tWordSet &wsFilt, bool bPrematch = false);
 
 private:
 

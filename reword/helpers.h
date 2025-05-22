@@ -1,7 +1,7 @@
 //helpers.h
 
-#if !defined _HELPERS_H
-#define _HELPERS_H
+#ifndef HELPERS_H
+#define HELPERS_H
 
 #include <string>
 #include <vector>
@@ -23,10 +23,4 @@ namespace pptxt	//pp string functions
 
 }
 
-	//math functions
-	//static int round(float fl);
-
-	//rand functions
-//	static int RandomInt(unsigned int limit);
-
-#endif //_HELPERS_H
+#endif //HELPERS_H

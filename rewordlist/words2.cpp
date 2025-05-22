@@ -250,15 +250,16 @@ bool Words2::xdxfBuildDict(const std::string& dictFile, bool bUpdateDef, bool bX
 //build the word sets from the full list using the target list as the source
 void Words2::addWordsToSets()
 {
-	int iCount = _vecTarget.size(),
-		iDisplayMod = _vecTarget.size() / 100;
+	int iCount = _vecTarget.size();
+	int iDisplayMod = iCount / 200;
 
 	std::cout << std::endl << std::unitbuf; // enable automatic flushing
+	std::cout << "Filtering " << _vecTarget.size() << " targets..." << std::endl;
 
 	for (auto const& target : _vecTarget)
 	{
 		if (!(iCount-- % iDisplayMod))
-			std::cout << "\r" << "Adding words... " << iCount << "       ";
+			std::cout << "\r" << "Remaining: " << iCount << "       ";
 
 		//make sure its a word length we support (say 3..8)
 		if (target.length() >= SHORTW_MIN && target.length() <= TARGET_MAX)
@@ -278,39 +279,34 @@ void Words2::addWordsToSets()
 			}
 		}
 	}
-	std::cout << "\r" << "Adding words... done";
-	std::cout << std::endl << std::nounitbuf << std::endl;
+	std::cout << "\rFiltering done        " << std::endl << std::nounitbuf;
 }
-
 
 //Filter the loaded wordlists that has been processed to remove duplicates or words with too
 //many or too few letters etc and get it ready to save back out to the named file.
 //Must be called before save is used.
-bool Words2::filterGameWords()    //const std::string &dictFile, bool bUpdateDef)
+bool Words2::filterGameWords()
 {
 	//now we know we can open the output file, so proceed - which may take a while...
-	std::cout << "Filtering ... " << _vecTarget.size() << std::endl;
-
 	addWordsToSets();
-
 	return true;
 }
 
 // Previously findWordsInWordTarget() was called per target word during play, but due to 
-// some platforms limited processing power, we will call it on all target words and output 
+// platforms with limited processing power, we will call it on all target words and output 
 // these found words in the loadable dictionary itself rather than calculate live.
 // new dict line format:
 // TARGET | level | WORD[,WORD,WORD,...] | description
 bool Words2::prematch() 
 {
-	std::cout << "Calculating prematch lists..." << std::endl;
 	std::cout << std::endl << std::unitbuf; // enable automatic flushing
+	std::cout << "Prematching " << _vecTarget.size() << " targets..." << std::endl;
 
-	int iCount = _vecTarget.size(),
-		iDisplayMod = _vecTarget.size() / 100;
+	int iCount = _vecTarget.size();
+	int iDisplayMod = iCount / 200;
 
-	#pragma omp parallel for
-	for (auto target : _vecTarget)
+	//#pragma omp parallel for
+	for (const auto& target : _vecTarget)
 	{
 		if (target.length() < TARGET_MIN)
 			continue;
@@ -323,7 +319,7 @@ bool Words2::prematch()
 		else
 		{
 			if (!(iCount-- % iDisplayMod))
-				std::cout << "\r" << "Matching words... " << iCount << "       ";
+				std::cout << "\r" << "Remaining: " << iCount << "       ";
 		}
 
 		// copy map of found words into sorted vector of shortest to longest (ascending)
@@ -353,8 +349,7 @@ bool Words2::prematch()
 			std::cout << std::endl;
 		}
 	}
-	std::cout << "\r" << "Prematching words... done";
-	std::cout << std::endl << std::nounitbuf << std::endl;
+	std::cout << "\rPrematching done        " << std::endl << std::nounitbuf;
 
 	return true;
 }
@@ -430,34 +425,64 @@ bool Words2::load(const std::string& wordFile, 		//load a wordlist and exclude
 	unsigned int startAtWord)
 {
 	const bool bOk = Words::load(wordFile, rndSeed, startAtWord);
-	if (bOk && _bAutoSkillUpd)
+	if (bOk)
 	{
-		std::cout << "Auto skill difficulty using Scrabble letter values ... " << std::endl;
-		for (tWordMap::iterator wrd = _mapAll.begin(); wrd != _mapAll.end(); ++wrd)
+		if (_bAutoSkillUpd)
 		{
-			(*wrd).second._level = calcScrabbleSkillLevel((*wrd).first);
+			std::cout << "Auto skill difficulty using Scrabble letter values ... " << std::endl;
+			for (auto& wrd : _mapAll)
+			{
+				wrd.second._level = calcScrabbleSkillLevel(wrd.first);
+			}
+		}
+
+		// sort and iterate and assign final output indexes from smallest to largest
+		std::cout << "Indexing words..." << std::endl;
+		std::vector<std::string> indexList;	// fill list of words then sort smallest->largest
+		for (const auto& w : _mapAll)
+		{
+			indexList.push_back(w.first);
+		}
+		// Use comparator tuple to test size first then string content
+		auto comp = [](const std::string& s) { return std::make_tuple(s.size(), std::ref(s)); };
+		std::sort(indexList.begin(), indexList.end(), 
+			[comp](const std::string& s1, const std::string& s2) -> bool
+			{
+				return comp(s1) < comp(s2);
+			});
+		int index = 0;
+		for (const auto& w : indexList)
+		{
+			auto it = _mapAll.find(w);
+			if (it != _mapAll.end())
+			{
+				it->second._index = index;
+				//std::cout << "DEBUG " << it->first << "=" << w << ":" << it->second._index << std::endl;
+			}
+			++index;
 		}
 	}
+
 	return bOk;
 }
 
 //output the actual word list to file
 //The wordMap is the original list and the wordSet is the filtered list that
 //is to be output. Called from save() for each set of same length words.
-int Words2::saveWordMap(FILE *& fp, tWordMap &wmOrig, const tWordSet &wsFilt)
+int Words2::saveWordMap(FILE *& fp, const tWordMap &wmOrig, const tWordSet &wsFilt, bool bPrematch)
 {
 	int count = 0;
 
-	for (auto const & filt : wsFilt)
+	for (auto const & filtWord : wsFilt)
 	{
-		auto w = wmOrig.find(filt);
+		auto w = wmOrig.find(filtWord);
 		if (w == wmOrig.end())
 			continue;
 
 		auto const & wrd = (*w).second;
 		//found dictionary word in filtered set, so save it
 		//build word line "word|level|prematch|description"
-		// e.g. "BAMBOO|0|BOB,BOOB,...|n. 1 a mainly tropical giant woody grass of the subfamily Bambusidae..."
+		// e.g. "BAMBOO|0|BOB,BOMB,...|n. 1 a mainly tropical giant woody grass of the subfamily Bambusidae..."
 		//level may be 0 if not explicitly specified in originally loaded word list file
 		//description may be blank, in which case the pipe (|) divider need not be added
 
@@ -466,13 +491,17 @@ int Words2::saveWordMap(FILE *& fp, tWordMap &wmOrig, const tWordSet &wsFilt)
 
 		fprintf(fp, "%s|%d|", wrd._word.c_str(), level);
 			
-		if (wrd._prematch.size())
+		if (bPrematch)
 		{
+			// Save the position of the 
 			std::string prematch;
-			for (auto & word : wrd._prematch)
+			for (const auto & word : wrd._prematch)
 			{
 				if (word != wrd._word)
-					prematch += (prematch.length()?",":"") + word;
+				{
+					const auto ind = _mapAll.find(word);	//should NEVER fail to find a word
+					prematch += (prematch.length()?",":"") + std::to_string(ind->second._index);
+				}
 			}
 			fprintf(fp, "%s", prematch.c_str());
 		}
@@ -484,7 +513,7 @@ int Words2::saveWordMap(FILE *& fp, tWordMap &wmOrig, const tWordSet &wsFilt)
 	return count;
 }
 
-bool Words2::save(std::string outFile)
+bool Words2::save(std::string outFile, bool bPrematch)
 {
 	if (!outFile.length()) outFile = _wordFile;	//save back out to same file loaded
 
@@ -496,14 +525,29 @@ bool Words2::save(std::string outFile)
 		//now save filtered dictionary...
 		if (_bList) std::cout << "Writing..." << outFile << std::endl;
 
-		//loop through each word set and use _mapAll to output N.. 6.. 5.. 4.. 3.
-		//with full description and level value.
-		for (int i = TARGET_MAX; i >= SHORTW_MIN; --i)
+		if (bPrematch)
 		{
-			iout = saveWordMap(fp, _mapAll, _wordSet[i]);
-			itotal += iout;
-			if (_bList) std::cout << "Saved: " << iout << " " << i << " letter filtered words " << std::endl;
+			//loop through each word set and use _mapAll to output 3.. 4.. 5.. N.
+			//with full prematch list and description and level value.
+			for (int i = SHORTW_MIN; i <= TARGET_MAX; ++i)
+			{
+				iout = saveWordMap(fp, _mapAll, _wordSet[i], true);
+				itotal += iout;
+				if (_bList) std::cout << "Saved: " << iout << " " << i << " prematched letter filtered words" << std::endl;
+			}
 		}
+		else
+		{
+			//loop through each word set and use _mapAll to output N.. 6.. 5.. 4.. 3.
+			//with full description and level value.
+			for (int i = TARGET_MAX; i >= SHORTW_MIN; --i)
+			{
+				iout = saveWordMap(fp, _mapAll, _wordSet[i]);
+				itotal += iout;
+				if (_bList) std::cout << "Saved: " << iout << " " << i << " letter filtered words " << std::endl;
+			}
+		}
+
 		fclose(fp);
 
 		std::cout << std::endl << "Saved: " << itotal << " total filtered words " << std::endl;
