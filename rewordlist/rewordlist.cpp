@@ -85,8 +85,9 @@ int main(int argc, char* argv[])
 	std::string::size_type pos;
 	tWordSet xdxfFiles;
 	tWordSet txtFiles;
-	tWordSet txtInclude;
-	tWordSet txtExclude;
+	tWordSet txtIncludeFiles;
+	tWordSet txtExcludeFiles;
+	tWordSet txtDefinitionExcl;
 	const std::string default_outfile("rewordlist.txt");
 	const std::string default_outfile_rw2("rewordlist.rw2");
 	std::string outFile(default_outfile);
@@ -133,6 +134,13 @@ int main(int argc, char* argv[])
 				outFile = default_outfile_rw2;
 			continue;
 		}
+
+		if ("-e" == arg.substr(0, 2))    //e.g. "-eText"
+		{
+			txtDefinitionExcl.insert(arg.substr(2));
+			continue;
+		}
+
 		if ("-o" == arg.substr(0, 2))    //e.g. "-oOutputFile.txt"
 		{
 			outFile = arg.substr(2);
@@ -164,14 +172,14 @@ int main(int argc, char* argv[])
 		//allow multiple .include file
 		if (".include" == ext)
 		{
-			txtInclude.insert(arg);
+			txtIncludeFiles.insert(arg);
 			bHelp = false;	//valid input
 			continue;
 		}
 		//allow multiple .exclude file
 		if (".exclude" == ext)
 		{
-			txtExclude.insert(arg);
+			txtExcludeFiles.insert(arg);
 			bHelp = false;	//valid input
 			continue;
 		}
@@ -203,11 +211,11 @@ int main(int argc, char* argv[])
 
 		bool bSave = false;
 
-		if (!txtInclude.empty())
+		if (!txtIncludeFiles.empty())
 		{
 			std::cout << "Adding include list" << std::endl;
-			tWordSet::const_iterator it_txt = txtInclude.begin();
-			for (; it_txt != txtInclude.end(); ++it_txt)
+			tWordSet::const_iterator it_txt = txtIncludeFiles.begin();
+			for (; it_txt != txtIncludeFiles.end(); ++it_txt)
 			{
 				Words2 includeWords(*it_txt);
 				int iOrig = finalWords.size();
@@ -266,11 +274,11 @@ int main(int argc, char* argv[])
 			}
 			std::cout << "Added " << finalWords.size() - iOrig << " words using xdxf dictionary files" << std::endl;
 		}
-		if (!txtExclude.empty())
+		if (!txtExcludeFiles.empty())
 		{
 			std::cout << "Adding exclude list" << std::endl;
-			tWordSet::const_iterator it_txt = txtExclude.begin();
-			for (; it_txt != txtExclude.end(); ++it_txt)
+			tWordSet::const_iterator it_txt = txtExcludeFiles.begin();
+			for (; it_txt != txtExcludeFiles.end(); ++it_txt)
 			{
 				Words2 includeWords(*it_txt);
 				int iOrig = finalWords.size();
@@ -319,29 +327,30 @@ int main(int argc, char* argv[])
 	if (bHelp)
 	{
 		std::cout << "Utility (version 0.7) to generate rewordlist.txt for the reword game." << std::endl
-			<< "Useage:" << std::endl
-			<< "rewordlist [words.txt] [words.include] [words.exclude] [dictionary.xdxf|...] [-f] [-l] [-d] [-x] [-s] [-p] [-o<outputfile>]" << std::endl
-			<< std::endl
-			<< "  Params:  " << std::endl
-			<< "  words.txt is a simple one word per line wordlist, which may include |diff|def " << std::endl
-			<< "        (omit, if creating rewordlist.txt directly from xdxf)" << std::endl
-			//				<< "        (Also, can be rewordlist.txt from a prev. run to add xdxf etc, see readme)" << std::endl
-			<< "  words.include is a simple one word per line wordlist of words to force inclusion of.." << std::endl
-			<< "  words.exclude is a simple one word per line wordlist of words to exclude" << std::endl
-			<< "  dict.xdxf is the optional dictionary for word definitions" << std::endl
-			<< "        (if used exclusively ,may contain unwanted real names etc)" << std::endl
-			<< "  -f to force xdxf definition overwrite mode (replaces definition if new one found)" << std::endl
-			<< "  -l to force listing (verbose) mode" << std::endl
-			<< "  -d to force debug listing (messages) mode" << std::endl
-			<< "  -x to use .xdxf files for definitions only, else used to create .txt words" << std::endl
-			<< "  -s to auto generate scrabble scored words and place into easy/med/hard categories" << std::endl
-			<< "  -p to generate pre-matched words in the output dictionary (output to .rw2)" << std::endl
-			<< "  -o to name an output file e.g. -oNewDict.txt" << std::endl
-			<< std::endl
-			<< "e.g." << std::endl
-			<< "If just a xdxf file given, use that to create rewordlist.txt with definitions" << std::endl
-			<< "If just a wordlist txt file given, create just a filtered rewordlist.txt" << std::endl
-			<< "If a wordlist text file and a xdxf given, use both to create rewordlist.txt with definitions" << std::endl;
+				<< "Useage:" << std::endl
+				<< "rewordlist [words.txt] [words.include] [words.exclude] [dictionary.xdxf|...] [-f] [-l] [-d] [-x] [-s] [-p] [-e<text>] [-o<outputfile>]" << std::endl
+				<< std::endl
+				<< "  Params:  " << std::endl
+				<< "  words.txt is a simple one word per line wordlist, which may include |diff|def " << std::endl
+				<< "        (omit, if creating rewordlist.txt directly from xdxf)" << std::endl
+				//				<< "        (Also, can be rewordlist.txt from a prev. run to add xdxf etc, see readme)" << std::endl
+				<< "  words.include is a simple one word per line wordlist of words to force inclusion of.." << std::endl
+				<< "  words.exclude is a simple one word per line wordlist of words to exclude" << std::endl
+				<< "  dict.xdxf is the optional dictionary for word definitions" << std::endl
+				<< "        (if used exclusively ,may contain unwanted real names etc)" << std::endl
+				<< "  -f to force xdxf definition overwrite mode (replaces definition if new one found)" << std::endl
+				<< "  -l to force listing (verbose) mode" << std::endl
+				<< "  -d to force debug listing (messages) mode" << std::endl
+				<< "  -x to use .xdxf files for definitions only, else used to create .txt words" << std::endl
+				<< "  -s to auto generate scrabble scored words and place into easy/med/hard categories" << std::endl
+				<< "  -p to generate pre-matched words in the output dictionary (output to .rw2)" << std::endl
+				<< "  -e to exclude words based on specific text found in the word definition (e.g. abbr.)" << std::endl
+				<< "  -o to name an output file e.g. -oNewDict.txt" << std::endl
+				<< std::endl
+				<< "e.g." << std::endl
+				<< "If just a xdxf file given, use that to create rewordlist.txt with definitions" << std::endl
+				<< "If just a wordlist txt file given, create just a filtered rewordlist.txt" << std::endl
+				<< "If a wordlist text file and a xdxf given, use both to create rewordlist.txt with definitions" << std::endl;
 		return 0;
 	}
 
