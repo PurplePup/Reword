@@ -134,71 +134,11 @@ public:
 	int			getWordLevel() const { return _word._level; };		//curr word level
 	std::string getWordDesc() const { return _word._description; };	//curr word description
 
-	Words & operator+=(const Words &w)
-	{
-	    // Check for self-assignment
-	    if (this != &w)      // not same object, so add all of 'w' to 'this'
-	    {
-	    	//we must iterate through and assign, as there is a map and a vect to modify
-	    	//We can't just use map::insert(begin,end) as we need to check for existence and
-	    	//insert into vect if not there too.
-			tWordMap::const_iterator pos;
-            tWordMap::iterator foundpos;
-			for (pos = w._mapAll.begin(); pos != w._mapAll.end(); ++pos)
-			{
-                foundpos = this->_mapAll.find(pos->first);
-				//only add if not already exists - this saves us from searching the _vecTarget vector each time
-				if (foundpos == this->_mapAll.end())
-				{
-				    //check we don't overwrite a valid value with a blank, but anything valid overwrites
-					this->_mapAll[pos->first]._word = pos->second._word;
-					if (!pos->second._description.empty())
-                        this->_mapAll[pos->first]._description = pos->second._description;
-                    if (pos->second._level > 0)
-                        this->_mapAll[pos->first]._level = pos->second._level;
+	Words & operator+=(const Words &w);
+	Words operator+(const Words &other) const;
 
-					if ((pos->first.length() >= TARGET_MIN) && (pos->first.length() <= TARGET_MAX))  //is a 6to8 target word
-						this->_vecTarget.push_back(pos->first);	//so also add to valid 6to8 letter word vector
-				}
-			}
-		}
-		return *this;
-	}
-	Words operator+(const Words &other) const
-	{
-		return Words(*this) += other;	//call += operator overload (as it's already there)
-	}
-
-	Words & operator-=(const Words &w)
-	{
-	    // Check for self-assignment
-	    if (this != &w)      // not same object, so remove all of 'w' from 'this'
-		{
-			//iterate through and remove from vect too, time consuming but necessary
-			tWordMap::const_iterator pos;
-			for (pos = w._mapAll.begin(); pos != w._mapAll.end(); ++pos)
-			{
-				this->_mapAll.erase(pos->first);	//erase by value
-
-				//find the same word in the vect6 and erase it
-				tWordVect::iterator vpos;
-				for (vpos = this->_vecTarget.begin(); vpos != this->_vecTarget.end(); ++vpos)
-				{
-					if (*vpos == pos->first)
-					{
-						//std::cout << pos->first << " erased after " << n+1 << " reads" << std::endl;
-						this->_vecTarget.erase(vpos);
-						break;
-					}
-				}
-			}
-		}
-		return *this;
-	}
-	Words operator-(const Words &other) const
-	{
-		return Words(*this) -= other;	//call -= operator overload (as it's already there)
-	}
+	Words & operator-=(const Words &w);
+	Words operator-(const Words &other) const;
 
 protected:
 

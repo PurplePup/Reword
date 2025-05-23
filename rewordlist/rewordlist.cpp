@@ -210,15 +210,13 @@ int main(int argc, char* argv[])
 		finalWords.setDebug(bDebug);
 		finalWords.setAutoSkillUpd(bAutoSkillUpd);
 
-		bool bSave = false;
-
 		tWordSet allIncludeWords;
 		if (!txtIncludeFiles.empty())
 		{
 			std::cout << "Adding include list" << std::endl;
-			for (auto const& txt : txtIncludeFiles)
+			for (auto const& fileName : txtIncludeFiles)
 			{
-				Words2 includeWords(txt);
+				Words2 includeWords(fileName);
 				auto iOrig = finalWords.size();
 				finalWords += includeWords;	//add any forced include words
 
@@ -226,8 +224,9 @@ int main(int argc, char* argv[])
 				tWordSet ws = includeWords.getWordSet();
 				allIncludeWords.insert(ws.begin(), ws.end());
 
-				std::cout << "Included " << finalWords.size() - iOrig << " words from '" << txt << "'" << std::endl;
+				std::cout << "Included " << finalWords.size() - iOrig << " words from '" << fileName << "'" << std::endl;
 			}
+			finalWords += allIncludeWords;
 		}
 
 		if (!txtFiles.empty())
@@ -236,9 +235,9 @@ int main(int argc, char* argv[])
 			//Must be done before xdxf dictionaries as xdxf contain possible definitions
 			//for the words in the wordlist files.
 			auto iOrig = finalWords.size();
-			for (auto const& txt : txtFiles)
+			for (auto const& fileName : txtFiles)
 			{
-				std::cout << "Adding wordlist .txt file '" << txt << "'" << std::endl;
+				std::cout << "Adding wordlist .txt file '" << fileName << "'" << std::endl;
 				Words2 txtWords;
 				if (bExcludeByDef)
 				{
@@ -247,7 +246,7 @@ int main(int argc, char* argv[])
 					txtWords.setDefinitionExcl(txtDefinitionExcl, allIncludeWords);
 				}
 
-				if (txtWords.load(txt))
+				if (txtWords.load(fileName))
 				{
 					if (bList) std::cout << "Inserting " << txtWords.size() << " words for processing" << std::endl;
 					finalWords += txtWords;	//insert into main list (no dups)
@@ -260,19 +259,19 @@ int main(int argc, char* argv[])
 		{
 			//load all the named xdxf dictionary/definition files
 			auto iOrig = finalWords.size();
-			for (auto const& xdxf : xdxfFiles)
+			for (auto const& fileName : xdxfFiles)
 			{
 				Words2 xdxfWords;
 
-				std::cout << "Adding .xdxf dictionary file '" << xdxf << "' ";
+				std::cout << "Adding .xdxf dictionary file '" << fileName << "' ";
 				if (bXdxfDefOnly && finalWords.size() > 0)
 				{
 					std::cout << "for definitions only";
-					xdxfWords = finalWords; //preload with wordlist to populate definiitions
+					xdxfWords = finalWords; //preload with wordlist to populate definitions
 				}
 				std::cout << std::endl;
 
-				if (xdxfWords.xdxfBuildDict(xdxf, bForceDef, bXdxfDefOnly))
+				if (xdxfWords.xdxfBuildDict(fileName, bForceDef, bXdxfDefOnly))
 				{
 					if (bXdxfDefOnly)
 					{
@@ -291,28 +290,22 @@ int main(int argc, char* argv[])
 		if (!txtExcludeFiles.empty())
 		{
 			std::cout << "Adding exclude list" << std::endl;
-			for (auto const& txt : txtExcludeFiles)
+			for (auto const& fileName : txtExcludeFiles)
 			{
-				Words2 includeWords(txt);
+				Words2 excludeWords(fileName);
 				auto iOrig = finalWords.size();
-				finalWords -= includeWords;	//remove any forced exclude words
-				std::cout << "Excluded " << iOrig - finalWords.size() << " words from '" << txt << "'" << std::endl;
+				finalWords -= excludeWords;	//remove any forced exclude words
+				std::cout << "Excluded " << iOrig - finalWords.size() << " words from '" << fileName << "'" << std::endl;
 			}
 		}
 
 		if (finalWords.size() == 0)
 		{
 			std::cout << "Nothing to output." << std::endl;
-			bSave = false;
 		}
 		else
 		{
 			std::cout << "Output " << finalWords.size() << " words" << std::endl;
-			bSave = true;
-		}
-
-		if (bSave)
-		{
 			//now all list and xdxf words added internally, filter out words
 			//not needed due to not found in bigger words etc
 			finalWords.filterGameWords();

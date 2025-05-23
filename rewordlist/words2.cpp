@@ -66,6 +66,82 @@ Words2::~Words2()
 	xdxfCloseDict();
 }
 
+Words2 & Words2::operator = (const Words2 &w2)
+{
+	// Check for self-assignment
+	if (this != &w2)      // not same object, so add all of 'w2' to 'this'
+	{
+		this->Words::operator=(w2);	//call Words overload first
+
+		_doc = 0;   //shouldn't copy open file handle
+
+		_countXdxfWords = w2._countXdxfWords;
+		_countXdxfSkipped = w2._countXdxfSkipped;
+		_countXdxfMatched = w2._countXdxfMatched;
+		_countXdxfMissing = w2._countXdxfMissing;
+		_bAutoSkillUpd = w2._bAutoSkillUpd;
+
+		for (int i = TARGET_MAX; i >= SHORTW_MIN; --i)
+		{
+			_wordSet[i] = w2._wordSet[i];
+		}
+	}
+	return *this;
+}
+Words2 & Words2::operator += (const Words2 &w2)
+{
+	// Check for self-assignment
+	if (this != &w2)      // not same object, so add all of 'w2' to 'this'
+	{
+		this->Words::operator+=(w2);	//call Words += operator overload first
+		for (int i = TARGET_MAX; i >= SHORTW_MIN; --i)
+		{
+			_wordSet[i].insert(w2._wordSet[i].begin(), w2._wordSet[i].end());
+		}
+	}
+	return *this;
+}
+Words2 & Words2::operator += (const tWordSet &ws)
+{
+	for (auto const& w: ws)
+	{
+		this->_mapAll.emplace(w, DictWord());
+
+		if (w.length() >= SHORTW_MIN && w.length() <= TARGET_MAX)
+		{
+			_wordSet[w.length()].insert(w);
+		}
+	}
+	return *this;
+}
+Words2 Words2::operator+(const Words2 &other) const
+{
+	return Words2(*this) += other;	//call += operator overload (as it's already there)
+}
+
+Words2 & Words2::operator -= (const Words2 &w2)
+{
+	// Check for self-assignment
+	if (this != &w2)      // not same object, so del all of 'w2' from 'this'
+	{
+		this->Words::operator-=(w2);	//call Words overload first
+		for (int i = TARGET_MAX; i >= SHORTW_MIN; --i)
+		{
+			tWordSet temp;
+			std::set_difference( _wordSet[i].begin(), _wordSet[i].end(),
+								 w2._wordSet[i].begin(),w2._wordSet[i].end(),
+								 std::inserter(temp, temp.begin()));
+			temp.swap(_wordSet[i]);
+		}
+
+	}
+	return *this;
+}
+Words2 Words2::operator-(const Words2 &other) const
+{
+	return Words2(*this) -= other;	//call -= operator overload (as it's already there)
+}
+
 bool Words2::xdxfOpenDict(const std::string& dictFile)
 {
 	if (!dictFile.length()) return false;
@@ -249,15 +325,16 @@ bool Words2::xdxfBuildDict(const std::string& dictFile, bool bUpdateDef, bool bX
 //build the word sets from the full list using the target list as the source
 void Words2::addWordsToSets()
 {
+	const int iMod = 200;
 	int iCount = _vecTarget.size();
-	int iDisplayMod = iCount / 200;
+	int iDisplayMod = iCount / std::min(iMod, iCount+1);
 
 	std::cout << std::endl << std::unitbuf; // enable automatic flushing
 	std::cout << "Filtering " << _vecTarget.size() << " targets..." << std::endl;
 
 	for (auto const& target : _vecTarget)
 	{
-		if (!(iCount-- % iDisplayMod))
+		if (iCount > iMod && !(iCount-- % iDisplayMod))
 			std::cout << "\r" << "Remaining: " << iCount << "       ";
 
 		//make sure its a word length we support (say 3..8)
