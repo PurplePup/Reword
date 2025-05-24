@@ -621,10 +621,10 @@ int Words2::saveWordMap(FILE *& fp, const tWordMap &wmOrig, const tWordSet &wsFi
 					prematch += (prematch.length()?",":"") + std::to_string(ind->second._index);
 				}
 			}
-			fprintf(fp, "%s", prematch.c_str());
+			fprintf(fp, "%s|", prematch.c_str());
 		}
 		if (wrd._description.length())
-			fprintf(fp, "|%s",wrd._description.c_str());
+			fprintf(fp, "%s",wrd._description.c_str());
 		fprintf(fp, "\n");
 		++count;
 	}
