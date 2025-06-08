@@ -78,7 +78,7 @@ using namespace std;
 int main(int argc, char* argv[])
 {
 	bool bList(false), bDebug(false), bForceDef(false), bXdxfDefOnly(false), bAutoSkillUpd(false), bPrematch(false);
-	bool bHelp(true), bHelpForce(false), bExcludeByDef(false);
+	bool bHelp(true), bHelpForce(false), bExcludeByDef(false), bTrialOutput(false);
 	std::string::size_type pos;
 	tWordSet xdxfFiles;
 	tWordSet txtFiles;
@@ -88,6 +88,8 @@ int main(int argc, char* argv[])
 	const std::string default_outfile("rewordlist.txt");
 	const std::string default_outfile_rw2("rewordlist.rw2");
 	std::string outFile(default_outfile);
+	int trialWordCount = 0;
+	std::string trialWordFile;
 
 	//v. simple loop to load cmd line args - in any order,
 	//but must be separately 'dashed' ie. -l -f not -lf
@@ -124,7 +126,7 @@ int main(int argc, char* argv[])
 			bAutoSkillUpd = true;    //update word scrabble skill value on any word list input
 			continue;
 		}
-		if ("-p" == arg)		// prematch words and add to output 
+		if ("-p" == arg)		// prematch words and add to output
 		{
 			bPrematch = true;
 			if (outFile == default_outfile)
@@ -142,13 +144,41 @@ int main(int argc, char* argv[])
 			continue;
 		}
 
+		if ("-t" == arg.substr(0, 2))    //n words to output, or file list of words to output
+		{
+			const std::string arg2 = arg.substr(2);
+			if (!arg2.length())
+			{
+				std::cout << std::endl << "No numeric or text input file given for patam t" << std::endl;
+				exit(0);
+			}
+			try
+			{
+				int len = std::stoi(arg2);
+				if (len <= 0)
+				{
+					std::cout << std::endl << "Numeric value " << len << "out of range for patam t (1-n)" << std::endl;
+					exit(0);
+				}
+				trialWordCount = len;
+			}
+			catch (const std::exception& e)
+			{
+				trialWordFile = arg2;
+			}
+			bTrialOutput = true;
+			continue;
+		}
 		if ("-o" == arg.substr(0, 2))    //e.g. "-oOutputFile.txt"
 		{
-			outFile = arg.substr(2);
+			if (arg.substr(2).length())
+				outFile = arg.substr(2);
+			else
+				std::cout << std::endl << "Output filename not specified, defualting to " << outFile << std::endl;
 			continue;
 		}
 		pos = arg.find_last_of('.');		//find the last period for file extension
-		if (pos == string::npos) continue;	//unknown (doesnt end in a file extension)
+		if (pos == string::npos) continue;	//unknown (doesn't end in a file extension)
 		std::string ext(arg.substr(pos));
 
 		//allow multiple input .xdxf files
@@ -305,10 +335,34 @@ int main(int argc, char* argv[])
 		}
 		else
 		{
-			std::cout << "Output " << finalWords.size() << " words" << std::endl;
-			//now all list and xdxf words added internally, filter out words
-			//not needed due to not found in bigger words etc
-			finalWords.filterGameWords();
+			std::cout << "Output from " << finalWords.size() << " words" << std::endl;
+			if (bTrialOutput)
+			{
+				if (trialWordCount)
+				{
+					std::cout << "Trial dictionary filter for " << trialWordCount << " words." << std::endl;
+					if (!finalWords.trialFilterByCount(trialWordCount))
+					{
+						std::cout << "Trial dictionary filter (-t<" << trialWordCount << ">) produced no output." << std::endl;
+						exit(0);
+					}
+				}
+				else
+				{
+					std::cout << "Trial dictionary filter for words in file " << trialWordFile << std::endl;
+					if (!finalWords.trialFilterByFile(trialWordFile))
+					{
+						std::cout << "Trial dictionary filter (-t<" << trialWordFile << ">) produced no output." << std::endl;
+						exit(0);
+					}
+				}
+			}
+			else
+			{
+				//now all list and xdxf words added internally, filter out words
+				//not needed due to not found in bigger words etc
+				finalWords.filterGameWords();
+			}
 
 			// discover and prepare for saving, any prematch words
 			// so game doesn't have to find the list of match words on the fly
@@ -334,7 +388,7 @@ int main(int argc, char* argv[])
 	{
 		std::cout << "Utility (version 0.7) to generate rewordlist.txt for the reword game." << std::endl
 				<< "Useage:" << std::endl
-				<< "rewordlist [words.txt] [words.include] [words.exclude] [dictionary.xdxf|...] [-f] [-l] [-d] [-x] [-s] [-p] [-e<text>] [-o<outputfile>]" << std::endl
+				<< "rewordlist [<words>.txt] [<words>.include] [<words>.exclude] [<dictionary>.xdxf|...] [-f] [-l] [-d] [-x] [-s] [-p] [-e<text>] [-t[<n>|<filename>]] [-o<outputfile>]" << std::endl
 				<< std::endl
 				<< "  Params:  " << std::endl
 				<< "  words.txt is a simple one word per line wordlist, which may include |diff|def " << std::endl
@@ -350,7 +404,8 @@ int main(int argc, char* argv[])
 				<< "  -x to use .xdxf files for definitions only, else used to create .txt words" << std::endl
 				<< "  -s to auto generate scrabble scored words and place into easy/med/hard categories" << std::endl
 				<< "  -p to generate pre-matched words in the output dictionary (output to .rw2)" << std::endl
-				<< "  -e to exclude words based on specific text found in the word definition (e.g. abbr.)" << std::endl
+				<< "  -e<param> to exclude words based on specific text found in the word definition (e.g. abbr.)" << std::endl
+				<< "  -t<param> to build a trial dictionary output of <n> words at random from words.txt or specify a wordslist input <filename>" << std::endl
 				<< "  -o to name an output file e.g. -oNewDict.txt" << std::endl
 				<< std::endl
 				<< "e.g." << std::endl

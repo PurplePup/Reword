@@ -42,10 +42,10 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <ios>
 #include <iostream>
 #include <stdio.h>
-
 #include <regex>
 #include <algorithm>
 #include <array>
+#include <random>
 
 #include "words2.h"
 #include "../reword/helpers.h"	//string helpers etc
@@ -337,28 +337,28 @@ void Words2::addWordsToSets()
 		if (iCount > iMod && !(iCount-- % iDisplayMod))
 			std::cout << "\r" << "Remaining: " << iCount << "       ";
 
-		//make sure its a word length we support (say 3..8)
+		//make sure it's a word length we support (say 3..8)
 		if (target.length() >= SHORTW_MIN && target.length() <= TARGET_MAX)
 		{
 			clearCurrentWord();
 			if (checkCurrentWordTarget(target))	//finds shorter words in target word
 			{
-				// check if any exclusion by definition words also exclude the word
-				if (!_definitionExclSet.empty())
-				{
-					auto p = _mapAll.find(target);
-					if (p != _mapAll.end())
-					{
-						for (auto w : _definitionExclSet)
-						{
-							if (p->second._description.find(w) != std::string::npos)
-							{
-
-							}
-
-						}
-					}
-				}
+				// // check if any exclusion by definition words also exclude the word
+				// if (!_definitionExclSet.empty())
+				// {
+				// 	auto p = _mapAll.find(target);
+				// 	if (p != _mapAll.end())
+				// 	{
+				// 		for (auto w : _definitionExclSet)
+				// 		{
+				// 			if (p->second._description.find(w) != std::string::npos)
+				// 			{
+				//
+				// 			}
+				//
+				// 		}
+				// 	}
+				// }
 
 				//add to valid words - if within word length size required
 				for (auto const& word : _wordsInTarget)
@@ -385,11 +385,52 @@ bool Words2::filterGameWords()
 	return true;
 }
 
+// Find n target words and include them and all associative words and return the list
+bool Words2::trialFilterByCount(int trialWordCount)
+{
+	int filtered = 0;
+	int countdown = trialWordCount;
+
+	for (auto set : _wordSet)
+		set.clear();
+
+	std::random_device rd;
+	std::shuffle(_vecTarget.begin(), _vecTarget.end(), rd);
+
+	for (const auto& target : _vecTarget)
+	{
+		if (countdown <= 0)
+			break;
+
+		if (target.length() < TARGET_MIN)
+			continue;
+
+		countdown--;
+
+		clearCurrentWord();
+		findWordsInWordTarget(_mapAll, target.c_str());	//side effect - fills _nWords[] & _wordsInTarget
+		for (auto const& [word, found] : _wordsInTarget)
+		{
+			_wordSet[word.length()].insert(word);
+			filtered++;
+		}
+	}
+	return filtered > 0;
+}
+// Find target words from the text file and include thenm and all associative words and return the list
+bool Words2::trialFilterByFile(const std::string& trialWordFile)
+{
+	return false;
+}
+
+
+
 // Previously findWordsInWordTarget() was called per target word during play, but due to 
 // platforms with limited processing power, we will call it on all target words and output 
 // these found words in the loadable dictionary itself rather than calculate live.
 // new dict line format:
 // TARGET | level | WORD[,WORD,WORD,...] | description
+// Dictionary file must have extension .rw2 to distinguish the new line format
 bool Words2::prematch() 
 {
 	std::cout << std::endl << std::unitbuf; // enable automatic flushing

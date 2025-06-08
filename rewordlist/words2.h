@@ -27,6 +27,8 @@ public:
 
 	//build the output dictionary from all loaded words
 	bool filterGameWords();
+	bool trialFilterByCount(int trialWordCount);
+	bool trialFilterByFile(const std::string& trialWordFile);
 
 	// iterate over the current dictionary and assign all match words to each 'reword' word 
 	bool prematch();
@@ -40,8 +42,8 @@ public:
 	bool save(std::string outFile, bool bPrematch);
 
 	Words2 & operator = (const Words2 &w2);
-	Words2 & operator += (const Words2 &w2);
-	Words2 & operator += (const tWordSet &ws);
+	Words2 & operator += (const Words2 &w2);		// add all the important Word2 member vars
+	Words2 & operator += (const tWordSet &ws);		// add just a word list/set
 	Words2 operator+(const Words2 &other) const;
 
 	Words2 & operator -= (const Words2 &w2);
@@ -73,7 +75,7 @@ private:
 
 	tWordSet _wordSet[TARGET_MAX+1];	//use 1..n for actual word length (as index) during rewordlist.txt build
 
-	tWordSet _definitionExclSet;		// list of words to check definitions for and exclude words if found (e.g. abbr.)
+	tWordSet _definitionExclSet;		// list of words to check definitions for and exclude words if found (e.g. "abbr." "prefix.")
 	tWordSet _allIncludeWords;			// list of forced include words (used in definition exclusion tests)
 
     bool    _bAutoSkillUpd = false;     //update the word skill level with any non 0 value from any list
