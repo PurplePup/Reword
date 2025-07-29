@@ -29,6 +29,7 @@ public:
 	bool filterGameWords();
 	bool trialFilterByCount(int trialWordCount);
 	bool trialFilterByFile(const std::string& trialWordFile);
+	void applyAllWords();
 
 	// iterate over the current dictionary and assign all match words to each 'reword' word 
 	bool prematch();
@@ -39,7 +40,7 @@ public:
 				unsigned int rndSeed = 0,				//duplicates, too many etc
 				unsigned int startAtWord = 0) override;
 
-	bool save(std::string outFile, bool bPrematch);
+	bool save(std::string outFile, bool bPrematch, const std::string& comment = std::string());
 
 	Words2 & operator = (const Words2 &w2);
 	Words2 & operator += (const Words2 &w2);		// add all the important Word2 member vars
@@ -52,7 +53,10 @@ public:
 	[[nodiscard]] tWordSet getWordSet() const;
 
 	void setAutoSkillUpd(bool bOn = true) { _bAutoSkillUpd = bOn; }
+	int setSkillLevelFromWordlist(int level, const std::string& wordlist);
+	
 	void setDefinitionExcl(const tWordSet& defExcl, const tWordSet& incWords) { _definitionExclSet = defExcl; _allIncludeWords = incWords; };
+	void showLevelStatsCounts();
 
 protected:
 

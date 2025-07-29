@@ -70,6 +70,8 @@ Licence:		This program is free software; you can redistribute it and/or modify
 
 using namespace std;
 
+using tLevelWordlistMap = std::map<int, std::string>;
+
 //undefine sdl main definition if sdl has been included in a embedded include
 //otherwise sdl defines main as SDL_Main and linker fails to find _main
 #ifdef _SDL_H
@@ -77,14 +79,17 @@ using namespace std;
 #endif
 int main(int argc, char* argv[])
 {
-	bool bList(false), bDebug(false), bForceDef(false), bXdxfDefOnly(false), bAutoSkillUpd(false), bPrematch(false);
-	bool bHelp(true), bHelpForce(false), bExcludeByDef(false), bTrialOutput(false);
+	bool bVerbose(false), bDebug(false), bForceDef(false), bXdxfDefOnly(false), bAutoSkillUpd(false), bPrematch(false);
+	bool bHelp(true), bHelpForce(false), bExcludeByDef(false), bTrialOutput(false), bSkillUpdate(false), bSkillResetZero(false);
+	bool bNoFiltering(false);
+
 	std::string::size_type pos;
 	tWordSet xdxfFiles;
 	tWordSet txtFiles;
 	tWordSet txtIncludeFiles;
 	tWordSet txtExcludeFiles;
 	tWordSet txtDefinitionExcl;
+	tLevelWordlistMap mapLevelWordlist;
 	const std::string default_outfile("rewordlist.txt");
 	const std::string default_outfile_rw2("rewordlist.rw2");
 	std::string outFile(default_outfile);
@@ -93,17 +98,20 @@ int main(int argc, char* argv[])
 
 	//v. simple loop to load cmd line args - in any order,
 	//but must be separately 'dashed' ie. -l -f not -lf
+	std::string save_comment;
 	for (int i = 1; i < argc; ++i)
 	{
+		save_comment += std::string(argv[i]) + " ";
+
 		std::string arg = argv[i];
 		if ("--help" == arg)
 		{
 			bHelp = bHelpForce = true;  //show help page
 			continue;
 		}
-		if ("-l" == arg)
+		if ("-v" == arg)
 		{
-			bList = true;       //display more debug info
+			bVerbose = true;       //display more debug info
 			continue;
 		}
 		if ("-d" == arg)
@@ -126,6 +134,11 @@ int main(int argc, char* argv[])
 			bAutoSkillUpd = true;    //update word scrabble skill value on any word list input
 			continue;
 		}
+		if ("-n" == arg)
+		{
+			bNoFiltering = true;    // prevent post processing of words loaded
+			continue;
+		}
 		if ("-p" == arg)		// prematch words and add to output
 		{
 			bPrematch = true;
@@ -144,12 +157,15 @@ int main(int argc, char* argv[])
 			continue;
 		}
 
-		if ("-t" == arg.substr(0, 2))    //n words to output, or file list of words to output
+		// n words to output, or file list of words to output
+		// -t<param>
+		// where <param> is a numeric value for the number of words to export
+		if ("-t" == arg.substr(0, 2))
 		{
 			const std::string arg2 = arg.substr(2);
 			if (!arg2.length())
 			{
-				std::cout << std::endl << "No numeric or text input file given for patam t" << std::endl;
+				std::cout << std::endl << "No numeric or text input file given for param t" << std::endl;
 				exit(0);
 			}
 			try
@@ -157,7 +173,7 @@ int main(int argc, char* argv[])
 				int len = std::stoi(arg2);
 				if (len <= 0)
 				{
-					std::cout << std::endl << "Numeric value " << len << "out of range for patam t (1-n)" << std::endl;
+					std::cout << std::endl << "Numeric value " << len << "out of range for param t (1-n)" << std::endl;
 					exit(0);
 				}
 				trialWordCount = len;
@@ -169,7 +185,48 @@ int main(int argc, char* argv[])
 			bTrialOutput = true;
 			continue;
 		}
-		if ("-o" == arg.substr(0, 2))    //e.g. "-oOutputFile.txt"
+	
+		// -l<n>,<wordlist>
+		// Set level of word difficulty <n>based on wordlist filename supplied
+		if ("-l" == arg.substr(0,2))
+		{
+			const std::string arg2 = arg.substr(2);		// number,filename
+			if (!arg2.length())
+			{
+				std::cout << std::endl << "No numeric or text input file given for param -l should be -l<n>,<filename>" << std::endl;
+				exit(0);
+			}
+			std::string::size_type pos = arg2.find(",");
+			if (pos != std::string::npos)
+			{
+				std::string strLevel = arg2.substr(0, pos-2);	// just the <num> after -l and before ,
+				const int level = std::stoi(strLevel);
+				if (level < 0 || level > 3)
+				{
+					std::cout << std::endl << "Level specified '" << strLevel << "' is out of range (0-3)" << std::endl;
+					exit(0);
+				}
+				std::string strWordlist = arg2.substr(pos + 1);
+				mapLevelWordlist[level] = strWordlist;
+				bSkillUpdate = true;
+			}
+			else
+			{
+				if (arg2 == "0")
+				{
+					bSkillResetZero = true;
+				}
+				else
+				{
+					std::cout << std::endl << "Missing ',' delimited param for -l should be -l<n>,<filename>" << std::endl;
+					exit(0);
+				}
+			}
+		}
+		
+		// Output file
+		// e.g. "-oOutputFile.txt"
+		if ("-o" == arg.substr(0, 2))
 		{
 			if (arg.substr(2).length())
 				outFile = arg.substr(2);
@@ -177,19 +234,22 @@ int main(int argc, char* argv[])
 				std::cout << std::endl << "Output filename not specified, defualting to " << outFile << std::endl;
 			continue;
 		}
+
+		// finally check for any text files on the command line (that are not part of another -flag)
+		const bool bIsFlag = (arg[0] == '-');
 		pos = arg.find_last_of('.');		//find the last period for file extension
 		if (pos == string::npos) continue;	//unknown (doesn't end in a file extension)
 		std::string ext(arg.substr(pos));
 
 		//allow multiple input .xdxf files
-		if (".xdxf" == ext)
+		if (!bIsFlag && ".xdxf" == ext)
 		{
 			xdxfFiles.insert(arg);
 			bHelp = false;	//valid input
 			continue;
 		}
 		//allow multiple input .txt files
-		if (".txt" == ext)
+		if (!bIsFlag && ".txt" == ext)
 		{
 			if (strcasecmp(arg.c_str(), outFile.c_str()) == 0)
 			{
@@ -201,14 +261,14 @@ int main(int argc, char* argv[])
 			continue;
 		}
 		//allow multiple .include file
-		if (".include" == ext)
+		if (!bIsFlag && ".include" == ext)
 		{
 			txtIncludeFiles.insert(arg);
 			bHelp = false;	//valid input
 			continue;
 		}
 		//allow multiple .exclude file
-		if (".exclude" == ext)
+		if (!bIsFlag && ".exclude" == ext)
 		{
 			txtExcludeFiles.insert(arg);
 			bHelp = false;	//valid input
@@ -233,14 +293,13 @@ int main(int argc, char* argv[])
 
 	if (!bHelp)
 	{
-		std::cout << "Working..." << std::endl;
-
 		Words2 finalWords;
-		finalWords.setList(bList);
+		finalWords.setList(bVerbose);
 		finalWords.setDebug(bDebug);
 		finalWords.setAutoSkillUpd(bAutoSkillUpd);
-
 		tWordSet allIncludeWords;
+
+		std::cout << "Working..." << std::endl;
 		if (!txtIncludeFiles.empty())
 		{
 			std::cout << "Adding include list" << std::endl;
@@ -278,7 +337,7 @@ int main(int argc, char* argv[])
 
 				if (txtWords.load(fileName))
 				{
-					if (bList) std::cout << "Inserting " << txtWords.size() << " words for processing" << std::endl;
+					if (bVerbose) std::cout << "Inserting " << txtWords.size() << " words for processing" << std::endl;
 					finalWords += txtWords;	//insert into main list (no dups)
 				}
 			}
@@ -309,7 +368,7 @@ int main(int argc, char* argv[])
 					}
 					else
 					{
-						if (bList) std::cout << "Inserting " << xdxfWords.size() << " words from xdxf file" << std::endl;
+						if (bVerbose) std::cout << "Inserting " << xdxfWords.size() << " words from xdxf file" << std::endl;
 						finalWords += xdxfWords;	//insert into main list (no dups)
 					}
 				}
@@ -329,6 +388,18 @@ int main(int argc, char* argv[])
 			}
 		}
 
+		if (bSkillUpdate)
+		{
+			for (auto const& [level, wordlist]: mapLevelWordlist)
+			{
+				finalWords.setSkillLevelFromWordlist(level, wordlist);
+			}
+		}
+		else if (bSkillResetZero)
+		{
+			finalWords.setSkillLevelFromWordlist(0, std::string());
+		}
+		
 		if (finalWords.size() == 0)
 		{
 			std::cout << "Nothing to output." << std::endl;
@@ -359,10 +430,15 @@ int main(int argc, char* argv[])
 			}
 			else
 			{
-				//now all list and xdxf words added internally, filter out words
-				//not needed due to not found in bigger words etc
-				finalWords.filterGameWords();
+				if (bNoFiltering)
+					// no filtering required, maybe no words added or changed
+					finalWords.applyAllWords();
+				else
+					// now all list and xdxf words added internally, filter out words
+					// not needed due to not found in bigger words etc
+					finalWords.filterGameWords();
 			}
+			finalWords.showLevelStatsCounts();
 
 			// discover and prepare for saving, any prematch words
 			// so game doesn't have to find the list of match words on the fly
@@ -371,8 +447,8 @@ int main(int argc, char* argv[])
 				finalWords.prematch();
 			}
 
-			//save it
-			if (finalWords.save(outFile, bPrematch))
+			//save it with a comment of the program arguments
+			if (finalWords.save(outFile, bPrematch, save_comment))
 			{
 				std::cout << std::endl << "Created '" << outFile << "'";
 				//std::copy( txtFiles.begin(), txtFiles.end(), std::ostream_iterator< std::string >( std::cout, "," ) );
@@ -399,13 +475,16 @@ int main(int argc, char* argv[])
 				<< "  dict.xdxf is the optional dictionary for word definitions" << std::endl
 				<< "        (if used exclusively ,may contain unwanted real names etc)" << std::endl
 				<< "  -f to force xdxf definition overwrite mode (replaces definition if new one found)" << std::endl
-				<< "  -l to force listing (verbose) mode" << std::endl
+				<< "  -v to force listing (verbose) mode" << std::endl
 				<< "  -d to force debug listing (messages) mode" << std::endl
 				<< "  -x to use .xdxf files for definitions only, else used to create .txt words" << std::endl
 				<< "  -s to auto generate scrabble scored words and place into easy/med/hard categories" << std::endl
 				<< "  -p to generate pre-matched words in the output dictionary (output to .rw2)" << std::endl
+				<< "  -n no post filtering, just save input words after any other modifiers run against the list" << std::endl
 				<< "  -e<param> to exclude words based on specific text found in the word definition (e.g. abbr.)" << std::endl
 				<< "  -t<param> to build a trial dictionary output of <n> words at random from words.txt or specify a wordslist input <filename>" << std::endl
+				<< "  -l<level>,<wordlist> to set difficulty level values with a wordlist file of the level specified (e.g.  -l1,wordlist.txt for level 1=easy)" << std::endl
+				<< "    -l0 will reset all word levels in the output file to 0" << std::endl
 				<< "  -o to name an output file e.g. -oNewDict.txt" << std::endl
 				<< std::endl
 				<< "e.g." << std::endl

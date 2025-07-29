@@ -54,9 +54,14 @@ LDFLAGS = -L/usr/lib -L/usr/lib/x86_64-linux-gnu
 ## targets
 ##########
 
-all: prep release
+all: \
+	prep \
+	release
 
-alldebug: prep debug
+alldebug: \
+	prep \
+	debug \
+	postcopy
 
 ## Debug rules
 ##############
@@ -86,6 +91,10 @@ $(RELDIR)/%.o: %.cpp
 
 prep:
 	@mkdir -p $(DBGDIR)/tinyxml $(RELDIR)/tinyxml
+
+
+postcopy:
+	cp -u $(DBGBIN) ~/bin
 
 ## clean up rules
 #################

@@ -46,8 +46,12 @@ Licence:		This program is free software; you can redistribute it and/or modify
 #include <algorithm>
 #include <array>
 #include <random>
+#include <iterator>
 
 #include "words2.h"
+
+#include <iomanip>
+
 #include "../reword/helpers.h"	//string helpers etc
 
 
@@ -385,13 +389,22 @@ bool Words2::filterGameWords()
 	return true;
 }
 
+// Simply transfer all words loaded into the valid word sets fore later saving or further filtering
+void Words2::applyAllWords()
+{
+	for (auto const& [word, found] : _mapAll)
+	{
+		_wordSet[word.length()].insert(word);
+	}
+}
+
 // Find n target words and include them and all associative words and return the list
 bool Words2::trialFilterByCount(int trialWordCount)
 {
 	int filtered = 0;
 	int countdown = trialWordCount;
 
-	for (auto set : _wordSet)
+	for (auto& set : _wordSet)
 		set.clear();
 
 	std::random_device rd;
@@ -537,7 +550,7 @@ int Words2::calcScrabbleSkillLevel(const std::string& word)
     //count up the letter score
     int iTotal(0);
     for (int i = 0; i < static_cast<int>(out.length()); ++i) iTotal+=scores[out[i]-65];   //A-Z
-    //gives a score between 6 (smalest re-word of all 1's) and 80 (largest 8 letter re-word of all 10's)
+    //gives a score between 6 (smallest re-word of all 1's) and 80 (largest 8 letter re-word of all 10's)
 
     //need to fine tune the distribution and therfore thresholds
     const int score = (iTotal < SCORE_EASY_THRESHOLD)? 1 : (iTotal < SCORE_MED_THRESHOLD) ? 2 : 3;
@@ -672,7 +685,7 @@ int Words2::saveWordMap(FILE *& fp, const tWordMap &wmOrig, const tWordSet &wsFi
 	return count;
 }
 
-bool Words2::save(std::string outFile, bool bPrematch)
+bool Words2::save(std::string outFile, bool bPrematch, const std::string& comment)
 {
 	if (!outFile.length()) outFile = _wordFile;	//save back out to same file loaded
 
@@ -681,6 +694,13 @@ bool Words2::save(std::string outFile, bool bPrematch)
 	{
 		int iout = 0;
 		int itotal = 0;
+
+		auto t = std::time(nullptr);
+		auto tm = *std::localtime(&t);
+		std::stringstream ss;
+		ss << std::put_time(&tm, "%d-%m-%Y %H:%M:%S");
+		fprintf(fp, "# [%s] %s\n", ss.str().c_str(), comment.c_str());
+
 		//now save filtered dictionary...
 		if (_bList) std::cout << "Writing..." << outFile << std::endl;
 
@@ -744,3 +764,97 @@ tWordSet Words2::getWordSet() const
 	}
 	return ws;
 }
+
+int Words2::setSkillLevelFromWordlist(int level, const std::string& wordlist)
+{
+	std::vector<std::string> words;
+	std::string lnwrd;
+	int count = 0;
+	int total = 0;
+
+	if (level == 0 and wordlist.empty())
+	{
+		for (auto& [word, dict]: _mapAll)
+		{
+			dict._level = 0;
+			count++;
+		}
+		return count;
+	}
+
+	std::cout << "Skill: Opening level " << level << " wordlist " << wordlist << std::endl;
+	std::ifstream ifs1 (wordlist.c_str(), std::ifstream::in);	//open the file
+	if (ifs1.is_open() && !ifs1.eof())
+	{
+		while (std::getline(ifs1, lnwrd))
+		{
+			total++;
+			pptxt::trim(lnwrd, " \r\n\t");
+			pptxt::makeUpper(lnwrd);
+			const size_t all_alpha = lnwrd.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+			if (all_alpha == std::string::npos &&
+			    lnwrd.length() >= SHORTW_MIN and lnwrd.length() <= TARGET_MAX )
+			{
+				count++;
+				words.emplace_back(lnwrd);
+			}
+		}
+	}
+	else
+	{
+		std::cout << "Skill: !! Failed to load " << wordlist << std::endl;
+		return 0;
+	}
+	ifs1.close();
+	std::cout << "Skill: Loaded " << count << " words of " << total << std::endl;
+
+	count = 0;
+	for (const auto& word: words)
+	{
+		auto it = _mapAll.find(word);
+		if (it != _mapAll.end())
+		{
+			// only update words with no level already set
+			if (it->second._level == 0)
+			{
+				count++;
+				it->second._level = level;
+			}
+		}
+	}
+	std::cout << "Skill: Updated " << count << " words to level " << level << std::endl;
+	return count;
+}
+
+// display a count of number of words in each level
+void Words2::showLevelStatsCounts()
+{
+	std::vector<std::vector<int>> levels(4, std::vector<int>({0,0,0, 0,0,0,0,0,0}));
+
+	for (auto& setWordLen: _wordSet)
+	{
+		for (auto& word: setWordLen)
+		{
+			auto it = _mapAll.find(word);
+			if (it != _mapAll.end())
+				levels[it->second._level][word.length()] += 1;
+		}
+	}
+	std::cout << "Level stats:" << std::endl;
+
+	int levelno = 0;
+	for (auto const& level: levels)
+	{
+		std::cout << "Level " << levelno << ":" << std::endl;
+		int len = 0;
+		for (auto const& word: level)
+		{
+			if (len >= 3)
+				std::cout << "   Word length " << len << " has " << word << std::endl;
+			len++;
+		}
+		levelno++;
+	}
+}
+
+
