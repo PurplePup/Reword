@@ -18,6 +18,11 @@
 class Words2 : public Words
 {
 public:
+	enum SkillUpd
+	{
+		NONE, ALL, ZERO_ONLY
+	};
+
 	Words2();
 	explicit Words2(const std::string &wordFile);
 	~Words2() override;
@@ -52,7 +57,7 @@ public:
 
 	[[nodiscard]] tWordSet getWordSet() const;
 
-	void setAutoSkillUpd(bool bOn = true) { _bAutoSkillUpd = bOn; }
+	void setAutoSkillUpd(SkillUpd autoSkillUpd = NONE) { _autoSkillUpd = autoSkillUpd; }
 	int setSkillLevelFromWordlist(int level, const std::string& wordlist);
 	
 	void setDefinitionExcl(const tWordSet& defExcl, const tWordSet& incWords) { _definitionExclSet = defExcl; _allIncludeWords = incWords; };
@@ -82,7 +87,7 @@ private:
 	tWordSet _definitionExclSet;		// list of words to check definitions for and exclude words if found (e.g. "abbr." "prefix.")
 	tWordSet _allIncludeWords;			// list of forced include words (used in definition exclusion tests)
 
-    bool    _bAutoSkillUpd = false;     //update the word skill level with any non 0 value from any list
+    SkillUpd _autoSkillUpd = NONE;     //update the word skill level with any non 0 value from any list
 };
 
 #endif //_WORDS2_H

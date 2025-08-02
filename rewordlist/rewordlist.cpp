@@ -79,8 +79,11 @@ using tLevelWordlistMap = std::map<int, std::string>;
 #endif
 int main(int argc, char* argv[])
 {
-	bool bVerbose(false), bDebug(false), bForceDef(false), bXdxfDefOnly(false), bAutoSkillUpd(false), bPrematch(false);
-	bool bHelp(true), bHelpForce(false), bExcludeByDef(false), bTrialOutput(false), bSkillUpdate(false), bSkillResetZero(false);
+	Words2::SkillUpd autoSkillUpd = Words2::SkillUpd::NONE;
+	bool bSkillListUpdate(false);
+
+	bool bVerbose(false), bDebug(false), bForceDef(false), bXdxfDefOnly(false), bPrematch(false);
+	bool bHelp(true), bHelpForce(false), bExcludeByDef(false), bTrialOutput(false), bSkillResetZero(false);
 	bool bNoFiltering(false);
 
 	std::string::size_type pos;
@@ -129,9 +132,14 @@ int main(int argc, char* argv[])
 			bXdxfDefOnly = true;	//use xdxf files passed in for definitions only
 			continue;
 		}
-		if ("-s" == arg)
+		if ("-s" == arg.substr(0, 2))
 		{
-			bAutoSkillUpd = true;    //update word scrabble skill value on any word list input
+			//update word scrabble skill value on any word list input
+			const std::string arg2 = arg.substr(2);
+			if (arg2.length() && arg2[0] == '0')
+				autoSkillUpd = Words2::SkillUpd::ZERO_ONLY;		// only upd if -s0 used
+			else
+				autoSkillUpd = Words2::SkillUpd::ALL;			// overwrite any prev level setting
 			continue;
 		}
 		if ("-n" == arg)
@@ -208,7 +216,7 @@ int main(int argc, char* argv[])
 				}
 				std::string strWordlist = arg2.substr(pos + 1);
 				mapLevelWordlist[level] = strWordlist;
-				bSkillUpdate = true;
+				bSkillListUpdate = true;
 			}
 			else
 			{
@@ -296,7 +304,7 @@ int main(int argc, char* argv[])
 		Words2 finalWords;
 		finalWords.setList(bVerbose);
 		finalWords.setDebug(bDebug);
-		finalWords.setAutoSkillUpd(bAutoSkillUpd);
+		finalWords.setAutoSkillUpd(autoSkillUpd);
 		tWordSet allIncludeWords;
 
 		std::cout << "Working..." << std::endl;
@@ -388,7 +396,7 @@ int main(int argc, char* argv[])
 			}
 		}
 
-		if (bSkillUpdate)
+		if (bSkillListUpdate)
 		{
 			for (auto const& [level, wordlist]: mapLevelWordlist)
 			{

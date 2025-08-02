@@ -83,7 +83,7 @@ Words2 & Words2::operator = (const Words2 &w2)
 		_countXdxfSkipped = w2._countXdxfSkipped;
 		_countXdxfMatched = w2._countXdxfMatched;
 		_countXdxfMissing = w2._countXdxfMissing;
-		_bAutoSkillUpd = w2._bAutoSkillUpd;
+		_autoSkillUpd = w2._autoSkillUpd;
 
 		for (int i = TARGET_MAX; i >= SHORTW_MIN; --i)
 		{
@@ -538,8 +538,8 @@ EE, OO, NN, SS, ...    any double letter ?
 #define SCORE_MED_THRESHOLD     12
 int Words2::calcScrabbleSkillLevel(const std::string& word)
 {
-	if (word.length() < TARGET_MIN || word.length() > TARGET_MAX)
-		return 0;   //only 6...8 currently scored
+	// if (word.length() < TARGET_MIN || word.length() > TARGET_MAX)
+	// 	return 0;   //only 6...8 currently scored
 
 	//remove digraphs and trigraphs
 	std::regex re(R"((BLE|CH|CK|CI|IGH|ING|OUS|QU|RH|SH|SCH|SC|TH|WH|WR|BB|CC|DD|EE|FF|GG|LL|MM|NN|OO|PP|RR|SS|TT|UU|WW|ZZ)*)");
@@ -552,7 +552,7 @@ int Words2::calcScrabbleSkillLevel(const std::string& word)
     for (int i = 0; i < static_cast<int>(out.length()); ++i) iTotal+=scores[out[i]-65];   //A-Z
     //gives a score between 6 (smallest re-word of all 1's) and 80 (largest 8 letter re-word of all 10's)
 
-    //need to fine tune the distribution and therfore thresholds
+    //need to fine tune the distribution and therefore thresholds
     const int score = (iTotal < SCORE_EASY_THRESHOLD)? 1 : (iTotal < SCORE_MED_THRESHOLD) ? 2 : 3;
     _stats._countScore[iTotal]++;
     _stats._countLevels[score-1]++;
@@ -599,17 +599,8 @@ bool Words2::load(
 	const bool bOk = Words::load(wordFile, rndSeed, startAtWord);
 	if (bOk)
 	{
-		if (_bAutoSkillUpd)
-		{
-			std::cout << "Auto skill difficulty using Scrabble letter values ... " << std::endl;
-			for (auto& wrd : _mapAll)
-			{
-				wrd.second._level = calcScrabbleSkillLevel(wrd.first);
-			}
-		}
-
 		// sort and iterate and assign final output indexes from smallest to largest
-		std::cout << "Indexing words..." << std::endl;
+		std::cout << "Indexing (loading) words..." << std::endl;
 		std::vector<std::string> indexList;	// fill list of words then sort smallest->largest
 		for (const auto& w : _mapAll)
 		{
@@ -659,7 +650,8 @@ int Words2::saveWordMap(FILE *& fp, const tWordMap &wmOrig, const tWordSet &wsFi
 		//description may be blank, in which case the pipe (|) divider need not be added
 
         //level only defined in .txt files, not .xdxf, unles -s used to auto scrabble score
-        const int level = _bAutoSkillUpd ? calcScrabbleSkillLevel(wrd._word) : wrd._level;
+        const int level = _autoSkillUpd == ALL || (_autoSkillUpd == ZERO_ONLY && wrd._level == 0) ?
+			calcScrabbleSkillLevel(wrd._word) : wrd._level;
 
 		fprintf(fp, "%s|%d|", wrd._word.c_str(), level);
 			
@@ -732,7 +724,7 @@ bool Words2::save(std::string outFile, bool bPrematch, const std::string& commen
 		std::cout << std::endl << "Saved: " << itotal << " total filtered words " << std::endl;
 		std::cout << std::endl << "Rejected: " << _stats._ignored << " total filtered words " << std::endl;
 
-		if (_bAutoSkillUpd)
+		if (_autoSkillUpd != NONE)
 		{
 			std::cout << "Auto-skill breakdown:" << std::endl;
 			for (unsigned int as = 0; as < (sizeof(_stats._countScore) / sizeof(int)); ++as)
